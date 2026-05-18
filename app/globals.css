@@ -111,7 +111,7 @@ body {
   padding: 5rem 1.25rem;
 }
 
-.section-pad > *:not(.section-atmosphere) {
+.section-pad > *:not(.section-atmosphere):not(.login-scene) {
   position: relative;
   z-index: 2;
 }
@@ -1135,7 +1135,54 @@ body {
   border-top: 1px solid rgba(125, 223, 255, 0.08);
 }
 
-/* Login gate */
+/* Discover / login scene */
+.section-discover {
+  min-height: min(100dvh, 56rem);
+  isolation: isolate;
+  background-color: var(--cave-night);
+}
+
+.section-discover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("/images/login-background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(1.05) brightness(0.9) contrast(1.06);
+  pointer-events: none;
+}
+
+.section-discover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 75% 60% at 50% 45%,
+      rgba(2, 8, 23, 0.72),
+      rgba(2, 8, 23, 0.35) 58%,
+      rgba(2, 8, 23, 0.65) 100%
+    ),
+    linear-gradient(180deg, rgba(2, 8, 23, 0.35) 0%, rgba(2, 8, 23, 0.7) 100%);
+}
+
+.section-pad.section-discover > * {
+  position: relative;
+  z-index: 2;
+}
+
+.login-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
 .login-scene-layer {
   filter: saturate(1.05) brightness(0.88) contrast(1.06);
 }

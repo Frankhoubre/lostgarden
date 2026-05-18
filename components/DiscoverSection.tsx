@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { AnimatedInView } from "./AnimatedInView";
-import { AtmosphereLayer } from "./AtmosphereLayer";
 import { AuthForm } from "./auth/AuthForm";
 import { SignOutButton } from "./auth/SignOutButton";
 import { SectionTitle } from "./SectionTitle";
@@ -12,9 +11,7 @@ export function DiscoverSection() {
   const { user, loading } = useAuth();
 
   return (
-    <section id="discover" className="section-pad section-misty scroll-mt-14">
-      <AtmosphereLayer variant="dense" />
-
+    <section id="discover" className="section-pad section-discover scroll-mt-14">
       <AnimatedInView>
         <SectionTitle subtitle="Sign in to enter the first chapter of the underground: early visuals, episode notes, and the world before the trailer.">
           Discover the experience
