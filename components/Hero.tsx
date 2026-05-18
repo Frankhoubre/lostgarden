@@ -115,8 +115,8 @@ export function Hero() {
             <a href="#discover" className="btn-primary btn-shimmer">
               Discover the experience
             </a>
-            <a href="#world" className="btn-secondary">
-              The World Beneath
+            <a href="#characters" className="btn-secondary">
+              Characters
             </a>
           </motion.div>
 
@@ -131,7 +131,7 @@ export function Hero() {
 
       {!prefersReducedMotion ? (
         <motion.a
-          href="#world"
+          href="#characters"
           className="scroll-hint absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-cyan-pale/50 transition-colors hover:text-magic"
           aria-label="Scroll to explore"
           initial={{ opacity: 0, y: 8 }}

@@ -1,13 +1,11 @@
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CharactersSection } from "@/components/CharactersSection";
 import { homePageJsonLd } from "@/lib/seo";
-import { EpisodeSection } from "@/components/EpisodeSection";
 import { Hero } from "@/components/Hero";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
 import { TrailerSection } from "@/components/TrailerSection";
 import { DiscoverSection } from "@/components/DiscoverSection";
-import { WorldSection } from "@/components/WorldSection";
 
 export default function Home() {
   return (
@@ -24,9 +22,7 @@ export default function Home() {
 
       <main id="main">
         <Hero />
-        <WorldSection />
         <CharactersSection />
-        <EpisodeSection />
         <TrailerSection />
         <DiscoverSection />
       </main>

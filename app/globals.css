@@ -872,144 +872,6 @@ body {
   box-shadow: inset 0 -40px 0 rgba(248, 250, 252, 0.85);
 }
 
-/* World cards */
-.world-visual {
-  background: linear-gradient(
-    180deg,
-    rgba(8, 42, 74, 0.55) 0%,
-    rgba(4, 11, 28, 0.92) 100%
-  );
-  overflow: hidden;
-}
-
-.world-visual--blue-forest::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 28% 75%, rgba(76, 201, 255, 0.28), transparent 42%),
-    radial-gradient(circle at 72% 68%, rgba(47, 107, 88, 0.45), transparent 48%);
-}
-
-.world-visual--blue-forest::after {
-  content: "";
-  position: absolute;
-  bottom: 8%;
-  left: 18%;
-  width: 4px;
-  height: 58%;
-  border-radius: 999px;
-  background: linear-gradient(180deg, transparent, rgba(31, 77, 58, 0.95));
-  box-shadow:
-    55px 8px 0 -1px rgba(34, 54, 77, 0.7),
-    -38px 4px 0 -1px rgba(31, 77, 58, 0.6);
-}
-
-.world-visual--mirror-waters::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(6, 22, 47, 0.3) 45%, rgba(56, 189, 248, 0.2) 100%);
-}
-
-.world-visual--mirror-waters::after {
-  content: "";
-  position: absolute;
-  bottom: 18%;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(185, 243, 255, 0.5), transparent);
-  box-shadow: 0 -12px 24px rgba(56, 189, 248, 0.15);
-}
-
-.world-visual--white-lily-hill::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 80%, rgba(248, 250, 252, 0.12), transparent 55%);
-}
-
-.world-visual--white-lily-hill::after {
-  content: "";
-  position: absolute;
-  bottom: 22%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: var(--lily);
-  box-shadow:
-    -20px 4px 0 rgba(248, 250, 252, 0.85),
-    20px 4px 0 rgba(248, 250, 252, 0.85),
-    -10px -8px 0 rgba(248, 250, 252, 0.7),
-    10px -8px 0 rgba(248, 250, 252, 0.7);
-}
-
-.world-visual--sleeping-machine-fields::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 55%;
-  background: linear-gradient(180deg, transparent, rgba(31, 77, 58, 0.5));
-}
-
-.world-visual--sleeping-machine-fields::after {
-  content: "";
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  width: 80px;
-  height: 24px;
-  transform: translateX(-50%) rotate(-8deg);
-  border-radius: 40%;
-  background: rgba(34, 54, 77, 0.85);
-  border: 1px solid rgba(169, 165, 154, 0.25);
-}
-
-.world-visual--last-garden {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.world-visual--last-garden::before {
-  content: "";
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 1px dashed rgba(125, 223, 255, 0.25);
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
-  animation: garden-pulse 8s ease-in-out infinite;
-}
-
-.world-visual--last-garden::after {
-  content: "?";
-  position: absolute;
-  font-family: var(--font-oswald), sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: rgba(185, 243, 255, 0.35);
-  letter-spacing: 0.2em;
-}
-
-@keyframes garden-pulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.04); }
-}
-
-.world-card--mysterious {
-  border-color: rgba(125, 223, 255, 0.14);
-}
-
-.world-card--mysterious:hover {
-  box-shadow: 0 0 48px rgba(56, 189, 248, 0.12);
-}
-
 .character-card::before {
   content: "";
   position: absolute;
@@ -1229,150 +1091,6 @@ body {
   transform: none;
 }
 
-/* World card visuals */
-.world-visual {
-  background: linear-gradient(
-    180deg,
-    rgba(8, 42, 74, 0.55) 0%,
-    rgba(4, 11, 28, 0.94) 100%
-  );
-  overflow: hidden;
-}
-
-.world-visual--blue-forest::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 25% 78%, rgba(76, 201, 255, 0.3), transparent 42%),
-    radial-gradient(circle at 75% 65%, rgba(47, 107, 88, 0.42), transparent 48%);
-}
-
-.world-visual--blue-forest::after {
-  content: "";
-  position: absolute;
-  bottom: 6%;
-  left: 16%;
-  width: 4px;
-  height: 62%;
-  border-radius: 999px;
-  background: linear-gradient(180deg, transparent, rgba(31, 77, 58, 0.95));
-  box-shadow:
-    50px 6px 0 -1px rgba(34, 54, 77, 0.65),
-    -32px 4px 0 -1px rgba(31, 77, 58, 0.55),
-    24px -16px 12px 0 rgba(125, 223, 255, 0.32);
-}
-
-.world-visual--mirror-waters::before {
-  content: "";
-  position: absolute;
-  inset: auto 8% 12%;
-  height: 28%;
-  border-radius: 50%;
-  background: linear-gradient(
-    180deg,
-    rgba(125, 223, 255, 0.35),
-    rgba(8, 42, 74, 0.2)
-  );
-  box-shadow: 0 0 30px rgba(76, 201, 255, 0.2);
-}
-
-.world-visual--mirror-waters::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    0deg,
-    rgba(4, 11, 28, 0.5),
-    transparent 40%,
-    rgba(185, 243, 255, 0.06)
-  );
-}
-
-.world-visual--white-lily-hill::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at 50% 70%,
-    rgba(248, 250, 252, 0.12),
-    transparent 55%
-  );
-}
-
-.world-visual--white-lily-hill::after {
-  content: "";
-  position: absolute;
-  bottom: 22%;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: var(--lily);
-  box-shadow:
-    -22px 4px 0 var(--lily),
-    22px 4px 0 var(--lily),
-    -12px -10px 0 rgba(248, 250, 252, 0.85),
-    12px -10px 0 rgba(248, 250, 252, 0.85);
-  opacity: 0.9;
-}
-
-.world-visual--sleeping-machine-fields::before {
-  content: "";
-  position: absolute;
-  bottom: 18%;
-  left: 50%;
-  width: 56px;
-  height: 56px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  border: 2px solid rgba(169, 165, 154, 0.35);
-  background: radial-gradient(circle, rgba(255, 160, 60, 0.45), rgba(34, 54, 77, 0.5));
-  box-shadow: 0 0 24px rgba(255, 140, 40, 0.15);
-}
-
-.world-visual--sleeping-machine-fields::after {
-  content: "";
-  position: absolute;
-  bottom: 8%;
-  left: 30%;
-  width: 40%;
-  height: 3px;
-  background: rgba(34, 54, 77, 0.8);
-  border-radius: 2px;
-  box-shadow: 0 -18px 0 8px rgba(31, 77, 58, 0.5);
-}
-
-.world-visual--last-garden::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(125, 223, 255, 0.22),
-    transparent 62%
-  );
-}
-
-.world-visual--last-garden::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 72px;
-  height: 72px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px dashed rgba(185, 243, 255, 0.25);
-  opacity: 0.7;
-}
-
-.world-card--mysterious {
-  border-color: rgba(185, 243, 255, 0.22);
-  box-shadow: 0 0 48px rgba(88, 199, 245, 0.1);
-}
-
 .character-visual--machines::before {
   content: "";
   position: absolute;
@@ -1535,10 +1253,6 @@ body {
   animation: play-pulse 3.2s ease-in-out infinite;
 }
 
-.world-card--mysterious-pulse {
-  animation: mysterious-border 5s ease-in-out infinite;
-}
-
 @keyframes hero-ken-burns {
   0% {
     transform: scale(1.02);
@@ -1610,20 +1324,6 @@ body {
   }
 }
 
-@keyframes mysterious-border {
-  0%,
-  100% {
-    border-color: rgba(185, 243, 255, 0.22);
-    box-shadow: 0 5px 0 rgba(2, 8, 23, 0.75), 0 0 32px rgba(88, 199, 245, 0.08);
-  }
-  50% {
-    border-color: rgba(185, 243, 255, 0.45);
-    box-shadow:
-      0 5px 0 rgba(2, 8, 23, 0.75),
-      0 0 48px rgba(88, 199, 245, 0.22);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hero-scene .hero-reference-layer,
   .hero-logo-float,
@@ -1631,7 +1331,6 @@ body {
   .anime-label-glow,
   .scroll-hint-chevron,
   .trailer-play--pulse,
-  .world-card--mysterious-pulse,
   .section-mist-floor,
   .section-particle {
     animation: none !important;

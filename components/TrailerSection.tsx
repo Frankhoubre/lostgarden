@@ -22,10 +22,10 @@ export function TrailerSection() {
                 <span className="trailer-play-icon" aria-hidden="true" />
               </button>
               <p className="anime-heading font-display text-2xl text-lily sm:text-3xl">
-                Trailer coming soon
+                First episode coming soon
               </p>
               <p className="font-body text-sm font-medium text-ivory/80 sm:text-base">
-                The first episode is currently in production.
+                Trailer coming soon — the hollow knight wakes beneath the earth.
               </p>
             </div>
           </div>

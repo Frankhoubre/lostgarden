@@ -4,9 +4,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { EASE_OUT_EXPO } from "@/lib/motion";
 
 const navLinks = [
-  { label: "World", href: "#world" },
   { label: "Characters", href: "#characters" },
-  { label: "Episode One", href: "#episode-one" },
+  { label: "Trailer", href: "#trailer" },
   { label: "Discover", href: "#discover" },
   { label: "Experience", href: "/experience" },
 ] as const;
