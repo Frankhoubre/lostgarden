@@ -27,7 +27,33 @@ const FLOWERS = [
   "flower-8",
 ];
 
-export function CaveBackground() {
+type CaveBackgroundProps = {
+  /** Lighter overlay when a hero illustration is already present */
+  minimal?: boolean;
+};
+
+export function CaveBackground({ minimal = false }: CaveBackgroundProps) {
+  if (minimal) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="mist-layer mist-2 opacity-40" />
+        <div className="particles absolute inset-0 opacity-50">
+          {Array.from({ length: 24 }, (_, i) => (
+            <span
+              key={i}
+              className="particle"
+              style={{ "--i": i } as CSSProperties}
+            />
+          ))}
+        </div>
+        <div className="cave-vignette absolute inset-0 opacity-80" />
+      </div>
+    );
+  }
+
   return (
     <div
       className="pointer-events-none absolute inset-0 overflow-hidden"

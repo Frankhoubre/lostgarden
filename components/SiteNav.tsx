@@ -10,7 +10,7 @@ const navLinks = [
 export function SiteNav() {
   return (
     <nav
-      className="site-nav sticky top-0 z-50 border-b border-glow/5 bg-abyss/75 backdrop-blur-md"
+      className="site-nav sticky top-0 z-50 backdrop-blur-md"
       aria-label="Page sections"
     >
       <div className="mx-auto max-w-6xl px-4">
@@ -19,7 +19,7 @@ export function SiteNav() {
             <li key={link.href} className="shrink-0">
               <a
                 href={link.href}
-                className="inline-block rounded-md px-3 py-1.5 font-body text-xs tracking-[0.12em] text-sol-ivory/55 transition hover:bg-cavern/50 hover:text-magic focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/50 sm:text-sm"
+                className="anime-label inline-block rounded-md px-3 py-2 font-display text-xs text-cyan-pale/75 transition hover:bg-cavern/60 hover:text-magic focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/50 sm:text-sm"
               >
                 {link.label}
               </a>

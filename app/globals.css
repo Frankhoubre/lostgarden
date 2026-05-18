@@ -48,8 +48,8 @@
   --color-sol-ivory: var(--ivory);
   --color-soft-glow: var(--cyan-pale);
   --color-shadow: var(--indigo-shadow);
-  --font-display: var(--font-cinzel);
-  --font-body: var(--font-inter);
+  --font-display: var(--font-oswald);
+  --font-body: var(--font-zen);
 }
 
 html {
@@ -74,15 +74,35 @@ body {
   background: var(--site-bg);
   background-attachment: fixed;
   color: var(--lily);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-zen), "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-weight: 500;
 }
 
 .font-display {
-  font-family: var(--font-cinzel), Georgia, serif;
+  font-family: var(--font-oswald), "Arial Narrow", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  text-transform: uppercase;
 }
 
 .font-body {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-zen), "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.anime-heading {
+  text-shadow:
+    0 0 32px rgba(125, 223, 255, 0.35),
+    0 2px 0 rgba(2, 8, 23, 0.85),
+    0 0 1px rgba(2, 8, 23, 1);
+}
+
+.anime-label {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .section-pad {
@@ -189,25 +209,36 @@ body {
   isolation: isolate;
 }
 
-.hero-reference-layer {
+.hero-scene .hero-reference-layer {
   object-fit: cover;
-  object-position: center 42%;
-  opacity: 0.32;
-  mix-blend-mode: soft-light;
-  filter: saturate(1.15) brightness(0.78) contrast(1.05);
+  object-position: center center;
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: saturate(1.08) brightness(0.94) contrast(1.04);
 }
 
-.hero-reference-veil {
+.hero-scene .hero-reference-veil {
   background:
-    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(56, 189, 248, 0.14), transparent 55%),
-    linear-gradient(180deg, rgba(2, 8, 23, 0.35) 0%, rgba(6, 22, 47, 0.72) 55%, rgba(2, 8, 23, 0.92) 100%);
+    radial-gradient(
+      ellipse 95% 60% at 50% 18%,
+      rgba(2, 8, 23, 0.72),
+      rgba(2, 8, 23, 0.2) 48%,
+      transparent 68%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(2, 8, 23, 0.5) 0%,
+      rgba(6, 22, 47, 0.12) 42%,
+      rgba(2, 8, 23, 0.88) 100%
+    );
 }
 
 .hero-content-veil {
+  width: 100%;
   background: radial-gradient(
-    ellipse 80% 55% at 50% 38%,
+    ellipse 85% 70% at 50% 42%,
     rgba(6, 22, 47, 0.35),
-    transparent 70%
+    transparent 68%
   );
 }
 
@@ -220,43 +251,53 @@ body {
   height: auto;
   width: 100%;
   background: transparent;
-  filter: drop-shadow(0 2px 20px rgba(2, 8, 23, 0.45))
-    drop-shadow(0 0 28px rgba(125, 223, 255, 0.08));
+  filter: drop-shadow(0 4px 24px rgba(2, 8, 23, 0.7))
+    drop-shadow(0 0 40px rgba(125, 223, 255, 0.22))
+    drop-shadow(0 0 2px rgba(2, 8, 23, 0.9));
 }
 
 /* —— Buttons —— */
 .btn-primary {
   display: inline-flex;
-  min-height: 3rem;
+  min-height: 3.25rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  border-radius: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--abyss);
   background: linear-gradient(
-    135deg,
-    rgba(185, 243, 255, 0.95),
-    rgba(56, 189, 248, 0.88)
+    180deg,
+    rgba(185, 243, 255, 1) 0%,
+    rgba(56, 189, 248, 0.95) 100%
   );
-  border: 1px solid rgba(185, 243, 255, 0.35);
+  border: 2px solid rgba(2, 8, 23, 0.55);
   box-shadow:
-    0 0 18px rgba(76, 201, 255, 0.22),
-    0 4px 28px rgba(37, 99, 235, 0.14);
+    0 4px 0 rgba(2, 8, 23, 0.65),
+    0 0 24px rgba(76, 201, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    border-color 0.28s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  border-color: rgba(185, 243, 255, 0.5);
   box-shadow:
-    0 0 26px rgba(125, 223, 255, 0.28),
-    0 8px 36px rgba(37, 99, 235, 0.18);
+    0 6px 0 rgba(2, 8, 23, 0.55),
+    0 0 32px rgba(125, 223, 255, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 2px 0 rgba(2, 8, 23, 0.65),
+    0 0 18px rgba(76, 201, 255, 0.28);
 }
 
 .btn-primary:focus-visible {
@@ -266,30 +307,42 @@ body {
 
 .btn-secondary {
   display: inline-flex;
-  min-height: 3rem;
+  min-height: 3.25rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--ivory);
-  background: rgba(6, 22, 47, 0.55);
-  border: 1px solid rgba(125, 223, 255, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan-pale);
+  background: rgba(6, 22, 47, 0.88);
+  border: 2px solid rgba(125, 223, 255, 0.45);
+  box-shadow:
+    0 4px 0 rgba(2, 8, 23, 0.7),
+    0 0 16px rgba(56, 189, 248, 0.12);
   backdrop-filter: blur(10px);
   transition:
-    transform 0.28s ease,
-    border-color 0.28s ease,
-    background 0.28s ease,
-    box-shadow 0.28s ease;
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  border-color: rgba(125, 223, 255, 0.38);
-  background: rgba(8, 42, 74, 0.62);
-  box-shadow: 0 0 24px rgba(56, 189, 248, 0.1);
+  border-color: rgba(185, 243, 255, 0.65);
+  background: rgba(8, 42, 74, 0.92);
+  box-shadow:
+    0 6px 0 rgba(2, 8, 23, 0.6),
+    0 0 28px rgba(56, 189, 248, 0.22);
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 rgba(2, 8, 23, 0.7);
 }
 
 .btn-secondary:focus-visible {
@@ -313,29 +366,38 @@ body {
 
 /* —— Glass —— */
 .glass-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(125, 223, 255, 0.16);
-  background: rgba(6, 22, 47, 0.62);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
+  border-radius: 0.75rem;
+  border: 2px solid rgba(125, 223, 255, 0.28);
+  background: linear-gradient(
+    165deg,
+    rgba(8, 42, 74, 0.78) 0%,
+    rgba(4, 11, 28, 0.92) 100%
+  );
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 5px 0 rgba(2, 8, 23, 0.75),
+    0 0 36px rgba(56, 189, 248, 0.14),
+    inset 0 1px 0 rgba(185, 243, 255, 0.08);
   transition:
-    transform 0.35s ease,
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(125, 223, 255, 0.3);
+  transform: translateY(-4px);
+  border-color: rgba(185, 243, 255, 0.5);
   box-shadow:
-    0 10px 48px rgba(56, 189, 248, 0.12),
-    0 0 56px rgba(88, 199, 245, 0.08);
+    0 8px 0 rgba(2, 8, 23, 0.65),
+    0 12px 48px rgba(56, 189, 248, 0.2),
+    0 0 56px rgba(88, 199, 245, 0.12);
 }
 
 .glass-input {
-  border: 1px solid rgba(125, 223, 255, 0.18);
-  background: rgba(6, 22, 47, 0.48);
+  border: 2px solid rgba(125, 223, 255, 0.32);
+  background: rgba(6, 22, 47, 0.65);
   backdrop-filter: blur(10px);
+  font-weight: 500;
 }
 
 /* —— Cave background —— */
@@ -909,8 +971,9 @@ body {
 .world-visual--last-garden::after {
   content: "?";
   position: absolute;
-  font-family: var(--font-cinzel), Georgia, serif;
+  font-family: var(--font-oswald), sans-serif;
   font-size: 1.25rem;
+  font-weight: 700;
   color: rgba(185, 243, 255, 0.35);
   letter-spacing: 0.2em;
 }
@@ -1039,14 +1102,14 @@ body {
 }
 
 .episode-timeline-marker {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
   margin-top: 0.35rem;
   border-radius: 50%;
-  border: 1px solid rgba(56, 189, 248, 0.5);
-  background: rgba(56, 189, 248, 0.2);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  border: 2px solid rgba(185, 243, 255, 0.7);
+  background: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
 }
 
 .episode-timeline-content {
@@ -1122,7 +1185,10 @@ body {
 }
 
 .site-nav {
-  background: rgba(2, 8, 23, 0.82);
+  background: rgba(2, 8, 23, 0.92);
+  border-bottom-width: 2px;
+  border-bottom-color: rgba(125, 223, 255, 0.22);
+  box-shadow: 0 4px 24px rgba(2, 8, 23, 0.6);
 }
 
 .universe-item {
@@ -1144,7 +1210,7 @@ body {
 }
 
 .trailer-frame {
-  border: 1px solid rgba(125, 223, 255, 0.16);
+  border: 2px solid rgba(125, 223, 255, 0.32);
   background: linear-gradient(
     165deg,
     rgba(8, 42, 74, 0.55),

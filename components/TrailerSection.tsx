@@ -21,10 +21,10 @@ export function TrailerSection() {
               >
                 <span className="trailer-play-icon" aria-hidden="true" />
               </button>
-              <p className="font-display text-2xl tracking-[0.14em] text-lily sm:text-3xl">
+              <p className="anime-heading font-display text-2xl text-lily sm:text-3xl">
                 Trailer coming soon
               </p>
-              <p className="font-body text-sm text-ivory/50 sm:text-base">
+              <p className="font-body text-sm font-medium text-ivory/80 sm:text-base">
                 The first episode is currently in production.
               </p>
             </div>

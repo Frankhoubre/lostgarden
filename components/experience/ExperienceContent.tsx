@@ -45,13 +45,13 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
       <div className="relative z-10 mx-auto max-w-4xl px-5 pb-20 pt-28">
         <header className="flex flex-col gap-6 border-b border-glow/10 pb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-body text-xs uppercase tracking-[0.2em] text-cyan-pale/50">
+            <p className="anime-label font-display text-xs text-cyan-pale/75">
               Lost Garden — First Light
             </p>
-            <h1 className="mt-2 font-display text-3xl tracking-[0.1em] text-lily sm:text-4xl">
+            <h1 className="anime-heading mt-2 font-display text-3xl text-lily sm:text-4xl">
               Welcome, {name}
             </h1>
-            <p className="mt-3 max-w-lg font-body text-base leading-relaxed text-ivory/65">
+            <p className="mt-3 max-w-lg font-body text-base font-medium leading-relaxed text-ivory/90">
               You have crossed the threshold. This is an early look at the world
               beneath — before the first episode reaches the surface.
             </p>
@@ -65,10 +65,10 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
         </header>
 
         <section className="mt-14">
-          <h2 className="font-display text-2xl tracking-[0.12em] text-lily">
+          <h2 className="anime-heading font-display text-2xl text-lily">
             Episode One — notes
           </h2>
-          <p className="mt-3 font-body text-sm leading-relaxed text-ivory/55">
+          <p className="mt-3 font-body text-sm font-medium leading-relaxed text-ivory/85">
             Production diary fragments. More will appear as the caverns open.
           </p>
           <div className="mt-8">
@@ -79,31 +79,31 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
         <section className="mt-16 grid gap-6 sm:grid-cols-3">
           {PREVIEW_BLOCKS.map((block) => (
             <article key={block.title} className="glass-card p-6">
-              <h3 className="font-display text-lg tracking-[0.08em] text-lily">
+              <h3 className="anime-heading font-display text-lg text-lily">
                 {block.title}
               </h3>
-              <p className="mt-3 font-body text-sm leading-relaxed text-ivory/60">
+              <p className="mt-3 font-body text-sm leading-relaxed text-ivory/85">
                 {block.text}
               </p>
             </article>
           ))}
         </section>
 
-        <section className="mt-16 overflow-hidden rounded-2xl border border-glow/15">
+        <section className="mt-16 overflow-hidden rounded-xl border-2 border-glow/30 shadow-[0_5px_0_rgba(2,8,23,0.75)]">
           <div className="relative aspect-[16/9] w-full">
             <Image
-              src="/images/forest-reference.png"
-              alt="Blue forest beneath the earth"
+              src="/images/blue-forest.png"
+              alt="The Blue Forest — glowing mushrooms and mist beneath the earth"
               fill
               className="object-cover opacity-90"
               sizes="(max-width: 896px) 100vw, 896px"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/40 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-              <p className="font-display text-xl tracking-wide text-lily sm:text-2xl">
+              <p className="anime-heading font-display text-xl text-lily sm:text-2xl">
                 Trailer coming soon
               </p>
-              <p className="mt-2 font-body text-sm text-ivory/60">
+              <p className="mt-2 font-body text-sm font-medium text-ivory/85">
                 You will be among the first to see it when the light returns.
               </p>
             </div>

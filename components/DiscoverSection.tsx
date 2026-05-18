@@ -28,7 +28,7 @@ export function DiscoverSection() {
           </p>
         ) : user ? (
           <div className="auth-card glass-card mx-auto max-w-md p-8 text-center">
-            <p className="font-display text-xl tracking-wide text-lily">
+            <p className="anime-heading font-display text-xl text-lily">
               Welcome back
               {user.displayName ? `, ${user.displayName}` : ""}.
             </p>

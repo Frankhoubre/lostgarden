@@ -13,11 +13,11 @@ export function SectionTitle({
 }: SectionTitleProps) {
   return (
     <header className={`text-center ${className}`}>
-      <Tag className="font-display text-3xl tracking-[0.12em] text-lily sm:text-4xl md:text-5xl">
+      <Tag className="anime-heading font-display text-3xl text-lily sm:text-4xl md:text-5xl">
         {children}
       </Tag>
       {subtitle ? (
-        <p className="mx-auto mt-4 max-w-xl font-body text-base leading-relaxed text-ivory/75 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-xl font-body text-base font-medium leading-relaxed text-ivory/90 sm:text-lg">
           {subtitle}
         </p>
       ) : null}

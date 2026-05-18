@@ -48,7 +48,7 @@ export function WorldSection() {
       </AnimatedInView>
 
       <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.08}>
-        <p className="text-center font-body text-base italic leading-relaxed text-sol-ivory/60 sm:text-lg">
+        <p className="text-center font-body text-base font-medium leading-relaxed text-sol-ivory/85 sm:text-lg">
           The deeper you go, the more the world listens.
         </p>
       </AnimatedInView>

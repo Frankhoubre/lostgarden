@@ -19,10 +19,10 @@ export function CreatureCard({ name, description, icon }: CreatureCardProps) {
         className={`creature-icon creature-icon--${icon}`}
         aria-hidden="true"
       />
-      <h3 className="mt-4 font-display text-base tracking-[0.08em] text-lily sm:text-lg">
+      <h3 className="anime-heading mt-4 font-display text-base text-lily sm:text-lg">
         {name}
       </h3>
-      <p className="mt-2 font-body text-sm leading-relaxed text-sol-ivory/55">
+      <p className="mt-2 font-body text-sm leading-relaxed text-sol-ivory/80">
         {description}
       </p>
     </article>

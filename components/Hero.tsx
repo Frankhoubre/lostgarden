@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { CaveBackground } from "./CaveBackground";
 
 export function Hero() {
   const prefersReducedMotion = useReducedMotion();
@@ -22,7 +21,7 @@ export function Hero() {
     >
       <div className="hero-scene absolute inset-0">
         <Image
-          src="/images/hero-cavern.jpg"
+          src="/images/hero-banner.png"
           alt=""
           fill
           priority
@@ -30,11 +29,10 @@ export function Hero() {
           sizes="100vw"
         />
         <div className="hero-reference-veil absolute inset-0" />
-        <CaveBackground />
       </div>
 
       <motion.div
-        className="hero-content-veil relative z-10 mx-auto flex max-w-4xl flex-col items-center px-2 text-center"
+        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-2 text-center"
         {...fade}
       >
         <h1 className="hero-logo-wrap relative mx-auto w-[min(92vw,34rem)]">
@@ -44,12 +42,14 @@ export function Hero() {
             width={1024}
             height={576}
             priority
+            unoptimized
             className="hero-logo-img"
             sizes="(max-width: 768px) 92vw, 34rem"
           />
         </h1>
 
-        <p className="mt-8 max-w-xl font-body text-base leading-relaxed text-ivory/80 sm:text-lg">
+        <div className="hero-content-veil mt-8 flex w-full flex-col items-center">
+        <p className="max-w-xl font-body text-base font-medium leading-relaxed text-ivory sm:text-lg">
           Some things wake beneath the earth. A hollow knight. A child in the
           mist. A forest that remembers.
         </p>
@@ -63,9 +63,10 @@ export function Hero() {
           </a>
         </div>
 
-        <p className="mt-12 text-xs tracking-wide text-cyan-pale/45 sm:text-sm">
+        <p className="anime-label mt-12 font-display text-sm text-cyan-pale/70 sm:text-base">
           Not every guardian was meant to protect.
         </p>
+        </div>
       </motion.div>
 
       <div

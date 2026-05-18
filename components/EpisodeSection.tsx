@@ -33,7 +33,7 @@ export function EpisodeSection() {
       </AnimatedInView>
 
       <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.1}>
-        <p className="text-center font-body text-base leading-relaxed text-sol-ivory/65 sm:text-lg">
+        <p className="text-center font-body text-base font-medium leading-relaxed text-sol-ivory/85 sm:text-lg">
           In the depths of an ancient cavern, an empty armor opens its eyes
           without a face. Above him, the world is blue, silent, and alive in
           ways it should not be. Somewhere in the mist, a child is waiting.

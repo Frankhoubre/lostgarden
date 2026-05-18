@@ -17,7 +17,7 @@ export function VisualIdentitySection() {
       </AnimatedInView>
 
       <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.08}>
-        <p className="text-center font-body text-base leading-relaxed text-sol-ivory/65 sm:text-lg">
+        <p className="text-center font-body text-base font-medium leading-relaxed text-sol-ivory/85 sm:text-lg">
           Lost Garden uses simple anime color treatment, muted blue palettes,
           soft cel-shading, readable silhouettes, and dreamlike underground
           environments.

@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter } from "next/font/google";
+import { Oswald, Zen_Kaku_Gothic_New } from "next/font/google";
+import { CookieBanner } from "@/components/legal/CookieBanner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import "./globals.css";
 
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
+const display = Oswald({
+  variable: "--font-oswald",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["500", "600", "700"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const body = Zen_Kaku_Gothic_New({
+  variable: "--font-zen",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lostgarden.app";
@@ -49,10 +51,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${inter.variable} scroll-smooth`}
+      className={`${display.variable} ${body.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-abyss text-lily antialiased">
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-screen bg-abyss text-lily font-body font-medium antialiased">
+        <AuthProvider>
+          {children}
+          <CookieBanner />
+        </AuthProvider>
       </body>
     </html>
   );
