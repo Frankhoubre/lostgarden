@@ -1,9 +1,12 @@
 import { CharactersSection } from "@/components/CharactersSection";
+import { CreaturesSection } from "@/components/CreaturesSection";
+import { EpisodeSection } from "@/components/EpisodeSection";
 import { Hero } from "@/components/Hero";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteNav } from "@/components/SiteNav";
 import { TrailerSection } from "@/components/TrailerSection";
-import { UniverseSection } from "@/components/UniverseSection";
-import { WaitlistSection } from "@/components/WaitlistSection";
+import { VisualIdentitySection } from "@/components/VisualIdentitySection";
+import { DiscoverSection } from "@/components/DiscoverSection";
 import { WorldSection } from "@/components/WorldSection";
 
 export default function Home() {
@@ -16,13 +19,17 @@ export default function Home() {
         Skip to content
       </a>
 
+      <SiteNav />
+
       <main id="main">
         <Hero />
         <WorldSection />
         <CharactersSection />
-        <UniverseSection />
+        <CreaturesSection />
+        <EpisodeSection />
+        <VisualIdentitySection />
         <TrailerSection />
-        <WaitlistSection />
+        <DiscoverSection />
       </main>
 
       <SiteFooter />

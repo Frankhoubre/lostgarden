@@ -1,8 +1,10 @@
 import { AnimatedInView } from "./AnimatedInView";
+import { AtmosphereLayer } from "./AtmosphereLayer";
 
 export function TrailerSection() {
   return (
-    <section id="trailer" className="section-pad">
+    <section id="trailer" className="section-pad section-abyss">
+      <AtmosphereLayer />
       <AnimatedInView>
         <div className="mx-auto max-w-5xl">
           {/*

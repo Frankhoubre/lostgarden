@@ -1,56 +1,62 @@
 import { AnimatedInView } from "./AnimatedInView";
+import { AtmosphereLayer } from "./AtmosphereLayer";
 import { SectionTitle } from "./SectionTitle";
+import { WorldCard } from "./WorldCard";
 
-const cards = [
+const places = [
   {
     title: "The Blue Forest",
+    description:
+      "A dense underground forest with no sky, filled with glowing mushrooms, giant roots, pale flowers, and blue mist.",
     visual: "blue-forest" as const,
-    description: "Roots drink the dark. Mushrooms keep the silence lit.",
   },
   {
-    title: "The Hollow Armor",
-    visual: "hollow-armor" as const,
-    description: "Metal shaped like duty. A lantern where a face should be.",
+    title: "The Mirror Waters",
+    description:
+      "Silent underground rivers and pools reflecting lights that do not come from the sun.",
+    visual: "mirror-waters" as const,
+  },
+  {
+    title: "The White Lily Hill",
+    description:
+      "A dreamlike place that appears like a memory, covered in white lilies and impossible wind.",
+    visual: "white-lily-hill" as const,
+  },
+  {
+    title: "The Sleeping Machine Fields",
+    description:
+      "Ancient alien bodies half-buried beneath moss, roots, and luminous fungi.",
+    visual: "sleeping-machine-fields" as const,
   },
   {
     title: "The Last Garden",
+    description:
+      "A place whispered about in the deepest caverns. No one describes it the same way twice.",
     visual: "last-garden" as const,
-    description: "White lilies in stone. A place the world still remembers.",
+    mysterious: true,
   },
 ];
 
 export function WorldSection() {
   return (
-    <section id="world" className="section-pad">
+    <section id="world" className="section-pad section-misty scroll-mt-14">
+      <AtmosphereLayer />
       <AnimatedInView>
-        <SectionTitle>A world beneath the world</SectionTitle>
+        <SectionTitle subtitle="A buried world of blue forests, broken sanctuaries, sleeping machines, and impossible gardens.">
+          The World Beneath
+        </SectionTitle>
       </AnimatedInView>
 
-      <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.1}>
-        <p className="text-center font-body text-lg leading-relaxed text-ivory/70 italic sm:text-xl">
-          &ldquo;Far below the dead surface, a blue forest still breathes. Rivers
-          run through stone. White lilies grow where nothing should survive. And
-          somewhere in the mist, an empty armor wakes.&rdquo;
+      <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.08}>
+        <p className="text-center font-body text-base italic leading-relaxed text-sol-ivory/60 sm:text-lg">
+          The deeper you go, the more the world listens.
         </p>
       </AnimatedInView>
 
       <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card, index) => (
-          <AnimatedInView key={card.title} delay={0.15 + index * 0.1}>
-            <article className="glass-card group flex h-full flex-col overflow-hidden">
-              <div
-                className={`card-visual card-visual--${card.visual} relative h-44 shrink-0`}
-                aria-hidden="true"
-              />
-              <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-display text-xl tracking-[0.08em] text-lily">
-                  {card.title}
-                </h3>
-                <p className="mt-3 font-body text-sm leading-relaxed text-ivory/60">
-                  {card.description}
-                </p>
-              </div>
-            </article>
+        {places.map((place, index) => (
+          <AnimatedInView key={place.title} delay={0.12 + index * 0.07}>
+            <WorldCard {...place} />
           </AnimatedInView>
         ))}
       </div>

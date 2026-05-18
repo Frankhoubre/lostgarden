@@ -6,7 +6,7 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/5 px-5 py-16">
+    <footer className="site-footer relative px-5 py-16">
       <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
         <p className="font-display text-2xl tracking-[0.2em] text-lily sm:text-3xl">
           LOST GARDEN
@@ -20,7 +20,7 @@ export function SiteFooter() {
               <li key={link.label}>
                 <a
                   href={link.href}
-                  className="font-body text-sm text-ivory/60 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 focus-visible:ring-offset-2 focus-visible:ring-offset-deep rounded-sm"
+                  className="font-body text-sm text-ivory/60 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 focus-visible:ring-offset-2 focus-visible:ring-offset-abyss rounded-sm"
                 >
                   {link.label}
                 </a>

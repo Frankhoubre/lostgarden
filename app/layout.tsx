@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, Inter } from "next/font/google";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -50,8 +51,8 @@ export default function RootLayout({
       lang="en"
       className={`${cinzel.variable} ${inter.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-deep text-lily antialiased">
-        {children}
+      <body className="min-h-screen bg-abyss text-lily antialiased">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

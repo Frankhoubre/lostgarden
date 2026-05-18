@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { CaveBackground } from "./CaveBackground";
 
@@ -17,37 +18,60 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-24"
+      className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-5 pb-20 pt-24"
     >
-      <CaveBackground />
+      <div className="hero-scene absolute inset-0">
+        <Image
+          src="/images/hero-cavern.jpg"
+          alt=""
+          fill
+          priority
+          className="hero-reference-layer"
+          sizes="100vw"
+        />
+        <div className="hero-reference-veil absolute inset-0" />
+        <CaveBackground />
+      </div>
 
       <motion.div
-        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center"
+        className="hero-content-veil relative z-10 mx-auto flex max-w-4xl flex-col items-center px-2 text-center"
         {...fade}
       >
-        <h1 className="font-display text-[clamp(2.75rem,12vw,6.5rem)] font-medium leading-[0.95] tracking-[0.18em] text-lily drop-shadow-[0_0_40px_rgba(56,189,248,0.15)]">
-          LOST
-          <br />
-          GARDEN
+        <h1 className="hero-logo-wrap relative mx-auto w-[min(92vw,34rem)]">
+          <Image
+            src="/images/logo-lost-garden.png"
+            alt="Lost Garden"
+            width={1024}
+            height={576}
+            priority
+            className="hero-logo-img"
+            sizes="(max-width: 768px) 92vw, 34rem"
+          />
         </h1>
 
-        <p className="mt-8 max-w-xl font-body text-base leading-relaxed text-ivory/75 sm:text-lg">
-          A hollow knight. A sleeping child. A world waiting beneath the earth.
+        <p className="mt-8 max-w-xl font-body text-base leading-relaxed text-ivory/80 sm:text-lg">
+          Some things wake beneath the earth. A hollow knight. A child in the
+          mist. A forest that remembers.
         </p>
 
         <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-          <a href="#waitlist" className="btn-primary">
-            Join the waitlist
+          <a href="#discover" className="btn-primary">
+            Discover the experience
           </a>
           <a href="#world" className="btn-secondary">
-            Discover the world
+            The World Beneath
           </a>
         </div>
 
-        <p className="mt-12 text-xs tracking-wide text-ivory/40 sm:text-sm">
-          The official Lost Garden project is currently in development.
+        <p className="mt-12 text-xs tracking-wide text-cyan-pale/45 sm:text-sm">
+          Not every guardian was meant to protect.
         </p>
       </motion.div>
+
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-32 bg-gradient-to-t from-abyss/90 to-transparent"
+        aria-hidden="true"
+      />
     </section>
   );
 }

@@ -17,7 +17,7 @@ export function SectionTitle({
         {children}
       </Tag>
       {subtitle ? (
-        <p className="mx-auto mt-4 max-w-xl font-body text-base leading-relaxed text-ivory/70 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-xl font-body text-base leading-relaxed text-ivory/75 sm:text-lg">
           {subtitle}
         </p>
       ) : null}

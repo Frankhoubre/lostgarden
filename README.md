@@ -6,7 +6,7 @@ Official one-page landing site for the anime project **Lost Garden** — poetic 
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
-- Firebase Firestore (waitlist)
+- Firebase Authentication (email + Google) & Firestore (user profiles)
 - Framer Motion
 
 ## Local development
