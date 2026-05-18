@@ -29,7 +29,7 @@ export function EpisodeSection() {
   return (
     <section id="episode-one" className="section-pad scroll-mt-14">
       <AnimatedInView>
-        <SectionTitle>Episode One — The Hollow Knight Wakes</SectionTitle>
+        <SectionTitle>Episode One: The Hollow Knight Wakes</SectionTitle>
       </AnimatedInView>
 
       <AnimatedInView className="mx-auto mt-10 max-w-2xl" delay={0.1}>

@@ -58,7 +58,11 @@ export function CharactersSection() {
 
       <div className="mx-auto mt-16 grid max-w-6xl gap-6 md:grid-cols-2">
         {characters.map((character, index) => (
-          <AnimatedInView key={character.name} delay={0.1 + index * 0.08}>
+          <AnimatedInView
+            key={character.name}
+            delay={0.1 + index * 0.08}
+            variant={index % 2 === 1 ? "slideLeft" : "fadeUp"}
+          >
             <CharacterCard {...character} />
           </AnimatedInView>
         ))}

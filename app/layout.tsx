@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Oswald, Zen_Kaku_Gothic_New } from "next/font/google";
 import { CookieBanner } from "@/components/legal/CookieBanner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import {
+  buildPageMetadata,
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  SITE,
+} from "@/lib/seo";
 import "./globals.css";
 
 const display = Oswald({
@@ -16,31 +22,23 @@ const body = Zen_Kaku_Gothic_New({
   weight: ["400", "500", "700"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lostgarden.app";
+const homeMeta = buildPageMetadata({
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  path: "/",
+});
 
 export const metadata: Metadata = {
-  title: "Lost Garden — Official Anime Project",
-  description:
-    "A poetic dark fantasy anime about a hollow knight, a mysterious child, and a hidden world beneath the earth.",
-  metadataBase: new URL(siteUrl),
-  openGraph: {
-    title: "Lost Garden — Official Anime Project",
-    description:
-      "A poetic dark fantasy anime about a hollow knight, a mysterious child, and a hidden world beneath the earth.",
-    type: "website",
-    locale: "en_US",
-    siteName: "Lost Garden",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: HOME_TITLE,
+    template: `%s | ${SITE.name}`,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Lost Garden — Official Anime Project",
-    description:
-      "A poetic dark fantasy anime about a hollow knight, a mysterious child, and a hidden world beneath the earth.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  description: homeMeta.description,
+  alternates: homeMeta.alternates,
+  openGraph: homeMeta.openGraph,
+  twitter: homeMeta.twitter,
+  robots: homeMeta.robots,
 };
 
 export default function RootLayout({

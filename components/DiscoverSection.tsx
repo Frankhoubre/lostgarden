@@ -16,7 +16,7 @@ export function DiscoverSection() {
       <AtmosphereLayer variant="dense" />
 
       <AnimatedInView>
-        <SectionTitle subtitle="Sign in to enter the first chapter of the underground — early visuals, episode notes, and the world before the trailer.">
+        <SectionTitle subtitle="Sign in to enter the first chapter of the underground: early visuals, episode notes, and the world before the trailer.">
           Discover the experience
         </SectionTitle>
       </AnimatedInView>

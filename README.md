@@ -1,6 +1,6 @@
 # Lost Garden
 
-Official one-page landing site for the anime project **Lost Garden** — poetic dark fantasy set in an underground world.
+Official one-page landing site for the anime project **Lost Garden**, a poetic dark fantasy set in an underground world.
 
 ## Stack
 

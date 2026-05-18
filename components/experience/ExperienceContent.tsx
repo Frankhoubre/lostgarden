@@ -21,7 +21,7 @@ const PREVIEW_BLOCKS = [
   },
   {
     title: "Sol & Rose",
-    text: "An empty armor and a quiet child — one made to obey, one who should have been protected.",
+    text: "An empty armor and a quiet child, one made to obey, one who should have been protected.",
   },
   {
     title: "Sleeping Machines",
@@ -46,14 +46,14 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
         <header className="flex flex-col gap-6 border-b border-glow/10 pb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="anime-label font-display text-xs text-cyan-pale/75">
-              Lost Garden — First Light
+              Lost Garden: First Light
             </p>
             <h1 className="anime-heading mt-2 font-display text-3xl text-lily sm:text-4xl">
               Welcome, {name}
             </h1>
             <p className="mt-3 max-w-lg font-body text-base font-medium leading-relaxed text-ivory/90">
               You have crossed the threshold. This is an early look at the world
-              beneath — before the first episode reaches the surface.
+              beneath, before the first episode reaches the surface.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
@@ -66,7 +66,7 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
 
         <section className="mt-14">
           <h2 className="anime-heading font-display text-2xl text-lily">
-            Episode One — notes
+            Episode One: notes
           </h2>
           <p className="mt-3 font-body text-sm font-medium leading-relaxed text-ivory/85">
             Production diary fragments. More will appear as the caverns open.
@@ -93,7 +93,7 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
           <div className="relative aspect-[16/9] w-full">
             <Image
               src="/images/blue-forest.png"
-              alt="The Blue Forest — glowing mushrooms and mist beneath the earth"
+              alt="The Blue Forest, glowing mushrooms and mist beneath the earth"
               fill
               className="object-cover opacity-90"
               sizes="(max-width: 896px) 100vw, 896px"

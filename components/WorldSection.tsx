@@ -55,7 +55,11 @@ export function WorldSection() {
 
       <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {places.map((place, index) => (
-          <AnimatedInView key={place.title} delay={0.12 + index * 0.07}>
+          <AnimatedInView
+            key={place.title}
+            delay={0.12 + index * 0.07}
+            variant={index % 2 === 0 ? "fadeUp" : "scaleIn"}
+          >
             <WorldCard {...place} />
           </AnimatedInView>
         ))}

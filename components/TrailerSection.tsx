@@ -5,7 +5,7 @@ export function TrailerSection() {
   return (
     <section id="trailer" className="section-pad section-abyss">
       <AtmosphereLayer />
-      <AnimatedInView>
+      <AnimatedInView variant="scaleIn">
         <div className="mx-auto max-w-5xl">
           {/*
             Replace this block with an iframe when ready:
@@ -15,7 +15,7 @@ export function TrailerSection() {
             <div className="trailer-frame-inner absolute inset-0 flex flex-col items-center justify-center gap-4">
               <button
                 type="button"
-                className="trailer-play"
+                className="trailer-play trailer-play--pulse"
                 aria-label="Trailer coming soon"
                 disabled
               >

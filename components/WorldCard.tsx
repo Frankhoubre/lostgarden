@@ -25,7 +25,7 @@ export function WorldCard({
 
   return (
     <article
-      className={`world-card glass-card group flex h-full flex-col overflow-hidden transition-transform duration-500 ease-out hover:-translate-y-1 ${mysterious ? "world-card--mysterious" : ""}`}
+      className={`world-card glass-card group flex h-full flex-col overflow-hidden transition-transform duration-500 ease-out hover:-translate-y-1 ${mysterious ? "world-card--mysterious world-card--mysterious-pulse" : ""}`}
     >
       <div className="relative h-44 shrink-0 overflow-hidden sm:h-48">
         {imageSrc ? (

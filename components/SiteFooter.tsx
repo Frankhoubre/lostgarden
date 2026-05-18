@@ -1,3 +1,5 @@
+import { AnimatedInView } from "./AnimatedInView";
+
 const socialLinks = [
   { label: "Instagram", href: "#" },
   { label: "YouTube", href: "#" },
@@ -12,7 +14,7 @@ const legalLinks = [
 export function SiteFooter() {
   return (
     <footer className="site-footer relative px-5 py-16">
-      <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
+      <AnimatedInView className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
         <p className="anime-heading font-display text-2xl text-lily sm:text-3xl">
           LOST GARDEN
         </p>
@@ -48,10 +50,10 @@ export function SiteFooter() {
           </ul>
         </nav>
         <p className="text-xs text-ivory/30">
-          © {new Date().getFullYear()} Lost Garden — Frank Houbre. All rights
+          © {new Date().getFullYear()} Lost Garden, Frank Houbre. All rights
           reserved.
         </p>
-      </div>
+      </AnimatedInView>
     </footer>
   );
 }
