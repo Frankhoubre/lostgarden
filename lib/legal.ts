@@ -5,7 +5,7 @@ export const LEGAL_PUBLISHER = {
   postalCode: "57400",
   city: "Sarrebourg",
   country: "France",
-  email: "contact@lostgarden.app",
+  email: "hellobusinessdynamite@gmail.com",
 } as const;
 
 export const LEGAL_HOSTS = [

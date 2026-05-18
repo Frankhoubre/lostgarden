@@ -1,9 +1,10 @@
+import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { AnimatedInView } from "./AnimatedInView";
 
 const socialLinks = [
   { label: "Instagram", href: "#" },
   { label: "YouTube", href: "#" },
-  { label: "Contact", href: "mailto:contact@lostgarden.app" },
+  { label: "Contact", href: `mailto:${LEGAL_PUBLISHER.email}` },
 ] as const;
 
 const legalLinks = [
