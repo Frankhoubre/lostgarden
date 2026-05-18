@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { SiteFooter } from "@/components/SiteFooter";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,5 +12,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function ExperienceLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      {children}
+      <SiteFooter />
+    </>
+  );
 }

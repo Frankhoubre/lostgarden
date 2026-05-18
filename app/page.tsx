@@ -6,7 +6,6 @@ import { Hero } from "@/components/Hero";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
 import { TrailerSection } from "@/components/TrailerSection";
-import { VisualIdentitySection } from "@/components/VisualIdentitySection";
 import { DiscoverSection } from "@/components/DiscoverSection";
 import { WorldSection } from "@/components/WorldSection";
 
@@ -28,7 +27,6 @@ export default function Home() {
         <WorldSection />
         <CharactersSection />
         <EpisodeSection />
-        <VisualIdentitySection />
         <TrailerSection />
         <DiscoverSection />
       </main>

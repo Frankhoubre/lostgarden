@@ -84,7 +84,7 @@ export function Hero() {
         variants={staggerContainer(0.14, 0.15)}
       >
         <motion.h1
-          className="hero-logo-wrap relative mx-auto w-[min(92vw,34rem)]"
+          className="hero-logo-wrap hero-logo-float relative mx-auto w-[min(92vw,34rem)]"
           variants={fadeUp}
         >
           <Image
@@ -94,7 +94,7 @@ export function Hero() {
             height={576}
             priority
             unoptimized
-            className="hero-logo-img hero-logo-float"
+            className="hero-logo-img"
             sizes="(max-width: 768px) 92vw, 34rem"
           />
         </motion.h1>
