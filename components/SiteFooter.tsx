@@ -9,7 +9,8 @@ const socialLinks = [
   { label: "Contact", href: `mailto:${LEGAL_PUBLISHER.email}` },
 ] as const;
 
-const legalLinks = [
+const footerLinks = [
+  { label: "Vision", href: "/vision" },
   { label: "Legal notice", href: "/legal-notice" },
   { label: "Privacy", href: "/privacy-policy" },
 ] as const;
@@ -49,9 +50,9 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-        <nav aria-label="Legal links">
+        <nav aria-label="Site and legal links">
           <ul className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            {legalLinks.map((link) => (
+            {footerLinks.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
