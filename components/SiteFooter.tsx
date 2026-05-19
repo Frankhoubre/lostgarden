@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { AnimatedInView } from "./AnimatedInView";
 
@@ -16,9 +18,20 @@ export function SiteFooter() {
   return (
     <footer className="site-footer relative px-5 py-16">
       <AnimatedInView className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
-        <p className="anime-heading font-display text-2xl text-lily sm:text-3xl">
-          LOST GARDEN
-        </p>
+        <Link
+          href="/"
+          className="footer-logo-wrap relative block w-[min(85vw,14rem)] sm:w-52"
+        >
+          <Image
+            src="/images/logo-lost-garden.png"
+            alt="Lost Garden"
+            width={1024}
+            height={576}
+            unoptimized
+            className="hero-logo-img h-auto w-full"
+            sizes="(max-width: 640px) 85vw, 13rem"
+          />
+        </Link>
         <p className="font-body text-sm font-medium text-ivory/75">
           An original anime project by Frank Houbre.
         </p>
