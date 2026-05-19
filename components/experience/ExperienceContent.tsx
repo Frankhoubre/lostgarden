@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import type { User } from "firebase/auth";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { EpisodeTimeline } from "@/components/EpisodeTimeline";
+import { ExperienceJoinedNotice } from "@/components/experience/ExperienceJoinedNotice";
+import { EXPERIENCE_COPY } from "@/lib/experience-copy";
 
 const EPISODE_STEPS = [
   { title: "The Oath", line: "Words spoken where no one listens." },
@@ -52,8 +55,7 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
               Welcome, {name}
             </h1>
             <p className="mt-3 max-w-lg font-body text-base font-medium leading-relaxed text-ivory/90">
-              You have crossed the threshold. This is an early look at the world
-              beneath, before the first episode reaches the surface.
+              {EXPERIENCE_COPY.memberWelcome}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
@@ -63,6 +65,10 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
             <SignOutButton />
           </div>
         </header>
+
+        <Suspense fallback={null}>
+          <ExperienceJoinedNotice user={user} />
+        </Suspense>
 
         <section className="mt-14">
           <h2 className="anime-heading font-display text-2xl text-lily">

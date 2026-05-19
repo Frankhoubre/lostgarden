@@ -6,7 +6,7 @@ import { EASE_OUT_EXPO } from "@/lib/motion";
 const navLinks = [
   { label: "Characters", href: "#characters" },
   { label: "Trailer", href: "#trailer" },
-  { label: "Discover", href: "#discover" },
+  { label: "Join", href: "#discover" },
   { label: "Experience", href: "/experience" },
 ] as const;
 

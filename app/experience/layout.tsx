@@ -6,7 +6,7 @@ import { buildPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Discover the Experience",
   description:
-    "Sign in to explore early Lost Garden visuals, episode notes, and lore from the world beneath the earth. Members-only preview.",
+    "Join the Lost Garden experience: early previews, lore, and episode watch links sent to your email when new chapters are released.",
   path: "/experience",
   noIndex: true,
 });

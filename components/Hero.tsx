@@ -113,7 +113,7 @@ export function Hero() {
             variants={fadeUp}
           >
             <a href="#discover" className="btn-primary btn-shimmer">
-              Discover the experience
+              Join the experience
             </a>
             <a href="#characters" className="btn-secondary">
               Characters

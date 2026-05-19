@@ -87,6 +87,11 @@ export default function PrivacyPolicyPage() {
               of the service).
             </li>
             <li>
+              Sending project updates and email links to watch new episodes when
+              they are released (performance of the service and, where required,
+              your consent at sign-up).
+            </li>
+            <li>
               Security, maintenance, and improvement of the site (legitimate
               interest).
             </li>

@@ -13,6 +13,8 @@ import { useState, type FormEvent } from "react";
 import { AuthField } from "@/components/auth/AuthField";
 import { GoogleIcon } from "@/components/auth/GoogleIcon";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { EXPERIENCE_COPY } from "@/lib/experience-copy";
+import { isNewFirebaseUser } from "@/lib/firebase-user";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { syncUserProfile } from "@/lib/sync-user-profile";
 
@@ -48,12 +50,16 @@ export function AuthForm({
     clearMessages();
   }
 
-  async function afterAuth() {
+  async function afterAuth(justJoined = false) {
     if (onSuccess) {
       onSuccess();
-    } else {
-      router.push(redirectTo);
+      return;
     }
+    const [path, query] = redirectTo.split("?");
+    const next = justJoined
+      ? `${path}?joined=1${query ? `&${query}` : ""}`
+      : redirectTo;
+    router.push(next);
   }
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
@@ -75,6 +81,7 @@ export function AuthForm({
     }
 
     setLoading(true);
+    const justJoined = mode === "signup";
     try {
       const auth = getFirebaseAuth();
       if (mode === "signup") {
@@ -90,7 +97,7 @@ export function AuthForm({
       } else {
         await signInWithEmailAndPassword(auth, trimmedEmail, password);
       }
-      await afterAuth();
+      await afterAuth(justJoined);
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
@@ -107,7 +114,7 @@ export function AuthForm({
       provider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(auth, provider);
       await syncUserProfile(result.user);
-      await afterAuth();
+      await afterAuth(isNewFirebaseUser(result.user));
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
@@ -247,7 +254,7 @@ export function AuthForm({
       ) : null}
 
       <p className="mt-6 text-center text-xs leading-relaxed text-ivory/40">
-        By continuing, you agree to receive updates about Lost Garden. No spam.
+        {EXPERIENCE_COPY.authConsent}
       </p>
     </div>
   );
