@@ -54,6 +54,20 @@ export function middleware(request: NextRequest) {
   );
 
   if (pathnameLocale) {
+    const afterLocale = pathname.slice(`/${pathnameLocale}`.length) || "/";
+    const nestedLocale = afterLocale.split("/").filter(Boolean)[0];
+    if (nestedLocale && isLocale(nestedLocale)) {
+      const url = request.nextUrl.clone();
+      url.pathname = afterLocale.startsWith("/") ? afterLocale : `/${afterLocale}`;
+      const response = NextResponse.redirect(url);
+      response.cookies.set(LOCALE_COOKIE, nestedLocale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+      return response;
+    }
+
     const response = NextResponse.next();
     response.headers.set("x-locale", pathnameLocale);
     response.cookies.set(LOCALE_COOKIE, pathnameLocale, {
