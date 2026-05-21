@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
+import { openGraphLocales, type Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/types";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://lostgarden.app";
@@ -7,7 +9,6 @@ export const SITE_URL =
 export const SITE = {
   name: "Lost Garden",
   url: SITE_URL,
-  locale: "en_US",
   ogImage: "/images/hero-banner.png",
   ogImageWidth: 1024,
   ogImageHeight: 576,
@@ -15,12 +16,8 @@ export const SITE = {
   creator: LEGAL_PUBLISHER.name,
 } as const;
 
-export const HOME_TITLE = "Lost Garden - Poetic Dark Fantasy Anime";
-
-export const HOME_DESCRIPTION =
-  "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Watch the trailer and join the journey.";
-
 type BuildPageMetadataOptions = {
+  locale: Locale;
   title: string;
   description: string;
   path: string;
@@ -36,6 +33,7 @@ export function absoluteUrl(path: string): string {
 }
 
 export function buildPageMetadata({
+  locale,
   title,
   description,
   path,
@@ -54,7 +52,7 @@ export function buildPageMetadata({
       description,
       url: canonical,
       type: ogType,
-      locale: SITE.locale,
+      locale: openGraphLocales[locale],
       siteName: SITE.name,
       images: [
         {
@@ -77,8 +75,16 @@ export function buildPageMetadata({
   };
 }
 
-export function homePageJsonLd() {
+const schemaLanguages: Record<Locale, string> = {
+  en: "en",
+  fr: "fr",
+  ja: "ja",
+  ko: "ko",
+};
+
+export function homePageJsonLd(locale: Locale, dict: Dictionary) {
   const image = absoluteUrl(SITE.ogImage);
+  const pageUrl = absoluteUrl(`/${locale}`);
 
   return {
     "@context": "https://schema.org",
@@ -87,9 +93,9 @@ export function homePageJsonLd() {
         "@type": "WebSite",
         "@id": `${SITE.url}/#website`,
         name: SITE.name,
-        url: SITE.url,
-        description: HOME_DESCRIPTION,
-        inLanguage: "en",
+        url: pageUrl,
+        description: dict.meta.home.description,
+        inLanguage: schemaLanguages[locale],
         publisher: { "@id": `${SITE.url}/#organization` },
       },
       {
@@ -108,11 +114,11 @@ export function homePageJsonLd() {
         "@type": "TVSeries",
         "@id": `${SITE.url}/#series`,
         name: SITE.name,
-        description: HOME_DESCRIPTION,
-        url: SITE.url,
+        description: dict.meta.home.description,
+        url: pageUrl,
         image,
         genre: ["Animation", "Fantasy"],
-        inLanguage: "en",
+        inLanguage: schemaLanguages[locale],
         creator: {
           "@type": "Person",
           name: SITE.creator,
@@ -138,10 +144,12 @@ export function breadcrumbJsonLd(
 }
 
 export function webPageJsonLd({
+  locale,
   name,
   description,
   path,
 }: {
+  locale: Locale;
   name: string;
   description: string;
   path: string;
@@ -153,6 +161,6 @@ export function webPageJsonLd({
     description,
     url: absoluteUrl(path),
     isPartOf: { "@id": `${SITE.url}/#website` },
-    inLanguage: "en",
+    inLanguage: schemaLanguages[locale],
   };
 }

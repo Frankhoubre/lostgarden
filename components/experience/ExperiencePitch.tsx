@@ -1,16 +1,20 @@
-import { EXPERIENCE_COPY } from "@/lib/experience-copy";
+"use client";
+
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 type ExperiencePitchProps = {
   className?: string;
 };
 
 export function ExperiencePitch({ className = "" }: ExperiencePitchProps) {
+  const { dict } = useLocale();
+
   return (
     <ul
       className={`mx-auto max-w-md space-y-4 text-left ${className}`.trim()}
-      aria-label="What you get by joining"
+      aria-label={dict.discover.pitchAria}
     >
-      {EXPERIENCE_COPY.pitch.map((item) => (
+      {dict.discover.pitch.map((item) => (
         <li
           key={item.title}
           className="rounded-lg border border-glow/12 bg-cavern/35 px-4 py-3 backdrop-blur-sm"

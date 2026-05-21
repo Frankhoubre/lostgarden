@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { User } from "firebase/auth";
-import { EXPERIENCE_COPY } from "@/lib/experience-copy";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { localePath } from "@/lib/i18n/navigation";
 
 const JOINED_STORAGE_KEY = "lostgarden-joined-notice";
 
@@ -13,30 +14,31 @@ type ExperienceJoinedNoticeProps = {
 
 export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
   const searchParams = useSearchParams();
+  const { locale, dict } = useLocale();
   const [visible, setVisible] = useState(false);
+  const experiencePath = localePath(locale, "/experience");
 
   useEffect(() => {
     if (searchParams.get("joined") === "1") {
       setVisible(true);
       sessionStorage.setItem(JOINED_STORAGE_KEY, "1");
-      window.history.replaceState(null, "", "/experience");
+      window.history.replaceState(null, "", experiencePath);
       return;
     }
     if (sessionStorage.getItem(JOINED_STORAGE_KEY) === "1") {
       setVisible(true);
     }
-  }, [searchParams]);
+  }, [searchParams, experiencePath]);
 
   if (!visible) return null;
 
   const email = user.email ?? "your email";
+  const { postSignup } = dict.experience;
 
   function dismiss() {
     setVisible(false);
     sessionStorage.removeItem(JOINED_STORAGE_KEY);
   }
-
-  const { postSignup } = EXPERIENCE_COPY;
 
   return (
     <aside
@@ -44,7 +46,10 @@ export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
       role="status"
       aria-live="polite"
     >
-      <p className="anime-label font-display text-xs tracking-[0.2em] text-magic">
+      <p className="anime-label episode-release-badge inline-block rounded-md border border-magic/40 bg-abyss/60 px-3 py-1.5 font-display text-xs tracking-[0.16em] text-lily">
+        {dict.episodeOne.badge}
+      </p>
+      <p className="anime-label mt-3 font-display text-xs tracking-[0.2em] text-magic">
         {postSignup.title}
       </p>
       <p className="mt-2 font-body text-sm leading-relaxed text-ivory/85 sm:text-base">
@@ -59,13 +64,13 @@ export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
         </p>
         {user.email ? (
           <p className="mt-3 font-body text-sm text-cyan-pale/90">
-            Watch link will be sent to{" "}
+            {postSignup.watchLinkTo}{" "}
             <strong className="font-medium text-lily">{email}</strong>
           </p>
         ) : null}
       </div>
       <button type="button" onClick={dismiss} className="btn-primary mt-6 min-h-11">
-        {postSignup.dismiss}
+        {dict.common.gotIt}
       </button>
     </aside>
   );

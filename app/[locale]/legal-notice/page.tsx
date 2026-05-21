@@ -1,39 +1,59 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { LegalPageShell, LegalSection } from "@/components/legal/LegalPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_HOSTS, LEGAL_PUBLISHER } from "@/lib/legal";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 
-const TITLE = "Legal Notice | Lost Garden";
-const DESCRIPTION =
-  "Legal notice for Lost Garden, the official anime project website. Publisher, hosting, intellectual property, and liability information.";
+type LegalNoticePageProps = {
+  params: Promise<{ locale: string }>;
+};
 
-export const metadata: Metadata = buildPageMetadata({
-  title: TITLE,
-  description: DESCRIPTION,
-  path: "/legal-notice",
-  absoluteTitle: true,
-});
+export async function generateMetadata({
+  params,
+}: LegalNoticePageProps): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  if (!isLocale(localeParam)) return {};
+  const locale = localeParam as Locale;
+  const dict = await getDictionary(locale);
 
-const breadcrumbs = [
-  { name: "Home", path: "/" },
-  { name: "Legal Notice", path: "/legal-notice" },
-] as const;
+  return buildPageMetadata({
+    locale,
+    title: dict.meta.legalNotice.title,
+    description: dict.meta.legalNotice.description,
+    path: localePath(locale, "/legal-notice"),
+    absoluteTitle: true,
+  });
+}
 
-export default function LegalNoticePage() {
+export default async function LegalNoticePage({ params }: LegalNoticePageProps) {
+  const { locale: localeParam } = await params;
+  if (!isLocale(localeParam)) notFound();
+  const locale = localeParam as Locale;
+  const dict = await getDictionary(locale);
+  const path = localePath(locale, "/legal-notice");
   const fullAddress = `${LEGAL_PUBLISHER.address}, ${LEGAL_PUBLISHER.postalCode} ${LEGAL_PUBLISHER.city}, ${LEGAL_PUBLISHER.country}`;
+
+  const breadcrumbs = [
+    { name: dict.vision.breadcrumbHome, path: localePath(locale, "/") },
+    { name: dict.footer.legalNotice, path },
+  ] as const;
 
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(breadcrumbs)} />
       <JsonLd
         data={webPageJsonLd({
-          name: "Legal Notice",
-          description: DESCRIPTION,
-          path: "/legal-notice",
+          locale,
+          name: dict.footer.legalNotice,
+          description: dict.meta.legalNotice.description,
+          path,
         })}
       />
-      <LegalPageShell title="Legal Notice">
+      <LegalPageShell title={dict.footer.legalNotice}>
         <LegalSection title="Site publisher">
           <p>
             The website <strong>{LEGAL_PUBLISHER.project}</strong> is published by{" "}

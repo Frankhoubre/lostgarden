@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "home": {
+      "title": "Lost Garden - Anime dark fantasy poétique",
+      "description": "Anime dark fantasy poétique par Frank Houbre. Un chevalier creux, une enfant mystérieuse, un monde sous la terre. Préparez-vous pour l'épisode 1 le 2 juin 2026."
+    },
+    "experience": {
+      "title": "Épisode 1 — accès anticipé",
+      "description": "Inscrivez-vous pour l'épisode 1 de Lost Garden. Le lien de visionnage est envoyé par email le 2 juin 2026 ; explorez les previews jusqu'à la sortie."
+    },
+    "vision": {
+      "title": "Vision | Lost Garden",
+      "description": "Frank Houbre sur Lost Garden : Sol, Rose, un monde souterrain blessé, et comment l'IA aide à donner forme à une vision artistique."
+    },
+    "legalNotice": {
+      "title": "Mentions légales | Lost Garden",
+      "description": "Informations légales du site Lost Garden."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité | Lost Garden",
+      "description": "Comment Lost Garden collecte et utilise vos données, cookies, authentification Firebase et vos droits RGPD."
+    }
+  },
+  "episodeOne": {
+    "premiereDate": "2 juin",
+    "premiereDateFull": "2 juin 2026",
+    "badge": "Épisode 1 · 2 juin 2026"
+  },
+  "common": {
+    "siteName": "Lost Garden",
+    "skipToContent": "Aller au contenu",
+    "loadingGate": "Ouverture du portail…",
+    "logoAlt": "Lost Garden",
+    "traveler": "Voyageur",
+    "or": "ou",
+    "pleaseWait": "Patientez…",
+    "gotIt": "Compris"
+  },
+  "lang": {
+    "switcherLabel": "Langue",
+    "en": "English",
+    "fr": "Français",
+    "ja": "日本語",
+    "ko": "한국어"
+  },
+  "nav": {
+    "ariaLabel": "Sections de la page",
+    "characters": "Personnages",
+    "trailer": "Bande-annonce",
+    "join": "Épisode 1",
+    "experience": "Espace membre"
+  },
+  "hero": {
+    "tagline": "Certaines choses s'éveillent sous la terre. Un chevalier creux. Une enfant dans la brume. Une forêt qui se souvient.",
+    "releaseLine": "L'épisode 1 sort le 2 juin 2026.",
+    "signupLine": "Créez un compte gratuit : le lien de visionnage arrivera dans votre boîte mail le jour de la sortie.",
+    "cta": "Préparez-vous pour le 1er épisode",
+    "characters": "Personnages",
+    "footerLine": "Tous les gardiens n'étaient pas faits pour protéger.",
+    "scrollLabel": "Faire défiler pour explorer",
+    "descend": "Descendre"
+  },
+  "characters": {
+    "title": "Personnages",
+    "subtitle": "Dans les cavernes sous le monde, même ce qui est brisé se souvient protéger.",
+    "traitsAria": "Traits de {name}",
+    "list": [
+      {
+        "name": "Sol",
+        "visual": "sol",
+        "type": "Armure creuse",
+        "tagline": "Un chevalier vide à tête-lanterne, sans corps, sans voix, avec un devoir qu'il ne comprend pas.",
+        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent — une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde.",
+        "traits": ["Armure vide", "Heaume-lanterne", "Instinct protecteur", "Maladroit mais brave"]
+      },
+      {
+        "name": "Rose",
+        "visual": "rose",
+        "type": "Enfant mystérieuse",
+        "tagline": "Une enfant silencieuse dont la présence fait revenir la vie là où rien ne devrait pousser.",
+        "description": "Rose est petite, calme, presque irréelle. Elle traverse les ruines avec une sérénité étrange, comme si elle entendait ce que le monde a oublié. Autour d'elle, les fleurs s'ouvrent, les racines bougent, la terre morte se souvient parfois de respirer. Mais Rose n'est ni une arme, ni un miracle à dépenser, ni un symbole. C'est une enfant.",
+        "traits": ["Force silencieuse", "Lys blancs", "Pouvoir caché", "Présence douce"]
+      },
+      {
+        "name": "Les machines endormies",
+        "visual": "machines",
+        "type": "Reliques organo-mécaniques",
+        "tagline": "Des êtres colossaux, mi-morts mi-rêveurs, sous la mousse et les racines.",
+        "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons — mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés.",
+        "traits": ["Œil géant", "Membres mécaniques", "Métal moussu", "Menace latente"]
+      },
+      {
+        "name": "Les pèlerins masqués",
+        "visual": "pilgrims",
+        "type": "Procession inconnue",
+        "tagline": "Des silhouettes en capuche noire et masque blanc, portant d'étranges rituels dans la brume.",
+        "description": "Vus seulement de loin, ils traversent les plateformes des cavernes en processions silencieuses. Leurs gongs résonnent dans l'abîme. Nul ne sait s'ils sont gardiens, pleureurs, ou quelque chose de plus ancien. Leur présence signifie que les profondeurs ne sont pas vides.",
+        "traits": ["Masques blancs", "Capuches noires", "Gongs rituels", "Procession silencieuse"]
+      }
+    ]
+  },
+  "trailer": {
+    "playAria": "Bande-annonce bientôt disponible",
+    "headline": "Épisode 1",
+    "subline": "Sortie le 2 juin 2026 — inscrivez-vous pour recevoir le lien de visionnage par email."
+  },
+  "discover": {
+    "title": "Préparez-vous pour le 1er épisode",
+    "subtitle": "Inscrivez-vous avec votre email — nous vous enverrons le lien de l'épisode 1 le jour de la sortie, le 2 juin 2026.",
+    "pitchAria": "Ce que vous obtenez en vous inscrivant pour l'épisode 1",
+    "pitch": [
+      {
+        "title": "L'épisode 1 par email",
+        "body": "Inscrivez-vous maintenant. Le 2 juin 2026, nous envoyons le lien de visionnage à l'adresse indiquée ici — pas besoin de chercher le lien le jour J."
+      },
+      {
+        "title": "Previews en attendant",
+        "body": "Jusqu'à la sortie, explorez visuels, notes de lore et fragments du monde souterrain dans l'espace membre."
+      }
+    ],
+    "loggedInTitle": "Vous êtes inscrit",
+    "welcomeBack": "Vous êtes inscrit pour l'épisode 1. Le 2 juin 2026, nous enverrons le lien de visionnage à l'adresse de votre compte.",
+    "episodeLink": "Lien épisode 1 →",
+    "openPreviews": "Ouvrir les previews"
+  },
+  "auth": {
+    "loginIntro": "Vous réservez l'épisode 1, pas une simple newsletter. Utilisez une adresse que vous consultez — c'est là que part le lien le 2 juin.",
+    "consent": "En continuant, vous acceptez de recevoir les actualités Lost Garden, dont le lien de l'épisode 1 par email le 2 juin 2026. Pas de spam.",
+    "tabsAria": "Mode d'authentification",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte",
+    "continueGoogle": "Continuer avec Google",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Votre nom",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@email.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "8 caractères minimum",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signupSubmit": "S'inscrire — épisode 1 par email",
+    "signingOut": "Déconnexion…",
+    "signOut": "Se déconnecter",
+    "resetSent": "Email de réinitialisation envoyé. Vérifiez votre boîte mail.",
+    "validation": {
+      "invalidEmail": "Veuillez entrer une adresse email valide.",
+      "passwordMin": "Le mot de passe doit contenir au moins 8 caractères.",
+      "nameRequired": "Veuillez entrer un nom.",
+      "resetEmailHint": "Entrez votre email ci-dessus, puis demandez un lien de réinitialisation."
+    },
+    "errors": {
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "emailInUse": "Un compte existe déjà avec cet email. Essayez de vous connecter.",
+      "invalidEmail": "Veuillez entrer une adresse email valide.",
+      "operationNotAllowed": "Cette méthode de connexion n'est pas activée. Contactez le support si le problème persiste.",
+      "weakPassword": "Le mot de passe doit contenir au moins 8 caractères.",
+      "userDisabled": "Ce compte a été désactivé.",
+      "userNotFound": "Aucun compte trouvé avec cet email.",
+      "wrongPassword": "Email ou mot de passe incorrect.",
+      "tooManyRequests": "Trop de tentatives. Patientez puis réessayez.",
+      "popupClosed": "Connexion annulée.",
+      "accountExistsDifferent": "Un compte existe déjà avec cet email via une autre méthode de connexion.",
+      "network": "Erreur réseau. Vérifiez votre connexion et réessayez."
+    }
+  },
+  "experience": {
+    "seriesLabel": "Lost Garden : Première lumière",
+    "welcome": "Bienvenue, {name}",
+    "memberWelcome": "Vous êtes sur la liste pour l'épisode 1 (2 juin 2026). Le lien de visionnage sera envoyé par email le jour de la sortie — explorez le lore en attendant.",
+    "backToGate": "Retour au portail",
+    "notesTitle": "Épisode 1 : notes",
+    "notesLead": "Fragments du journal de production. D'autres apparaîtront quand les cavernes s'ouvriront.",
+    "timeline": [
+      { "title": "Le serment", "line": "Des mots prononcés là où personne n'écoute." },
+      { "title": "L'éveil", "line": "Le métal ouvre les yeux sans visage." },
+      { "title": "La forêt bleue", "line": "Des champignons éclairent des chemins que le soleil n'a jamais touchés." },
+      { "title": "L'œil dans le noir", "line": "Un géant se souvient qu'il est éveillé." },
+      { "title": "L'enfant dans les lys", "line": "Des pétales blancs la trouvent dans la brume." }
+    ],
+    "previews": [
+      {
+        "title": "La forêt bleue",
+        "text": "Une forêt sans ciel. Champignons bioluminescents, fleurs pâles, racines qui boivent l'obscurité."
+      },
+      {
+        "title": "Sol & Rose",
+        "text": "Une armure vide et une enfant silencieuse — l'une faite pour obéir, l'autre qui aurait dû être protégée."
+      },
+      {
+        "title": "Machines endormies",
+        "text": "Des reliques organiques colossales, à demi enfouies dans la mousse. Certains yeux s'ouvrent encore quand la brume bouge."
+      }
+    ],
+    "previewImageAlt": "La forêt bleue, champignons lumineux et brume sous la terre",
+    "premiereCardLine": "Le lien de visionnage vous sera envoyé par email le jour de la sortie.",
+    "postSignup": {
+      "title": "Vous êtes sur la liste",
+      "lead": "L'épisode 1 sort le 2 juin 2026. En attendant, explorez la preview ci-dessous.",
+      "emailHeading": "Lien de visionnage le 2 juin",
+      "emailBody": "Le jour de la sortie, nous envoyons l'épisode 1 à l'email avec lequel vous vous êtes inscrit. Vérifiez votre boîte mail — et vos spams — pour ne pas manquer l'ouverture.",
+      "watchLinkTo": "Le lien sera envoyé à"
+    }
+  },
+  "footer": {
+    "byline": "Projet d'anime original par Frank Houbre.",
+    "socialAria": "Réseaux sociaux et contact",
+    "linksAria": "Liens du site et mentions légales",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "contact": "Contact",
+    "vision": "Vision",
+    "legalNotice": "Mentions légales",
+    "privacy": "Confidentialité",
+    "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés."
+  },
+  "cookies": {
+    "title": "Cookies et confidentialité",
+    "bodyBefore": "Ce site utilise des cookies techniques nécessaires au fonctionnement (authentification Firebase) et peut enregistrer votre choix localement. Consultez notre",
+    "privacyLink": "politique de confidentialité",
+    "bodyAfter": ".",
+    "decline": "Refuser",
+    "accept": "Accepter"
+  },
+  "legal": {
+    "backToSite": "← Retour au site"
+  },
+  "vision": {
+    "pageTitle": "Vision",
+    "headline": "Créer un anime avec l'IA, une scène à la fois",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbVision": "Vision"
+  }
+}

@@ -1,43 +1,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { LegalPageShell, LegalSection } from "@/components/legal/LegalPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_HOSTS, LEGAL_PUBLISHER } from "@/lib/legal";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 
-const TITLE = "Privacy Policy | Lost Garden";
-const DESCRIPTION =
-  "How Lost Garden collects and uses your data, cookies, Firebase auth, and your GDPR rights. Contact us to exercise your privacy rights.";
+type PrivacyPolicyPageProps = {
+  params: Promise<{ locale: string }>;
+};
 
-export const metadata: Metadata = buildPageMetadata({
-  title: TITLE,
-  description: DESCRIPTION,
-  path: "/privacy-policy",
-  absoluteTitle: true,
-});
+export async function generateMetadata({
+  params,
+}: PrivacyPolicyPageProps): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  if (!isLocale(localeParam)) return {};
+  const locale = localeParam as Locale;
+  const dict = await getDictionary(locale);
 
-const breadcrumbs = [
-  { name: "Home", path: "/" },
-  { name: "Privacy Policy", path: "/privacy-policy" },
-] as const;
+  return buildPageMetadata({
+    locale,
+    title: dict.meta.privacy.title,
+    description: dict.meta.privacy.description,
+    path: localePath(locale, "/privacy-policy"),
+    absoluteTitle: true,
+  });
+}
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage({ params }: PrivacyPolicyPageProps) {
+  const { locale: localeParam } = await params;
+  if (!isLocale(localeParam)) notFound();
+  const locale = localeParam as Locale;
+  const dict = await getDictionary(locale);
+  const path = localePath(locale, "/privacy-policy");
   const fullAddress = `${LEGAL_PUBLISHER.address}, ${LEGAL_PUBLISHER.postalCode} ${LEGAL_PUBLISHER.city}, ${LEGAL_PUBLISHER.country}`;
+
+  const breadcrumbs = [
+    { name: dict.vision.breadcrumbHome, path: localePath(locale, "/") },
+    { name: dict.footer.privacy, path },
+  ] as const;
 
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(breadcrumbs)} />
       <JsonLd
         data={webPageJsonLd({
-          name: "Privacy Policy",
-          description: DESCRIPTION,
-          path: "/privacy-policy",
+          locale,
+          name: dict.footer.privacy,
+          description: dict.meta.privacy.description,
+          path,
         })}
       />
-      <LegalPageShell title="Privacy Policy">
+      <LegalPageShell title={dict.footer.privacy}>
         <p className="text-ivory/70">
           Last updated:{" "}
-          {new Date().toLocaleDateString("en-US", {
+          {new Date().toLocaleDateString(locale === "en" ? "en-US" : locale, {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -169,10 +189,10 @@ export default function PrivacyPolicyPage() {
         <LegalSection title="Related links">
           <p>
             <Link
-              href="/legal-notice"
+              href={localePath(locale, "/legal-notice")}
               className="text-magic underline-offset-2 hover:underline"
             >
-              Legal notice
+              {dict.footer.legalNotice}
             </Link>
           </p>
         </LegalSection>

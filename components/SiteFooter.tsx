@@ -1,31 +1,38 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { AnimatedInView } from "./AnimatedInView";
-
-const socialLinks = [
-  { label: "Instagram", href: "#" },
-  { label: "YouTube", href: "#" },
-  { label: "Contact", href: `mailto:${LEGAL_PUBLISHER.email}` },
-] as const;
-
-const footerLinks = [
-  { label: "Vision", href: "/vision" },
-  { label: "Legal notice", href: "/legal-notice" },
-  { label: "Privacy", href: "/privacy-policy" },
-] as const;
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { formatMessage } from "@/lib/i18n/format";
+import { localePath } from "@/lib/i18n/navigation";
 
 export function SiteFooter() {
+  const { locale, dict } = useLocale();
+
+  const socialLinks = [
+    { label: dict.footer.instagram, href: "#" },
+    { label: dict.footer.youtube, href: "#" },
+    { label: dict.footer.contact, href: `mailto:${LEGAL_PUBLISHER.email}` },
+  ] as const;
+
+  const footerLinks = [
+    { label: dict.footer.vision, href: localePath(locale, "/vision") },
+    { label: dict.footer.legalNotice, href: localePath(locale, "/legal-notice") },
+    { label: dict.footer.privacy, href: localePath(locale, "/privacy-policy") },
+  ] as const;
+
   return (
     <footer className="site-footer relative px-5 py-16">
       <AnimatedInView className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
         <Link
-          href="/"
+          href={localePath(locale, "/")}
           className="footer-logo-wrap relative block w-[min(85vw,14rem)] sm:w-52"
         >
           <Image
             src="/images/logo-lost-garden.png"
-            alt="Lost Garden"
+            alt={dict.common.logoAlt}
             width={1024}
             height={576}
             unoptimized
@@ -34,9 +41,9 @@ export function SiteFooter() {
           />
         </Link>
         <p className="font-body text-sm font-medium text-ivory/75">
-          An original anime project by Frank Houbre.
+          {dict.footer.byline}
         </p>
-        <nav aria-label="Social and contact links">
+        <nav aria-label={dict.footer.socialAria}>
           <ul className="flex flex-wrap items-center justify-center gap-6">
             {socialLinks.map((link) => (
               <li key={link.label}>
@@ -50,23 +57,24 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-        <nav aria-label="Site and legal links">
+        <nav aria-label={dict.footer.linksAria}>
           <ul className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             {footerLinks.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   className="font-body text-xs font-medium text-ivory/55 underline-offset-4 transition hover:text-cyan-pale hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm sm:text-sm"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
         </nav>
         <p className="text-xs text-ivory/30">
-          © {new Date().getFullYear()} Lost Garden, Frank Houbre. All rights
-          reserved.
+          {formatMessage(dict.footer.copyright, {
+            year: String(new Date().getFullYear()),
+          })}
         </p>
       </AnimatedInView>
     </footer>

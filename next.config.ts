@@ -8,12 +8,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/mentions-legales",
-        destination: "/legal-notice",
+        destination: "/fr/legal-notice",
         permanent: true,
       },
       {
         source: "/politique-de-confidentialite",
-        destination: "/privacy-policy",
+        destination: "/fr/privacy-policy",
         permanent: true,
       },
     ];

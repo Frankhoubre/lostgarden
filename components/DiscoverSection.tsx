@@ -2,21 +2,23 @@
 
 import Link from "next/link";
 import { AnimatedInView } from "./AnimatedInView";
-import { EXPERIENCE_COPY } from "@/lib/experience-copy";
 import { ExperiencePitch } from "./experience/ExperiencePitch";
 import { AuthForm } from "./auth/AuthForm";
 import { SignOutButton } from "./auth/SignOutButton";
 import { SectionTitle } from "./SectionTitle";
 import { useAuth } from "./providers/AuthProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { localePath } from "@/lib/i18n/navigation";
 
 export function DiscoverSection() {
   const { user, loading } = useAuth();
+  const { locale, dict } = useLocale();
 
   return (
     <section id="discover" className="section-pad section-discover scroll-mt-14">
       <AnimatedInView>
-        <SectionTitle subtitle={EXPERIENCE_COPY.sectionSubtitle}>
-          Join the experience
+        <SectionTitle subtitle={dict.discover.subtitle}>
+          {dict.discover.title}
         </SectionTitle>
       </AnimatedInView>
 
@@ -27,31 +29,35 @@ export function DiscoverSection() {
       <AnimatedInView className="mt-10" delay={0.12}>
         {loading ? (
           <p className="text-center font-body text-sm text-ivory/50" role="status">
-            Opening the gate…
+            {dict.common.loadingGate}
           </p>
         ) : user ? (
           <div className="auth-card glass-card mx-auto max-w-md p-8 text-center">
             <p className="anime-heading font-display text-xl text-lily">
-              You are in
+              {dict.discover.loggedInTitle}
               {user.displayName ? `, ${user.displayName}` : ""}.
             </p>
             <p className="mt-3 font-body text-sm leading-relaxed text-ivory/60">
-              {EXPERIENCE_COPY.welcomeBack}
+              {dict.discover.welcomeBack}
             </p>
             {user.email ? (
               <p className="mt-2 font-body text-xs text-cyan-pale/70">
-                Episode One link → <span className="text-lily">{user.email}</span>
+                {dict.discover.episodeLink}{" "}
+                <span className="text-lily">{user.email}</span>
               </p>
             ) : null}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link href="/experience" className="btn-primary">
-                Enter the experience
+              <Link
+                href={localePath(locale, "/experience")}
+                className="btn-primary"
+              >
+                {dict.discover.openPreviews}
               </Link>
               <SignOutButton />
             </div>
           </div>
         ) : (
-          <AuthForm redirectTo="/experience" />
+          <AuthForm redirectTo={localePath(locale, "/experience")} />
         )}
       </AnimatedInView>
     </section>

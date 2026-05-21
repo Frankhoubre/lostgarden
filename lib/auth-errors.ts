@@ -1,30 +1,31 @@
 import { FirebaseError } from "firebase/app";
+import type { Dictionary } from "@/lib/i18n/types";
 
-const MESSAGES: Record<string, string> = {
-  "auth/email-already-in-use":
-    "An account already exists with this email. Try signing in.",
-  "auth/invalid-email": "Please enter a valid email address.",
-  "auth/operation-not-allowed":
-    "This sign-in method is not enabled. Contact support if this persists.",
-  "auth/weak-password": "Password must be at least 8 characters.",
-  "auth/user-disabled": "This account has been disabled.",
-  "auth/user-not-found": "No account found with this email.",
-  "auth/wrong-password": "Incorrect email or password.",
-  "auth/invalid-credential": "Incorrect email or password.",
-  "auth/too-many-requests": "Too many attempts. Please wait and try again.",
-  "auth/popup-closed-by-user": "Sign-in was cancelled.",
-  "auth/account-exists-with-different-credential":
-    "An account already exists with this email using a different sign-in method.",
-  "auth/network-request-failed":
-    "Network error. Check your connection and try again.",
+const CODE_TO_KEY: Record<string, keyof Dictionary["auth"]["errors"]> = {
+  "auth/email-already-in-use": "emailInUse",
+  "auth/invalid-email": "invalidEmail",
+  "auth/operation-not-allowed": "operationNotAllowed",
+  "auth/weak-password": "weakPassword",
+  "auth/user-disabled": "userDisabled",
+  "auth/user-not-found": "userNotFound",
+  "auth/wrong-password": "wrongPassword",
+  "auth/invalid-credential": "wrongPassword",
+  "auth/too-many-requests": "tooManyRequests",
+  "auth/popup-closed-by-user": "popupClosed",
+  "auth/account-exists-with-different-credential": "accountExistsDifferent",
+  "auth/network-request-failed": "network",
 };
 
-export function getAuthErrorMessage(error: unknown): string {
-  if (error instanceof FirebaseError && MESSAGES[error.code]) {
-    return MESSAGES[error.code];
+export function getAuthErrorMessage(
+  error: unknown,
+  errors: Dictionary["auth"]["errors"],
+): string {
+  if (error instanceof FirebaseError) {
+    const key = CODE_TO_KEY[error.code];
+    if (key) return errors[key];
   }
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Something went wrong. Please try again.";
+  return errors.generic;
 }

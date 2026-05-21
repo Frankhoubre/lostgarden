@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "home": {
+      "title": "Lost Garden - Poetic Dark Fantasy Anime",
+      "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Be ready for Episode One on 2 June 2026."
+    },
+    "experience": {
+      "title": "Episode One — early access",
+      "description": "Sign up for Lost Garden Episode One. The watch link is emailed on 2 June 2026; explore early previews until premiere."
+    },
+    "vision": {
+      "title": "Vision | Lost Garden",
+      "description": "Frank Houbre on Lost Garden: Sol, Rose, a wounded underground world, and how AI helps turn a clear artistic vision into images, animation, and sound."
+    },
+    "legalNotice": {
+      "title": "Legal Notice | Lost Garden",
+      "description": "Legal information for the Lost Garden website."
+    },
+    "privacy": {
+      "title": "Privacy Policy | Lost Garden",
+      "description": "How Lost Garden collects and uses your data, cookies, Firebase auth, and your GDPR rights."
+    }
+  },
+  "episodeOne": {
+    "premiereDate": "2 June",
+    "premiereDateFull": "2 June 2026",
+    "badge": "Episode One · 2 June 2026"
+  },
+  "common": {
+    "siteName": "Lost Garden",
+    "skipToContent": "Skip to content",
+    "loadingGate": "Opening the gate…",
+    "logoAlt": "Lost Garden",
+    "traveler": "Traveler",
+    "or": "or",
+    "pleaseWait": "Please wait…",
+    "gotIt": "Got it"
+  },
+  "lang": {
+    "switcherLabel": "Language",
+    "en": "English",
+    "fr": "Français",
+    "ja": "日本語",
+    "ko": "한국어"
+  },
+  "nav": {
+    "ariaLabel": "Page sections",
+    "characters": "Characters",
+    "trailer": "Trailer",
+    "join": "Episode One",
+    "experience": "Members"
+  },
+  "hero": {
+    "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",
+    "releaseLine": "Episode One premieres 2 June 2026.",
+    "signupLine": "Create a free account and the watch link will land in your inbox when the first episode drops.",
+    "cta": "Be ready for the 1st episode",
+    "characters": "Characters",
+    "footerLine": "Not every guardian was meant to protect.",
+    "scrollLabel": "Scroll to explore",
+    "descend": "Descend"
+  },
+  "characters": {
+    "title": "Characters",
+    "subtitle": "In the caverns beneath the world, even broken things remember how to protect.",
+    "traitsAria": "{name} traits",
+    "list": [
+      {
+        "name": "Sol",
+        "visual": "sol",
+        "type": "Hollow Armor",
+        "tagline": "An empty knight with a lantern-shaped head, no body, no voice, and a duty he does not understand.",
+        "description": "Sol is not a legendary warrior. He is damaged, awkward, and strangely innocent, an old armor awakened in the depths of a blue cavern. He cannot truly speak. Only hollow metallic sounds, creaks, groans, and quiet gestures reveal what he feels. Yet when danger comes, he places himself between Rose and the world.",
+        "traits": ["Empty armor", "Lantern helmet", "Protective instinct", "Clumsy but brave"]
+      },
+      {
+        "name": "Rose",
+        "visual": "rose",
+        "type": "Mysterious Child",
+        "tagline": "A quiet child whose presence makes life return where nothing should grow.",
+        "description": "Rose is small, calm, and almost unreal. She walks through ruined places with a strange serenity, as if she can hear what the world has forgotten. Around her, flowers bloom, roots move, and the dead earth sometimes remembers how to breathe. But Rose is not a weapon, not a miracle to spend, and not a symbol. She is a child.",
+        "traits": ["Silent strength", "White lilies", "Hidden power", "Gentle presence"]
+      },
+      {
+        "name": "The Sleeping Machines",
+        "visual": "machines",
+        "type": "Ancient Alien Relics",
+        "tagline": "Colossal mechanical-organic beings, half dead, half dreaming beneath moss and roots.",
+        "description": "Long after the old catastrophe, the machines still lie buried in the blue forests. Their bodies are rusted, cracked, and covered in fungi, but some eyes still open in the dark. They do not hate. They do not forgive. They awaken like forgotten disasters.",
+        "traits": ["Giant eye", "Mechanical limbs", "Moss-covered metal", "Dormant threat"]
+      },
+      {
+        "name": "The Masked Pilgrims",
+        "visual": "pilgrims",
+        "type": "Unknown Procession",
+        "tagline": "Figures in black hoods and white masks, carrying strange rituals through the mist.",
+        "description": "Seen only from afar, they move through the cavern platforms in silent processions. Their gongs echo across the abyss. Nobody knows if they are guardians, mourners, or something older. Their presence means the depths are not empty.",
+        "traits": ["White masks", "Black hoods", "Ritual gongs", "Silent procession"]
+      }
+    ]
+  },
+  "trailer": {
+    "playAria": "Trailer coming soon",
+    "headline": "Episode One",
+    "subline": "Premieres 2 June 2026 — sign up to get the watch link by email."
+  },
+  "discover": {
+    "title": "Be ready for the 1st episode",
+    "subtitle": "Sign up with your email — we will send you the Episode One watch link on premiere day, 2 June 2026.",
+    "pitchAria": "What you get when you sign up for Episode One",
+    "pitch": [
+      {
+        "title": "Episode One by email",
+        "body": "Register now. On 2 June 2026, we email the watch link to the address you use here — no hunting for links on release day."
+      },
+      {
+        "title": "Early previews while you wait",
+        "body": "Until premiere, explore early visuals, lore notes, and fragments from beneath the earth inside the members area."
+      }
+    ],
+    "loggedInTitle": "You are in",
+    "welcomeBack": "You are registered for Episode One. On 2 June 2026, we will email the watch link to the address on your account.",
+    "episodeLink": "Episode One link →",
+    "openPreviews": "Open early previews"
+  },
+  "auth": {
+    "loginIntro": "You are reserving Episode One, not just a newsletter. Use an email you check — that is where the watch link goes on 2 June.",
+    "consent": "By continuing, you agree to receive Lost Garden updates, including the Episode One watch link by email on 2 June 2026. No spam.",
+    "tabsAria": "Authentication mode",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "continueGoogle": "Continue with Google",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@email.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "forgotPassword": "Forgot password?",
+    "signupSubmit": "Sign up — get Episode One by email",
+    "signingOut": "Signing out…",
+    "signOut": "Sign out",
+    "resetSent": "Password reset email sent. Check your inbox.",
+    "validation": {
+      "invalidEmail": "Please enter a valid email address.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "nameRequired": "Please enter a name.",
+      "resetEmailHint": "Enter your email above, then request a reset link."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "emailInUse": "An account already exists with this email. Try signing in.",
+      "invalidEmail": "Please enter a valid email address.",
+      "operationNotAllowed": "This sign-in method is not enabled. Contact support if this persists.",
+      "weakPassword": "Password must be at least 8 characters.",
+      "userDisabled": "This account has been disabled.",
+      "userNotFound": "No account found with this email.",
+      "wrongPassword": "Incorrect email or password.",
+      "tooManyRequests": "Too many attempts. Please wait and try again.",
+      "popupClosed": "Sign-in was cancelled.",
+      "accountExistsDifferent": "An account already exists with this email using a different sign-in method.",
+      "network": "Network error. Check your connection and try again."
+    }
+  },
+  "experience": {
+    "seriesLabel": "Lost Garden: First Light",
+    "welcome": "Welcome, {name}",
+    "memberWelcome": "You are on the list for Episode One (2 June 2026). The watch link will be sent to your email on premiere day — explore early lore below while you wait.",
+    "backToGate": "Back to the gate",
+    "notesTitle": "Episode One: notes",
+    "notesLead": "Production diary fragments. More will appear as the caverns open.",
+    "timeline": [
+      { "title": "The Oath", "line": "Words spoken where no one listens." },
+      { "title": "The Awakening", "line": "Metal opens its eyes without a face." },
+      { "title": "The Blue Forest", "line": "Mushrooms lit paths no sun ever touched." },
+      { "title": "The Eye in the Dark", "line": "A giant remembers it is awake." },
+      { "title": "The Child in the Lilies", "line": "White petals find her in the mist." }
+    ],
+    "previews": [
+      {
+        "title": "The Blue Forest",
+        "text": "A forest without sky. Bioluminescent mushrooms, pale flowers, and roots that drink the dark."
+      },
+      {
+        "title": "Sol & Rose",
+        "text": "An empty armor and a quiet child, one made to obey, one who should have been protected."
+      },
+      {
+        "title": "Sleeping Machines",
+        "text": "Colossal organic relics, half-buried in moss. Some eyes still open when the mist moves."
+      }
+    ],
+    "previewImageAlt": "The Blue Forest, glowing mushrooms and mist beneath the earth",
+    "premiereCardLine": "The watch link will be emailed to you on premiere day.",
+    "postSignup": {
+      "title": "You are on the list",
+      "lead": "Episode One premieres 2 June 2026. Until then, explore the preview below.",
+      "emailHeading": "Watch link on 2 June",
+      "emailBody": "On premiere day we send Episode One to the email you signed up with. Check your inbox — and your spam folder — so you do not miss the opening.",
+      "watchLinkTo": "Watch link will be sent to"
+    }
+  },
+  "footer": {
+    "byline": "An original anime project by Frank Houbre.",
+    "socialAria": "Social and contact links",
+    "linksAria": "Site and legal links",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "contact": "Contact",
+    "vision": "Vision",
+    "legalNotice": "Legal notice",
+    "privacy": "Privacy",
+    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
+  },
+  "cookies": {
+    "title": "Cookies & privacy",
+    "bodyBefore": "This site uses technical cookies required for operation (Firebase authentication) and may store your choice locally. Read our",
+    "privacyLink": "privacy policy",
+    "bodyAfter": ".",
+    "decline": "Decline",
+    "accept": "Accept"
+  },
+  "legal": {
+    "backToSite": "← Back to site"
+  },
+  "vision": {
+    "pageTitle": "Vision",
+    "headline": "Creating an Anime With AI, One Scene at a Time",
+    "breadcrumbHome": "Home",
+    "breadcrumbVision": "Vision"
+  }
+}

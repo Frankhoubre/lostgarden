@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "home": {
+      "title": "Lost Garden - 詩的ダークファンタジーアニメ",
+      "description": "Frank Houbreによる詩的ダークファンタジーアニメ。空洞の騎士、謎の子供、地下の世界。第1話は2026年6月2日公開。"
+    },
+    "experience": {
+      "title": "第1話 — 早期アクセス",
+      "description": "Lost Garden第1話に登録。視聴リンクは2026年6月2日にメールで送信。公開までプレビューを探索。"
+    },
+    "vision": {
+      "title": "ビジョン | Lost Garden",
+      "description": "Frank Houbreが語るLost Garden：Sol、Rose、傷ついた地下世界、そしてAIが芸術的ビジョンを形にする方法。"
+    },
+    "legalNotice": {
+      "title": "法的通知 | Lost Garden",
+      "description": "Lost Gardenウェブサイトの法的情報。"
+    },
+    "privacy": {
+      "title": "プライバシーポリシー | Lost Garden",
+      "description": "Lost Gardenにおけるデータ収集、Cookie、Firebase認証、GDPR上の権利について。"
+    }
+  },
+  "episodeOne": {
+    "premiereDate": "6月2日",
+    "premiereDateFull": "2026年6月2日",
+    "badge": "第1話 · 2026年6月2日"
+  },
+  "common": {
+    "siteName": "Lost Garden",
+    "skipToContent": "コンテンツへスキップ",
+    "loadingGate": "門が開く…",
+    "logoAlt": "Lost Garden",
+    "traveler": "旅人",
+    "or": "または",
+    "pleaseWait": "お待ちください…",
+    "gotIt": "了解"
+  },
+  "lang": {
+    "switcherLabel": "言語",
+    "en": "English",
+    "fr": "Français",
+    "ja": "日本語",
+    "ko": "한국어"
+  },
+  "nav": {
+    "ariaLabel": "ページセクション",
+    "characters": "キャラクター",
+    "trailer": "予告",
+    "join": "第1話",
+    "experience": "会員"
+  },
+  "hero": {
+    "tagline": "地の底で目覚めるものがある。空洞の騎士。霧の中の子供。記憶する森。",
+    "releaseLine": "第1話は2026年6月2日公開。",
+    "signupLine": "無料アカウントを作成すると、第1話公開日に視聴リンクがメールで届きます。",
+    "cta": "第1話の準備をする",
+    "characters": "キャラクター",
+    "footerLine": "すべての守護者が守るために生まれたわけではない。",
+    "scrollLabel": "スクロールして探索",
+    "descend": "降りる"
+  },
+  "characters": {
+    "title": "キャラクター",
+    "subtitle": "世界の下の洞窟では、壊れたものさえ守ることを思い出す。",
+    "traitsAria": "{name}の特徴",
+    "list": [
+      {
+        "name": "Sol",
+        "visual": "sol",
+        "type": "空洞の鎧",
+        "tagline": "ランタンの頭を持つ空の騎士。体も声もなく、理解できない使命だけがある。",
+        "description": "Solは伝説の戦士ではない。傷つき、ぎこちなく、奇妙に無垢な、青い洞窟の奥で目覚めた古い鎧。本当の言葉は話せない。空洞の金属音、きしみ、うめき、静かな仕草だけが感情を示す。それでも危険が来れば、Roseと世界のあいだに立つ。",
+        "traits": ["空の鎧", "ランタン兜", "守る本能", "不器用だが勇敢"]
+      },
+      {
+        "name": "Rose",
+        "visual": "rose",
+        "type": "謎の子供",
+        "tagline": "何も育つはずのない場所に命を取り戻す、静かな子供。",
+        "description": "Roseは小さく、穏やかで、ほとんど非現実的。廃墟を不思議な静けさで歩く。世界が忘れたものを聞いているかのよう。彼女の周りで花が咲き、根が動き、死んだ大地が息を思い出すことがある。だがRoseは武器でも、使い捨ての奇跡でも、象徴でもない。子供なのだ。",
+        "traits": ["静かな強さ", "白い百合", "秘めた力", "穏やかな存在"]
+      },
+      {
+        "name": "眠る機械",
+        "visual": "machines",
+        "type": "古代の異星遺物",
+        "tagline": "苔と根の下で、半分死に、半分夢見る巨大な機械生物。",
+        "description": "古い catastrophe のずっと後も、機械は青い森に埋もれたまま。体は錆び、ひび割れ、菌に覆われているが、闇の中で目を開くものもいる。憎むことも、許すこともない。忘れられた災害のように目覚める。",
+        "traits": ["巨大な眼", "機械の肢", "苔むした金属", "眠る脅威"]
+      },
+      {
+        "name": "仮面の巡礼者",
+        "visual": "pilgrims",
+        "type": "未知の行列",
+        "tagline": "黒いフードと白い仮面、霧の中で奇怪な儀式を運ぶ姿。",
+        "description": "遠くからしか見えない。洞窟の台で沈黙の行列を進む。鉦の音が深淵に響く。守護者か、喪主か、それより古い何かか。彼らの存在は、深みが空ではないことを意味する。",
+        "traits": ["白い仮面", "黒いフード", "儀式の鉦", "静かな行列"]
+      }
+    ]
+  },
+  "trailer": {
+    "playAria": "予告編は近日公開",
+    "headline": "第1話",
+    "subline": "2026年6月2日公開 — 登録してメールで視聴リンクを受け取る。"
+  },
+  "discover": {
+    "title": "第1話の準備をする",
+    "subtitle": "メールで登録 — 公開日2026年6月2日に第1話の視聴リンクをお送りします。",
+    "pitchAria": "第1話登録で得られるもの",
+    "pitch": [
+      {
+        "title": "メールで第1話",
+        "body": "今すぐ登録。2026年6月2日に、ここで使ったアドレスへ視聴リンクをメールします — 公開日にリンクを探す必要はありません。"
+      },
+      {
+        "title": "公開までの早期プレビュー",
+        "body": "公開まで、会員エリアで早期ビジュアル、ロアノート、地下世界の断片を探索できます。"
+      }
+    ],
+    "loggedInTitle": "登録済み",
+    "welcomeBack": "第1話に登録済みです。2026年6月2日に、アカウントのメールアドレスへ視聴リンクを送ります。",
+    "episodeLink": "第1話リンク →",
+    "openPreviews": "早期プレビューを開く"
+  },
+  "auth": {
+    "loginIntro": "ニュースレターではなく第1話を予約しています。確認するメールアドレスを使ってください — 6月2日に視聴リンクが届きます。",
+    "consent": "続行すると、Lost Gardenの更新（2026年6月2日の第1話視聴リンクを含む）をメールで受け取ることに同意します。スパムは送りません。",
+    "tabsAria": "認証モード",
+    "signIn": "ログイン",
+    "createAccount": "アカウント作成",
+    "continueGoogle": "Googleで続行",
+    "nameLabel": "名前",
+    "namePlaceholder": "お名前",
+    "emailLabel": "メール",
+    "emailPlaceholder": "you@email.com",
+    "passwordLabel": "パスワード",
+    "passwordPlaceholder": "8文字以上",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "signupSubmit": "登録 — メールで第1話",
+    "signingOut": "ログアウト中…",
+    "signOut": "ログアウト",
+    "resetSent": "パスワードリセットメールを送信しました。受信トレイを確認してください。",
+    "validation": {
+      "invalidEmail": "有効なメールアドレスを入力してください。",
+      "passwordMin": "パスワードは8文字以上必要です。",
+      "nameRequired": "名前を入力してください。",
+      "resetEmailHint": "上にメールを入力してから、リセットリンクをリクエストしてください。"
+    },
+    "errors": {
+      "generic": "問題が発生しました。もう一度お試しください。",
+      "emailInUse": "このメールのアカウントは既に存在します。ログインをお試しください。",
+      "invalidEmail": "有効なメールアドレスを入力してください。",
+      "operationNotAllowed": "このログイン方法は有効になっていません。続く場合はサポートに連絡してください。",
+      "weakPassword": "パスワードは8文字以上必要です。",
+      "userDisabled": "このアカウントは無効化されています。",
+      "userNotFound": "このメールのアカウントは見つかりません。",
+      "wrongPassword": "メールまたはパスワードが正しくありません。",
+      "tooManyRequests": "試行回数が多すぎます。しばらく待ってから再試行してください。",
+      "popupClosed": "ログインがキャンセルされました。",
+      "accountExistsDifferent": "このメールは別のログイン方法で既に登録されています。",
+      "network": "ネットワークエラー。接続を確認して再試行してください。"
+    }
+  },
+  "experience": {
+    "seriesLabel": "Lost Garden: First Light",
+    "welcome": "ようこそ、{name}",
+    "memberWelcome": "第1話のリストに登録済み（2026年6月2日）。公開日にメールで視聴リンクを送ります — それまで下のロアを探索してください。",
+    "backToGate": "門へ戻る",
+    "notesTitle": "第1話：ノート",
+    "notesLead": "制作日記の断片。洞窟が開くにつれ、さらに追加されます。",
+    "timeline": [
+      { "title": "誓い", "line": "誰も聞かない場所で語られた言葉。" },
+      { "title": "覚醒", "line": "顔のない金属が目を開く。" },
+      { "title": "青い森", "line": "太陽の届かなかった道を照らすキノコ。" },
+      { "title": "闇の眼", "line": "巨人が目覚めていることを思い出す。" },
+      { "title": "百合の子", "line": "白い花びらが霧の中で彼女を見つける。" }
+    ],
+    "previews": [
+      {
+        "title": "青い森",
+        "text": "空のない森。生物発光のキノコ、淡い花、闇を飲む根。"
+      },
+      {
+        "title": "Sol & Rose",
+        "text": "空の鎧と静かな子供 — 従うために作られた一方と、守られるべきだった一方。"
+      },
+      {
+        "title": "眠る機械",
+        "text": "苔に半分埋もれた巨大な有機遺物。霧が動くと、まだ目を開くものもいる。"
+      }
+    ],
+    "previewImageAlt": "青い森、光るキノコと地下の霧",
+    "premiereCardLine": "公開日に視聴リンクをメールでお送りします。",
+    "postSignup": {
+      "title": "リストに登録されました",
+      "lead": "第1話は2026年6月2日公開。それまで下のプレビューを探索してください。",
+      "emailHeading": "6月2日に視聴リンク",
+      "emailBody": "公開日に、登録したメールへ第1話を送ります。受信トレイと迷惑メールを確認し、オープニングを見逃さないでください。",
+      "watchLinkTo": "視聴リンクの送信先"
+    }
+  },
+  "footer": {
+    "byline": "Frank Houbreによるオリジナルアニメプロジェクト。",
+    "socialAria": "ソーシャルと連絡先",
+    "linksAria": "サイトと法的リンク",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "contact": "連絡",
+    "vision": "ビジョン",
+    "legalNotice": "法的通知",
+    "privacy": "プライバシー",
+    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
+  },
+  "cookies": {
+    "title": "Cookieとプライバシー",
+    "bodyBefore": "このサイトは動作に必要な技術Cookie（Firebase認証）を使用し、選択をローカルに保存する場合があります。",
+    "privacyLink": "プライバシーポリシー",
+    "bodyAfter": "をご覧ください。",
+    "decline": "拒否",
+    "accept": "同意"
+  },
+  "legal": {
+    "backToSite": "← サイトに戻る"
+  },
+  "vision": {
+    "pageTitle": "ビジョン",
+    "headline": "AIでアニメを作る、ひとシーンずつ",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbVision": "ビジョン"
+  }
+}

@@ -6,6 +6,8 @@ import {
   COOKIE_CONSENT_KEY,
   type CookieConsent,
 } from "@/lib/legal";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { localePath } from "@/lib/i18n/navigation";
 
 function readConsent(): CookieConsent | null {
   if (typeof window === "undefined") return null;
@@ -19,6 +21,7 @@ function storeConsent(value: CookieConsent) {
 }
 
 export function CookieBanner() {
+  const { locale, dict } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -47,21 +50,20 @@ export function CookieBanner() {
             id="cookie-banner-title"
             className="anime-label font-display text-sm text-lily"
           >
-            Cookies & privacy
+            {dict.cookies.title}
           </p>
           <p
             id="cookie-banner-desc"
             className="mt-2 font-body text-sm leading-relaxed text-ivory/85"
           >
-            This site uses technical cookies required for operation (Firebase
-            authentication) and may store your choice locally. Read our{" "}
+            {dict.cookies.bodyBefore}{" "}
             <Link
-              href="/privacy-policy"
+              href={localePath(locale, "/privacy-policy")}
               className="text-magic underline-offset-2 hover:underline"
             >
-              privacy policy
+              {dict.cookies.privacyLink}
             </Link>
-            .
+            {dict.cookies.bodyAfter}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
@@ -70,14 +72,14 @@ export function CookieBanner() {
             onClick={() => dismiss("rejected")}
             className="btn-secondary min-h-11 px-4 py-2 text-xs sm:text-sm"
           >
-            Decline
+            {dict.cookies.decline}
           </button>
           <button
             type="button"
             onClick={() => dismiss("accepted")}
             className="btn-primary min-h-11 px-4 py-2 text-xs sm:text-sm"
           >
-            Accept
+            {dict.cookies.accept}
           </button>
         </div>
       </div>

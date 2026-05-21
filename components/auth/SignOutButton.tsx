@@ -3,6 +3,8 @@
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { localePath } from "@/lib/i18n/navigation";
 import { getFirebaseAuth } from "@/lib/firebase";
 
 type SignOutButtonProps = {
@@ -11,13 +13,14 @@ type SignOutButtonProps = {
 
 export function SignOutButton({ className = "btn-secondary" }: SignOutButtonProps) {
   const router = useRouter();
+  const { locale, dict } = useLocale();
   const [loading, setLoading] = useState(false);
 
   async function handleSignOut() {
     setLoading(true);
     try {
       await signOut(getFirebaseAuth());
-      router.push("/");
+      router.push(localePath(locale, "/"));
     } finally {
       setLoading(false);
     }
@@ -30,7 +33,7 @@ export function SignOutButton({ className = "btn-secondary" }: SignOutButtonProp
       disabled={loading}
       className={className}
     >
-      {loading ? "Signing out…" : "Sign out"}
+      {loading ? dict.auth.signingOut : dict.auth.signOut}
     </button>
   );
 }

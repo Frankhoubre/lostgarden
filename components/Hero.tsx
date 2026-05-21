@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { EASE_OUT_EXPO, fadeUp, staggerContainer } from "@/lib/motion";
 
 const SPARKLE_POSITIONS = [
@@ -16,6 +17,7 @@ const SPARKLE_POSITIONS = [
 
 export function Hero() {
   const prefersReducedMotion = useReducedMotion();
+  const { dict } = useLocale();
 
   return (
     <section
@@ -89,7 +91,7 @@ export function Hero() {
         >
           <Image
             src="/images/logo-lost-garden.png"
-            alt="Lost Garden"
+            alt={dict.common.logoAlt}
             width={1024}
             height={576}
             priority
@@ -104,19 +106,31 @@ export function Hero() {
             className="max-w-xl font-body text-base font-medium leading-relaxed text-ivory sm:text-lg"
             variants={fadeUp}
           >
-            Some things wake beneath the earth. A hollow knight. A child in the
-            mist. A forest that remembers.
+            {dict.hero.tagline}
           </motion.p>
 
           <motion.div
-            className="mt-10 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center"
+            className="mt-8 flex flex-col items-center gap-3"
+            variants={fadeUp}
+          >
+            <p className="anime-label episode-release-badge rounded-md border-2 border-magic/45 bg-cavern/75 px-4 py-2 font-display text-sm tracking-[0.14em] text-lily shadow-[0_0_28px_rgba(56,189,248,0.2)]">
+              {dict.episodeOne.badge}
+            </p>
+            <p className="max-w-lg font-body text-sm font-medium leading-relaxed text-cyan-pale/90 sm:text-base">
+              {dict.hero.releaseLine}{" "}
+              <span className="text-lily">{dict.hero.signupLine}</span>
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center"
             variants={fadeUp}
           >
             <a href="#discover" className="btn-primary btn-shimmer">
-              Join the experience
+              {dict.hero.cta}
             </a>
             <a href="#characters" className="btn-secondary">
-              Characters
+              {dict.hero.characters}
             </a>
           </motion.div>
 
@@ -124,7 +138,7 @@ export function Hero() {
             className="anime-label anime-label-glow mt-12 font-display text-sm text-cyan-pale/70 sm:text-base"
             variants={fadeUp}
           >
-            Not every guardian was meant to protect.
+            {dict.hero.footerLine}
           </motion.p>
         </div>
       </motion.div>
@@ -133,13 +147,13 @@ export function Hero() {
         <motion.a
           href="#characters"
           className="scroll-hint absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-cyan-pale/50 transition-colors hover:text-magic"
-          aria-label="Scroll to explore"
+          aria-label={dict.hero.scrollLabel}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.6, duration: 0.8, ease: EASE_OUT_EXPO }}
         >
           <span className="anime-label font-display text-[0.65rem] tracking-[0.2em]">
-            Descend
+            {dict.hero.descend}
           </span>
           <span className="scroll-hint-chevron" aria-hidden="true" />
         </motion.a>

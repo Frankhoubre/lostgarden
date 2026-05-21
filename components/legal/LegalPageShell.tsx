@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 
 type LegalPageShellProps = {
@@ -9,22 +14,27 @@ type LegalPageShellProps = {
 };
 
 export function LegalPageShell({ title, children }: LegalPageShellProps) {
+  const { locale, dict } = useLocale();
+
   return (
     <>
       <header className="site-nav border-b border-glow/20 px-5 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
           <Link
-            href="/"
+            href={localePath(locale, "/")}
             className="anime-heading font-display text-lg text-lily transition hover:text-magic"
           >
             {LEGAL_PUBLISHER.project}
           </Link>
-          <Link
-            href="/"
-            className="font-body text-sm font-medium text-cyan-pale/80 underline-offset-4 transition hover:text-magic hover:underline"
-          >
-            ← Back to site
-          </Link>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <Link
+              href={localePath(locale, "/")}
+              className="font-body text-sm font-medium text-cyan-pale/80 underline-offset-4 transition hover:text-magic hover:underline"
+            >
+              {dict.legal.backToSite}
+            </Link>
+          </div>
         </div>
       </header>
 

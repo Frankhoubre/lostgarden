@@ -12,8 +12,8 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AuthField } from "@/components/auth/AuthField";
 import { GoogleIcon } from "@/components/auth/GoogleIcon";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
-import { EXPERIENCE_COPY } from "@/lib/experience-copy";
 import { isNewFirebaseUser } from "@/lib/firebase-user";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { syncUserProfile } from "@/lib/sync-user-profile";
@@ -31,6 +31,7 @@ export function AuthForm({
   redirectTo = "/experience",
   onSuccess,
 }: AuthFormProps) {
+  const { dict } = useLocale();
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
@@ -68,15 +69,15 @@ export function AuthForm({
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail)) {
-      setError("Please enter a valid email address.");
+      setError(dict.auth.validation.invalidEmail);
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(dict.auth.validation.passwordMin);
       return;
     }
     if (mode === "signup" && !displayName.trim()) {
-      setError("Please enter a name.");
+      setError(dict.auth.validation.nameRequired);
       return;
     }
 
@@ -99,7 +100,7 @@ export function AuthForm({
       }
       await afterAuth(justJoined);
     } catch (err) {
-      setError(getAuthErrorMessage(err));
+      setError(getAuthErrorMessage(err, dict.auth.errors));
     } finally {
       setLoading(false);
     }
@@ -116,7 +117,7 @@ export function AuthForm({
       await syncUserProfile(result.user);
       await afterAuth(isNewFirebaseUser(result.user));
     } catch (err) {
-      setError(getAuthErrorMessage(err));
+      setError(getAuthErrorMessage(err, dict.auth.errors));
     } finally {
       setLoading(false);
     }
@@ -126,15 +127,15 @@ export function AuthForm({
     clearMessages();
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail)) {
-      setError("Enter your email above, then request a reset link.");
+      setError(dict.auth.validation.resetEmailHint);
       return;
     }
     setLoading(true);
     try {
       await sendPasswordResetEmail(getFirebaseAuth(), trimmedEmail);
-      setInfo("Password reset email sent. Check your inbox.");
+      setInfo(dict.auth.resetSent);
     } catch (err) {
-      setError(getAuthErrorMessage(err));
+      setError(getAuthErrorMessage(err, dict.auth.errors));
     } finally {
       setLoading(false);
     }
@@ -145,7 +146,7 @@ export function AuthForm({
       <div
         className="auth-tabs flex rounded-lg border border-glow/15 bg-cavern/40 p-1"
         role="tablist"
-        aria-label="Authentication mode"
+        aria-label={dict.auth.tabsAria}
       >
         <button
           type="button"
@@ -155,7 +156,7 @@ export function AuthForm({
           onClick={() => switchMode("signin")}
           disabled={loading}
         >
-          Sign in
+          {dict.auth.signIn}
         </button>
         <button
           type="button"
@@ -165,7 +166,7 @@ export function AuthForm({
           onClick={() => switchMode("signup")}
           disabled={loading}
         >
-          Create account
+          {dict.auth.createAccount}
         </button>
       </div>
 
@@ -176,12 +177,12 @@ export function AuthForm({
         className="btn-google mt-6 flex w-full min-h-12 items-center justify-center gap-3 rounded-xl px-4 py-3 font-body text-sm font-medium tracking-wide text-lily transition disabled:opacity-60"
       >
         <GoogleIcon />
-        Continue with Google
+        {dict.auth.continueGoogle}
       </button>
 
       <div className="auth-divider my-6 flex items-center gap-3">
         <span className="h-px flex-1 bg-glow/15" aria-hidden="true" />
-        <span className="font-body text-xs tracking-wide text-ivory/40">or</span>
+        <span className="font-body text-xs tracking-wide text-ivory/40">{dict.common.or}</span>
         <span className="h-px flex-1 bg-glow/15" aria-hidden="true" />
       </div>
 
@@ -189,36 +190,36 @@ export function AuthForm({
         {mode === "signup" ? (
           <AuthField
             id="auth-name"
-            label="Name"
+            label={dict.auth.nameLabel}
             type="text"
             autoComplete="name"
             value={displayName}
             onChange={setDisplayName}
             disabled={loading}
-            placeholder="Your name"
+            placeholder={dict.auth.namePlaceholder}
           />
         ) : null}
 
         <AuthField
           id="auth-email"
-          label="Email"
+          label={dict.auth.emailLabel}
           type="email"
           autoComplete="email"
           value={email}
           onChange={setEmail}
           disabled={loading}
-          placeholder="you@email.com"
+          placeholder={dict.auth.emailPlaceholder}
         />
 
         <AuthField
           id="auth-password"
-          label="Password"
+          label={dict.auth.passwordLabel}
           type="password"
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
           value={password}
           onChange={setPassword}
           disabled={loading}
-          placeholder="At least 8 characters"
+          placeholder={dict.auth.passwordPlaceholder}
         />
 
         {mode === "signin" ? (
@@ -228,16 +229,16 @@ export function AuthForm({
             disabled={loading}
             className="font-body text-xs text-cyan-pale/55 underline-offset-2 transition hover:text-magic hover:underline"
           >
-            Forgot password?
+            {dict.auth.forgotPassword}
           </button>
         ) : null}
 
         <button type="submit" disabled={loading} className="btn-primary w-full min-h-12">
           {loading
-            ? "Please wait…"
+            ? dict.common.pleaseWait
             : mode === "signup"
-              ? "Create account"
-              : "Sign in"}
+              ? dict.auth.signupSubmit
+              : dict.auth.signIn}
         </button>
       </form>
 
@@ -254,7 +255,7 @@ export function AuthForm({
       ) : null}
 
       <p className="mt-6 text-center text-xs leading-relaxed text-ivory/40">
-        {EXPERIENCE_COPY.authConsent}
+        {dict.auth.consent}
       </p>
     </div>
   );
