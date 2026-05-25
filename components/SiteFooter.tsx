@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
+import { SOCIAL_LINKS } from "@/lib/social";
 import { AnimatedInView } from "./AnimatedInView";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { formatMessage } from "@/lib/i18n/format";
@@ -12,8 +13,9 @@ export function SiteFooter() {
   const { locale, dict } = useLocale();
 
   const socialLinks = [
-    { label: dict.footer.instagram, href: "#" },
-    { label: dict.footer.youtube, href: "#" },
+    { label: dict.footer.instagram, href: SOCIAL_LINKS.instagram },
+    { label: dict.footer.youtube, href: SOCIAL_LINKS.youtube },
+    { label: dict.footer.tiktok, href: SOCIAL_LINKS.tiktok },
     { label: dict.footer.contact, href: `mailto:${LEGAL_PUBLISHER.email}` },
   ] as const;
 
@@ -49,6 +51,12 @@ export function SiteFooter() {
               <li key={link.label}>
                 <a
                   href={link.href}
+                  {...(link.href.startsWith("http")
+                    ? {
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                      }
+                    : {})}
                   className="font-display text-sm font-semibold uppercase tracking-wider text-ivory/80 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 focus-visible:ring-offset-2 focus-visible:ring-offset-abyss rounded-sm"
                 >
                   {link.label}
