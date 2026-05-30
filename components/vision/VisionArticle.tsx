@@ -49,7 +49,7 @@ export function VisionArticle() {
         Lost Garden
       </p>
       <p className="mt-2 text-ivory/60">
-        By Frank Houbre — vision, process, and why AI is a bridge, not a
+        By Frank Houbre, vision, process, and why AI is a bridge, not a
         shortcut.
       </p>
       {VISION_ARTICLE.sections.map((section, index) => (

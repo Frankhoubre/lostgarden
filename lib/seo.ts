@@ -59,7 +59,7 @@ export function buildPageMetadata({
           url: SITE.ogImage,
           width: SITE.ogImageWidth,
           height: SITE.ogImageHeight,
-          alt: `${SITE.name} — official anime project`,
+          alt: `${SITE.name}, official anime project`,
         },
       ],
     },

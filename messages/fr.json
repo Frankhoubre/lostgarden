@@ -5,7 +5,7 @@
       "description": "Anime dark fantasy poétique par Frank Houbre. Un chevalier creux, une enfant mystérieuse, un monde sous la terre. L'épisode 1 est disponible."
     },
     "experience": {
-      "title": "Épisode 1 — espace membre",
+      "title": "Épisode 1 · espace membre",
       "description": "Regardez l'épisode 1 de Lost Garden et explorez le lore, les notes de production et les fragments du monde souterrain."
     },
     "vision": {
@@ -25,7 +25,7 @@
     "premiereDate": "2 juin",
     "premiereDateFull": "2 juin 2026",
     "badge": "Épisode 1 · disponible",
-    "youtubeEngagement": "Likez, commentez et partagez sur YouTube — ça aide le projet énormément.",
+    "youtubeEngagement": "Likez, commentez et partagez sur YouTube, ça aide le projet énormément.",
     "openOnYouTube": "Voir sur YouTube"
   },
   "common": {
@@ -59,7 +59,7 @@
   "hero": {
     "tagline": "Certaines choses s'éveillent sous la terre. Un chevalier creux. Une enfant dans la brume. Une forêt qui se souvient.",
     "releaseLine": "L'épisode 1 est disponible.",
-    "signupLine": "Regardez-le ci-dessous — likez, commentez et partagez sur YouTube, ça nous aide à fond.",
+    "signupLine": "Regardez-le ci-dessous, likez, commentez et partagez sur YouTube, ça nous aide à fond.",
     "cta": "Voir l'épisode 1",
     "characters": "Personnages",
     "footerLine": "Tous les gardiens n'étaient pas faits pour protéger.",
@@ -76,7 +76,7 @@
         "visual": "sol",
         "type": "Armure creuse",
         "tagline": "Un chevalier vide à tête-lanterne, sans corps, sans voix, avec un devoir qu'il ne comprend pas.",
-        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent — une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde.",
+        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde.",
         "traits": ["Armure vide", "Heaume-lanterne", "Instinct protecteur", "Maladroit mais brave"]
       },
       {
@@ -92,7 +92,7 @@
         "visual": "machines",
         "type": "Reliques organo-mécaniques",
         "tagline": "Des êtres colossaux, mi-morts mi-rêveurs, sous la mousse et les racines.",
-        "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons — mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés.",
+        "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons, mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés.",
         "traits": ["Œil géant", "Membres mécaniques", "Métal moussu", "Menace latente"]
       },
       {
@@ -107,7 +107,7 @@
   },
   "knights": {
     "title": "Les treize chevaliers",
-    "subtitle": "Une procession d'armures creuses sous la terre — du 13 au 1. Deux visages connus ; les autres seront révélés dans les prochains épisodes.",
+    "subtitle": "Une procession d'armures creuses sous la terre, du 13 au 1. Deux visages connus ; les autres seront révélés dans les prochains épisodes.",
     "carouselAria": "Carrousel des treize chevaliers",
     "prev": "Chevalier précédent",
     "next": "Chevalier suivant",
@@ -136,9 +136,9 @@
     }
   },
   "trailer": {
-    "embedTitle": "Lost Garden — épisode 1",
+    "embedTitle": "Lost Garden · épisode 1",
     "headline": "Épisode 1",
-    "subline": "Le premier épisode est en ligne. Likez, commentez et partagez sur YouTube — chaque geste compte."
+    "subline": "Le premier épisode est en ligne. Likez, commentez et partagez sur YouTube, chaque geste compte."
   },
   "discover": {
     "title": "Rejoignez les voyageurs",
@@ -151,7 +151,7 @@
       },
       {
         "title": "Lore et coulisses",
-        "body": "Dans l'espace membre : visuels, notes de production et fragments du monde souterrain — et la suite à venir."
+        "body": "Dans l'espace membre : visuels, notes de production et fragments du monde souterrain, et la suite à venir."
       }
     ],
     "loggedInTitle": "Vous êtes connecté",
@@ -173,7 +173,7 @@
     "passwordLabel": "Mot de passe",
     "passwordPlaceholder": "8 caractères minimum",
     "forgotPassword": "Mot de passe oublié ?",
-    "signupSubmit": "Créer un compte — accès membre",
+    "signupSubmit": "Créer un compte · accès membre",
     "signingOut": "Déconnexion…",
     "signOut": "Se déconnecter",
     "resetSent": "Email de réinitialisation envoyé. Vérifiez votre boîte mail.",
@@ -201,7 +201,7 @@
   "experience": {
     "seriesLabel": "Lost Garden : Première lumière",
     "welcome": "Bienvenue, {name}",
-    "memberWelcome": "L'épisode 1 est en ligne. Regardez-le ci-dessous, puis likez, commentez et partagez sur YouTube — ça nous aide énormément.",
+    "memberWelcome": "L'épisode 1 est en ligne. Regardez-le ci-dessous, puis likez, commentez et partagez sur YouTube, ça nous aide énormément.",
     "watchTitle": "Épisode 1",
     "watchLead": "La première lumière sous la terre. Merci de soutenir le projet sur YouTube.",
     "backToGate": "Retour au portail",
@@ -221,7 +221,7 @@
       },
       {
         "title": "Sol & Rose",
-        "text": "Une armure vide et une enfant silencieuse — l'une faite pour obéir, l'autre qui aurait dû être protégée."
+        "text": "Une armure vide et une enfant silencieuse, l'une faite pour obéir, l'autre qui aurait dû être protégée."
       },
       {
         "title": "Machines endormies",
@@ -232,7 +232,7 @@
       "title": "Bienvenue dans l'espace membre",
       "lead": "L'épisode 1 est disponible juste au-dessus. Merci d'être là.",
       "supportHeading": "Soutenez l'épisode sur YouTube",
-      "supportBody": "Likez, commentez et partagez la vidéo — ça aide le projet à se faire connaître et à continuer."
+      "supportBody": "Likez, commentez et partagez la vidéo, ça aide le projet à se faire connaître et à continuer."
     }
   },
   "footer": {

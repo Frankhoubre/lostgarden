@@ -60,6 +60,18 @@ export function KnightsCarousel() {
     const cards = Array.from(track.children) as HTMLElement[];
     if (cards.length === 0) return;
 
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+
+    if (desktop) {
+      const scrollLeft = track.scrollLeft;
+      let leading = 0;
+      for (let i = 0; i < cards.length; i++) {
+        if (cards[i].offsetLeft <= scrollLeft + 8) leading = i;
+      }
+      setActiveIndex(leading);
+      return;
+    }
+
     const trackCenter = track.scrollLeft + track.clientWidth / 2;
     let closest = 0;
     let minDistance = Infinity;
@@ -93,7 +105,19 @@ export function KnightsCarousel() {
   function scrollToIndex(index: number) {
     const track = trackRef.current;
     const card = track?.children[index] as HTMLElement | undefined;
-    card?.scrollIntoView({
+    if (!track || !card) return;
+
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+
+    if (desktop) {
+      track.scrollTo({
+        left: card.offsetLeft - track.offsetLeft,
+        behavior: "smooth",
+      });
+      return;
+    }
+
+    card.scrollIntoView({
       behavior: "smooth",
       inline: "center",
       block: "nearest",

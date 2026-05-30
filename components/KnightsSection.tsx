@@ -18,7 +18,7 @@ export function KnightsSection() {
         </SectionTitle>
       </AnimatedInView>
 
-      <AnimatedInView className="mx-auto mt-12 max-w-5xl" delay={0.1}>
+      <AnimatedInView className="mx-auto mt-12 w-full max-w-7xl" delay={0.1}>
         <KnightsCarousel />
       </AnimatedInView>
     </section>

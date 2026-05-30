@@ -39,7 +39,7 @@ export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
       className="knight-card glass-card group flex h-full w-full flex-col overflow-hidden"
       aria-labelledby={`knight-${number}-title`}
     >
-      <div className="relative h-56 shrink-0 overflow-hidden sm:h-64">
+      <div className="relative h-44 shrink-0 overflow-hidden sm:h-48 lg:h-[9.5rem]">
         <span className="knight-number-badge anime-label absolute left-4 top-4 z-10 rounded-md border border-magic/40 bg-abyss/80 px-3 py-1 font-display text-xs tracking-[0.2em] text-lily">
           {KNIGHT_ROMAN[number]}
         </span>
@@ -71,34 +71,34 @@ export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
         />
       </div>
 
-      <div className="flex flex-1 flex-col p-6 sm:p-7">
+      <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-5 lg:p-4">
         {content.revealed ? (
           <>
-            <span className="anime-label character-type-badge w-fit rounded-md border-2 border-glow/35 bg-cavern/80 px-3 py-1 font-display text-[0.7rem] text-soft-glow">
+            <span className="anime-label character-type-badge w-fit rounded-md border-2 border-glow/35 bg-cavern/80 px-2.5 py-0.5 font-display text-[0.65rem] text-soft-glow lg:text-[0.6rem]">
               {content.title}
             </span>
             <h3
               id={`knight-${number}-title`}
-              className="anime-heading mt-4 font-display text-2xl text-lily"
+              className="anime-heading mt-2 font-display text-xl text-lily sm:mt-3 sm:text-2xl lg:mt-2 lg:text-lg"
             >
               {content.name}
             </h3>
-            <p className="mt-2 font-body text-sm font-bold leading-relaxed text-magic">
+            <p className="mt-1.5 font-body text-xs font-bold leading-snug text-magic sm:text-sm lg:mt-1 lg:text-xs">
               {content.tagline}
             </p>
-            <div className="knight-card-lore mt-4 min-h-0 max-h-52 flex-1 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:overflow-visible sm:pr-0">
+            <div className="knight-card-lore mt-3 min-h-0 max-h-40 flex-1 overflow-y-auto overscroll-contain pr-1 sm:max-h-44 lg:mt-2 lg:max-h-[6.75rem]">
               <div className="space-y-3">
                 {content.description.split("\n\n").map((paragraph, index) => (
                   <p
                     key={index}
-                    className="font-body text-sm leading-relaxed text-sol-ivory/80"
+                    className="font-body text-sm leading-relaxed text-sol-ivory/80 lg:text-xs lg:leading-relaxed"
                   >
                     {paragraph}
                   </p>
                 ))}
               </div>
             </div>
-            <ul className="mt-5 shrink-0 flex flex-wrap gap-2" aria-label={traitsAria}>
+            <ul className="mt-3 shrink-0 flex flex-wrap gap-1.5 lg:mt-2" aria-label={traitsAria}>
               {content.traits.map((trait) => (
                 <li key={trait}>
                   <span className="character-trait-tag inline-block rounded-md border-2 border-glow/20 bg-shadow/60 px-2.5 py-1 font-body text-[0.75rem] font-medium text-ivory/75">
@@ -115,11 +115,11 @@ export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
             </span>
             <h3
               id={`knight-${number}-title`}
-              className="anime-heading mt-4 font-display text-2xl text-lily/90"
+              className="anime-heading mt-3 font-display text-xl text-lily/90 sm:text-2xl lg:mt-2 lg:text-lg"
             >
               {content.hiddenTitle}
             </h3>
-            <p className="mt-4 flex-1 font-body text-sm leading-relaxed text-ivory/55">
+            <p className="mt-3 flex-1 font-body text-sm leading-relaxed text-ivory/55 lg:mt-2 lg:text-xs">
               {content.hiddenTeaser}
             </p>
           </>

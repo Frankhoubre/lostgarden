@@ -5,7 +5,7 @@
       "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Episode One is out now."
     },
     "experience": {
-      "title": "Episode One — members",
+      "title": "Episode One · members",
       "description": "Watch Lost Garden Episode One and explore lore, production notes, and fragments from beneath the earth."
     },
     "vision": {
@@ -25,7 +25,7 @@
     "premiereDate": "2 June",
     "premiereDateFull": "2 June 2026",
     "badge": "Episode One · out now",
-    "youtubeEngagement": "Like, comment and share on YouTube — it helps the project enormously.",
+    "youtubeEngagement": "Like, comment and share on YouTube, it helps the project enormously.",
     "openOnYouTube": "Watch on YouTube"
   },
   "common": {
@@ -59,7 +59,7 @@
   "hero": {
     "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",
     "releaseLine": "Episode One is out now.",
-    "signupLine": "Watch below — like, comment and share on YouTube. It helps more than you know.",
+    "signupLine": "Watch below, like, comment and share on YouTube. It helps more than you know.",
     "cta": "Watch Episode One",
     "characters": "Characters",
     "footerLine": "Not every guardian was meant to protect.",
@@ -107,7 +107,7 @@
   },
   "knights": {
     "title": "The Thirteen Knights",
-    "subtitle": "A procession of hollow armors beneath the earth — from 13 to 1. Two faces are known; the rest will be revealed in coming episodes.",
+    "subtitle": "A procession of hollow armors beneath the earth, from 13 to 1. Two faces are known; the rest will be revealed in coming episodes.",
     "carouselAria": "Carousel of the thirteen knights",
     "prev": "Previous knight",
     "next": "Next knight",
@@ -136,9 +136,9 @@
     }
   },
   "trailer": {
-    "embedTitle": "Lost Garden — Episode One",
+    "embedTitle": "Lost Garden · Episode One",
     "headline": "Episode One",
-    "subline": "The first episode is live. Like, comment and share on YouTube — every bit helps."
+    "subline": "The first episode is live. Like, comment and share on YouTube, every bit helps."
   },
   "discover": {
     "title": "Join the travelers",
@@ -151,7 +151,7 @@
       },
       {
         "title": "Lore and behind the scenes",
-        "body": "Inside the members area: visuals, production notes, and fragments from the underground world — with more to come."
+        "body": "Inside the members area: visuals, production notes, and fragments from the underground world, with more to come."
       }
     ],
     "loggedInTitle": "You are signed in",
@@ -173,7 +173,7 @@
     "passwordLabel": "Password",
     "passwordPlaceholder": "At least 8 characters",
     "forgotPassword": "Forgot password?",
-    "signupSubmit": "Create account — member access",
+    "signupSubmit": "Create account · member access",
     "signingOut": "Signing out…",
     "signOut": "Sign out",
     "resetSent": "Password reset email sent. Check your inbox.",
@@ -201,7 +201,7 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "Welcome, {name}",
-    "memberWelcome": "Episode One is live. Watch below, then like, comment and share on YouTube — it helps enormously.",
+    "memberWelcome": "Episode One is live. Watch below, then like, comment and share on YouTube, it helps enormously.",
     "watchTitle": "Episode One",
     "watchLead": "The first light beneath the earth. Thank you for supporting the project on YouTube.",
     "backToGate": "Back to the gate",
@@ -232,7 +232,7 @@
       "title": "Welcome to the members area",
       "lead": "Episode One is available just above. Thank you for being here.",
       "supportHeading": "Support the episode on YouTube",
-      "supportBody": "Like, comment and share the video — it helps the project reach more travelers beneath the earth."
+      "supportBody": "Like, comment and share the video, it helps the project reach more travelers beneath the earth."
     }
   },
   "footer": {

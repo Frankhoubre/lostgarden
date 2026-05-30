@@ -1145,7 +1145,7 @@ body {
   );
 }
 
-/* —— Ambient motion & micro-interactions —— */
+/* Ambient motion & micro-interactions */
 .hero-aurora {
   background:
     radial-gradient(ellipse 55% 40% at 30% 25%, rgba(56, 189, 248, 0.2), transparent 60%),
@@ -1348,11 +1348,11 @@ body {
 /* Knights carousel */
 .knights-carousel-track {
   display: flex;
-  gap: 1.25rem;
+  gap: 1rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: max(1.25rem, calc((100% - min(100%, 26rem)) / 2));
-  padding: 0.25rem max(1.25rem, calc((100% - min(100%, 26rem)) / 2)) 1rem;
+  scroll-padding-inline: max(1rem, calc((100% - min(100%, 22rem)) / 2));
+  padding: 0.25rem max(1rem, calc((100% - min(100%, 22rem)) / 2)) 1rem;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -1362,12 +1362,30 @@ body {
 }
 
 .knights-carousel-slide {
-  flex: 0 0 min(100%, 26rem);
+  flex: 0 0 min(100%, 22rem);
   scroll-snap-align: center;
 }
 
 .knight-card {
-  min-height: 28rem;
+  height: 100%;
+  max-height: 32rem;
+}
+
+@media (min-width: 1024px) {
+  .knights-carousel-track {
+    gap: 1.25rem;
+    scroll-padding-inline: 0;
+    padding-inline: 0;
+  }
+
+  .knights-carousel-slide {
+    flex: 0 0 calc((100% - 2.5rem) / 3);
+    scroll-snap-align: start;
+  }
+
+  .knight-card {
+    max-height: 22.5rem;
+  }
 }
 
 .knight-number-badge {
