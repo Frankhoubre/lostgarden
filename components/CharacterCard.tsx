@@ -15,9 +15,7 @@ type CharacterCardProps = {
   type: string;
   tagline: string;
   description: string;
-  traits: string[];
   visual: CharacterVisual;
-  traitsAria: string;
 };
 
 export function CharacterCard({
@@ -25,9 +23,7 @@ export function CharacterCard({
   type,
   tagline,
   description,
-  traits,
   visual,
-  traitsAria,
 }: CharacterCardProps) {
   const imageSrc = CHARACTER_IMAGES[visual];
   const imageFocus = CHARACTER_IMAGE_FOCUS[visual] ?? "center";
@@ -74,15 +70,6 @@ export function CharacterCard({
         <p className="mt-4 flex-1 font-body text-sm leading-relaxed text-sol-ivory/80">
           {description}
         </p>
-        <ul className="mt-5 flex flex-wrap gap-2" aria-label={traitsAria}>
-          {traits.map((trait) => (
-            <li key={trait}>
-              <span className="character-trait-tag inline-block rounded-md border-2 border-glow/20 bg-shadow/60 px-2.5 py-1 font-body text-[0.75rem] font-medium text-ivory/75 transition-colors group-hover:border-glow/40 group-hover:text-lily">
-                {trait}
-              </span>
-            </li>
-          ))}
-        </ul>
       </div>
     </article>
   );

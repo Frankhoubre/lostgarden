@@ -69,7 +69,6 @@
   "characters": {
     "title": "Personnages",
     "subtitle": "Dans les cavernes sous le monde, même ce qui est brisé se souvient protéger.",
-    "traitsAria": "Traits de {name}",
     "list": [
       {
         "name": "Sol",
@@ -77,7 +76,6 @@
         "type": "Armure creuse",
         "tagline": "Un chevalier vide à tête-lanterne, sans corps, sans voix, avec un devoir qu'il ne comprend pas.",
         "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde.",
-        "traits": ["Armure vide", "Heaume-lanterne", "Instinct protecteur", "Maladroit mais brave"]
       },
       {
         "name": "Rose",
@@ -85,7 +83,6 @@
         "type": "Enfant mystérieuse",
         "tagline": "Une enfant silencieuse dont la présence fait revenir la vie là où rien ne devrait pousser.",
         "description": "Rose est petite, calme, presque irréelle. Elle traverse les ruines avec une sérénité étrange, comme si elle entendait ce que le monde a oublié. Autour d'elle, les fleurs s'ouvrent, les racines bougent, la terre morte se souvient parfois de respirer. Mais Rose n'est ni une arme, ni un miracle à dépenser, ni un symbole. C'est une enfant.",
-        "traits": ["Force silencieuse", "Lys blancs", "Pouvoir caché", "Présence douce"]
       },
       {
         "name": "Les machines endormies",
@@ -93,7 +90,6 @@
         "type": "Reliques organo-mécaniques",
         "tagline": "Des êtres colossaux, mi-morts mi-rêveurs, sous la mousse et les racines.",
         "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons, mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés.",
-        "traits": ["Œil géant", "Membres mécaniques", "Métal moussu", "Menace latente"]
       },
       {
         "name": "Les pèlerins masqués",
@@ -101,7 +97,6 @@
         "type": "Procession inconnue",
         "tagline": "Des silhouettes en capuche noire et masque blanc, portant d'étranges rituels dans la brume.",
         "description": "Vus seulement de loin, ils traversent les plateformes des cavernes en processions silencieuses. Leurs gongs résonnent dans l'abîme. Nul ne sait s'ils sont gardiens, pleureurs, ou quelque chose de plus ancien. Leur présence signifie que les profondeurs ne sont pas vides.",
-        "traits": ["Masques blancs", "Capuches noires", "Gongs rituels", "Procession silencieuse"]
       }
     ]
   },

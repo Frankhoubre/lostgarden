@@ -5,7 +5,6 @@ import { AtmosphereLayer } from "./AtmosphereLayer";
 import { CharacterCard, type CharacterVisual } from "./CharacterCard";
 import { SectionTitle } from "./SectionTitle";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { formatMessage } from "@/lib/i18n/format";
 
 export function CharactersSection() {
   const { dict } = useLocale();
@@ -29,9 +28,6 @@ export function CharactersSection() {
             <CharacterCard
               {...character}
               visual={character.visual as CharacterVisual}
-              traitsAria={formatMessage(dict.characters.traitsAria, {
-                name: character.name,
-              })}
             />
           </AnimatedInView>
         ))}
