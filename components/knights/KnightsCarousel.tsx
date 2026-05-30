@@ -17,7 +17,6 @@ function getKnightContent(
     title: string;
     tagline: string;
     description: string;
-    traits: string[];
   }>,
   hidden: {
     hiddenBadge: string;
@@ -178,15 +177,7 @@ export function KnightsCarousel() {
 
           return (
             <div key={number} className="knights-carousel-slide">
-              <KnightCard
-                number={number}
-                content={content}
-                traitsAria={
-                  content.revealed
-                    ? formatMessage(knights.traitsAria, { name: content.name })
-                    : undefined
-                }
-              />
+              <KnightCard number={number} content={content} />
             </div>
           );
         })}

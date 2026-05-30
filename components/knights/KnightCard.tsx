@@ -14,7 +14,6 @@ export type KnightCardContent =
       title: string;
       tagline: string;
       description: string;
-      traits: string[];
     }
   | {
       revealed: false;
@@ -26,10 +25,9 @@ export type KnightCardContent =
 type KnightCardProps = {
   number: KnightNumber;
   content: KnightCardContent;
-  traitsAria?: string;
 };
 
-export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
+export function KnightCard({ number, content }: KnightCardProps) {
   const imageSrc = KNIGHT_IMAGES[number];
   const imageFocus = KNIGHT_IMAGE_FOCUS[number] ?? "center";
   const visual = KNIGHT_VISUALS[number] ?? "hidden";
@@ -98,15 +96,6 @@ export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
                 ))}
               </div>
             </div>
-            <ul className="mt-3 shrink-0 flex flex-wrap gap-1.5 lg:mt-2" aria-label={traitsAria}>
-              {content.traits.map((trait) => (
-                <li key={trait}>
-                  <span className="character-trait-tag inline-block rounded-md border-2 border-glow/20 bg-shadow/60 px-2.5 py-1 font-body text-[0.75rem] font-medium text-ivory/75">
-                    {trait}
-                  </span>
-                </li>
-              ))}
-            </ul>
           </>
         ) : (
           <>

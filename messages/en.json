@@ -114,7 +114,6 @@
     "counter": "Knight {number} of 13",
     "dotsAria": "Jump to a knight",
     "dotLabel": "Knight {number}",
-    "traitsAria": "{name} traits",
     "hiddenBadge": "Unrevealed",
     "hiddenTitle": "Knight {number}",
     "hiddenTeaser": "Their identity will be revealed in a coming episode.",
@@ -123,15 +122,13 @@
         "name": "Lanterne",
         "title": "The Silent Knight",
         "tagline": "He has no voice. No body. Only a child to protect.",
-        "description": "Lanterne is the 12th Knight, and one of the weakest among the thirteen.\n\nHe awakens alone on an ancient altar, animated by a strange blue energy. There is no body inside his armor. He cannot speak. He cannot write. He cannot explain who he is or what he remembers.\n\nAround his neck, he carries a pendant showing the face of Rose, a mysterious Source Child connected to the human life he lost. When Rose is near, the pendant glows with blue light.\n\nLanterne is not a traditional hero. He stumbles, hesitates, falls, and observes the world with the fragile attention of someone who has forgotten how to exist.\n\nBut beneath his silence, something remains: warmth.\n\nHe may be one of the weakest knights, but he may also be the only one capable of protecting Rose without losing what makes him human.",
-        "traits": ["Empty armor", "Lantern helm", "Rose's pendant", "Warmth in silence"]
+        "description": "Lanterne is the 12th Knight, and one of the weakest among the thirteen.\n\nHe awakens alone on an ancient altar, animated by a strange blue energy. There is no body inside his armor. He cannot speak. He cannot write. He cannot explain who he is or what he remembers.\n\nAround his neck, he carries a pendant showing the face of Rose, a mysterious Source Child connected to the human life he lost. When Rose is near, the pendant glows with blue light.\n\nLanterne is not a traditional hero. He stumbles, hesitates, falls, and observes the world with the fragile attention of someone who has forgotten how to exist.\n\nBut beneath his silence, something remains: warmth.\n\nHe may be one of the weakest knights, but he may also be the only one capable of protecting Rose without losing what makes him human."
       },
       "9": {
         "name": "Serrure",
         "title": "The Lock Knight",
         "tagline": "His kindness is real. His oath is dangerous.",
-        "description": "Serrure is the 9th Knight.\n\nUnlike many of the other oath-bound knights, Serrure has not lost his warmth. He is gentle, welcoming, and strangely reassuring in a world where every knight could become a rival.\n\nWhen Lanterne is weak, lost, and unable to understand the danger around him, Serrure becomes one of the first signs that not every knight is an enemy.\n\nHe speaks with kindness. He helps Lanterne understand the oath, the Source Children, and the path toward the Forgotten Garden.\n\nBut Serrure is not free.\n\nLike every knight, he is bound to his own Source Child: Aren, a boy with red and white hair whose awakening closes the first episode.\n\nSerrure's warmth makes him precious.\nHis oath makes him dangerous.\nAnd one day, his kindness may be tested by the child he was waiting for.",
-        "traits": ["Lock & key armor", "Gentle warmth", "Bound to Aren", "Oath's danger"]
+        "description": "Serrure is the 9th Knight.\n\nUnlike many of the other oath-bound knights, Serrure has not lost his warmth. He is gentle, welcoming, and strangely reassuring in a world where every knight could become a rival.\n\nWhen Lanterne is weak, lost, and unable to understand the danger around him, Serrure becomes one of the first signs that not every knight is an enemy.\n\nHe speaks with kindness. He helps Lanterne understand the oath, the Source Children, and the path toward the Forgotten Garden.\n\nBut Serrure is not free.\n\nLike every knight, he is bound to his own Source Child: Aren, a boy with red and white hair whose awakening closes the first episode.\n\nSerrure's warmth makes him precious.\nHis oath makes him dangerous.\nAnd one day, his kindness may be tested by the child he was waiting for."
       }
     }
   },
