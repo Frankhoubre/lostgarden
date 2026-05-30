@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { EpisodeWatchBlock } from "@/components/EpisodeWatchBlock";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { EASE_OUT_EXPO, fadeUp, staggerContainer } from "@/lib/motion";
 
@@ -22,7 +23,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-5 pb-20 pt-24"
+      className="relative overflow-hidden px-5 pb-16 pt-24 sm:pb-20"
     >
       <motion.div
         className="hero-scene absolute inset-0"
@@ -80,13 +81,13 @@ export function Hero() {
       ) : null}
 
       <motion.div
-        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-2 text-center"
+        className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-2 text-center"
         initial={prefersReducedMotion ? false : "hidden"}
         animate={prefersReducedMotion ? undefined : "visible"}
-        variants={staggerContainer(0.14, 0.15)}
+        variants={staggerContainer(0.12, 0.12)}
       >
         <motion.h1
-          className="hero-logo-wrap hero-logo-float relative mx-auto w-[min(92vw,34rem)]"
+          className="hero-logo-wrap hero-logo-float relative mx-auto w-[min(88vw,22rem)] sm:w-[min(72vw,26rem)]"
           variants={fadeUp}
         >
           <Image
@@ -97,37 +98,39 @@ export function Hero() {
             priority
             unoptimized
             className="hero-logo-img"
-            sizes="(max-width: 768px) 92vw, 34rem"
+            sizes="(max-width: 768px) 88vw, 26rem"
           />
         </motion.h1>
 
-        <div className="hero-content-veil mt-8 flex w-full flex-col items-center">
+        <div className="hero-content-veil mt-6 flex w-full flex-col items-center sm:mt-8">
           <motion.p
-            className="max-w-xl font-body text-base font-medium leading-relaxed text-ivory sm:text-lg"
+            className="anime-label episode-release-badge rounded-md border-2 border-magic/45 bg-cavern/75 px-4 py-2 font-display text-sm tracking-[0.14em] text-lily shadow-[0_0_28px_rgba(56,189,248,0.2)]"
+            variants={fadeUp}
+          >
+            {dict.episodeOne.badge}
+          </motion.p>
+
+          <motion.div className="mt-6 w-full sm:mt-8" variants={fadeUp}>
+            <EpisodeWatchBlock
+              id="trailer"
+              compact
+              title={dict.trailer.embedTitle}
+            />
+          </motion.div>
+
+          <motion.p
+            className="mt-6 max-w-xl font-body text-base font-medium leading-relaxed text-ivory sm:text-lg"
             variants={fadeUp}
           >
             {dict.hero.tagline}
           </motion.p>
 
           <motion.div
-            className="mt-8 flex flex-col items-center gap-3"
-            variants={fadeUp}
-          >
-            <p className="anime-label episode-release-badge rounded-md border-2 border-magic/45 bg-cavern/75 px-4 py-2 font-display text-sm tracking-[0.14em] text-lily shadow-[0_0_28px_rgba(56,189,248,0.2)]">
-              {dict.episodeOne.badge}
-            </p>
-            <p className="max-w-lg font-body text-sm font-medium leading-relaxed text-cyan-pale/90 sm:text-base">
-              {dict.hero.releaseLine}{" "}
-              <span className="text-lily">{dict.hero.signupLine}</span>
-            </p>
-          </motion.div>
-
-          <motion.div
             className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center"
             variants={fadeUp}
           >
-            <a href="#trailer" className="btn-primary btn-shimmer">
-              {dict.hero.cta}
+            <a href="#discover" className="btn-primary btn-shimmer">
+              {dict.nav.experience}
             </a>
             <a href="#characters" className="btn-secondary">
               {dict.hero.characters}
@@ -135,7 +138,7 @@ export function Hero() {
           </motion.div>
 
           <motion.p
-            className="anime-label anime-label-glow mt-12 font-display text-sm text-cyan-pale/70 sm:text-base"
+            className="anime-label anime-label-glow mt-10 font-display text-sm text-cyan-pale/70 sm:text-base"
             variants={fadeUp}
           >
             {dict.hero.footerLine}
@@ -146,7 +149,7 @@ export function Hero() {
       {!prefersReducedMotion ? (
         <motion.a
           href="#characters"
-          className="scroll-hint absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-cyan-pale/50 transition-colors hover:text-magic"
+          className="scroll-hint absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-cyan-pale/50 transition-colors hover:text-magic"
           aria-label={dict.hero.scrollLabel}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

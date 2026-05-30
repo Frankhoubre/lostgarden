@@ -4,7 +4,6 @@ import { DiscoverSection } from "@/components/DiscoverSection";
 import { Hero } from "@/components/Hero";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
-import { TrailerSection } from "@/components/TrailerSection";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
@@ -36,7 +35,6 @@ export default async function Home({ params }: HomePageProps) {
       <main id="main">
         <Hero />
         <CharactersSection />
-        <TrailerSection />
         <DiscoverSection />
       </main>
 
