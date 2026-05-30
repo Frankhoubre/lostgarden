@@ -50,8 +50,11 @@
     "characters": "Characters",
     "knights": "Knights",
     "trailer": "Episode One",
-    "join": "Episode One",
-    "experience": "Members"
+    "watchShort": "Watch",
+    "join": "Sign up",
+    "joinShort": "Join",
+    "experience": "Members",
+    "experienceShort": "Members"
   },
   "hero": {
     "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",

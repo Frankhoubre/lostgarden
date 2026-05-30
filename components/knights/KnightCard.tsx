@@ -86,17 +86,19 @@ export function KnightCard({ number, content, traitsAria }: KnightCardProps) {
             <p className="mt-2 font-body text-sm font-bold leading-relaxed text-magic">
               {content.tagline}
             </p>
-            <div className="mt-4 flex-1 space-y-3">
-              {content.description.split("\n\n").map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="font-body text-sm leading-relaxed text-sol-ivory/80"
-                >
-                  {paragraph}
-                </p>
-              ))}
+            <div className="knight-card-lore mt-4 min-h-0 max-h-52 flex-1 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:overflow-visible sm:pr-0">
+              <div className="space-y-3">
+                {content.description.split("\n\n").map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="font-body text-sm leading-relaxed text-sol-ivory/80"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
-            <ul className="mt-5 flex flex-wrap gap-2" aria-label={traitsAria}>
+            <ul className="mt-5 shrink-0 flex flex-wrap gap-2" aria-label={traitsAria}>
               {content.traits.map((trait) => (
                 <li key={trait}>
                   <span className="character-trait-tag inline-block rounded-md border-2 border-glow/20 bg-shadow/60 px-2.5 py-1 font-body text-[0.75rem] font-medium text-ivory/75">

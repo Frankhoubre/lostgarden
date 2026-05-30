@@ -50,8 +50,11 @@
     "characters": "Personnages",
     "knights": "Chevaliers",
     "trailer": "Épisode 1",
-    "join": "Épisode 1",
-    "experience": "Espace membre"
+    "watchShort": "Vidéo",
+    "join": "Inscription",
+    "joinShort": "Compte",
+    "experience": "Espace membre",
+    "experienceShort": "Membre"
   },
   "hero": {
     "tagline": "Certaines choses s'éveillent sous la terre. Un chevalier creux. Une enfant dans la brume. Une forêt qui se souvient.",

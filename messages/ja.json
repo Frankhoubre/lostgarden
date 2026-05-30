@@ -50,8 +50,11 @@
     "characters": "キャラクター",
     "knights": "騎士",
     "trailer": "第1話",
-    "join": "第1話",
-    "experience": "会員"
+    "watchShort": "視聴",
+    "join": "登録",
+    "joinShort": "登録",
+    "experience": "会員",
+    "experienceShort": "会員"
   },
   "hero": {
     "tagline": "地の底で目覚めるものがある。空洞の騎士。霧の中の子供。記憶する森。",

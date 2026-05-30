@@ -50,8 +50,11 @@
     "characters": "캐릭터",
     "knights": "기사",
     "trailer": "1화",
-    "join": "1화",
-    "experience": "회원"
+    "watchShort": "시청",
+    "join": "가입",
+    "joinShort": "가입",
+    "experience": "회원",
+    "experienceShort": "회원"
   },
   "hero": {
     "tagline": "땅속에서 깨어나는 것들이 있다. 공허한 기사. 안개 속의 아이. 기억하는 숲.",
