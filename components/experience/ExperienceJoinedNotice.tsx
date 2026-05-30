@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { User } from "firebase/auth";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { EPISODE_ONE } from "@/lib/episode";
 import { localePath } from "@/lib/i18n/navigation";
 
 const JOINED_STORAGE_KEY = "lostgarden-joined-notice";
@@ -12,7 +13,7 @@ type ExperienceJoinedNoticeProps = {
   user: User;
 };
 
-export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
+export function ExperienceJoinedNotice({ user: _user }: ExperienceJoinedNoticeProps) {
   const searchParams = useSearchParams();
   const { locale, dict } = useLocale();
   const [visible, setVisible] = useState(false);
@@ -32,7 +33,6 @@ export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
 
   if (!visible) return null;
 
-  const email = user.email ?? "your email";
   const { postSignup } = dict.experience;
 
   function dismiss() {
@@ -42,7 +42,7 @@ export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
 
   return (
     <aside
-      className="experience-joined-notice mb-10 rounded-xl border border-magic/35 bg-cavern/80 p-6 shadow-[0_0_40px_rgba(56,189,248,0.12)] backdrop-blur-sm sm:p-8"
+      className="experience-joined-notice mt-10 rounded-xl border border-magic/35 bg-cavern/80 p-6 shadow-[0_0_40px_rgba(56,189,248,0.12)] backdrop-blur-sm sm:p-8"
       role="status"
       aria-live="polite"
     >
@@ -57,21 +57,25 @@ export function ExperienceJoinedNotice({ user }: ExperienceJoinedNoticeProps) {
       </p>
       <div className="mt-5 rounded-lg border border-glow/20 bg-abyss/50 px-4 py-4">
         <p className="font-display text-sm font-semibold tracking-wide text-lily">
-          {postSignup.emailHeading}
+          {postSignup.supportHeading}
         </p>
         <p className="mt-2 font-body text-sm leading-relaxed text-ivory/75">
-          {postSignup.emailBody}
+          {postSignup.supportBody}
         </p>
-        {user.email ? (
-          <p className="mt-3 font-body text-sm text-cyan-pale/90">
-            {postSignup.watchLinkTo}{" "}
-            <strong className="font-medium text-lily">{email}</strong>
-          </p>
-        ) : null}
       </div>
-      <button type="button" onClick={dismiss} className="btn-primary mt-6 min-h-11">
-        {dict.common.gotIt}
-      </button>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <a
+          href={EPISODE_ONE.watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary min-h-11 text-center"
+        >
+          {dict.episodeOne.openOnYouTube}
+        </a>
+        <button type="button" onClick={dismiss} className="btn-secondary min-h-11">
+          {dict.common.gotIt}
+        </button>
+      </div>
     </aside>
   );
 }

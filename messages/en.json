@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - Poetic Dark Fantasy Anime",
-      "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Be ready for Episode One on 2 June 2026."
+      "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Episode One is out now."
     },
     "experience": {
-      "title": "Episode One — early access",
-      "description": "Sign up for Lost Garden Episode One. The watch link is emailed on 2 June 2026; explore early previews until premiere."
+      "title": "Episode One — members",
+      "description": "Watch Lost Garden Episode One and explore lore, production notes, and fragments from beneath the earth."
     },
     "vision": {
       "title": "Vision | Lost Garden",
@@ -24,7 +24,9 @@
   "episodeOne": {
     "premiereDate": "2 June",
     "premiereDateFull": "2 June 2026",
-    "badge": "Episode One · 2 June 2026"
+    "badge": "Episode One · out now",
+    "youtubeEngagement": "Like, comment and share on YouTube — it helps the project enormously.",
+    "openOnYouTube": "Watch on YouTube"
   },
   "common": {
     "siteName": "Lost Garden",
@@ -46,15 +48,15 @@
   "nav": {
     "ariaLabel": "Page sections",
     "characters": "Characters",
-    "trailer": "Trailer",
+    "trailer": "Episode One",
     "join": "Episode One",
     "experience": "Members"
   },
   "hero": {
     "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",
-    "releaseLine": "Episode One premieres 2 June 2026.",
-    "signupLine": "Create a free account and the watch link will land in your inbox when the first episode drops.",
-    "cta": "Be ready for the 1st episode",
+    "releaseLine": "Episode One is out now.",
+    "signupLine": "Watch below — like, comment and share on YouTube. It helps more than you know.",
+    "cta": "Watch Episode One",
     "characters": "Characters",
     "footerLine": "Not every guardian was meant to protect.",
     "scrollLabel": "Scroll to explore",
@@ -100,32 +102,32 @@
     ]
   },
   "trailer": {
-    "playAria": "Trailer coming soon",
+    "embedTitle": "Lost Garden — Episode One",
     "headline": "Episode One",
-    "subline": "Premieres 2 June 2026 — sign up to get the watch link by email."
+    "subline": "The first episode is live. Like, comment and share on YouTube — every bit helps."
   },
   "discover": {
-    "title": "Be ready for the 1st episode",
-    "subtitle": "Sign up with your email — we will send you the Episode One watch link on premiere day, 2 June 2026.",
-    "pitchAria": "What you get when you sign up for Episode One",
+    "title": "Join the travelers",
+    "subtitle": "Episode One is available for everyone. Create a free account for the members area: lore, notes, and fragments from beneath the earth.",
+    "pitchAria": "What you get when you create an account",
     "pitch": [
       {
-        "title": "Episode One by email",
-        "body": "Register now. On 2 June 2026, we email the watch link to the address you use here — no hunting for links on release day."
+        "title": "Episode One online",
+        "body": "Watch the first episode here or in the members area. Remember to like, comment and share on YouTube."
       },
       {
-        "title": "Early previews while you wait",
-        "body": "Until premiere, explore early visuals, lore notes, and fragments from beneath the earth inside the members area."
+        "title": "Lore and behind the scenes",
+        "body": "Inside the members area: visuals, production notes, and fragments from the underground world — with more to come."
       }
     ],
-    "loggedInTitle": "You are in",
-    "welcomeBack": "You are registered for Episode One. On 2 June 2026, we will email the watch link to the address on your account.",
-    "episodeLink": "Episode One link →",
-    "openPreviews": "Open early previews"
+    "loggedInTitle": "You are signed in",
+    "welcomeBack": "Episode One is waiting in the members area. Do not forget to like, comment and share on YouTube.",
+    "watchEpisode": "Watch Episode One",
+    "watchOnLanding": "Watch on this page"
   },
   "auth": {
-    "loginIntro": "You are reserving Episode One, not just a newsletter. Use an email you check — that is where the watch link goes on 2 June.",
-    "consent": "By continuing, you agree to receive Lost Garden updates, including the Episode One watch link by email on 2 June 2026. No spam.",
+    "loginIntro": "Create an account for the members area: Episode One, lore, and behind the scenes. Use an email you check.",
+    "consent": "By continuing, you agree to receive Lost Garden updates (new episodes, lore, behind the scenes). No spam.",
     "tabsAria": "Authentication mode",
     "signIn": "Sign in",
     "createAccount": "Create account",
@@ -137,7 +139,7 @@
     "passwordLabel": "Password",
     "passwordPlaceholder": "At least 8 characters",
     "forgotPassword": "Forgot password?",
-    "signupSubmit": "Sign up — get Episode One by email",
+    "signupSubmit": "Create account — member access",
     "signingOut": "Signing out…",
     "signOut": "Sign out",
     "resetSent": "Password reset email sent. Check your inbox.",
@@ -165,7 +167,9 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "Welcome, {name}",
-    "memberWelcome": "You are on the list for Episode One (2 June 2026). The watch link will be sent to your email on premiere day — explore early lore below while you wait.",
+    "memberWelcome": "Episode One is live. Watch below, then like, comment and share on YouTube — it helps enormously.",
+    "watchTitle": "Episode One",
+    "watchLead": "The first light beneath the earth. Thank you for supporting the project on YouTube.",
     "backToGate": "Back to the gate",
     "notesTitle": "Episode One: notes",
     "notesLead": "Production diary fragments. More will appear as the caverns open.",
@@ -190,14 +194,11 @@
         "text": "Colossal organic relics, half-buried in moss. Some eyes still open when the mist moves."
       }
     ],
-    "previewImageAlt": "The Blue Forest, glowing mushrooms and mist beneath the earth",
-    "premiereCardLine": "The watch link will be emailed to you on premiere day.",
     "postSignup": {
-      "title": "You are on the list",
-      "lead": "Episode One premieres 2 June 2026. Until then, explore the preview below.",
-      "emailHeading": "Watch link on 2 June",
-      "emailBody": "On premiere day we send Episode One to the email you signed up with. Check your inbox — and your spam folder — so you do not miss the opening.",
-      "watchLinkTo": "Watch link will be sent to"
+      "title": "Welcome to the members area",
+      "lead": "Episode One is available just above. Thank you for being here.",
+      "supportHeading": "Support the episode on YouTube",
+      "supportBody": "Like, comment and share the video — it helps the project reach more travelers beneath the earth."
     }
   },
   "footer": {

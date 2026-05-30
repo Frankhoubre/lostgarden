@@ -40,19 +40,16 @@ export function DiscoverSection() {
             <p className="mt-3 font-body text-sm leading-relaxed text-ivory/60">
               {dict.discover.welcomeBack}
             </p>
-            {user.email ? (
-              <p className="mt-2 font-body text-xs text-cyan-pale/70">
-                {dict.discover.episodeLink}{" "}
-                <span className="text-lily">{user.email}</span>
-              </p>
-            ) : null}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href={localePath(locale, "/experience")}
                 className="btn-primary"
               >
-                {dict.discover.openPreviews}
+                {dict.discover.watchEpisode}
               </Link>
+              <a href="#trailer" className="btn-secondary">
+                {dict.discover.watchOnLanding}
+              </a>
               <SignOutButton />
             </div>
           </div>

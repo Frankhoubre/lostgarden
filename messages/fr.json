@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - Anime dark fantasy poétique",
-      "description": "Anime dark fantasy poétique par Frank Houbre. Un chevalier creux, une enfant mystérieuse, un monde sous la terre. Préparez-vous pour l'épisode 1 le 2 juin 2026."
+      "description": "Anime dark fantasy poétique par Frank Houbre. Un chevalier creux, une enfant mystérieuse, un monde sous la terre. L'épisode 1 est disponible."
     },
     "experience": {
-      "title": "Épisode 1 — accès anticipé",
-      "description": "Inscrivez-vous pour l'épisode 1 de Lost Garden. Le lien de visionnage est envoyé par email le 2 juin 2026 ; explorez les previews jusqu'à la sortie."
+      "title": "Épisode 1 — espace membre",
+      "description": "Regardez l'épisode 1 de Lost Garden et explorez le lore, les notes de production et les fragments du monde souterrain."
     },
     "vision": {
       "title": "Vision | Lost Garden",
@@ -24,7 +24,9 @@
   "episodeOne": {
     "premiereDate": "2 juin",
     "premiereDateFull": "2 juin 2026",
-    "badge": "Épisode 1 · 2 juin 2026"
+    "badge": "Épisode 1 · disponible",
+    "youtubeEngagement": "Likez, commentez et partagez sur YouTube — ça aide le projet énormément.",
+    "openOnYouTube": "Voir sur YouTube"
   },
   "common": {
     "siteName": "Lost Garden",
@@ -46,15 +48,15 @@
   "nav": {
     "ariaLabel": "Sections de la page",
     "characters": "Personnages",
-    "trailer": "Bande-annonce",
+    "trailer": "Épisode 1",
     "join": "Épisode 1",
     "experience": "Espace membre"
   },
   "hero": {
     "tagline": "Certaines choses s'éveillent sous la terre. Un chevalier creux. Une enfant dans la brume. Une forêt qui se souvient.",
-    "releaseLine": "L'épisode 1 sort le 2 juin 2026.",
-    "signupLine": "Créez un compte gratuit : le lien de visionnage arrivera dans votre boîte mail le jour de la sortie.",
-    "cta": "Préparez-vous pour le 1er épisode",
+    "releaseLine": "L'épisode 1 est disponible.",
+    "signupLine": "Regardez-le ci-dessous — likez, commentez et partagez sur YouTube, ça nous aide à fond.",
+    "cta": "Voir l'épisode 1",
     "characters": "Personnages",
     "footerLine": "Tous les gardiens n'étaient pas faits pour protéger.",
     "scrollLabel": "Faire défiler pour explorer",
@@ -100,32 +102,32 @@
     ]
   },
   "trailer": {
-    "playAria": "Bande-annonce bientôt disponible",
+    "embedTitle": "Lost Garden — épisode 1",
     "headline": "Épisode 1",
-    "subline": "Sortie le 2 juin 2026 — inscrivez-vous pour recevoir le lien de visionnage par email."
+    "subline": "Le premier épisode est en ligne. Likez, commentez et partagez sur YouTube — chaque geste compte."
   },
   "discover": {
-    "title": "Préparez-vous pour le 1er épisode",
-    "subtitle": "Inscrivez-vous avec votre email — nous vous enverrons le lien de l'épisode 1 le jour de la sortie, le 2 juin 2026.",
-    "pitchAria": "Ce que vous obtenez en vous inscrivant pour l'épisode 1",
+    "title": "Rejoignez les voyageurs",
+    "subtitle": "L'épisode 1 est disponible pour tous. Créez un compte gratuit pour l'espace membre : lore, notes et fragments du monde souterrain.",
+    "pitchAria": "Ce que vous obtenez en créant un compte",
     "pitch": [
       {
-        "title": "L'épisode 1 par email",
-        "body": "Inscrivez-vous maintenant. Le 2 juin 2026, nous envoyons le lien de visionnage à l'adresse indiquée ici — pas besoin de chercher le lien le jour J."
+        "title": "Épisode 1 en ligne",
+        "body": "Regardez le premier épisode ici ou dans l'espace membre. Pensez à liker, commenter et partager sur YouTube."
       },
       {
-        "title": "Previews en attendant",
-        "body": "Jusqu'à la sortie, explorez visuels, notes de lore et fragments du monde souterrain dans l'espace membre."
+        "title": "Lore et coulisses",
+        "body": "Dans l'espace membre : visuels, notes de production et fragments du monde souterrain — et la suite à venir."
       }
     ],
-    "loggedInTitle": "Vous êtes inscrit",
-    "welcomeBack": "Vous êtes inscrit pour l'épisode 1. Le 2 juin 2026, nous enverrons le lien de visionnage à l'adresse de votre compte.",
-    "episodeLink": "Lien épisode 1 →",
-    "openPreviews": "Ouvrir les previews"
+    "loggedInTitle": "Vous êtes connecté",
+    "welcomeBack": "L'épisode 1 vous attend dans l'espace membre. N'oubliez pas de liker, commenter et partager sur YouTube.",
+    "watchEpisode": "Voir l'épisode 1",
+    "watchOnLanding": "Lire sur cette page"
   },
   "auth": {
-    "loginIntro": "Vous réservez l'épisode 1, pas une simple newsletter. Utilisez une adresse que vous consultez — c'est là que part le lien le 2 juin.",
-    "consent": "En continuant, vous acceptez de recevoir les actualités Lost Garden, dont le lien de l'épisode 1 par email le 2 juin 2026. Pas de spam.",
+    "loginIntro": "Créez un compte pour accéder à l'espace membre : épisode 1, lore et coulisses. Utilisez une adresse que vous consultez.",
+    "consent": "En continuant, vous acceptez de recevoir les actualités Lost Garden (nouveaux épisodes, lore, coulisses). Pas de spam.",
     "tabsAria": "Mode d'authentification",
     "signIn": "Se connecter",
     "createAccount": "Créer un compte",
@@ -137,7 +139,7 @@
     "passwordLabel": "Mot de passe",
     "passwordPlaceholder": "8 caractères minimum",
     "forgotPassword": "Mot de passe oublié ?",
-    "signupSubmit": "S'inscrire — épisode 1 par email",
+    "signupSubmit": "Créer un compte — accès membre",
     "signingOut": "Déconnexion…",
     "signOut": "Se déconnecter",
     "resetSent": "Email de réinitialisation envoyé. Vérifiez votre boîte mail.",
@@ -165,7 +167,9 @@
   "experience": {
     "seriesLabel": "Lost Garden : Première lumière",
     "welcome": "Bienvenue, {name}",
-    "memberWelcome": "Vous êtes sur la liste pour l'épisode 1 (2 juin 2026). Le lien de visionnage sera envoyé par email le jour de la sortie — explorez le lore en attendant.",
+    "memberWelcome": "L'épisode 1 est en ligne. Regardez-le ci-dessous, puis likez, commentez et partagez sur YouTube — ça nous aide énormément.",
+    "watchTitle": "Épisode 1",
+    "watchLead": "La première lumière sous la terre. Merci de soutenir le projet sur YouTube.",
     "backToGate": "Retour au portail",
     "notesTitle": "Épisode 1 : notes",
     "notesLead": "Fragments du journal de production. D'autres apparaîtront quand les cavernes s'ouvriront.",
@@ -190,14 +194,11 @@
         "text": "Des reliques organiques colossales, à demi enfouies dans la mousse. Certains yeux s'ouvrent encore quand la brume bouge."
       }
     ],
-    "previewImageAlt": "La forêt bleue, champignons lumineux et brume sous la terre",
-    "premiereCardLine": "Le lien de visionnage vous sera envoyé par email le jour de la sortie.",
     "postSignup": {
-      "title": "Vous êtes sur la liste",
-      "lead": "L'épisode 1 sort le 2 juin 2026. En attendant, explorez la preview ci-dessous.",
-      "emailHeading": "Lien de visionnage le 2 juin",
-      "emailBody": "Le jour de la sortie, nous envoyons l'épisode 1 à l'email avec lequel vous vous êtes inscrit. Vérifiez votre boîte mail — et vos spams — pour ne pas manquer l'ouverture.",
-      "watchLinkTo": "Le lien sera envoyé à"
+      "title": "Bienvenue dans l'espace membre",
+      "lead": "L'épisode 1 est disponible juste au-dessus. Merci d'être là.",
+      "supportHeading": "Soutenez l'épisode sur YouTube",
+      "supportBody": "Likez, commentez et partagez la vidéo — ça aide le projet à se faire connaître et à continuer."
     }
   },
   "footer": {

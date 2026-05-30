@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { User } from "firebase/auth";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { EpisodeWatchBlock } from "@/components/EpisodeWatchBlock";
 import { EpisodeTimeline } from "@/components/EpisodeTimeline";
 import { ExperienceJoinedNotice } from "@/components/experience/ExperienceJoinedNotice";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -47,6 +47,19 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
           </div>
         </header>
 
+        <section className="mt-10">
+          <h2 className="anime-heading font-display text-2xl text-lily">
+            {dict.experience.watchTitle}
+          </h2>
+          <p className="mt-3 font-body text-sm font-medium leading-relaxed text-ivory/85">
+            {dict.experience.watchLead}
+          </p>
+          <EpisodeWatchBlock
+            className="mt-6"
+            title={dict.trailer.embedTitle}
+          />
+        </section>
+
         <Suspense fallback={null}>
           <ExperienceJoinedNotice user={user} />
         </Suspense>
@@ -76,26 +89,6 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
           ))}
         </section>
 
-        <section className="mt-16 overflow-hidden rounded-xl border-2 border-glow/30 shadow-[0_5px_0_rgba(2,8,23,0.75)]">
-          <div className="relative aspect-[16/9] w-full">
-            <Image
-              src="/images/blue-forest.png"
-              alt={dict.experience.previewImageAlt}
-              fill
-              className="object-cover opacity-90"
-              sizes="(max-width: 896px) 100vw, 896px"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/40 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-              <p className="anime-heading font-display text-xl text-lily sm:text-2xl">
-                {dict.episodeOne.badge}
-              </p>
-              <p className="mt-2 font-body text-sm font-medium text-ivory/85">
-                {dict.experience.premiereCardLine}
-              </p>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );

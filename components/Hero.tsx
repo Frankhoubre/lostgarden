@@ -126,7 +126,7 @@ export function Hero() {
             className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center"
             variants={fadeUp}
           >
-            <a href="#discover" className="btn-primary btn-shimmer">
+            <a href="#trailer" className="btn-primary btn-shimmer">
               {dict.hero.cta}
             </a>
             <a href="#characters" className="btn-secondary">

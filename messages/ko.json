@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - 시적 다크 판타지 애니메이션",
-      "description": "Frank Houbre의 시적 다크 판타지 애니메이션. 공허한 기사, 신비한 아이, 땅속 세계. 1화는 2026년 6월 2일 공개."
+      "description": "Frank Houbre의 시적 다크 판타지 애니메이션. 공허한 기사, 신비한 아이, 땅속 세계. 1화 시청 가능."
     },
     "experience": {
-      "title": "1화 — 얼리 액세스",
-      "description": "Lost Garden 1화에 가입하세요. 시청 링크는 2026년 6월 2일 이메일로 전송됩니다. 공개 전까지 프리뷰를 탐색하세요."
+      "title": "1화 — 회원 공간",
+      "description": "Lost Garden 1화를 시청하고 로어, 제작 노트, 지하 세계의 단편을 탐색하세요."
     },
     "vision": {
       "title": "비전 | Lost Garden",
@@ -24,7 +24,9 @@
   "episodeOne": {
     "premiereDate": "6월 2일",
     "premiereDateFull": "2026년 6월 2일",
-    "badge": "1화 · 2026년 6월 2일"
+    "badge": "1화 · 시청 가능",
+    "youtubeEngagement": "YouTube에서 좋아요, 댓글, 공유를 부탁드립니다 — 프로젝트에 큰 힘이 됩니다.",
+    "openOnYouTube": "YouTube에서 보기"
   },
   "common": {
     "siteName": "Lost Garden",
@@ -46,15 +48,15 @@
   "nav": {
     "ariaLabel": "페이지 섹션",
     "characters": "캐릭터",
-    "trailer": "예고편",
+    "trailer": "1화",
     "join": "1화",
     "experience": "회원"
   },
   "hero": {
     "tagline": "땅속에서 깨어나는 것들이 있다. 공허한 기사. 안개 속의 아이. 기억하는 숲.",
-    "releaseLine": "1화는 2026년 6월 2일 공개됩니다.",
-    "signupLine": "무료 계정을 만들면 1화 공개일에 시청 링크가 이메일로 도착합니다.",
-    "cta": "1화를 준비하세요",
+    "releaseLine": "1화가 공개되었습니다.",
+    "signupLine": "아래에서 시청하세요 — YouTube에서 좋아요, 댓글, 공유가 큰 도움이 됩니다.",
+    "cta": "1화 보기",
     "characters": "캐릭터",
     "footerLine": "모든 수호자가 지키기 위해 태어난 것은 아니다.",
     "scrollLabel": "스크롤하여 탐색",
@@ -100,32 +102,32 @@
     ]
   },
   "trailer": {
-    "playAria": "예고편 곧 공개",
+    "embedTitle": "Lost Garden — 1화",
     "headline": "1화",
-    "subline": "2026년 6월 2일 공개 — 가입하여 이메일로 시청 링크를 받으세요."
+    "subline": "첫 번째 에피소드가 공개되었습니다. YouTube에서 좋아요, 댓글, 공유 — 모든 것이 도움이 됩니다."
   },
   "discover": {
-    "title": "1화를 준비하세요",
-    "subtitle": "이메일로 가입하세요 — 공개일 2026년 6월 2일에 1화 시청 링크를 보내 드립니다.",
-    "pitchAria": "1화 가입 시 받는 것",
+    "title": "여행자에 합류하세요",
+    "subtitle": "1화는 누구나 시청할 수 있습니다. 무료 계정으로 회원 공간: 로어, 노트, 지하 세계의 단편.",
+    "pitchAria": "계정 생성 시 받는 것",
     "pitch": [
       {
-        "title": "이메일로 1화",
-        "body": "지금 가입하세요. 2026년 6월 2일에 여기서 사용한 주소로 시청 링크를 이메일합니다 — 공개일에 링크를 찾을 필요가 없습니다."
+        "title": "1화 온라인",
+        "body": "첫 에피소드를 여기 또는 회원 공간에서 시청하세요. YouTube 좋아요, 댓글, 공유를 잊지 마세요."
       },
       {
-        "title": "공개 전 얼리 프리뷰",
-        "body": "공개까지 회원 공간에서 얼리 비주얼, 로어 노트, 지하 세계의 단편을 탐색하세요."
+        "title": "로어와 비하인드",
+        "body": "회원 공간: 비주얼, 제작 노트, 지하 세계의 단편 — 앞으로 더 많은 내용이."
       }
     ],
-    "loggedInTitle": "가입 완료",
-    "welcomeBack": "1화에 등록되었습니다. 2026년 6월 2일에 계정 이메일로 시청 링크를 보내 드립니다.",
-    "episodeLink": "1화 링크 →",
-    "openPreviews": "얼리 프리뷰 열기"
+    "loggedInTitle": "로그인됨",
+    "welcomeBack": "1화가 회원 공간에서 기다립니다. YouTube에서 좋아요, 댓글, 공유를 부탁드립니다.",
+    "watchEpisode": "1화 보기",
+    "watchOnLanding": "이 페이지에서 보기"
   },
   "auth": {
-    "loginIntro": "뉴스레터가 아니라 1화를 예약하는 것입니다. 확인하는 이메일을 사용하세요 — 6월 2일에 시청 링크가 갑니다.",
-    "consent": "계속하면 Lost Garden 업데이트(2026년 6월 2일 1화 시청 링크 포함)를 이메일로 받는 것에 동의합니다. 스팸은 보내지 않습니다.",
+    "loginIntro": "회원 공간(1화, 로어, 비하인드)에 접근할 계정을 만드세요. 확인하는 이메일을 사용하세요.",
+    "consent": "계속하면 Lost Garden 업데이트(새 에피소드, 로어, 비하인드)를 이메일로 받는 것에 동의합니다. 스팸은 보내지 않습니다.",
     "tabsAria": "인증 모드",
     "signIn": "로그인",
     "createAccount": "계정 만들기",
@@ -137,7 +139,7 @@
     "passwordLabel": "비밀번호",
     "passwordPlaceholder": "8자 이상",
     "forgotPassword": "비밀번호를 잊으셨나요?",
-    "signupSubmit": "가입 — 이메일로 1화",
+    "signupSubmit": "계정 만들기 — 회원 접근",
     "signingOut": "로그아웃 중…",
     "signOut": "로그아웃",
     "resetSent": "비밀번호 재설정 이메일을 보냈습니다. 받은편지함을 확인하세요.",
@@ -165,7 +167,9 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "환영합니다, {name}",
-    "memberWelcome": "1화 목록에 등록되었습니다(2026년 6월 2일). 공개일에 이메일로 시청 링크를 보냅니다 — 그때까지 아래 로어를 탐색하세요.",
+    "memberWelcome": "1화가 공개되었습니다. 아래에서 시청한 뒤 YouTube에서 좋아요, 댓글, 공유를 — 큰 힘이 됩니다.",
+    "watchTitle": "1화",
+    "watchLead": "땅속의 첫 빛. YouTube에서의 응원에 감사드립니다.",
     "backToGate": "문으로 돌아가기",
     "notesTitle": "1화: 노트",
     "notesLead": "제작 일기 단편. 동굴이 열리면 더 추가됩니다.",
@@ -190,14 +194,11 @@
         "text": "이끼에 반쯤 묻힌 거대한 유기 유물. 안개가 움직이면 아직 눈을 뜨는 것도 있다."
       }
     ],
-    "previewImageAlt": "푸른 숲, 빛나는 버섯과 지하의 안개",
-    "premiereCardLine": "공개일에 시청 링크를 이메일로 보내 드립니다.",
     "postSignup": {
-      "title": "목록에 등록되었습니다",
-      "lead": "1화는 2026년 6월 2일 공개. 그때까지 아래 프리뷰를 탐색하세요.",
-      "emailHeading": "6월 2일 시청 링크",
-      "emailBody": "공개일에 가입한 이메일로 1화를 보냅니다. 받은편지함과 스팸함을 확인해 오프닝을 놓치지 마세요.",
-      "watchLinkTo": "시청 링크 전송 주소"
+      "title": "회원 공간에 오신 것을 환영합니다",
+      "lead": "1화는 위에서 시청할 수 있습니다. 함께해 주셔서 감사합니다.",
+      "supportHeading": "YouTube에서 에피소드 응원",
+      "supportBody": "좋아요, 댓글, 공유가 프로젝트의 인지도와 지속에 큰 도움이 됩니다."
     }
   },
   "footer": {

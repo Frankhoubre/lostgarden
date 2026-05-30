@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - 詩的ダークファンタジーアニメ",
-      "description": "Frank Houbreによる詩的ダークファンタジーアニメ。空洞の騎士、謎の子供、地下の世界。第1話は2026年6月2日公開。"
+      "description": "Frank Houbreによる詩的ダークファンタジーアニメ。空洞の騎士、謎の子供、地下の世界。第1話配信中。"
     },
     "experience": {
-      "title": "第1話 — 早期アクセス",
-      "description": "Lost Garden第1話に登録。視聴リンクは2026年6月2日にメールで送信。公開までプレビューを探索。"
+      "title": "第1話 — 会員エリア",
+      "description": "Lost Garden第1話を視聴し、ロア、制作ノート、地下世界の断片を探索。"
     },
     "vision": {
       "title": "ビジョン | Lost Garden",
@@ -24,7 +24,9 @@
   "episodeOne": {
     "premiereDate": "6月2日",
     "premiereDateFull": "2026年6月2日",
-    "badge": "第1話 · 2026年6月2日"
+    "badge": "第1話 · 配信中",
+    "youtubeEngagement": "YouTubeで高評価・コメント・共有をお願いします — プロジェクトの大きな支えになります。",
+    "openOnYouTube": "YouTubeで見る"
   },
   "common": {
     "siteName": "Lost Garden",
@@ -46,15 +48,15 @@
   "nav": {
     "ariaLabel": "ページセクション",
     "characters": "キャラクター",
-    "trailer": "予告",
+    "trailer": "第1話",
     "join": "第1話",
     "experience": "会員"
   },
   "hero": {
     "tagline": "地の底で目覚めるものがある。空洞の騎士。霧の中の子供。記憶する森。",
-    "releaseLine": "第1話は2026年6月2日公開。",
-    "signupLine": "無料アカウントを作成すると、第1話公開日に視聴リンクがメールで届きます。",
-    "cta": "第1話の準備をする",
+    "releaseLine": "第1話は配信中です。",
+    "signupLine": "下で視聴 — YouTubeで高評価・コメント・共有をお願いします。とても力になります。",
+    "cta": "第1話を見る",
     "characters": "キャラクター",
     "footerLine": "すべての守護者が守るために生まれたわけではない。",
     "scrollLabel": "スクロールして探索",
@@ -100,32 +102,32 @@
     ]
   },
   "trailer": {
-    "playAria": "予告編は近日公開",
+    "embedTitle": "Lost Garden — 第1話",
     "headline": "第1話",
-    "subline": "2026年6月2日公開 — 登録してメールで視聴リンクを受け取る。"
+    "subline": "第1話が公開されました。YouTubeで高評価・コメント・共有を — すべてが力になります。"
   },
   "discover": {
-    "title": "第1話の準備をする",
-    "subtitle": "メールで登録 — 公開日2026年6月2日に第1話の視聴リンクをお送りします。",
-    "pitchAria": "第1話登録で得られるもの",
+    "title": "旅人に参加する",
+    "subtitle": "第1話は誰でも視聴できます。無料アカウントで会員エリアへ：ロア、ノート、地下世界の断片。",
+    "pitchAria": "アカウント作成で得られるもの",
     "pitch": [
       {
-        "title": "メールで第1話",
-        "body": "今すぐ登録。2026年6月2日に、ここで使ったアドレスへ視聴リンクをメールします — 公開日にリンクを探す必要はありません。"
+        "title": "第1話オンライン",
+        "body": "第1話をここまたは会員エリアで視聴。YouTubeでの高評価・コメント・共有をお忘れなく。"
       },
       {
-        "title": "公開までの早期プレビュー",
-        "body": "公開まで、会員エリアで早期ビジュアル、ロアノート、地下世界の断片を探索できます。"
+        "title": "ロアと制作裏話",
+        "body": "会員エリア：ビジュアル、制作ノート、地下世界の断片 — 続きもお楽しみに。"
       }
     ],
-    "loggedInTitle": "登録済み",
-    "welcomeBack": "第1話に登録済みです。2026年6月2日に、アカウントのメールアドレスへ視聴リンクを送ります。",
-    "episodeLink": "第1話リンク →",
-    "openPreviews": "早期プレビューを開く"
+    "loggedInTitle": "ログイン済み",
+    "welcomeBack": "第1話は会員エリアでお待ちしています。YouTubeでの高評価・コメント・共有をお願いします。",
+    "watchEpisode": "第1話を見る",
+    "watchOnLanding": "このページで見る"
   },
   "auth": {
-    "loginIntro": "ニュースレターではなく第1話を予約しています。確認するメールアドレスを使ってください — 6月2日に視聴リンクが届きます。",
-    "consent": "続行すると、Lost Gardenの更新（2026年6月2日の第1話視聴リンクを含む）をメールで受け取ることに同意します。スパムは送りません。",
+    "loginIntro": "会員エリア（第1話、ロア、制作裏話）にアクセスするアカウントを作成。確認するメールアドレスを使ってください。",
+    "consent": "続行すると、Lost Gardenの更新（新エピソード、ロア、制作裏話）をメールで受け取ることに同意します。スパムは送りません。",
     "tabsAria": "認証モード",
     "signIn": "ログイン",
     "createAccount": "アカウント作成",
@@ -137,7 +139,7 @@
     "passwordLabel": "パスワード",
     "passwordPlaceholder": "8文字以上",
     "forgotPassword": "パスワードをお忘れですか？",
-    "signupSubmit": "登録 — メールで第1話",
+    "signupSubmit": "アカウント作成 — 会員アクセス",
     "signingOut": "ログアウト中…",
     "signOut": "ログアウト",
     "resetSent": "パスワードリセットメールを送信しました。受信トレイを確認してください。",
@@ -165,7 +167,9 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "ようこそ、{name}",
-    "memberWelcome": "第1話のリストに登録済み（2026年6月2日）。公開日にメールで視聴リンクを送ります — それまで下のロアを探索してください。",
+    "memberWelcome": "第1話は配信中です。下で視聴し、YouTubeで高評価・コメント・共有を — 大きな支えになります。",
+    "watchTitle": "第1話",
+    "watchLead": "地の底の最初の光。YouTubeでの応援ありがとうございます。",
     "backToGate": "門へ戻る",
     "notesTitle": "第1話：ノート",
     "notesLead": "制作日記の断片。洞窟が開くにつれ、さらに追加されます。",
@@ -190,14 +194,11 @@
         "text": "苔に半分埋もれた巨大な有機遺物。霧が動くと、まだ目を開くものもいる。"
       }
     ],
-    "previewImageAlt": "青い森、光るキノコと地下の霧",
-    "premiereCardLine": "公開日に視聴リンクをメールでお送りします。",
     "postSignup": {
-      "title": "リストに登録されました",
-      "lead": "第1話は2026年6月2日公開。それまで下のプレビューを探索してください。",
-      "emailHeading": "6月2日に視聴リンク",
-      "emailBody": "公開日に、登録したメールへ第1話を送ります。受信トレイと迷惑メールを確認し、オープニングを見逃さないでください。",
-      "watchLinkTo": "視聴リンクの送信先"
+      "title": "会員エリアへようこそ",
+      "lead": "第1話は上で視聴できます。ご参加ありがとうございます。",
+      "supportHeading": "YouTubeでエピソードを応援",
+      "supportBody": "高評価・コメント・共有が、プロジェクトの認知と継続に大きく役立ちます。"
     }
   },
   "footer": {
