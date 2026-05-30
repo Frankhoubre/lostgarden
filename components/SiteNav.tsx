@@ -12,6 +12,7 @@ export function SiteNav() {
 
   const navLinks = [
     { label: dict.nav.characters, href: "#characters" },
+    { label: dict.nav.knights, href: "#knights" },
     { label: dict.nav.trailer, href: "#trailer" },
     { label: dict.nav.join, href: "#discover" },
     { label: dict.nav.experience, href: localePath(locale, "/experience") },

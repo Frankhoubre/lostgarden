@@ -48,6 +48,7 @@
   "nav": {
     "ariaLabel": "Sections de la page",
     "characters": "Personnages",
+    "knights": "Chevaliers",
     "trailer": "Épisode 1",
     "join": "Épisode 1",
     "experience": "Espace membre"
@@ -100,6 +101,36 @@
         "traits": ["Masques blancs", "Capuches noires", "Gongs rituels", "Procession silencieuse"]
       }
     ]
+  },
+  "knights": {
+    "title": "Les treize chevaliers",
+    "subtitle": "Une procession d'armures creuses sous la terre — du 13 au 1. Deux visages connus ; les autres seront révélés dans les prochains épisodes.",
+    "carouselAria": "Carrousel des treize chevaliers",
+    "prev": "Chevalier précédent",
+    "next": "Chevalier suivant",
+    "counter": "Chevalier {number} sur 13",
+    "dotsAria": "Aller à un chevalier",
+    "dotLabel": "Chevalier {number}",
+    "traitsAria": "Traits de {name}",
+    "hiddenBadge": "À révéler",
+    "hiddenTitle": "Chevalier {number}",
+    "hiddenTeaser": "Son identité sera révélée dans un prochain épisode.",
+    "revealed": {
+      "12": {
+        "name": "Lanterne",
+        "title": "Le Chevalier silencieux",
+        "tagline": "Il n'a pas de voix. Pas de corps. Seulement une enfant à protéger.",
+        "description": "Lanterne est le 12e Chevalier, et l'un des plus faibles des treize.\n\nIl s'éveille seul sur un autel ancien, animé par une étrange énergie bleue. Il n'y a pas de corps dans son armure. Il ne peut pas parler. Il ne peut pas écrire. Il ne peut pas expliquer qui il est ni ce dont il se souvient.\n\nAutour de son cou, il porte un pendentif où apparaît le visage de Rose, une mystérieuse Enfant-Source liée à la vie humaine qu'il a perdue. Quand Rose est proche, le pendentif brille d'une lumière bleue.\n\nLanterne n'est pas un héros classique. Il trébuche, hésite, tombe, et observe le monde avec l'attention fragile de quelqu'un qui a oublié comment exister.\n\nMais sous son silence, quelque chose demeure : de la chaleur.\n\nIl est peut-être l'un des chevaliers les plus faibles, mais aussi le seul capable de protéger Rose sans perdre ce qui le rend encore humain.",
+        "traits": ["Armure vide", "Heaume-lanterne", "Pendentif de Rose", "Chaleur dans le silence"]
+      },
+      "9": {
+        "name": "Serrure",
+        "title": "Le Chevalier de la Serrure",
+        "tagline": "Sa bonté est vraie. Son serment est dangereux.",
+        "description": "Serrure est le 9e Chevalier.\n\nContrairement à beaucoup d'autres chevaliers liés par le serment, Serrure n'a pas perdu sa chaleur. Il est doux, accueillant, étrangement rassurant dans un monde où chaque chevalier pourrait devenir un rival.\n\nQuand Lanterne est faible, perdu, incapable de comprendre le danger autour de lui, Serrure devient l'un des premiers signes que tous les chevaliers ne sont pas des ennemis.\n\nIl parle avec bonté. Il aide Lanterne à comprendre le serment, les Enfants-Source, et le chemin vers le Jardin Oublié.\n\nMais Serrure n'est pas libre.\n\nComme chaque chevalier, il est lié à son propre Enfant-Source : Aren, un garçon aux cheveux rouges et blancs dont l'éveil clôt le premier épisode.\n\nLa chaleur de Serrure le rend précieux.\nSon serment le rend dangereux.\nEt un jour, sa bonté sera peut-être mise à l'épreuve par l'enfant qu'il attendait.",
+        "traits": ["Armure serrure & clé", "Douceur accueillante", "Lié à Aren", "Danger du serment"]
+      }
+    }
   },
   "trailer": {
     "embedTitle": "Lost Garden — épisode 1",

@@ -1,6 +1,7 @@
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CharactersSection } from "@/components/CharactersSection";
 import { DiscoverSection } from "@/components/DiscoverSection";
+import { KnightsSection } from "@/components/KnightsSection";
 import { Hero } from "@/components/Hero";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
@@ -35,6 +36,7 @@ export default async function Home({ params }: HomePageProps) {
       <main id="main">
         <Hero />
         <CharactersSection />
+        <KnightsSection />
         <DiscoverSection />
       </main>
 
