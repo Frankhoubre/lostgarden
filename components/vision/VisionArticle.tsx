@@ -1,5 +1,4 @@
-import type { VisionSection } from "@/lib/vision-article";
-import { VISION_ARTICLE } from "@/lib/vision-article";
+import type { VisionArticle, VisionSection } from "@/lib/vision-article";
 
 function VisionBlock({ section }: { section: VisionSection }) {
   const bodyClass = section.heading ? "mt-3 space-y-3" : "space-y-3";
@@ -42,17 +41,19 @@ function VisionBlock({ section }: { section: VisionSection }) {
   );
 }
 
-export function VisionArticle() {
+type VisionArticleProps = {
+  article: VisionArticle;
+  siteName: string;
+};
+
+export function VisionArticle({ article, siteName }: VisionArticleProps) {
   return (
     <>
       <p className="font-display text-lg text-cyan-pale/90 sm:text-xl">
-        Lost Garden
+        {siteName}
       </p>
-      <p className="mt-2 text-ivory/60">
-        By Frank Houbre, vision, process, and why AI is a bridge, not a
-        shortcut.
-      </p>
-      {VISION_ARTICLE.sections.map((section, index) => (
+      <p className="mt-2 text-ivory/60">{article.byline}</p>
+      {article.sections.map((section, index) => (
         <VisionBlock key={section.heading ?? `intro-${index}`} section={section} />
       ))}
     </>

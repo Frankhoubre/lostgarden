@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
-import { VISION_ARTICLE } from "@/lib/vision-article";
+import { getVisionArticle } from "@/lib/vision-articles";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 
 type VisionPageProps = {
@@ -36,6 +36,7 @@ export default async function VisionPage({ params }: VisionPageProps) {
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
+  const article = getVisionArticle(locale);
   const homePath = localePath(locale, "/");
   const visionPath = localePath(locale, "/vision");
 
@@ -56,7 +57,7 @@ export default async function VisionPage({ params }: VisionPageProps) {
         })}
       />
       <LegalPageShell title={dict.vision.headline}>
-        <VisionArticle />
+        <VisionArticle article={article} siteName={dict.common.siteName} />
       </LegalPageShell>
     </>
   );
