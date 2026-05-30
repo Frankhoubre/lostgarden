@@ -4,10 +4,12 @@ export const CHARACTER_IMAGES: Partial<Record<CharacterVisual, string>> = {
   sol: "/images/sol.png",
   rose: "/images/rose.png",
   machines: "/images/sleeping-machines.png",
+  pilgrims: "/images/pelerins.png",
 };
 
 export const CHARACTER_IMAGE_FOCUS: Partial<Record<CharacterVisual, string>> = {
   sol: "center 28%",
   rose: "center 42%",
   machines: "center 35%",
+  pilgrims: "center 42%",
 };
