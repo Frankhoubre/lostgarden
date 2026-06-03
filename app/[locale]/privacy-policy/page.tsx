@@ -26,6 +26,7 @@ export async function generateMetadata({
     title: dict.meta.privacy.title,
     description: dict.meta.privacy.description,
     path: localePath(locale, "/privacy-policy"),
+    pathSuffix: "/privacy-policy",
     absoluteTitle: true,
   });
 }

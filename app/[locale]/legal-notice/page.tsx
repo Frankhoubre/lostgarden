@@ -25,6 +25,7 @@ export async function generateMetadata({
     title: dict.meta.legalNotice.title,
     description: dict.meta.legalNotice.description,
     path: localePath(locale, "/legal-notice"),
+    pathSuffix: "/legal-notice",
     absoluteTitle: true,
   });
 }

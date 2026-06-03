@@ -10,7 +10,19 @@
     },
     "vision": {
       "title": "Vision | Lost Garden",
-      "description": "Frank Houbre sur Lost Garden : Sol, Rose, un monde souterrain blessé, et comment l'IA aide à donner forme à une vision artistique."
+      "description": "Frank Houbre sur Lost Garden, un animé assisté par IA : Sol, Rose, un monde souterrain blessé, et comment l'IA donne forme à la vision artistique."
+    },
+    "process": {
+      "title": "Process animé IA | Lost Garden",
+      "description": "Comment l'épisode 1 de Lost Garden est produit : pipeline d'animation assistée par IA, FAQ et référence pour l'animé généré par IA indie."
+    },
+    "press": {
+      "title": "Presse & media kit | Lost Garden",
+      "description": "Kit presse pour Lost Garden, animé dark fantasy original assisté par IA. Pitch, liens et contact pour journalistes et créateurs."
+    },
+    "episodeOnePublic": {
+      "title": "Lost Garden épisode 1 | Animé dark fantasy assisté par IA",
+      "description": "Regardez l'épisode 1 de Lost Garden, animé original assisté par IA par Frank Houbre. Sol, Rose et un monde sous la terre."
     },
     "legalNotice": {
       "title": "Mentions légales | Lost Garden",
@@ -75,28 +87,28 @@
         "visual": "sol",
         "type": "Armure creuse",
         "tagline": "Un chevalier vide à tête-lanterne, sans corps, sans voix, avec un devoir qu'il ne comprend pas.",
-        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde.",
+        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde."
       },
       {
         "name": "Rose",
         "visual": "rose",
         "type": "Enfant mystérieuse",
         "tagline": "Une enfant silencieuse dont la présence fait revenir la vie là où rien ne devrait pousser.",
-        "description": "Rose est petite, calme, presque irréelle. Elle traverse les ruines avec une sérénité étrange, comme si elle entendait ce que le monde a oublié. Autour d'elle, les fleurs s'ouvrent, les racines bougent, la terre morte se souvient parfois de respirer. Mais Rose n'est ni une arme, ni un miracle à dépenser, ni un symbole. C'est une enfant.",
+        "description": "Rose est petite, calme, presque irréelle. Elle traverse les ruines avec une sérénité étrange, comme si elle entendait ce que le monde a oublié. Autour d'elle, les fleurs s'ouvrent, les racines bougent, la terre morte se souvient parfois de respirer. Mais Rose n'est ni une arme, ni un miracle à dépenser, ni un symbole. C'est une enfant."
       },
       {
         "name": "Les machines endormies",
         "visual": "machines",
         "type": "Reliques organo-mécaniques",
         "tagline": "Des êtres colossaux, mi-morts mi-rêveurs, sous la mousse et les racines.",
-        "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons, mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés.",
+        "description": "Longtemps après l'ancienne catastrophe, les machines gisent encore dans les forêts bleues. Leurs corps sont rouillés, fissurés, recouverts de champignons, mais certains yeux s'ouvrent encore dans le noir. Elles ne haïssent pas. Elles ne pardonnent pas. Elles se réveillent comme des désastres oubliés."
       },
       {
         "name": "Les pèlerins masqués",
         "visual": "pilgrims",
         "type": "Procession inconnue",
         "tagline": "Des silhouettes en capuche noire et masque blanc, portant d'étranges rituels dans la brume.",
-        "description": "Vus seulement de loin, ils traversent les plateformes des cavernes en processions silencieuses. Leurs gongs résonnent dans l'abîme. Nul ne sait s'ils sont gardiens, pleureurs, ou quelque chose de plus ancien. Leur présence signifie que les profondeurs ne sont pas vides.",
+        "description": "Vus seulement de loin, ils traversent les plateformes des cavernes en processions silencieuses. Leurs gongs résonnent dans l'abîme. Nul ne sait s'ils sont gardiens, pleureurs, ou quelque chose de plus ancien. Leur présence signifie que les profondeurs ne sont pas vides."
       }
     ]
   },
@@ -231,11 +243,18 @@
     "byline": "Projet d'anime original par Frank Houbre.",
     "socialAria": "Réseaux sociaux et contact",
     "linksAria": "Liens du site et mentions légales",
+    "projectAria": "À propos du projet",
+    "legalAria": "Mentions légales",
+    "projectAria": "À propos du projet",
+    "legalAria": "Mentions légales",
     "instagram": "Instagram",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "contact": "Contact",
     "vision": "Vision",
+    "process": "Process IA",
+    "press": "Presse",
+    "episodeOne": "Épisode 1",
     "legalNotice": "Mentions légales",
     "privacy": "Confidentialité",
     "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés."
@@ -256,5 +275,52 @@
     "headline": "Créer un anime avec l'IA, une scène à la fois",
     "breadcrumbHome": "Accueil",
     "breadcrumbVision": "Vision"
+  },
+  "process": {
+    "headline": "Production d'animé assistée par IA",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbProcess": "Process",
+    "faqHeading": "Questions fréquentes",
+    "relatedHeading": "Explorer",
+    "links": {
+      "vision": "Vision du créateur (essai complet)",
+      "episode": "Voir l'épisode 1 (public)",
+      "press": "Presse & media kit"
+    }
+  },
+  "press": {
+    "headline": "Presse & media kit",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbPress": "Presse",
+    "lead": "Lost Garden est un animé dark fantasy original assisté par IA par Frank Houbre. Liens pour citer le projet ou demander des éléments.",
+    "pitchHeading": "Pitch court",
+    "pitch": "Sous la terre, Sol, chevalier creux au casque-lanterne, traverse forêts bleues et cavernes anciennes. À ses côtés, Rose, une enfant qui pourrait être la clé d'un monde blessé. L'épisode 1 est disponible, produit en animé indie assisté par IA sous une vision d'auteur unique.",
+    "factsHeading": "En bref",
+    "facts": [
+      "Format : animé original, épisode 1 disponible",
+      "Genre : dark fantasy poétique, monde souterrain",
+      "Production : animation et visuels assistés par IA, direction humaine",
+      "Créateur : Frank Houbre (auteur, réalisateur)",
+      "Site : lostgarden.world",
+      "YouTube : @lostgardenanime"
+    ],
+    "linksHeading": "Liens canoniques",
+    "linkProcess": "Process de production IA (page référence)",
+    "linkVision": "Vision & direction créative",
+    "linkEpisode": "Épisode 1 (lecteur sur le site)",
+    "linkYoutube": "Épisode 1 sur YouTube",
+    "contactHeading": "Contact",
+    "contactNote": "Interviews, articles ou listes (animé IA, animation indie) : email ci-dessous."
+  },
+  "episodeOnePublic": {
+    "headline": "Épisode 1",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbEpisode": "Épisode 1",
+    "lead": "Le premier épisode de Lost Garden, animé dark fantasy assisté par IA. À voir ici ou sur YouTube.",
+    "watchTitle": "Épisode 1",
+    "relatedHeading": "Sur la production",
+    "processLink": "Comment c'est fait (process IA)",
+    "visionLink": "Vision du créateur",
+    "pressLink": "Presse & media kit"
   }
 }

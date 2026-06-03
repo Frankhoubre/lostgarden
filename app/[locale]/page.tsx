@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: HomePageProps) {
     title: dict.meta.home.title,
     description: dict.meta.home.description,
     path: localePath(locale, "/"),
+    pathSuffix: "/",
     absoluteTitle: true,
   });
 }

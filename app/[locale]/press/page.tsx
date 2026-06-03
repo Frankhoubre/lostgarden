@@ -1,25 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
-import { VisionArticle } from "@/components/vision/VisionArticle";
+import { PressKit } from "@/components/press/PressKit";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
-import { getVisionArticle } from "@/lib/vision-articles";
-import {
-  articlePageJsonLd,
-  breadcrumbJsonLd,
-  buildPageMetadata,
-} from "@/lib/seo";
+import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 
-type VisionPageProps = {
+type PressPageProps = {
   params: Promise<{ locale: string }>;
 };
 
 export async function generateMetadata({
   params,
-}: VisionPageProps): Promise<Metadata> {
+}: PressPageProps): Promise<Metadata> {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
@@ -27,42 +22,40 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     locale,
-    title: dict.meta.vision.title,
-    description: dict.meta.vision.description,
-    path: localePath(locale, "/vision"),
-    pathSuffix: "/vision",
+    title: dict.meta.press.title,
+    description: dict.meta.press.description,
+    path: localePath(locale, "/press"),
+    pathSuffix: "/press",
     absoluteTitle: true,
-    ogType: "article",
   });
 }
 
-export default async function VisionPage({ params }: VisionPageProps) {
+export default async function PressPage({ params }: PressPageProps) {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
-  const article = getVisionArticle(locale);
   const homePath = localePath(locale, "/");
-  const visionPath = localePath(locale, "/vision");
+  const pressPath = localePath(locale, "/press");
 
   const breadcrumbs = [
-    { name: dict.vision.breadcrumbHome, path: homePath },
-    { name: dict.vision.breadcrumbVision, path: visionPath },
+    { name: dict.press.breadcrumbHome, path: homePath },
+    { name: dict.press.breadcrumbPress, path: pressPath },
   ] as const;
 
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(breadcrumbs)} />
       <JsonLd
-        data={articlePageJsonLd({
+        data={webPageJsonLd({
           locale,
-          headline: dict.vision.headline,
-          description: dict.meta.vision.description,
-          path: visionPath,
+          name: dict.press.headline,
+          description: dict.meta.press.description,
+          path: pressPath,
         })}
       />
-      <LegalPageShell title={dict.vision.headline}>
-        <VisionArticle article={article} siteName={dict.common.siteName} />
+      <LegalPageShell title={dict.press.headline}>
+        <PressKit locale={locale} dict={dict} />
       </LegalPageShell>
     </>
   );

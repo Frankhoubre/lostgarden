@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
-import { VisionArticle } from "@/components/vision/VisionArticle";
+import { EpisodeOnePublic } from "@/components/episode/EpisodeOnePublic";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
-import { getVisionArticle } from "@/lib/vision-articles";
 import {
-  articlePageJsonLd,
   breadcrumbJsonLd,
   buildPageMetadata,
+  episodeVideoJsonLd,
+  webPageJsonLd,
 } from "@/lib/seo";
 
-type VisionPageProps = {
+type EpisodeOnePageProps = {
   params: Promise<{ locale: string }>;
 };
 
 export async function generateMetadata({
   params,
-}: VisionPageProps): Promise<Metadata> {
+}: EpisodeOnePageProps): Promise<Metadata> {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
@@ -27,42 +27,47 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     locale,
-    title: dict.meta.vision.title,
-    description: dict.meta.vision.description,
-    path: localePath(locale, "/vision"),
-    pathSuffix: "/vision",
+    title: dict.meta.episodeOnePublic.title,
+    description: dict.meta.episodeOnePublic.description,
+    path: localePath(locale, "/episode-1"),
+    pathSuffix: "/episode-1",
     absoluteTitle: true,
-    ogType: "article",
   });
 }
 
-export default async function VisionPage({ params }: VisionPageProps) {
+export default async function EpisodeOnePage({ params }: EpisodeOnePageProps) {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
-  const article = getVisionArticle(locale);
   const homePath = localePath(locale, "/");
-  const visionPath = localePath(locale, "/vision");
+  const episodePath = localePath(locale, "/episode-1");
 
   const breadcrumbs = [
-    { name: dict.vision.breadcrumbHome, path: homePath },
-    { name: dict.vision.breadcrumbVision, path: visionPath },
+    { name: dict.episodeOnePublic.breadcrumbHome, path: homePath },
+    { name: dict.episodeOnePublic.breadcrumbEpisode, path: episodePath },
   ] as const;
 
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(breadcrumbs)} />
       <JsonLd
-        data={articlePageJsonLd({
+        data={webPageJsonLd({
           locale,
-          headline: dict.vision.headline,
-          description: dict.meta.vision.description,
-          path: visionPath,
+          name: dict.episodeOnePublic.headline,
+          description: dict.meta.episodeOnePublic.description,
+          path: episodePath,
         })}
       />
-      <LegalPageShell title={dict.vision.headline}>
-        <VisionArticle article={article} siteName={dict.common.siteName} />
+      <JsonLd
+        data={episodeVideoJsonLd({
+          locale,
+          name: dict.meta.episodeOnePublic.title,
+          description: dict.meta.episodeOnePublic.description,
+        })}
+      />
+      <LegalPageShell title={dict.episodeOnePublic.headline}>
+        <EpisodeOnePublic />
       </LegalPageShell>
     </>
   );

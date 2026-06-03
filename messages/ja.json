@@ -10,7 +10,19 @@
     },
     "vision": {
       "title": "ビジョン | Lost Garden",
-      "description": "Frank Houbreが語るLost Garden：Sol、Rose、傷ついた地下世界、そしてAIが芸術的ビジョンを形にする方法。"
+      "description": "Frank Houbreが語るLost Garden、AI支援アニメ：Sol、Rose、傷ついた地下世界、AIが芸術的ビジョンを形にする方法。"
+    },
+    "process": {
+      "title": "AIアニメ制作プロセス | Lost Garden",
+      "description": "Lost Garden第1話の制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
+    },
+    "press": {
+      "title": "プレス・メディアキット | Lost Garden",
+      "description": "オリジナルAI支援ダークファンタジーアニメLost Gardenのプレスキット。ピッチ、リンク、取材連絡先。"
+    },
+    "episodeOnePublic": {
+      "title": "Lost Garden 第1話 | AI支援ダークファンタジーアニメ",
+      "description": "Frank HoubreのオリジナルAI支援アニメLost Garden第1話を視聴。空洞の騎士Sol、Rose、地下の世界。"
     },
     "legalNotice": {
       "title": "法的通知 | Lost Garden",
@@ -75,28 +87,28 @@
         "visual": "sol",
         "type": "空洞の鎧",
         "tagline": "ランタンの頭を持つ空の騎士。体も声もなく、理解できない使命だけがある。",
-        "description": "Solは伝説の戦士ではない。傷つき、ぎこちなく、奇妙に無垢な、青い洞窟の奥で目覚めた古い鎧。本当の言葉は話せない。空洞の金属音、きしみ、うめき、静かな仕草だけが感情を示す。それでも危険が来れば、Roseと世界のあいだに立つ。",
+        "description": "Solは伝説の戦士ではない。傷つき、ぎこちなく、奇妙に無垢な、青い洞窟の奥で目覚めた古い鎧。本当の言葉は話せない。空洞の金属音、きしみ、うめき、静かな仕草だけが感情を示す。それでも危険が来れば、Roseと世界のあいだに立つ。"
       },
       {
         "name": "Rose",
         "visual": "rose",
         "type": "謎の子供",
         "tagline": "何も育つはずのない場所に命を取り戻す、静かな子供。",
-        "description": "Roseは小さく、穏やかで、ほとんど非現実的。廃墟を不思議な静けさで歩く。世界が忘れたものを聞いているかのよう。彼女の周りで花が咲き、根が動き、死んだ大地が息を思い出すことがある。だがRoseは武器でも、使い捨ての奇跡でも、象徴でもない。子供なのだ。",
+        "description": "Roseは小さく、穏やかで、ほとんど非現実的。廃墟を不思議な静けさで歩く。世界が忘れたものを聞いているかのよう。彼女の周りで花が咲き、根が動き、死んだ大地が息を思い出すことがある。だがRoseは武器でも、使い捨ての奇跡でも、象徴でもない。子供なのだ。"
       },
       {
         "name": "眠る機械",
         "visual": "machines",
         "type": "古代の異星遺物",
         "tagline": "苔と根の下で、半分死に、半分夢見る巨大な機械生物。",
-        "description": "古い catastrophe のずっと後も、機械は青い森に埋もれたまま。体は錆び、ひび割れ、菌に覆われているが、闇の中で目を開くものもいる。憎むことも、許すこともない。忘れられた災害のように目覚める。",
+        "description": "古い catastrophe のずっと後も、機械は青い森に埋もれたまま。体は錆び、ひび割れ、菌に覆われているが、闇の中で目を開くものもいる。憎むことも、許すこともない。忘れられた災害のように目覚める。"
       },
       {
         "name": "仮面の巡礼者",
         "visual": "pilgrims",
         "type": "未知の行列",
         "tagline": "黒いフードと白い仮面、霧の中で奇怪な儀式を運ぶ姿。",
-        "description": "遠くからしか見えない。洞窟の台で沈黙の行列を進む。鉦の音が深淵に響く。守護者か、喪主か、それより古い何かか。彼らの存在は、深みが空ではないことを意味する。",
+        "description": "遠くからしか見えない。洞窟の台で沈黙の行列を進む。鉦の音が深淵に響く。守護者か、喪主か、それより古い何かか。彼らの存在は、深みが空ではないことを意味する。"
       }
     ]
   },
@@ -231,11 +243,16 @@
     "byline": "Frank Houbreによるオリジナルアニメプロジェクト。",
     "socialAria": "ソーシャルと連絡先",
     "linksAria": "サイトと法的リンク",
+    "projectAria": "プロジェクトについて",
+    "legalAria": "法的情報",
     "instagram": "Instagram",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "contact": "連絡",
     "vision": "ビジョン",
+    "process": "制作プロセス",
+    "press": "プレス",
+    "episodeOne": "第1話",
     "legalNotice": "法的通知",
     "privacy": "プライバシー",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
@@ -256,5 +273,52 @@
     "headline": "AIでアニメを作る、ひとシーンずつ",
     "breadcrumbHome": "ホーム",
     "breadcrumbVision": "ビジョン"
+  },
+  "process": {
+    "headline": "AI支援アニメ制作",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbProcess": "プロセス",
+    "faqHeading": "よくある質問",
+    "relatedHeading": "関連ページ",
+    "links": {
+      "vision": "クリエイタービジョン（全文）",
+      "episode": "第1話を見る（公開）",
+      "press": "プレス・メディアキット"
+    }
+  },
+  "press": {
+    "headline": "プレス・メディアキット",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbPress": "プレス",
+    "lead": "Lost GardenはFrank HoubreによるオリジナルのAI支援ダークファンタジーアニメです。引用・取材用リンクは以下です。",
+    "pitchHeading": "短いピッチ",
+    "pitch": "地下で、ランタン兜の空洞の騎士Solが青い森と古代の洞窟を進む。謎の子Roseは傷ついた世界の鍵かもしれない。第1話配信中。インディーAI支援アニメとして一つの作者ビジョンで制作。",
+    "factsHeading": "概要",
+    "facts": [
+      "形式：オリジナルアニメ、第1話配信中",
+      "ジャンル：詩的ダークファンタジー、地下世界",
+      "制作：人間の監督のもとAI支援アニメーション",
+      "クリエイター：Frank Houbre（脚本・監督）",
+      "サイト：lostgarden.world",
+      "YouTube：@lostgardenanime"
+    ],
+    "linksHeading": "公式リンク",
+    "linkProcess": "AI制作プロセス（参考ページ）",
+    "linkVision": "ビジョンと創作方向",
+    "linkEpisode": "第1話（サイト内プレイヤー）",
+    "linkYoutube": "YouTubeで第1話",
+    "contactHeading": "連絡先",
+    "contactNote": "取材・特集・リスト掲載（AIアニメ、インディーアニメ）のお問い合わせは以下まで。"
+  },
+  "episodeOnePublic": {
+    "headline": "第1話",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbEpisode": "第1話",
+    "lead": "AI支援ダークファンタジーアニメLost Gardenの第1話。ここまたはYouTubeで視聴。",
+    "watchTitle": "第1話",
+    "relatedHeading": "制作について",
+    "processLink": "制作方法（AIプロセス）",
+    "visionLink": "クリエイタービジョン",
+    "pressLink": "プレス・メディアキット"
   }
 }

@@ -10,7 +10,19 @@
     },
     "vision": {
       "title": "Vision | Lost Garden",
-      "description": "Frank Houbre on Lost Garden: Sol, Rose, a wounded underground world, and how AI helps turn a clear artistic vision into images, animation, and sound."
+      "description": "Frank Houbre on Lost Garden, an AI-assisted anime: Sol, Rose, a wounded underground world, and how AI helps turn artistic vision into images, animation, and sound."
+    },
+    "process": {
+      "title": "AI Anime Process | Lost Garden",
+      "description": "How Lost Garden Episode One is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime by Frank Houbre."
+    },
+    "press": {
+      "title": "Press & Media Kit | Lost Garden",
+      "description": "Press kit for Lost Garden, an original AI-assisted dark fantasy anime. Pitch, links, and contact for journalists and creators."
+    },
+    "episodeOnePublic": {
+      "title": "Lost Garden Episode 1 | AI-Assisted Dark Fantasy Anime",
+      "description": "Watch Episode One of Lost Garden, an original AI-assisted anime by Frank Houbre. Hollow knight Sol, Rose, and a world beneath the earth."
     },
     "legalNotice": {
       "title": "Legal Notice | Lost Garden",
@@ -75,28 +87,28 @@
         "visual": "sol",
         "type": "Hollow Armor",
         "tagline": "An empty knight with a lantern-shaped head, no body, no voice, and a duty he does not understand.",
-        "description": "Sol is not a legendary warrior. He is damaged, awkward, and strangely innocent, an old armor awakened in the depths of a blue cavern. He cannot truly speak. Only hollow metallic sounds, creaks, groans, and quiet gestures reveal what he feels. Yet when danger comes, he places himself between Rose and the world.",
+        "description": "Sol is not a legendary warrior. He is damaged, awkward, and strangely innocent, an old armor awakened in the depths of a blue cavern. He cannot truly speak. Only hollow metallic sounds, creaks, groans, and quiet gestures reveal what he feels. Yet when danger comes, he places himself between Rose and the world."
       },
       {
         "name": "Rose",
         "visual": "rose",
         "type": "Mysterious Child",
         "tagline": "A quiet child whose presence makes life return where nothing should grow.",
-        "description": "Rose is small, calm, and almost unreal. She walks through ruined places with a strange serenity, as if she can hear what the world has forgotten. Around her, flowers bloom, roots move, and the dead earth sometimes remembers how to breathe. But Rose is not a weapon, not a miracle to spend, and not a symbol. She is a child.",
+        "description": "Rose is small, calm, and almost unreal. She walks through ruined places with a strange serenity, as if she can hear what the world has forgotten. Around her, flowers bloom, roots move, and the dead earth sometimes remembers how to breathe. But Rose is not a weapon, not a miracle to spend, and not a symbol. She is a child."
       },
       {
         "name": "The Sleeping Machines",
         "visual": "machines",
         "type": "Ancient Alien Relics",
         "tagline": "Colossal mechanical-organic beings, half dead, half dreaming beneath moss and roots.",
-        "description": "Long after the old catastrophe, the machines still lie buried in the blue forests. Their bodies are rusted, cracked, and covered in fungi, but some eyes still open in the dark. They do not hate. They do not forgive. They awaken like forgotten disasters.",
+        "description": "Long after the old catastrophe, the machines still lie buried in the blue forests. Their bodies are rusted, cracked, and covered in fungi, but some eyes still open in the dark. They do not hate. They do not forgive. They awaken like forgotten disasters."
       },
       {
         "name": "The Masked Pilgrims",
         "visual": "pilgrims",
         "type": "Unknown Procession",
         "tagline": "Figures in black hoods and white masks, carrying strange rituals through the mist.",
-        "description": "Seen only from afar, they move through the cavern platforms in silent processions. Their gongs echo across the abyss. Nobody knows if they are guardians, mourners, or something older. Their presence means the depths are not empty.",
+        "description": "Seen only from afar, they move through the cavern platforms in silent processions. Their gongs echo across the abyss. Nobody knows if they are guardians, mourners, or something older. Their presence means the depths are not empty."
       }
     ]
   },
@@ -231,11 +243,16 @@
     "byline": "An original anime project by Frank Houbre.",
     "socialAria": "Social and contact links",
     "linksAria": "Site and legal links",
+    "projectAria": "About the project",
+    "legalAria": "Legal",
     "instagram": "Instagram",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "contact": "Contact",
     "vision": "Vision",
+    "process": "AI process",
+    "press": "Press",
+    "episodeOne": "Episode 1",
     "legalNotice": "Legal notice",
     "privacy": "Privacy",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
@@ -256,5 +273,52 @@
     "headline": "Creating an Anime With AI, One Scene at a Time",
     "breadcrumbHome": "Home",
     "breadcrumbVision": "Vision"
+  },
+  "process": {
+    "headline": "AI-Assisted Anime Production",
+    "breadcrumbHome": "Home",
+    "breadcrumbProcess": "Process",
+    "faqHeading": "Frequently asked questions",
+    "relatedHeading": "Explore",
+    "links": {
+      "vision": "Creator vision (full essay)",
+      "episode": "Watch Episode One (public)",
+      "press": "Press & media kit"
+    }
+  },
+  "press": {
+    "headline": "Press & Media Kit",
+    "breadcrumbHome": "Home",
+    "breadcrumbPress": "Press",
+    "lead": "Lost Garden is an original AI-assisted dark fantasy anime by Frank Houbre. Use the links below to cite the project or request materials.",
+    "pitchHeading": "Short pitch",
+    "pitch": "Beneath the earth, a hollow knight named Sol carries a lantern helmet through blue forests and ancient caverns. Beside him, a child called Rose may be the key to a wounded world. Episode One is out now, produced as an indie AI-assisted anime with a single authorial vision.",
+    "factsHeading": "Quick facts",
+    "facts": [
+      "Format: original anime, Episode One available",
+      "Genre: poetic dark fantasy, underground world",
+      "Production: AI-assisted animation and visuals under human direction",
+      "Creator: Frank Houbre (writer, director)",
+      "Site: lostgarden.world",
+      "YouTube: @lostgardenanime"
+    ],
+    "linksHeading": "Canonical links",
+    "linkProcess": "AI production process (reference page)",
+    "linkVision": "Vision & creative direction",
+    "linkEpisode": "Episode One (on-site player)",
+    "linkYoutube": "Episode One on YouTube",
+    "contactHeading": "Contact",
+    "contactNote": "For interviews, features, or list inclusions (AI anime, indie animation), email below."
+  },
+  "episodeOnePublic": {
+    "headline": "Episode One",
+    "breadcrumbHome": "Home",
+    "breadcrumbEpisode": "Episode 1",
+    "lead": "The first episode of Lost Garden, an AI-assisted dark fantasy anime. Watch here or on YouTube.",
+    "watchTitle": "Episode One",
+    "relatedHeading": "About the production",
+    "processLink": "How it was made (AI process)",
+    "visionLink": "Creator vision",
+    "pressLink": "Press & media kit"
   }
 }
