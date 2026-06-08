@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { PressKit } from "@/components/press/PressKit";
+import { PressPageShell } from "@/components/press/PressPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
+import { PRESS_KIT } from "@/lib/press";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 
 type PressPageProps = {
   params: Promise<{ locale: string }>;
 };
+
+const PRESS_KEYWORDS = [
+  "Lost Garden",
+  "Frank Houbre",
+  "série animée",
+  "animation IA",
+  "animation indépendante",
+  "dark fantasy",
+  "one-person studio",
+  "ScreenWeaver",
+  "AI filmmaking",
+  "anime",
+  "creative AI workflow",
+  "independent animation",
+  "AI-assisted animation",
+  "animated dark fantasy series",
+];
 
 export async function generateMetadata({
   params,
@@ -19,15 +37,36 @@ export async function generateMetadata({
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
+  const meta = dict.meta.press;
 
-  return buildPageMetadata({
+  const base = buildPageMetadata({
     locale,
-    title: dict.meta.press.title,
-    description: dict.meta.press.description,
+    title: meta.title,
+    description: meta.description,
     path: localePath(locale, "/press"),
     pathSuffix: "/press",
     absoluteTitle: true,
+    ogImage: PRESS_KIT.ogImageUrl,
+    ogImageAlt: `${dict.press.hero.title} press kit`,
   });
+
+  const ogTitle = meta.ogTitle ?? meta.title;
+  const ogDescription = meta.ogDescription ?? meta.description;
+
+  return {
+    ...base,
+    keywords: PRESS_KEYWORDS,
+    openGraph: {
+      ...base.openGraph,
+      title: ogTitle,
+      description: ogDescription,
+    },
+    twitter: {
+      ...base.twitter,
+      title: ogTitle,
+      description: ogDescription,
+    },
+  };
 }
 
 export default async function PressPage({ params }: PressPageProps) {
@@ -49,14 +88,14 @@ export default async function PressPage({ params }: PressPageProps) {
       <JsonLd
         data={webPageJsonLd({
           locale,
-          name: dict.press.headline,
+          name: dict.press.hero.title,
           description: dict.meta.press.description,
           path: pressPath,
         })}
       />
-      <LegalPageShell title={dict.press.headline}>
+      <PressPageShell>
         <PressKit locale={locale} dict={dict} />
-      </LegalPageShell>
+      </PressPageShell>
     </>
   );
 }

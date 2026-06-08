@@ -42,6 +42,10 @@ type BuildPageMetadataOptions = {
   absoluteTitle?: boolean;
   noIndex?: boolean;
   ogType?: "website" | "article";
+  ogImage?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  ogImageAlt?: string;
 };
 
 export function localeHreflangAlternates(
@@ -71,6 +75,10 @@ export function buildPageMetadata({
   absoluteTitle = false,
   noIndex = false,
   ogType = "website",
+  ogImage = SITE.ogImage,
+  ogImageWidth = SITE.ogImageWidth,
+  ogImageHeight = SITE.ogImageHeight,
+  ogImageAlt = `${SITE.name}, official anime project`,
 }: BuildPageMetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
   const hreflang =
@@ -94,10 +102,10 @@ export function buildPageMetadata({
       siteName: SITE.name,
       images: [
         {
-          url: SITE.ogImage,
-          width: SITE.ogImageWidth,
-          height: SITE.ogImageHeight,
-          alt: `${SITE.name}, official anime project`,
+          url: ogImage,
+          width: ogImageWidth,
+          height: ogImageHeight,
+          alt: ogImageAlt,
         },
       ],
     },
@@ -105,7 +113,7 @@ export function buildPageMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [SITE.ogImage],
+      images: [ogImage],
     },
     robots: noIndex
       ? { index: false, follow: false }

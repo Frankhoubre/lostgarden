@@ -17,8 +17,10 @@
       "description": "Lost Garden 1화 제작 방식: AI 지원 애니메이션 파이프라인, FAQ, 인디 AI 생성 애니메이션 참고 자료."
     },
     "press": {
-      "title": "보도자료 & 미디어 키트 | Lost Garden",
-      "description": "오리지널 AI 지원 다크 판타지 애니메이션 Lost Garden 보도자료. 피치, 링크, 연락처."
+      "title": "Lost Garden 프레스 키트 — Frank Houbre의 독립 애니메이션 시리즈",
+      "description": "17분 다크 판타지 애니메이션을 혼자 제작. AI 지원 워크플로로 완성한 Lost Garden 프레스 키트.",
+      "ogTitle": "Lost Garden 프레스 키트 — 독립 애니메이션",
+      "ogDescription": "1인 스튜디오의 17분 다크 판타지 애니메이션. AI 지원 제작, 프레스 자료, 인터뷰 문의."
     },
     "episodeOnePublic": {
       "title": "Lost Garden 1화 | AI 지원 다크 판타지 애니메이션",
@@ -287,28 +289,144 @@
     }
   },
   "press": {
-    "headline": "보도자료 & 미디어 키트",
+    "headline": "Press Kit",
     "breadcrumbHome": "홈",
-    "breadcrumbPress": "보도자료",
-    "lead": "Lost Garden은 Frank Houbre의 오리지널 AI 지원 다크 판타지 애니메이션입니다. 인용 및 자료 요청용 링크입니다.",
-    "pitchHeading": "짧은 피치",
-    "pitch": "땅속에서 공허한 기사 Sol이 등불 투구를 쓰고 푸른 숲과 고대 동굴을 지난다. 아이 Rose는 상처 입은 세계의 열쇠일 수 있다. 1화 공개. 단일 작가 비전의 인디 AI 지원 애니메이션.",
-    "factsHeading": "요약",
-    "facts": [
-      "형식: 오리지널 애니메이션, 1화 공개",
-      "장르: 시적 다크 판타지, 지하 세계",
-      "제작: 인간 감독 아래 AI 지원 애니메이션",
-      "창작자: Frank Houbre (각본, 연출)",
-      "사이트: lostgarden.world",
-      "YouTube: @lostgardenanime"
-    ],
-    "linksHeading": "공식 링크",
-    "linkProcess": "AI 제작 과정 (참고 페이지)",
-    "linkVision": "비전 & 창작 방향",
-    "linkEpisode": "1화 (사이트 플레이어)",
-    "linkYoutube": "YouTube에서 1화",
-    "contactHeading": "연락처",
-    "contactNote": "인터뷰, 기사, 목록 포함(AI 애니, 인디 애니메이션) 문의는 아래 이메일."
+    "breadcrumbPress": "Press Kit",
+    "stickyContact": "보도 문의",
+    "nav": {
+      "story": "취재 포인트",
+      "facts": "핵심 수치",
+      "episode": "에피소드",
+      "watch": "시청",
+      "release": "보도자료",
+      "creator": "크리에이터",
+      "assets": "자료",
+      "gallery": "갤러리",
+      "quotes": "인용문",
+      "contact": "연락처"
+    },
+    "hero": {
+      "title": "Lost Garden",
+      "subtitle": "1인 스튜디오가 만든 독립 다크 판타지 애니메이션 시리즈.",
+      "badge": "17분 애니메이션 · 공개 며칠 만에 65,000회 이상 조회 · 1인 AI 지원 제작",
+      "emotional": "잊혀진 지하 세계에서 깨어난 고요한 기사. 신비한 아이 로즈에 대한 기억이 그를 이끈다.",
+      "ctaWatch": "에피소드 시청",
+      "ctaDownload": "프레스 키트 다운로드",
+      "ctaContact": "보도 문의"
+    },
+    "storyAngle": {
+      "title": "미디어가 주목하는 이유",
+      "lead": "Lost Garden은 기술 데모가 아닙니다. Frank Houbre가 기획·연출·제작을 혼자 완성한 애니메이션 에피소드입니다. 이 프로젝트는 새로운 제작 도구가 독립 크리에이터에게, 한때 대규모 스튜디오와 예산이 필요했던 야심 찬 애니메이션 세계를 구현할 수 있음을 보여줍니다.",
+      "angles": [
+        {
+          "title": "독립 제작",
+          "text": "한 명의 크리에이터가 17분 완성 애니메이션 에피소드를 제작."
+        },
+        {
+          "title": "혁신",
+          "text": "예술적 연출을 돕는 도구로 설계된 AI 지원 영상 제작 워크플로."
+        },
+        {
+          "title": "산업적 의미",
+          "text": "소규모 팀으로 야심 찬 애니메이션 시리즈를 제작하는 새로운 방식. 인간의 창의성을 대체하지 않습니다."
+        }
+      ]
+    },
+    "keyFacts": {
+      "title": "핵심 수치",
+      "items": [
+        { "highlight": "17분", "label": "애니메이션" },
+        { "highlight": "1명", "label": "크리에이터" },
+        { "highlight": "65,000+", "label": "공개 며칠 만의 조회수" },
+        { "highlight": "60시간+", "label": "제작 시간" },
+        { "highlight": "독립", "label": "자체 제작 프로젝트" },
+        { "highlight": "오리지널", "label": "스토리·세계관·캐릭터" },
+        { "highlight": "다크 판타지", "label": "애니메이션 시리즈" },
+        { "highlight": "AI 지원", "label": "제작 파이프라인" },
+        { "highlight": "Frank Houbre", "label": "각본·미술 감독·편집" }
+      ]
+    },
+    "episode": {
+      "title": "1화 — The Awakening of the Lantern Knight",
+      "synopsis": "Lost Garden 1화에서 고요하고 연약한 기사 랑테른은 푸른 숲, 고대 유적, 환영 같은 생물, 잊힌 기계가 펼쳐진 광대한 지하 세계에서 깨어납니다. 빛나는 메달리온의 인도를 받아, 이 세계의 미래의 열쇠를 쥐고 있을지 모르는 신비한 아이 로즈를 찾아 나섭니다.",
+      "cta": "전체 에피소드 시청"
+    },
+    "watch": {
+      "title": "에피소드 시청",
+      "lead": "기자, 파트너, 큐레이터는 인터뷰나 추가 자료 요청 전에 여기서 전체 에피소드를 시청할 수 있습니다.",
+      "cta": "에피소드 시청",
+      "openExternal": "YouTube에서 열기"
+    },
+    "pressRelease": {
+      "title": "보도자료",
+      "downloadCta": "보도자료 PDF 다운로드",
+      "headline": "독립 크리에이터, AI 지원 워크플로로 17분 애니메이션 시리즈를 혼자 완성",
+      "dateline": "2026년 6월",
+      "paragraphs": [
+        "애니메이션 시리즈 제작에 보통 수십에서 수백 명이 필요한 시대에, Frank Houbre는 특별한 도전에 나섰습니다. 오리지널 애니메이션 시리즈의 완성 에피소드를 혼자 제작하는 것입니다.",
+        "그 결과가 Lost Garden. 기사, 신비한 아이, 잊힌 생명체가 살아가는 광대한 지하 세계를 배경으로 한 다크 판타지 시리즈입니다.",
+        "6월 초 공개된 1화는 며칠 만에 65,000회 이상의 조회수를 기록했습니다. 비주얼 퀄리티, 미술 연출, 프로젝트의 야망에 감동한 시청자들의 열정적인 댓글이 이어지고 있습니다.",
+        "수주에 걸쳐 Frank Houbre는 각본, 미술 감독, 스토리보드, 애니메이션, 편집, 사운드 디자인, 음악, 포스트 프로덕션까지 모두 혼자 담당했습니다.",
+        "일부 오해와 달리, 이 프로젝트는 버튼 하나로 만들어지지 않았습니다. 스토리, 캐릭터, 세계관, 서사 구조, 예술적 선택은 모두 크리에이터가 기획하고 연출했습니다. AI는 제작 가속기로 활용되어, 독립 크리에이터가 이전에는 풀 스튜디오가 필요했던 비전을 실현할 수 있게 했습니다.",
+        "Lost Garden 외에도 Frank Houbre는 각본가와 영상 크리에이터를 위한 소프트웨어 ScreenWeaver를 개발 중입니다. 각본 작성에서 AI 지원 스토리보드 시각화까지 연결하는 도구입니다.",
+        "이 접근은 AI 도구가 작가, 감독, 스튜디오의 창작을 돕는 어시스턴트로 영상 산업 전반에 점차 자리 잡고 있는 흐름을 반영합니다."
+      ],
+      "quote": "제 목표는 아티스트나 스튜디오를 대체하는 것이 아닙니다. 오히려 그 반대입니다. 이 도구들이 새로운 세대의 크리에이터에게 이전에는 제작할 수 없었던 이야기를 들려줄 기회를 줄 것이라고 믿습니다."
+    },
+    "aboutFrank": {
+      "title": "Frank Houbre 소개",
+      "bio": "Frank Houbre는 인공지능, 스토리텔링, 마케팅, 영상 제작이 교차하는 지점에서 활동하는 프랑스의 기업가이자 크리에이터입니다. Lost Garden, ScreenWeaver, AI Studios 등의 프로젝트를 통해 새로운 제작 워크플로가 독립 크리에이터의 야심 찬 작품 제작을 어떻게 지원할 수 있는지 탐구하고 있습니다.",
+      "portraitAlt": "Lost Garden 크리에이터 Frank Houbre 초상"
+    },
+    "assets": {
+      "title": "미디어 자료",
+      "intro": "기사, 게재, 영화제 제출에 필요한 핵심 자료를 다운로드하세요.",
+      "download": "다운로드",
+      "items": [
+        { "id": "pressRelease", "title": "보도자료 PDF", "description": "공식 보도자료 인쇄용 버전." },
+        { "id": "images", "title": "Lost Garden HD 이미지", "description": "보도용 고해상도 스틸 컷." },
+        { "id": "portrait", "title": "Frank Houbre 초상", "description": "크리에이터 공식 사진 (보도 사용 가능)." },
+        { "id": "logo", "title": "Lost Garden 로고", "description": "공식 프로젝트 로고 (PNG)." },
+        { "id": "comments", "title": "댓글 캡처", "description": "시청자 반응 및 소셜 프루프." },
+        { "id": "episodeLinks", "title": "에피소드 링크", "description": "배포 플랫폼 직접 링크." },
+        { "id": "summary", "title": "프로젝트 요약", "description": "편집부·프로그래머용 1페이지 브리프." }
+      ]
+    },
+    "gallery": {
+      "title": "비주얼 갤러리",
+      "intro": "Lost Garden에서 엄선한 HD 스틸 컷. 보도, 기사, 미디어 게재에 활용하실 수 있습니다.",
+      "alts": {
+        "forestMachines": "거대한 기계가 깃든 푸른 숲을 달리는 랑테른, Lost Garden",
+        "lanterne": "랜턴 투구를 쓴 기사 랑테른 초상, Lost Garden",
+        "roseCapsule": "빛나는 캡슐 안에서 잠든 로즈, Lost Garden",
+        "tavern": "생물 발광 버섯이 비추는 지하 선술집의 두 기사, Lost Garden"
+      },
+      "close": "닫기",
+      "prev": "이전 이미지",
+      "next": "다음 이미지"
+    },
+    "quotes": {
+      "title": "인용문",
+      "intro": "기사, 인터뷰, 보도자료에 활용할 수 있는 인용문입니다.",
+      "items": [
+        "Lost Garden은 오늘날 한 명의 크리에이터가 몇 년 전에는 혼자서는 불가능했을 애니메이션 세계를 구현할 수 있음을 보여줍니다.",
+        "AI는 창작 과정을 대체하지 않았습니다. 혼자서는 도달할 수 없었던 야망을 더 멀리, 더 빠르게 향하게 해주었습니다.",
+        "애니메이션에서 인간을 제거하는 것이 아닙니다. 독립 크리에이터가 오랫동안 품어온 이야기를 드디어 들려줄 수 있게 하는 것입니다."
+      ],
+      "attribution": "Frank Houbre, Lost Garden 크리에이터"
+    },
+    "contact": {
+      "title": "인터뷰, 보도 요청, 추가 비주얼 문의",
+      "lead": "Lost Garden, 독립 애니메이션, AI 지원 제작, 새로운 크리에이티브 워크플로, 영상 창작의 미래에 대해 Frank Houbre가 인터뷰에 응합니다.",
+      "cta": "Frank에게 연락",
+      "emailLabel": "보도용 이메일"
+    },
+    "social": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok"
+    },
+    "backToSite": "사이트로 돌아가기"
   },
   "episodeOnePublic": {
     "headline": "1화",

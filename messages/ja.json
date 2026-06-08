@@ -17,8 +17,10 @@
       "description": "Lost Garden第1話の制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
     },
     "press": {
-      "title": "プレス・メディアキット | Lost Garden",
-      "description": "オリジナルAI支援ダークファンタジーアニメLost Gardenのプレスキット。ピッチ、リンク、取材連絡先。"
+      "title": "Lost Garden プレスキット — Frank Houbreによるインディーアニメーションシリーズ",
+      "description": "17分のダークファンタジーアニメを一人で制作。AI支援ワークフローで実現したLost Gardenのプレスキット。",
+      "ogTitle": "Lost Garden プレスキット — インディーアニメーション",
+      "ogDescription": "ワンパーソンスタジオによる17分のダークファンタジーアニメ。AI支援制作、プレス素材、取材連絡先。"
     },
     "episodeOnePublic": {
       "title": "Lost Garden 第1話 | AI支援ダークファンタジーアニメ",
@@ -287,28 +289,144 @@
     }
   },
   "press": {
-    "headline": "プレス・メディアキット",
+    "headline": "Press Kit",
     "breadcrumbHome": "ホーム",
-    "breadcrumbPress": "プレス",
-    "lead": "Lost GardenはFrank HoubreによるオリジナルのAI支援ダークファンタジーアニメです。引用・取材用リンクは以下です。",
-    "pitchHeading": "短いピッチ",
-    "pitch": "地下で、ランタン兜の空洞の騎士Solが青い森と古代の洞窟を進む。謎の子Roseは傷ついた世界の鍵かもしれない。第1話配信中。インディーAI支援アニメとして一つの作者ビジョンで制作。",
-    "factsHeading": "概要",
-    "facts": [
-      "形式：オリジナルアニメ、第1話配信中",
-      "ジャンル：詩的ダークファンタジー、地下世界",
-      "制作：人間の監督のもとAI支援アニメーション",
-      "クリエイター：Frank Houbre（脚本・監督）",
-      "サイト：lostgarden.world",
-      "YouTube：@lostgardenanime"
-    ],
-    "linksHeading": "公式リンク",
-    "linkProcess": "AI制作プロセス（参考ページ）",
-    "linkVision": "ビジョンと創作方向",
-    "linkEpisode": "第1話（サイト内プレイヤー）",
-    "linkYoutube": "YouTubeで第1話",
-    "contactHeading": "連絡先",
-    "contactNote": "取材・特集・リスト掲載（AIアニメ、インディーアニメ）のお問い合わせは以下まで。"
+    "breadcrumbPress": "Press Kit",
+    "stickyContact": "取材連絡",
+    "nav": {
+      "story": "取材のポイント",
+      "facts": "基本データ",
+      "episode": "エピソード",
+      "watch": "視聴",
+      "release": "プレスリリース",
+      "creator": "クリエイター",
+      "assets": "素材",
+      "gallery": "ギャラリー",
+      "quotes": "引用",
+      "contact": "連絡先"
+    },
+    "hero": {
+      "title": "Lost Garden",
+      "subtitle": "ワンパーソンスタジオが手がける、インディー・ダークファンタジー・アニメーションシリーズ。",
+      "badge": "17分のアニメーション · 公開数日で65,000回以上の再生 · 一人制作・AI支援",
+      "emotional": "忘れ去られた地下世界で目を覚ます、静かな騎士。謎の少女ローズへの記憶が、彼を導いていく。",
+      "ctaWatch": "エピソードを視聴",
+      "ctaDownload": "プレスキットをダウンロード",
+      "ctaContact": "取材のお問い合わせ"
+    },
+    "storyAngle": {
+      "title": "メディアが注目する理由",
+      "lead": "Lost Gardenは技術デモではありません。Frank Houbreが企画・演出・制作を一人で担った、完成したアニメーション・エピソードです。本作は、新しい制作ツールがインディークリエイターに、かつては大規模スタジオと予算を必要とした壮大なアニメの世界を実現する可能性を示しています。",
+      "angles": [
+        {
+          "title": "インディー制作",
+          "text": "一人のクリエイターが、17分の完成アニメーション・エピソードを制作。"
+        },
+        {
+          "title": "イノベーション",
+          "text": "演出を支えるツールとして設計された、AI支援の映像制作ワークフロー。"
+        },
+        {
+          "title": "業界への示唆",
+          "text": "少人数のチームで野心あるアニメシリーズを制作する新しいアプローチ。人の創造性を置き換えるものではない。"
+        }
+      ]
+    },
+    "keyFacts": {
+      "title": "基本データ",
+      "items": [
+        { "highlight": "17分", "label": "アニメーション" },
+        { "highlight": "1名", "label": "クリエイター" },
+        { "highlight": "65,000+", "label": "公開数日での再生数" },
+        { "highlight": "60時間+", "label": "制作時間" },
+        { "highlight": "インディー", "label": "自主制作プロジェクト" },
+        { "highlight": "オリジナル", "label": "ストーリー・世界観・キャラクター" },
+        { "highlight": "ダークファンタジー", "label": "アニメーションシリーズ" },
+        { "highlight": "AI支援", "label": "制作パイプライン" },
+        { "highlight": "Frank Houbre", "label": "脚本・美術監督・編集" }
+      ]
+    },
+    "episode": {
+      "title": "第1話 — The Awakening of the Lantern Knight",
+      "synopsis": "Lost Garden第1話では、静かで儚い騎士ランタンヌが、青い森、古代の遺跡、幻のような生き物、忘れられた機械が広がる地下世界で目を覚ます。光るメダリオンに導かれ、世界の未来の鍵を握るかもしれない謎の少女ローズを探し求める。",
+      "cta": "全編を視聴"
+    },
+    "watch": {
+      "title": "エピソードを視聴",
+      "lead": "ジャーナリスト、パートナー、キュレーターの方は、取材や追加素材のご依頼の前に、こちらで全編をご覧いただけます。",
+      "cta": "エピソードを視聴",
+      "openExternal": "YouTubeで開く"
+    },
+    "pressRelease": {
+      "title": "プレスリリース",
+      "downloadCta": "プレスリリースPDFをダウンロード",
+      "headline": "インディークリエイターがAI支援ワークフローで17分のアニメーションシリーズを一人制作",
+      "dateline": "2026年6月",
+      "paragraphs": [
+        "アニメーションシリーズの制作には通常、数十人から数百人のスタッフが必要となる時代に、Frank Houbreは異例の挑戦に取り組みました。オリジナルアニメーションシリーズの完成エピソードを、一人で制作することです。",
+        "その成果がLost Garden。騎士、謎の子供、忘れられた生き物が暮らす広大な地下世界を舞台にした、ダークファンタジーシリーズです。",
+        "6月初旬に公開された第1話は、公開からわずか数日で65,000回以上の再生を記録。ビジュアルの質、美術演出、作品の野心に感銘を受けた視聴者から、多くの好意的なコメントが寄せられています。",
+        "数週間にわたり、Frank Houbreは脚本、美術監督、絵コンテ、アニメーション、編集、サウンドデザイン、音楽、ポストプロダクションまで、すべてを一人で担当しました。",
+        "一部の誤解とは異なり、本作はボタン一つで作られたわけではありません。ストーリー、キャラクター、世界観、構成、美術的選択はすべてクリエイターが企画・監督。AIは制作の加速装置として機能し、インディークリエイターがかつてフルスタジオを必要としたビジョンを実現できるようにしました。",
+        "Lost Gardenに加え、Frank Houbreは脚本家や映像クリエイター向けのソフトウェアScreenWeaverも開発中。脚本執筆からAI支援の絵コンテ可視化までをつなぐツールです。",
+        "このアプローチは、AIツールが脚本家、監督、スタジオの創作を支えるアシスタントとして、映像業界全体で着実に普及している潮流を反映しています。"
+      ],
+      "quote": "私の目標は、アーティストやスタジオを置き換えることではありません。むしろ逆です。これらのツールが、新しい世代のクリエイターに、これまで制作できなかった物語を語る機会を与えると信じています。"
+    },
+    "aboutFrank": {
+      "title": "Frank Houbreについて",
+      "bio": "Frank Houbreは、人工知能、ストーリーテリング、マーケティング、映像制作の交差点で活動するフランスの起業家・クリエイターです。Lost Garden、ScreenWeaver、AI Studiosなどのプロジェクトを通じ、新しい制作ワークフローがインディークリエイターの野心ある作品制作をどのように支えうるかを探求しています。",
+      "portraitAlt": "Lost Gardenクリエイター Frank Houbreのポートレート"
+    },
+    "assets": {
+      "title": "メディア素材",
+      "intro": "記事、掲載、フェスティバル提出に必要な素材をダウンロードできます。",
+      "download": "ダウンロード",
+      "items": [
+        { "id": "pressRelease", "title": "プレスリリースPDF", "description": "公式プレスリリースの印刷用版。" },
+        { "id": "images", "title": "Lost Garden HD画像", "description": "プレス掲載用の高解像度スチル。" },
+        { "id": "portrait", "title": "Frank Houbreポートレート", "description": "クリエイターの公式写真（プレス使用可）。" },
+        { "id": "logo", "title": "Lost Gardenロゴ", "description": "公式プロジェクトロゴ（PNG）。" },
+        { "id": "comments", "title": "コメントキャプチャ", "description": "視聴者の反応とソーシャルプルーフ。" },
+        { "id": "episodeLinks", "title": "エピソードリンク", "description": "配信プラットフォームへの直接リンク。" },
+        { "id": "summary", "title": "プロジェクト概要", "description": "編集部・プログラマー向けの1枚サマリー。" }
+      ]
+    },
+    "gallery": {
+      "title": "ビジュアルギャラリー",
+      "intro": "Lost Gardenから厳選したHDスチル。プレス、記事、メディア掲載にご利用いただけます。",
+      "alts": {
+        "forestMachines": "巨大な機械が蠢く青い森を駆け抜けるランタンヌ、Lost Garden",
+        "lanterne": "ランタン兜の騎士ランタンヌのポートレート、Lost Garden",
+        "roseCapsule": "光るカプセルの中で眠るローズ、Lost Garden",
+        "tavern": "生物発光キノコに照らされた地下酒場の二人の騎士、Lost Garden"
+      },
+      "close": "閉じる",
+      "prev": "前の画像",
+      "next": "次の画像"
+    },
+    "quotes": {
+      "title": "引用文",
+      "intro": "記事、取材、プレス資料にご利用いただける引用文です。",
+      "items": [
+        "Lost Gardenは、一人のクリエイターが、わずか数年前には不可能だったアニメの世界を、今日実現できることを示しています。",
+        "AIは創作プロセスを置き換えませんでした。一人では到達できなかった野心に、より遠く、より速く近づくことを可能にしてくれました。",
+        "アニメから人を取り除くことではありません。インディークリエイターが、長年胸に抱えてきた物語をようやく語れるようにすることです。"
+      ],
+      "attribution": "Frank Houbre、Lost Gardenクリエイター"
+    },
+    "contact": {
+      "title": "取材、プレスリクエスト、追加素材のお問い合わせ",
+      "lead": "Lost Garden、インディーアニメーション、AI支援制作、新しいクリエイティブワークフロー、映像制作の未来について、Frank Houbreが取材を承ります。",
+      "cta": "Frankに連絡",
+      "emailLabel": "取材用メール"
+    },
+    "social": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok"
+    },
+    "backToSite": "サイトに戻る"
   },
   "episodeOnePublic": {
     "headline": "第1話",

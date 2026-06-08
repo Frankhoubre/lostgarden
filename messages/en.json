@@ -17,8 +17,10 @@
       "description": "How Lost Garden Episode One is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime by Frank Houbre."
     },
     "press": {
-      "title": "Press & Media Kit | Lost Garden",
-      "description": "Press kit for Lost Garden, an original AI-assisted dark fantasy anime. Pitch, links, and contact for journalists and creators."
+      "title": "Lost Garden Press Kit — Independent AI-Assisted Animated Series by Frank Houbre",
+      "description": "Press kit for Lost Garden, a 17-minute independent animated dark fantasy episode created solo by Frank Houbre using an AI-assisted production workflow.",
+      "ogTitle": "Lost Garden Press Kit — Independent Animated Series",
+      "ogDescription": "17-minute dark fantasy animated episode from a one-person studio. AI-assisted production, press assets, and contact."
     },
     "episodeOnePublic": {
       "title": "Lost Garden Episode 1 | AI-Assisted Dark Fantasy Anime",
@@ -287,28 +289,144 @@
     }
   },
   "press": {
-    "headline": "Press & Media Kit",
+    "headline": "Press Kit",
     "breadcrumbHome": "Home",
-    "breadcrumbPress": "Press",
-    "lead": "Lost Garden is an original AI-assisted dark fantasy anime by Frank Houbre. Use the links below to cite the project or request materials.",
-    "pitchHeading": "Short pitch",
-    "pitch": "Beneath the earth, a hollow knight named Sol carries a lantern helmet through blue forests and ancient caverns. Beside him, a child called Rose may be the key to a wounded world. Episode One is out now, produced as an indie AI-assisted anime with a single authorial vision.",
-    "factsHeading": "Quick facts",
-    "facts": [
-      "Format: original anime, Episode One available",
-      "Genre: poetic dark fantasy, underground world",
-      "Production: AI-assisted animation and visuals under human direction",
-      "Creator: Frank Houbre (writer, director)",
-      "Site: lostgarden.world",
-      "YouTube: @lostgardenanime"
-    ],
-    "linksHeading": "Canonical links",
-    "linkProcess": "AI production process (reference page)",
-    "linkVision": "Vision & creative direction",
-    "linkEpisode": "Episode One (on-site player)",
-    "linkYoutube": "Episode One on YouTube",
-    "contactHeading": "Contact",
-    "contactNote": "For interviews, features, or list inclusions (AI anime, indie animation), email below."
+    "breadcrumbPress": "Press Kit",
+    "stickyContact": "Press Contact",
+    "nav": {
+      "story": "Story Angle",
+      "facts": "Key Facts",
+      "episode": "Episode",
+      "watch": "Watch",
+      "release": "Press Release",
+      "creator": "Creator",
+      "assets": "Assets",
+      "gallery": "Gallery",
+      "quotes": "Quotes",
+      "contact": "Contact"
+    },
+    "hero": {
+      "title": "Lost Garden",
+      "subtitle": "An independent animated dark fantasy series from a one-person studio.",
+      "badge": "17-minute animated episode · 65,000+ views in days · Solo AI-assisted production",
+      "emotional": "A silent knight awakens in a forgotten underground world, guided by the memory of a mysterious child named Rose.",
+      "ctaWatch": "Watch the Episode",
+      "ctaDownload": "Download Press Kit",
+      "ctaContact": "Press Contact"
+    },
+    "storyAngle": {
+      "title": "Why this story matters to the press",
+      "lead": "Lost Garden is not a technical demo. It is a complete animated episode, written, directed, and produced independently by Frank Houbre. The project shows how new creative tools can help independent creators build ambitious animated worlds that once required large studio teams and budgets.",
+      "angles": [
+        {
+          "title": "Independent creation",
+          "text": "A single creator produces a complete 17-minute animated episode."
+        },
+        {
+          "title": "Innovation",
+          "text": "An AI-assisted audiovisual production workflow designed as a tool in service of artistic direction."
+        },
+        {
+          "title": "Industry",
+          "text": "A new way to produce ambitious animated series with small teams, without replacing human vision."
+        }
+      ]
+    },
+    "keyFacts": {
+      "title": "Key Facts",
+      "items": [
+        { "highlight": "17 min", "label": "of animation" },
+        { "highlight": "1", "label": "creator" },
+        { "highlight": "65,000+", "label": "views in days" },
+        { "highlight": "60+", "label": "hours of production" },
+        { "highlight": "Independent", "label": "self-produced project" },
+        { "highlight": "Original", "label": "story, world, and characters" },
+        { "highlight": "Dark fantasy", "label": "animated series" },
+        { "highlight": "AI-assisted", "label": "production pipeline" },
+        { "highlight": "Frank Houbre", "label": "writing, art direction, and editing" }
+      ]
+    },
+    "episode": {
+      "title": "Episode 1 — The Awakening of the Lantern Knight",
+      "synopsis": "In the first episode of Lost Garden, Lanterne, a silent and fragile knight, awakens in a vast underground world of blue forests, ancient ruins, ghostly creatures, and forgotten machines. Guided by a luminous medallion, he sets out to find Rose, a mysterious child who may hold the key to this world's future.",
+      "cta": "Watch the Full Episode"
+    },
+    "watch": {
+      "title": "Watch the Episode",
+      "lead": "Journalists, partners, and curators can watch the full episode online before requesting an interview, visuals, or additional information.",
+      "cta": "Watch the Episode",
+      "openExternal": "Open on YouTube"
+    },
+    "pressRelease": {
+      "title": "Press Release",
+      "downloadCta": "Download Press Release PDF",
+      "headline": "Independent creator completes 17-minute animated series solo using AI-assisted production workflow",
+      "dateline": "June 2026",
+      "paragraphs": [
+        "At a time when producing an animated series typically requires dozens, if not hundreds, of people, Frank Houbre took on an unusual challenge: producing a complete episode of an original animated series entirely on his own.",
+        "The result is Lost Garden, a dark fantasy series set in a vast underground world populated by knights, mysterious children, and forgotten creatures.",
+        "Released in early June, the first episode has already surpassed 65,000 views in just a few days, drawing enthusiastic comments from viewers impressed by the visual quality, art direction, and ambition of the project.",
+        "Over several weeks, Frank Houbre handled the entire production solo: writing, art direction, storyboard, animation, editing, sound design, music, and post-production.",
+        "Contrary to some assumptions, the project was not created by pressing a single button. The story, characters, world, narrative structure, and artistic choices were conceived and directed by its creator. Artificial intelligence served as a production accelerator, enabling an independent creator to realize a vision that would previously have required a full studio.",
+        "Beyond Lost Garden, Frank Houbre is also developing ScreenWeaver, software for screenwriters and filmmakers that bridges scriptwriting and AI-assisted storyboard visualization.",
+        "This approach reflects a broader shift in the audiovisual industry, where AI tools are gradually becoming creative assistants in service of writers, directors, and studios."
+      ],
+      "quote": "My goal is not to replace artists or studios. On the contrary. I believe these tools will enable a new generation of creators to tell stories they could never have afforded to produce before."
+    },
+    "aboutFrank": {
+      "title": "About Frank Houbre",
+      "bio": "Frank Houbre is a French entrepreneur and creator working at the intersection of artificial intelligence, storytelling, marketing, and audiovisual production. Through projects like Lost Garden, ScreenWeaver, and AI Studios, he explores how new creative workflows can help independent creators produce ambitious stories with leaner teams.",
+      "portraitAlt": "Portrait of Frank Houbre, creator of Lost Garden"
+    },
+    "assets": {
+      "title": "Media Assets",
+      "intro": "Download essential materials for articles, publications, and festival submissions.",
+      "download": "Download",
+      "items": [
+        { "id": "pressRelease", "title": "Press Release PDF", "description": "Print-ready version of the official press release." },
+        { "id": "images", "title": "Lost Garden HD Images", "description": "High-resolution stills for press use." },
+        { "id": "portrait", "title": "Frank Houbre Portrait", "description": "Creator headshot, cleared for press use." },
+        { "id": "logo", "title": "Lost Garden Logo", "description": "Official project logo in PNG." },
+        { "id": "comments", "title": "Audience Comment Screenshots", "description": "Social proof and audience reactions." },
+        { "id": "episodeLinks", "title": "Episode Links", "description": "Direct links to distribution platforms." },
+        { "id": "summary", "title": "Short Project Summary", "description": "One-page brief for editors and programmers." }
+      ]
+    },
+    "gallery": {
+      "title": "Visual Gallery",
+      "intro": "A selection of HD stills from Lost Garden, available for press, articles, and media publications.",
+      "alts": {
+        "forestMachines": "Lanterne runs through a blue forest haunted by giant machines, Lost Garden",
+        "lanterne": "Portrait of Lanterne, the lantern-helmet knight, Lost Garden",
+        "roseCapsule": "Rose asleep inside a glowing capsule, Lost Garden",
+        "tavern": "Two knights in an underground tavern lit by bioluminescent mushrooms, Lost Garden"
+      },
+      "close": "Close",
+      "prev": "Previous image",
+      "next": "Next image"
+    },
+    "quotes": {
+      "title": "Quotes",
+      "intro": "Pull quotes for articles, interviews, and press coverage.",
+      "items": [
+        "Lost Garden shows that a solo creator can today build an animated world that would have been impossible to produce alone just a few years ago.",
+        "AI did not replace the creative process. It let me go further, faster, with an ambition I could never have reached on my own.",
+        "This is not about removing the human from animation. It is about giving independent creators the means to finally tell the stories they have carried for years."
+      ],
+      "attribution": "Frank Houbre, creator of Lost Garden"
+    },
+    "contact": {
+      "title": "For interviews, press requests, or additional visuals",
+      "lead": "Frank Houbre is available for interviews about Lost Garden, independent animation, AI-assisted production, new creative workflows, and the future of audiovisual creation.",
+      "cta": "Contact Frank",
+      "emailLabel": "Press email"
+    },
+    "social": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok"
+    },
+    "backToSite": "Back to site"
   },
   "episodeOnePublic": {
     "headline": "Episode One",
