@@ -1,9 +1,22 @@
 import { EPISODE_ONE } from "@/lib/episode";
 
 /** Edit these URLs when assets are ready in /public/press */
+export const PRESS_TIKTOK = {
+  videoId: "7647885636711501088",
+  watchUrl: "https://www.tiktok.com/@frankhoubre/video/7647885636711501088",
+  embedUrl: "https://www.tiktok.com/embed/v2/7647885636711501088",
+  profileUrl: "https://www.tiktok.com/@frankhoubre",
+  /** Update when metrics change */
+  views: "26 000+",
+  likes: "9 000+",
+  commentCount: "430+",
+} as const;
+
 export const PRESS_KIT = {
   episodeUrl: EPISODE_ONE.watchUrl,
   episodeEmbedUrl: EPISODE_ONE.embedUrl,
+  tiktokUrl: PRESS_TIKTOK.watchUrl,
+  tiktokEmbedUrl: PRESS_TIKTOK.embedUrl,
   pressReleasePdfUrl: "/press/lost-garden-press-release.pdf",
   pressKitZipUrl: "/press/lost-garden-press-kit.zip",
   pressAssetsBaseUrl: "/press",
@@ -17,7 +30,7 @@ export const PRESS_KIT = {
 export const PRESS_SOCIAL = {
   instagram: "https://www.instagram.com/frank.houbre",
   youtube: "https://www.youtube.com/@businessdynamite",
-  tiktok: "https://www.tiktok.com/@frankhoubre",
+  tiktok: PRESS_TIKTOK.profileUrl,
 } as const;
 
 export type PressAssetId =
@@ -97,6 +110,7 @@ export const PRESS_SECTION_IDS = {
   facts: "facts",
   episode: "episode",
   watch: "watch",
+  audience: "audience",
   release: "release",
   creator: "creator",
   assets: "assets",

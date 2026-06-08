@@ -298,6 +298,7 @@
       "facts": "Key Facts",
       "episode": "Episode",
       "watch": "Watch",
+      "audience": "Audience",
       "release": "Press Release",
       "creator": "Creator",
       "assets": "Assets",
@@ -308,7 +309,7 @@
     "hero": {
       "title": "Lost Garden",
       "subtitle": "An independent animated dark fantasy series from a one-person studio.",
-      "badge": "17-minute animated episode · 65,000+ views in days · Solo AI-assisted production",
+      "badge": "17-minute animated episode · 65,000+ views · 9,000+ TikTok likes · Solo AI-assisted production",
       "emotional": "A silent knight awakens in a forgotten underground world, guided by the memory of a mysterious child named Rose.",
       "ctaWatch": "Watch the Episode",
       "ctaDownload": "Download Press Kit",
@@ -354,8 +355,84 @@
     "watch": {
       "title": "Watch the Episode",
       "lead": "Journalists, partners, and curators can watch the full episode online before requesting an interview, visuals, or additional information.",
+      "youtubeLabel": "YouTube",
+      "tiktokLabel": "TikTok",
       "cta": "Watch the Episode",
-      "openExternal": "Open on YouTube"
+      "openYoutube": "Open on YouTube",
+      "openTiktok": "Open on TikTok"
+    },
+    "audience": {
+      "title": "Audiences loved it",
+      "intro": "Released in early June on TikTok, the episode drew hundreds of enthusiastic comments within days. A selection of authentic audience reactions below.",
+      "source": "Public comments · TikTok @frankhoubre · June 2026",
+      "stats": [
+        { "value": "26,000+", "label": "TikTok views in one night" },
+        { "value": "9,000+", "label": "likes" },
+        { "value": "430+", "label": "comments" }
+      ],
+      "cta": "Watch on TikTok",
+      "comments": [
+        {
+          "author": "P_trl.cw",
+          "text": "No studio and this guy quietly drops an episode this sensational??"
+        },
+        {
+          "author": "Ley",
+          "text": "Honestly, it's impressive. He made a full episode alone with genuinely strong animation quality. Meanwhile major studios take years for a handful of episodes. What he pulled off solo is remarkable."
+        },
+        {
+          "author": "a_mine",
+          "text": "The animation is better than TBATE's"
+        },
+        {
+          "author": "victor_matu pro",
+          "text": "I think it's really great. The real question is: could we do this ourselves? AI is just a modern tool. Behind every creation there's always someone bringing a vision. The result is genuinely impressive."
+        },
+        {
+          "author": "Nicolas Barsac",
+          "text": "It's better made than 70% of anime out there"
+        },
+        {
+          "author": "Noblem",
+          "text": "That opening OST gave me chills. Worthy of the greatest soundtracks."
+        },
+        {
+          "author": "Olivier Trijeaud",
+          "text": "It's simply sublime, I loved it. Bravo and thank you for this delicious moment."
+        },
+        {
+          "author": "The Maddos",
+          "text": "Doesn't even look like AI. It's strong."
+        },
+        {
+          "author": "Art&Co",
+          "text": "It's exceptional, it deserves so much more visibility."
+        },
+        {
+          "author": "mob_J19",
+          "text": "So powerful and beautiful. You're a boss."
+        },
+        {
+          "author": "Swanny Lanoix",
+          "text": "The OST, the sound design… Several moments are so well done I forgot it was AI. Exactly the kind of work that gives project creators real hope."
+        },
+        {
+          "author": "okami_rya",
+          "text": "I just watched something this incredible for free? Even with AI involved, it's the first time I've been this absorbed by a world I knew nothing about from episode one."
+        },
+        {
+          "author": "Digital Business Succes",
+          "text": "Bravo, it's incredible. It really looks like anime from a proper studio. The story is engaging, you want more, and the music lands beautifully."
+        },
+        {
+          "author": "yassersoulaimane3",
+          "text": "Keep going man, it's just incredible. Don't ever give up!"
+        },
+        {
+          "author": "Zirokss",
+          "text": "This is incredible, seriously well done."
+        }
+      ]
     },
     "pressRelease": {
       "title": "Press Release",

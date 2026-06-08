@@ -300,6 +300,7 @@
       "facts": "Chiffres clés",
       "episode": "Épisode",
       "watch": "Vidéo",
+      "audience": "Réactions",
       "release": "Communiqué",
       "creator": "Créateur",
       "assets": "Ressources",
@@ -310,7 +311,7 @@
     "hero": {
       "title": "Lost Garden",
       "subtitle": "Une série animée dark fantasy indépendante créée par un studio d'une seule personne.",
-      "badge": "Épisode animé de 17 minutes · 65 000+ vues en quelques jours · Production solo assistée par IA",
+      "badge": "Épisode animé de 17 minutes · 65 000+ vues · 9 000+ likes TikTok · Production solo assistée par IA",
       "emotional": "Un chevalier silencieux s'éveille dans un monde souterrain oublié, guidé par le souvenir d'une mystérieuse enfant nommée Rose.",
       "ctaWatch": "Voir l'épisode",
       "ctaDownload": "Télécharger le press kit",
@@ -356,8 +357,84 @@
     "watch": {
       "title": "Voir l'épisode",
       "lead": "Les journalistes, partenaires et curateurs peuvent regarder l'épisode complet en ligne avant de demander une interview, des visuels ou des informations complémentaires.",
+      "youtubeLabel": "YouTube",
+      "tiktokLabel": "TikTok",
       "cta": "Voir l'épisode",
-      "openExternal": "Ouvrir sur YouTube"
+      "openYoutube": "Ouvrir sur YouTube",
+      "openTiktok": "Ouvrir sur TikTok"
+    },
+    "audience": {
+      "title": "Le public a adoré",
+      "intro": "Publié début juin sur TikTok, l'épisode a suscité des centaines de commentaires enthousiastes en quelques jours. Voici une sélection de réactions authentiques du public.",
+      "source": "Commentaires publics · TikTok @frankhoubre · juin 2026",
+      "stats": [
+        { "value": "26 000+", "label": "vues TikTok en une nuit" },
+        { "value": "9 000+", "label": "likes" },
+        { "value": "430+", "label": "commentaires" }
+      ],
+      "cta": "Voir sur TikTok",
+      "comments": [
+        {
+          "author": "P_trl.cw",
+          "text": "Sans studio le mec a pondu un épisode aussi sensationnel dans le plus grand des calmes ??"
+        },
+        {
+          "author": "Ley",
+          "text": "Franchement, c'est impressionnant. Ce gars a réussi à faire un épisode entier tout seul, avec une animation de très bonne qualité. Pendant ce temps, certains grands studios mettent des années pour une dizaine d'épisodes. Ça montre à quel point ce qu'il a accompli en solo est remarquable."
+        },
+        {
+          "author": "a_mine",
+          "text": "L'animation est mieux que celle de Tbate"
+        },
+        {
+          "author": "victor_matu pro",
+          "text": "Je trouve que c'est vraiment super. La vraie question : est-ce que nous-mêmes, nous sommes capables de faire cela ? L'IA n'est qu'un outil moderne. Derrière chaque création, il y a toujours quelqu'un qui apporte sa vision. Le rendu est vraiment impressionnant."
+        },
+        {
+          "author": "Nicolas Barsac",
+          "text": "C'est mieux fait que 70% des animes"
+        },
+        {
+          "author": "Noblem",
+          "text": "L'OST du début, les frissons que ça m'a donnés. Digne de faire partie des plus grands OST."
+        },
+        {
+          "author": "Olivier Trijeaud",
+          "text": "C'est juste sublime, j'ai adoré. Bravo et un grand merci pour ce délicieux moment."
+        },
+        {
+          "author": "The Maddos",
+          "text": "On dirait même pas de l'IA. C'est fort."
+        },
+        {
+          "author": "Art&Co",
+          "text": "C'est exceptionnel, ça mérite tellement plus de visibilité."
+        },
+        {
+          "author": "mob_J19",
+          "text": "Tellement lourd et magnifique. T'es un boss."
+        },
+        {
+          "author": "Swanny Lanoix",
+          "text": "Les OST, les bruitages… Il y a plusieurs moments tellement bien faits que j'en oubliais que c'était de l'IA. C'est exactement le type de travail qui donne énormément d'espoir aux porteurs de projets."
+        },
+        {
+          "author": "okami_rya",
+          "text": "Je viens de regarder une telle dinguerie gratuitement ? Même si c'est de l'IA, c'est la première fois que je suis autant absorbé par un univers dont je ne connais encore rien dès le premier épisode."
+        },
+        {
+          "author": "Digital Business Succes",
+          "text": "Bravo, c'est incroyable. On dirait vraiment un anime produit par un vrai studio. L'histoire est sympa, ça donne envie de voir la suite, et les musiques rendent super bien aussi."
+        },
+        {
+          "author": "yassersoulaimane3",
+          "text": "Mec continue, c'est juste incroyable. Courage à toi et n'abandonne jamais !"
+        },
+        {
+          "author": "Zirokss",
+          "text": "Mais c'est incroyable, franchement gg."
+        }
+      ]
     },
     "pressRelease": {
       "title": "Communiqué de presse",

@@ -298,6 +298,7 @@
       "facts": "基本データ",
       "episode": "エピソード",
       "watch": "視聴",
+      "audience": "反応",
       "release": "プレスリリース",
       "creator": "クリエイター",
       "assets": "素材",
@@ -308,7 +309,7 @@
     "hero": {
       "title": "Lost Garden",
       "subtitle": "ワンパーソンスタジオが手がける、インディー・ダークファンタジー・アニメーションシリーズ。",
-      "badge": "17分のアニメーション · 公開数日で65,000回以上の再生 · 一人制作・AI支援",
+      "badge": "17分のアニメーション · 65,000回以上の再生 · TikTok 9,000+いいね · 一人制作・AI支援",
       "emotional": "忘れ去られた地下世界で目を覚ます、静かな騎士。謎の少女ローズへの記憶が、彼を導いていく。",
       "ctaWatch": "エピソードを視聴",
       "ctaDownload": "プレスキットをダウンロード",
@@ -354,8 +355,84 @@
     "watch": {
       "title": "エピソードを視聴",
       "lead": "ジャーナリスト、パートナー、キュレーターの方は、取材や追加素材のご依頼の前に、こちらで全編をご覧いただけます。",
+      "youtubeLabel": "YouTube",
+      "tiktokLabel": "TikTok",
       "cta": "エピソードを視聴",
-      "openExternal": "YouTubeで開く"
+      "openYoutube": "YouTubeで開く",
+      "openTiktok": "TikTokで開く"
+    },
+    "audience": {
+      "title": "視聴者から熱い反響",
+      "intro": "6月初旬にTikTokで公開された第1話は、わずか数日で数百件の熱意あるコメントを集めました。公開コメントから厳選した反応をご紹介します。",
+      "source": "公開コメント · TikTok @frankhoubre · 2026年6月",
+      "stats": [
+        { "value": "26,000+", "label": "一晩でのTikTok再生数" },
+        { "value": "9,000+", "label": "いいね" },
+        { "value": "430+", "label": "コメント" }
+      ],
+      "cta": "TikTokで見る",
+      "comments": [
+        {
+          "author": "P_trl.cw",
+          "text": "スタジオなしで、こんなに感動的なエピソードを淡々と作っちゃうの？？"
+        },
+        {
+          "author": "Ley",
+          "text": "正直、すごい。一人でクオリティの高いアニメーションの完成エピソードを作り上げた。大手スタジオが何年もかけて十数話出す一方で、ソロで成し遂げたことの凄まじさがわかる。"
+        },
+        {
+          "author": "a_mine",
+          "text": "アニメーションはTBATEより上"
+        },
+        {
+          "author": "victor_matu pro",
+          "text": "本当に素晴らしいと思う。本当の問いは、自分たちにこれができるかどうか。AIは現代のツールに過ぎない。すべての作品の背後にはビジョンを持つ人がいる。仕上がりは本当に印象的。"
+        },
+        {
+          "author": "Nicolas Barsac",
+          "text": "アニメの70%より上手くできてる"
+        },
+        {
+          "author": "Noblem",
+          "text": "冒頭のOST、鳥肌が立った。最高のサウンドトラックに匹敵する。"
+        },
+        {
+          "author": "Olivier Trijeaud",
+          "text": "ただただ素晴らしい、大好き。ブラボー、この素敵な時間をありがとう。"
+        },
+        {
+          "author": "The Maddos",
+          "text": "AIに見えない。本当に強い。"
+        },
+        {
+          "author": "Art&Co",
+          "text": "例外的。もっと注目されるべき。"
+        },
+        {
+          "author": "mob_J19",
+          "text": "めちゃくちゃ重厚で美しい。あなたはボスだ。"
+        },
+        {
+          "author": "Swanny Lanoix",
+          "text": "OST、効果音… AIだと忘れるほど上手い瞬間がいくつもある。プロジェクトを持つ人に希望を与える、まさにそういう作品。"
+        },
+        {
+          "author": "okami_rya",
+          "text": "こんな凄いものを無料で見た？ AIでも、第1話からこれほど世界に引き込まれたのは初めて。"
+        },
+        {
+          "author": "Digital Business Succes",
+          "text": "ブラボー、信じられない。本物のスタジオのアニメみたい。ストーリーも音楽も素晴らしく、続きが見たくなる。"
+        },
+        {
+          "author": "yassersoulaimane3",
+          "text": "続けて、本当にすごい。絶対に諦めないで！"
+        },
+        {
+          "author": "Zirokss",
+          "text": "マジですごい、本当にお疲れ様。"
+        }
+      ]
     },
     "pressRelease": {
       "title": "プレスリリース",

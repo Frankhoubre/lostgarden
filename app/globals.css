@@ -1617,3 +1617,34 @@ body {
     display: none !important;
   }
 }
+
+.press-tiktok-frame {
+  min-height: 28rem;
+}
+
+.press-tiktok-embed {
+  min-height: 28rem;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .press-tiktok-frame,
+  .press-tiktok-embed {
+    min-height: 32rem;
+  }
+}
+
+.press-audience-stat {
+  box-shadow: inset 0 1px 0 rgba(185, 243, 255, 0.06);
+}
+
+.press-audience-comment {
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.press-audience-comment:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125, 223, 255, 0.35);
+}

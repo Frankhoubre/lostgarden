@@ -298,6 +298,7 @@
       "facts": "핵심 수치",
       "episode": "에피소드",
       "watch": "시청",
+      "audience": "반응",
       "release": "보도자료",
       "creator": "크리에이터",
       "assets": "자료",
@@ -308,7 +309,7 @@
     "hero": {
       "title": "Lost Garden",
       "subtitle": "1인 스튜디오가 만든 독립 다크 판타지 애니메이션 시리즈.",
-      "badge": "17분 애니메이션 · 공개 며칠 만에 65,000회 이상 조회 · 1인 AI 지원 제작",
+      "badge": "17분 애니메이션 · 65,000회 이상 조회 · TikTok 9,000+ 좋아요 · 1인 AI 지원 제작",
       "emotional": "잊혀진 지하 세계에서 깨어난 고요한 기사. 신비한 아이 로즈에 대한 기억이 그를 이끈다.",
       "ctaWatch": "에피소드 시청",
       "ctaDownload": "프레스 키트 다운로드",
@@ -354,8 +355,84 @@
     "watch": {
       "title": "에피소드 시청",
       "lead": "기자, 파트너, 큐레이터는 인터뷰나 추가 자료 요청 전에 여기서 전체 에피소드를 시청할 수 있습니다.",
+      "youtubeLabel": "YouTube",
+      "tiktokLabel": "TikTok",
       "cta": "에피소드 시청",
-      "openExternal": "YouTube에서 열기"
+      "openYoutube": "YouTube에서 열기",
+      "openTiktok": "TikTok에서 열기"
+    },
+    "audience": {
+      "title": "시청자들이 사랑했습니다",
+      "intro": "6월 초 TikTok에 공개된 1화는 며칠 만에 수백 개의 열정적인 댓글을 받았습니다. 공개 댓글 중 엄선한 반응입니다.",
+      "source": "공개 댓글 · TikTok @frankhoubre · 2026년 6월",
+      "stats": [
+        { "value": "26,000+", "label": "하룻밤 TikTok 조회수" },
+        { "value": "9,000+", "label": "좋아요" },
+        { "value": "430+", "label": "댓글" }
+      ],
+      "cta": "TikTok에서 보기",
+      "comments": [
+        {
+          "author": "P_trl.cw",
+          "text": "스튜디오 없이 이렇게 감동적인 에피소드를 조용히 만들어냈다고??"
+        },
+        {
+          "author": "Ley",
+          "text": "솔직히 인상적이다. 혼자서 정말 좋은 퀄리티의 완성 에피소드를 만들었다. 대형 스튜디오는 십수 화에 몇 년이 걸리는데, 솔로로 해낸 게 얼마나 대단한지 보여준다."
+        },
+        {
+          "author": "a_mine",
+          "text": "애니메이션이 TBATE보다 낫다"
+        },
+        {
+          "author": "victor_matu pro",
+          "text": "정말 대단하다고 생각한다. 진짜 질문은 우리 자신이 이걸 할 수 있느냐는 것. AI는 현대의 도구일 뿐. 모든 창작 뒤에는 비전을 가진 사람이 있다. 결과물이 정말 인상적이다."
+        },
+        {
+          "author": "Nicolas Barsac",
+          "text": "애니메이션 70%보다 잘 만들었다"
+        },
+        {
+          "author": "Noblem",
+          "text": "오프닝 OST, 소름이 돋았다. 최고의 사운드트랙에 견줄 만하다."
+        },
+        {
+          "author": "Olivier Trijeaud",
+          "text": "그냥 숭고하다, 정말 좋았다. 브라보, 이 멋진 순간 고맙다."
+        },
+        {
+          "author": "The Maddos",
+          "text": "AI 같지도 않다. 진짜 강하다."
+        },
+        {
+          "author": "Art&Co",
+          "text": "예외적이다. 훨씬 더 많은 주목을 받을 자격이 있다."
+        },
+        {
+          "author": "mob_J19",
+          "text": "너무 묵직하고 아름답다. 넌 보스다."
+        },
+        {
+          "author": "Swanny Lanoix",
+          "text": "OST, 사운드 디자인… AI인 줄 잊을 만큼 잘 만든 순간이 여럿 있다. 프로젝트를 품은 사람들에게 희망을 주는, 바로 그런 작업이다."
+        },
+        {
+          "author": "okami_rya",
+          "text": "이런 대작을 공짜로 봤다고? AI라도 1화부터 이렇게 세계에 빠져든 건 처음이다."
+        },
+        {
+          "author": "Digital Business Succes",
+          "text": "브라보, 믿을 수 없다. 진짜 스튜디오 애니메이션 같다. 스토리도 음악도 훌륭하고, 다음이 기대된다."
+        },
+        {
+          "author": "yassersoulaimane3",
+          "text": "계속해, 정말 대단하다. 절대 포기하지 마!"
+        },
+        {
+          "author": "Zirokss",
+          "text": "진짜 대단하다, 정말 잘했다."
+        }
+      ]
     },
     "pressRelease": {
       "title": "보도자료",

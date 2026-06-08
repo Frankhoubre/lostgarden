@@ -47,6 +47,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
     { id: PRESS_SECTION_IDS.facts, label: p.nav.facts },
     { id: PRESS_SECTION_IDS.episode, label: p.nav.episode },
     { id: PRESS_SECTION_IDS.watch, label: p.nav.watch },
+    { id: PRESS_SECTION_IDS.audience, label: p.nav.audience },
     { id: PRESS_SECTION_IDS.release, label: p.nav.release },
     { id: PRESS_SECTION_IDS.creator, label: p.nav.creator },
     { id: PRESS_SECTION_IDS.assets, label: p.nav.assets },
@@ -204,34 +205,109 @@ export function PressKit({ locale, dict }: PressKitProps) {
       <PressSection id={PRESS_SECTION_IDS.watch} className="section-abyss">
         <AnimatedInView>
           <SectionTitle subtitle={p.watch.lead}>{p.watch.title}</SectionTitle>
-          <div className="mx-auto mt-12 max-w-4xl">
-            <div className="trailer-frame relative aspect-video w-full overflow-hidden rounded-2xl">
-              <iframe
-                src={`${PRESS_KIT.episodeEmbedUrl}?rel=0`}
-                title={p.watch.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 h-full w-full border-0"
-              />
+          <div className="mx-auto mt-12 grid max-w-5xl gap-8 lg:grid-cols-2 lg:gap-10">
+            <div>
+              <p className="anime-label mb-3 font-display text-xs tracking-[0.16em] text-cyan-pale/70">
+                {p.watch.youtubeLabel}
+              </p>
+              <div className="trailer-frame relative aspect-video w-full overflow-hidden rounded-2xl">
+                <iframe
+                  src={`${PRESS_KIT.episodeEmbedUrl}?rel=0`}
+                  title={`${p.watch.title} — YouTube`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 h-full w-full border-0"
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <a
+                  href={PRESS_KIT.episodeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-[0.75rem]"
+                >
+                  {p.watch.openYoutube}
+                </a>
+              </div>
             </div>
-            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href={PRESS_KIT.episodeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary"
-              >
-                {p.watch.cta}
-              </a>
-              <a
-                href={PRESS_KIT.episodeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary"
-              >
-                {p.watch.openExternal}
-              </a>
+
+            <div>
+              <p className="anime-label mb-3 font-display text-xs tracking-[0.16em] text-cyan-pale/70">
+                {p.watch.tiktokLabel}
+              </p>
+              <div className="press-tiktok-frame trailer-frame relative w-full overflow-hidden rounded-2xl">
+                <iframe
+                  src={PRESS_KIT.tiktokEmbedUrl}
+                  title={`${p.watch.title} — TikTok`}
+                  allow="encrypted-media; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  className="press-tiktok-embed w-full border-0"
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <a
+                  href={PRESS_KIT.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary text-[0.75rem]"
+                >
+                  {p.watch.openTiktok}
+                </a>
+              </div>
             </div>
+          </div>
+        </AnimatedInView>
+      </PressSection>
+
+      {/* Audience reactions */}
+      <PressSection id={PRESS_SECTION_IDS.audience} className="section-misty">
+        <AnimatedInView>
+          <SectionTitle subtitle={p.audience.intro}>{p.audience.title}</SectionTitle>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            {p.audience.stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="press-audience-stat rounded-xl border border-glow/25 bg-cave-night/50 px-5 py-6 text-center backdrop-blur-sm"
+              >
+                <p className="anime-heading font-display text-3xl text-lily sm:text-4xl">
+                  {stat.value}
+                </p>
+                <p className="mt-2 font-body text-xs font-medium uppercase tracking-wide text-cyan-pale/70 sm:text-sm">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {p.audience.comments.map((comment) => (
+              <blockquote
+                key={`${comment.author}-${comment.text.slice(0, 24)}`}
+                className="press-audience-comment flex flex-col rounded-xl border border-glow/18 bg-abyss/40 p-5"
+              >
+                <p className="flex-1 font-body text-sm leading-relaxed text-ivory/88">
+                  &ldquo;{comment.text}&rdquo;
+                </p>
+                <footer className="mt-4 font-display text-[0.65rem] font-semibold tracking-[0.12em] text-cyan-pale/55 uppercase">
+                  {comment.author}
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+
+          <p className="mt-8 text-center font-body text-xs text-ivory/45">
+            {p.audience.source}
+          </p>
+          <div className="mt-6 text-center">
+            <a
+              href={PRESS_KIT.tiktokUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary"
+            >
+              {p.audience.cta}
+            </a>
           </div>
         </AnimatedInView>
       </PressSection>
