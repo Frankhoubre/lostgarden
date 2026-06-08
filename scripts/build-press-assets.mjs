@@ -13,7 +13,7 @@ const EPISODE = {
   tiktok: "https://www.tiktok.com/@frankhoubre/video/7647885636711501088",
   site: "https://lostgarden.world",
   press: "https://lostgarden.world/fr/press",
-  contact: "frank.houbre@gmail.com",
+  contact: "lostgarden.world@gmail.com",
 };
 
 const HD_STILLS = [

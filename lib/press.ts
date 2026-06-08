@@ -22,7 +22,7 @@ export const PRESS_KIT = {
   pressReleaseUrlEn: "/press/lost-garden-press-release.en.txt",
   pressKitZipUrl: "/press/lost-garden-press-kit.zip",
   pressAssetsBaseUrl: "/press",
-  contactEmail: "frank.houbre@gmail.com",
+  contactEmail: "lostgarden.world@gmail.com",
   heroImageUrl: "/press/forest-machines.png",
   ogImageUrl: "/press/forest-machines.png",
   portraitImageUrl: "/press/frank-houbre-portrait.png",
