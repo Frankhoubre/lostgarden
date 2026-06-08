@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:press": "node scripts/build-press-assets.mjs",
+    "build": "npm run build:press && next build",
     "start": "next start",
     "lint": "eslint",
     "check:copy": "node scripts/check-no-em-dash.mjs"

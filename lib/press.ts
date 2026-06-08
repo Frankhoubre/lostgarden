@@ -1,4 +1,5 @@
 import { EPISODE_ONE } from "@/lib/episode";
+import type { Locale } from "@/lib/i18n/config";
 
 /** Edit these URLs when assets are ready in /public/press */
 export const PRESS_TIKTOK = {
@@ -17,14 +18,15 @@ export const PRESS_KIT = {
   episodeEmbedUrl: EPISODE_ONE.embedUrl,
   tiktokUrl: PRESS_TIKTOK.watchUrl,
   tiktokEmbedUrl: PRESS_TIKTOK.embedUrl,
-  pressReleasePdfUrl: "/press/lost-garden-press-release.pdf",
+  pressReleaseUrl: "/press/lost-garden-press-release.fr.txt",
+  pressReleaseUrlEn: "/press/lost-garden-press-release.en.txt",
   pressKitZipUrl: "/press/lost-garden-press-kit.zip",
   pressAssetsBaseUrl: "/press",
   contactEmail: "frank.houbre@gmail.com",
   heroImageUrl: "/press/forest-machines.png",
   ogImageUrl: "/press/forest-machines.png",
   portraitImageUrl: "/press/frank-houbre-portrait.png",
-  logoImageUrl: "/images/logo-lost-garden.png",
+  logoImageUrl: "/press/lost-garden-logo.png",
 } as const;
 
 export const PRESS_SOCIAL = {
@@ -42,13 +44,20 @@ export type PressAssetId =
   | "episodeLinks"
   | "summary";
 
-export const PRESS_ASSET_FILES: Record<
-  PressAssetId,
-  { filename: string; href: string }
-> = {
+export type PressAssetFile = {
+  filename: string;
+  href: string;
+  /** When set, used instead of href for non-default locales */
+  hrefByLocale?: Partial<Record<Locale, string>>;
+};
+
+export const PRESS_ASSET_FILES: Record<PressAssetId, PressAssetFile> = {
   pressRelease: {
-    filename: "lost-garden-press-release.pdf",
-    href: PRESS_KIT.pressReleasePdfUrl,
+    filename: "lost-garden-press-release.fr.txt",
+    href: PRESS_KIT.pressReleaseUrl,
+    hrefByLocale: {
+      en: PRESS_KIT.pressReleaseUrlEn,
+    },
   },
   images: {
     filename: "lost-garden-hd-images.zip",
@@ -63,18 +72,27 @@ export const PRESS_ASSET_FILES: Record<
     href: PRESS_KIT.logoImageUrl,
   },
   comments: {
-    filename: "lost-garden-audience-comments.png",
-    href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-audience-comments.png`,
+    filename: "lost-garden-audience-comments.txt",
+    href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-audience-comments.txt`,
   },
   episodeLinks: {
     filename: "lost-garden-episode-links.txt",
     href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-episode-links.txt`,
   },
   summary: {
-    filename: "lost-garden-project-summary.pdf",
-    href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-project-summary.pdf`,
+    filename: "lost-garden-project-summary.txt",
+    href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-project-summary.txt`,
   },
 };
+
+export function pressAssetHref(asset: PressAssetFile, locale: Locale): string {
+  return asset.hrefByLocale?.[locale] ?? asset.href;
+}
+
+export function pressAssetFilename(asset: PressAssetFile, locale: Locale): string {
+  const href = pressAssetHref(asset, locale);
+  return href.split("/").pop() ?? asset.filename;
+}
 
 export const PRESS_GALLERY_IMAGES = [
   {

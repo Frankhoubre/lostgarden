@@ -14,6 +14,8 @@ import {
   PRESS_EPISODE_STILL,
   PRESS_SECTION_IDS,
   PRESS_SOCIAL,
+  pressAssetFilename,
+  pressAssetHref,
   type PressAssetId,
 } from "@/lib/press";
 
@@ -97,7 +99,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               </a>
               <a
                 href={PRESS_KIT.pressKitZipUrl}
-                download
+                download="lost-garden-press-kit.zip"
                 className="btn-secondary"
               >
                 {p.hero.ctaDownload}
@@ -337,8 +339,8 @@ export function PressKit({ locale, dict }: PressKitProps) {
           </article>
           <div className="mt-8 text-center">
             <a
-              href={PRESS_KIT.pressReleasePdfUrl}
-              download
+              href={pressAssetHref(PRESS_ASSET_FILES.pressRelease, locale)}
+              download={pressAssetFilename(PRESS_ASSET_FILES.pressRelease, locale)}
               className="btn-secondary"
             >
               {p.pressRelease.downloadCta}
@@ -421,6 +423,8 @@ export function PressKit({ locale, dict }: PressKitProps) {
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {p.assets.items.map((asset) => {
               const file = PRESS_ASSET_FILES[asset.id as PressAssetId];
+              const href = pressAssetHref(file, locale);
+              const filename = pressAssetFilename(file, locale);
               return (
                 <article key={asset.id} className="glass-card flex flex-col p-6">
                   <h3 className="anime-heading font-display text-lg text-lily">
@@ -430,8 +434,8 @@ export function PressKit({ locale, dict }: PressKitProps) {
                     {asset.description}
                   </p>
                   <a
-                    href={file.href}
-                    download={file.filename}
+                    href={href}
+                    download={filename}
                     className="btn-secondary mt-6 w-full text-center text-[0.75rem]"
                   >
                     {p.assets.download}

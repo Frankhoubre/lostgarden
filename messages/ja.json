@@ -436,7 +436,7 @@
     },
     "pressRelease": {
       "title": "プレスリリース",
-      "downloadCta": "プレスリリースPDFをダウンロード",
+      "downloadCta": "プレスリリースをダウンロード",
       "headline": "インディークリエイターがAI支援ワークフローで17分のアニメーションシリーズを一人制作",
       "dateline": "2026年6月",
       "paragraphs": [
@@ -460,11 +460,11 @@
       "intro": "記事、掲載、フェスティバル提出に必要な素材をダウンロードできます。",
       "download": "ダウンロード",
       "items": [
-        { "id": "pressRelease", "title": "プレスリリースPDF", "description": "公式プレスリリースの印刷用版。" },
+        { "id": "pressRelease", "title": "プレスリリース", "description": "公式プレスリリース本文。引用・転載用。" },
         { "id": "images", "title": "Lost Garden HD画像", "description": "プレス掲載用の高解像度スチル。" },
         { "id": "portrait", "title": "Frank Houbreポートレート", "description": "クリエイターの公式写真（プレス使用可）。" },
         { "id": "logo", "title": "Lost Gardenロゴ", "description": "公式プロジェクトロゴ（PNG）。" },
-        { "id": "comments", "title": "コメントキャプチャ", "description": "視聴者の反応とソーシャルプルーフ。" },
+        { "id": "comments", "title": "視聴者コメント", "description": "TikTokの好意的な反応を厳選。引用用。" },
         { "id": "episodeLinks", "title": "エピソードリンク", "description": "配信プラットフォームへの直接リンク。" },
         { "id": "summary", "title": "プロジェクト概要", "description": "編集部・プログラマー向けの1枚サマリー。" }
       ]

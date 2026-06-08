@@ -436,7 +436,7 @@
     },
     "pressRelease": {
       "title": "보도자료",
-      "downloadCta": "보도자료 PDF 다운로드",
+      "downloadCta": "보도자료 다운로드",
       "headline": "독립 크리에이터, AI 지원 워크플로로 17분 애니메이션 시리즈를 혼자 완성",
       "dateline": "2026년 6월",
       "paragraphs": [
@@ -460,11 +460,11 @@
       "intro": "기사, 게재, 영화제 제출에 필요한 핵심 자료를 다운로드하세요.",
       "download": "다운로드",
       "items": [
-        { "id": "pressRelease", "title": "보도자료 PDF", "description": "공식 보도자료 인쇄용 버전." },
+        { "id": "pressRelease", "title": "보도자료", "description": "공식 보도자료 본문. 인용·재가공용." },
         { "id": "images", "title": "Lost Garden HD 이미지", "description": "보도용 고해상도 스틸 컷." },
         { "id": "portrait", "title": "Frank Houbre 초상", "description": "크리에이터 공식 사진 (보도 사용 가능)." },
         { "id": "logo", "title": "Lost Garden 로고", "description": "공식 프로젝트 로고 (PNG)." },
-        { "id": "comments", "title": "댓글 캡처", "description": "시청자 반응 및 소셜 프루프." },
+        { "id": "comments", "title": "시청자 댓글", "description": "TikTok 긍정 반응 엄선. 인용용." },
         { "id": "episodeLinks", "title": "에피소드 링크", "description": "배포 플랫폼 직접 링크." },
         { "id": "summary", "title": "프로젝트 요약", "description": "편집부·프로그래머용 1페이지 브리프." }
       ]

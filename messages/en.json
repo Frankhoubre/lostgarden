@@ -436,7 +436,7 @@
     },
     "pressRelease": {
       "title": "Press Release",
-      "downloadCta": "Download Press Release PDF",
+      "downloadCta": "Download Press Release",
       "headline": "Independent creator completes 17-minute animated series solo using AI-assisted production workflow",
       "dateline": "June 2026",
       "paragraphs": [
@@ -460,11 +460,11 @@
       "intro": "Download essential materials for articles, publications, and festival submissions.",
       "download": "Download",
       "items": [
-        { "id": "pressRelease", "title": "Press Release PDF", "description": "Print-ready version of the official press release." },
+        { "id": "pressRelease", "title": "Press Release", "description": "Official press release text, ready to quote or reformat." },
         { "id": "images", "title": "Lost Garden HD Images", "description": "High-resolution stills for press use." },
         { "id": "portrait", "title": "Frank Houbre Portrait", "description": "Creator headshot, cleared for press use." },
         { "id": "logo", "title": "Lost Garden Logo", "description": "Official project logo in PNG." },
-        { "id": "comments", "title": "Audience Comment Screenshots", "description": "Social proof and audience reactions." },
+        { "id": "comments", "title": "Audience Comments", "description": "Curated positive TikTok reactions, ready to quote." },
         { "id": "episodeLinks", "title": "Episode Links", "description": "Direct links to distribution platforms." },
         { "id": "summary", "title": "Short Project Summary", "description": "One-page brief for editors and programmers." }
       ]

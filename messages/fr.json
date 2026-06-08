@@ -438,7 +438,7 @@
     },
     "pressRelease": {
       "title": "Communiqué de presse",
-      "downloadCta": "Télécharger le communiqué de presse PDF",
+      "downloadCta": "Télécharger le communiqué de presse",
       "headline": "Un créateur indépendant réalise seul une série animée de 17 minutes grâce à un workflow de production assisté par IA",
       "dateline": "Juin 2026",
       "paragraphs": [
@@ -462,11 +462,11 @@
       "intro": "Téléchargez les éléments essentiels pour vos articles, publications et dossiers festival.",
       "download": "Télécharger",
       "items": [
-        { "id": "pressRelease", "title": "Communiqué de presse PDF", "description": "Version imprimable du communiqué officiel." },
+        { "id": "pressRelease", "title": "Communiqué de presse", "description": "Texte officiel du communiqué, prêt à citer ou à reformater." },
         { "id": "images", "title": "Images HD de Lost Garden", "description": "Sélection de visuels haute résolution pour la presse." },
         { "id": "portrait", "title": "Portrait de Frank Houbre", "description": "Photo portrait du créateur, libre de droits presse." },
         { "id": "logo", "title": "Logo Lost Garden", "description": "Logo officiel du projet en PNG." },
-        { "id": "comments", "title": "Captures de commentaires", "description": "Preuve sociale et retours du public." },
+        { "id": "comments", "title": "Commentaires du public", "description": "Sélection de réactions positives TikTok, prêtes à citer." },
         { "id": "episodeLinks", "title": "Liens de l'épisode", "description": "Liens directs vers les plateformes de diffusion." },
         { "id": "summary", "title": "Résumé court du projet", "description": "Fiche synthétique pour rédactions et programmateurs." }
       ]
