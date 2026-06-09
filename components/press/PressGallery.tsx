@@ -63,9 +63,9 @@ export function PressGallery({ dict }: PressGalleryProps) {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition duration-500 group-hover:scale-[1.03]"
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-abyss/80 via-transparent to-transparent opacity-80" />
-            <span className="absolute bottom-3 left-3 right-3 font-body text-xs font-medium text-ivory/90">
-              {dict.alts[image.altKey]}
+            <span className="absolute inset-0 bg-gradient-to-t from-abyss/55 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100" />
+            <span className="absolute bottom-3 left-3 right-3 translate-y-1 font-body text-xs font-medium text-ivory/90 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+              {dict.captions[image.altKey]}
             </span>
           </button>
         ))}
@@ -127,7 +127,7 @@ export function PressGallery({ dict }: PressGalleryProps) {
               />
             </div>
             <p className="mt-4 text-center font-body text-sm text-ivory/80">
-              {dict.alts[PRESS_GALLERY_IMAGES[activeIndex].altKey]}
+              {dict.captions[PRESS_GALLERY_IMAGES[activeIndex].altKey]}
             </p>
           </div>
         </div>

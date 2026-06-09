@@ -1,22 +1,25 @@
-Independent creator completes 17-minute animated series solo using AI-assisted production workflow
+Independent creator completes solo 17-minute animated episode with AI-assisted production workflow
 
 June 2026
 
-At a time when producing an animated series typically requires dozens, if not hundreds, of people, Frank Houbre took on an unusual challenge: producing a complete episode of an original animated series entirely on his own.
+At a time when producing an animated series typically requires large teams, months of coordination, and substantial budgets, Frank Houbre presents Lost Garden, an independent animated dark fantasy series whose first episode was produced solo.
 
-The result is Lost Garden, a dark fantasy series set in a vast underground world populated by knights, mysterious children, and forgotten creatures.
+Running 17 minutes, this first episode was written, directed, edited, and finished by its creator using an AI-assisted production workflow.
 
-Released in early June, the first episode has already surpassed 65,000 views in just a few days, drawing enthusiastic comments from viewers impressed by the visual quality, art direction, and ambition of the project.
+Lost Garden unfolds in a vast underground world populated by silent knights, mysterious children, forgotten machines, and organic landscapes bathed in blue light. The story follows Lanterne, a fragile, mute knight guided by the memory of a child named Rose.
 
-Over several weeks, Frank Houbre handled the entire production solo: writing, art direction, storyboard, animation, editing, sound design, music, and post-production.
+Since its release in early June, the episode has surpassed 65,000 views in just a few days, generating strong positive responses around its atmosphere, art direction, music, and narrative ambition.
 
-Contrary to some assumptions, the project was not created by pressing a single button. The story, characters, world, narrative structure, and artistic choices were conceived and directed by its creator. Artificial intelligence served as a production accelerator, enabling an independent creator to realize a vision that would previously have required a full studio.
+The project does not rely on automatic generation. AI functions as a production tool within a human-led creative chain: writing, storyboard, staging, visual continuity, editing, sound design, and post-production.
 
-Beyond Lost Garden, Frank Houbre is also developing ScreenWeaver, software for screenwriters and filmmakers that bridges scriptwriting and AI-assisted storyboard visualization.
+With Lost Garden, Frank Houbre explores a new way to produce independent animation: lighter, more direct, yet always grounded in an author's vision.
 
-This approach reflects a broader shift in the audiovisual industry, where AI tools are gradually becoming creative assistants in service of writers, directors, and studios.
+Frank Houbre is also developing ScreenWeaver, a tool designed to help writers and audiovisual creators move more naturally from screenplay to scene visualization. This research into new creative workflows extends directly from the experience of Lost Garden.
 
-"My goal is not to replace artists or studios. On the contrary. I believe these tools will enable a new generation of creators to tell stories they could never have afforded to produce before."
+"Lost Garden was not born from a magic button. It is a project written, directed, edited, and built step by step. AI allowed me to produce alone a vision that would normally have required an entire team."
+— Frank Houbre
+
+"I do not see these tools as a way to remove the human from creation. I see them as an opportunity for independent creators to finally tell stories too large for their usual means."
 — Frank Houbre
 
 ---

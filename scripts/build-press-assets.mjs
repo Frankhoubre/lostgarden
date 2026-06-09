@@ -78,8 +78,7 @@ ${pr.dateline}
 
 ${pr.paragraphs.join("\n\n")}
 
-"${pr.quote}"
-— Frank Houbre
+${pr.quotes.map((quote) => `"${quote}"\n— Frank Houbre`).join("\n\n")}
 
 ---
 Press kit: ${EPISODE.press}
@@ -103,7 +102,7 @@ Points clés
 • Réception : 65 000+ vues, 9 000+ likes TikTok, 430+ commentaires publics en quelques jours
 
 Synopsis (épisode 1)
-${fr.episode.synopsis}
+${fr.episode.paragraphs.join("\n\n")}
 
 Liens
 YouTube: ${EPISODE.youtube}
@@ -116,9 +115,7 @@ Contact: ${EPISODE.contact}
 
 function buildAudienceComments() {
   const comments = readJson("messages/fr.json").press.audience.comments;
-  const lines = comments.map(
-    (item, index) => `${index + 1}. ${item.author}\n"${item.text}"\n`,
-  );
+  const lines = comments.map((text, index) => `${index + 1}. "${text}"\n`);
   const content = `Lost Garden — Sélection de commentaires publics (TikTok)
 Source: @frankhoubre · June 2026
 Positive audience reactions, curated for press use.

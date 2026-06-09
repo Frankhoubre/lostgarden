@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { AnimatedInView } from "@/components/AnimatedInView";
 import { PressGallery } from "@/components/press/PressGallery";
 import { SectionTitle } from "@/components/SectionTitle";
@@ -78,7 +77,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
         <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 sm:px-6 sm:pb-20">
           <AnimatedInView>
             <p className="anime-label font-display text-[0.65rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
-              {p.headline}
+              {p.hero.badge}
             </p>
             <h1 className="anime-heading mt-4 font-display text-5xl text-lily sm:text-6xl md:text-7xl">
               {p.hero.title}
@@ -86,12 +85,28 @@ export function PressKit({ locale, dict }: PressKitProps) {
             <p className="mt-5 max-w-2xl font-body text-lg font-medium leading-relaxed text-ivory/92 sm:text-xl">
               {p.hero.subtitle}
             </p>
-            <p className="mt-4 max-w-3xl font-body text-sm leading-relaxed text-cyan-pale/80 sm:text-base">
-              {p.hero.badge}
+            <p className="mt-5 max-w-3xl font-body text-base leading-relaxed text-ivory/80 sm:text-lg">
+              {p.hero.lead}
             </p>
             <p className="mt-6 max-w-2xl border-l-2 border-glow/40 pl-4 font-body text-base italic leading-relaxed text-ivory/85 sm:text-lg">
               {p.hero.emotional}
             </p>
+
+            <div className="mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
+              {p.hero.stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-glow/15 bg-abyss/35 px-3 py-4 text-center backdrop-blur-sm"
+                >
+                  <p className="anime-heading font-display text-xl text-lily sm:text-2xl">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 font-body text-[0.65rem] font-medium uppercase tracking-wide text-cyan-pale/65 sm:text-xs">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a href={`#${PRESS_SECTION_IDS.watch}`} className="btn-primary btn-shimmer">
@@ -134,6 +149,9 @@ export function PressKit({ locale, dict }: PressKitProps) {
       <PressSection id={PRESS_SECTION_IDS.story} className="section-misty">
         <AnimatedInView>
           <SectionTitle subtitle={p.storyAngle.lead}>{p.storyAngle.title}</SectionTitle>
+          <p className="mx-auto mt-6 max-w-3xl text-center font-body text-base leading-relaxed text-ivory/82 sm:text-lg">
+            {p.storyAngle.body}
+          </p>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
             {p.storyAngle.angles.map((angle) => (
               <article key={angle.title} className="glass-card p-6">
@@ -179,9 +197,11 @@ export function PressKit({ locale, dict }: PressKitProps) {
               <h2 className="anime-heading font-display text-2xl text-lily sm:text-3xl md:text-4xl">
                 {p.episode.title}
               </h2>
-              <p className="mt-6 font-body text-base leading-relaxed text-ivory/88 sm:text-lg">
-                {p.episode.synopsis}
-              </p>
+              <div className="mt-6 space-y-4 font-body text-base leading-relaxed text-ivory/88 sm:text-lg">
+                {p.episode.paragraphs.map((paragraph) => (
+                  <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                ))}
+              </div>
               <div className="mt-8">
                 <a href={`#${PRESS_SECTION_IDS.watch}`} className="btn-primary">
                   {p.episode.cta}
@@ -282,18 +302,15 @@ export function PressKit({ locale, dict }: PressKitProps) {
             ))}
           </div>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto mt-12 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {p.audience.comments.map((comment) => (
               <blockquote
-                key={`${comment.author}-${comment.text.slice(0, 24)}`}
-                className="press-audience-comment flex flex-col rounded-xl border border-glow/18 bg-abyss/40 p-5"
+                key={comment.slice(0, 40)}
+                className="press-audience-comment rounded-xl border border-glow/18 bg-abyss/40 p-5"
               >
-                <p className="flex-1 font-body text-sm leading-relaxed text-ivory/88">
-                  &ldquo;{comment.text}&rdquo;
+                <p className="font-body text-sm leading-relaxed text-ivory/88">
+                  &ldquo;{comment}&rdquo;
                 </p>
-                <footer className="mt-4 font-display text-[0.65rem] font-semibold tracking-[0.12em] text-cyan-pale/55 uppercase">
-                  {comment.author}
-                </footer>
               </blockquote>
             ))}
           </div>
@@ -301,16 +318,6 @@ export function PressKit({ locale, dict }: PressKitProps) {
           <p className="mt-8 text-center font-body text-xs text-ivory/45">
             {p.audience.source}
           </p>
-          <div className="mt-6 text-center">
-            <a
-              href={PRESS_KIT.tiktokUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary"
-            >
-              {p.audience.cta}
-            </a>
-          </div>
         </AnimatedInView>
       </PressSection>
 
@@ -330,12 +337,19 @@ export function PressKit({ locale, dict }: PressKitProps) {
                 <p key={paragraph.slice(0, 48)}>{paragraph}</p>
               ))}
             </div>
-            <blockquote className="press-quote mt-8 border-l-2 border-glow/50 pl-5 font-body text-base italic leading-relaxed text-ivory/92 sm:text-lg">
-              &ldquo;{p.pressRelease.quote}&rdquo;
-              <footer className="mt-3 text-sm not-italic text-cyan-pale/75">
-                Frank Houbre
-              </footer>
-            </blockquote>
+            <div className="mt-8 space-y-6">
+              {p.pressRelease.quotes.map((quote) => (
+                <blockquote
+                  key={quote.slice(0, 48)}
+                  className="press-quote border-l-2 border-glow/50 pl-5 font-body text-base italic leading-relaxed text-ivory/92 sm:text-lg"
+                >
+                  &ldquo;{quote}&rdquo;
+                  <footer className="mt-3 text-sm not-italic text-cyan-pale/75">
+                    Frank Houbre
+                  </footer>
+                </blockquote>
+              ))}
+            </div>
           </article>
           <div className="mt-8 text-center">
             <a
@@ -372,7 +386,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               </p>
               <ul className="mt-8 space-y-2 font-body text-sm sm:text-base">
                 <li>
-                  <span className="text-cyan-pale/65">{p.contact.emailLabel}: </span>
+                  <span className="text-cyan-pale/65">{p.aboutFrank.emailLabel}: </span>
                   <a
                     href={contactMailto}
                     className="text-cyan-pale/90 underline-offset-4 hover:text-magic hover:underline"
@@ -381,33 +395,36 @@ export function PressKit({ locale, dict }: PressKitProps) {
                   </a>
                 </li>
                 <li>
+                  <span className="text-cyan-pale/65">{p.social.instagram}: </span>
                   <a
                     href={PRESS_SOCIAL.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-pale/90 underline-offset-4 hover:text-magic hover:underline"
                   >
-                    {p.social.instagram}: @frank.houbre
+                    @frank.houbre
                   </a>
                 </li>
                 <li>
+                  <span className="text-cyan-pale/65">{p.social.youtube}: </span>
                   <a
                     href={PRESS_SOCIAL.youtube}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-pale/90 underline-offset-4 hover:text-magic hover:underline"
                   >
-                    {p.social.youtube}: @businessdynamite
+                    @businessdynamite
                   </a>
                 </li>
                 <li>
+                  <span className="text-cyan-pale/65">{p.social.tiktok}: </span>
                   <a
                     href={PRESS_SOCIAL.tiktok}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-pale/90 underline-offset-4 hover:text-magic hover:underline"
                   >
-                    {p.social.tiktok}: @frankhoubre
+                    @frankhoubre
                   </a>
                 </li>
               </ul>
@@ -500,31 +517,29 @@ export function PressKit({ locale, dict }: PressKitProps) {
                 {PRESS_KIT.contactEmail}
               </a>
             </div>
-            <p className="mt-10 font-body text-xs text-ivory/50">
-              <Link
-                href={localePath(locale, "/process")}
-                className="text-cyan-pale/60 underline-offset-4 hover:text-magic hover:underline"
-              >
-                {dict.episodeOnePublic.processLink}
-              </Link>
-              {" · "}
-              <Link
-                href={localePath(locale, "/vision")}
-                className="text-cyan-pale/60 underline-offset-4 hover:text-magic hover:underline"
-              >
-                {dict.episodeOnePublic.visionLink}
-              </Link>
-              {" · "}
-              <Link
-                href={localePath(locale, "/episode-1")}
-                className="text-cyan-pale/60 underline-offset-4 hover:text-magic hover:underline"
-              >
-                {dict.episodeOnePublic.watchTitle}
-              </Link>
-            </p>
+            <div className="mt-10">
+              <p className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-cyan-pale/55">
+                {p.contact.topicsLabel}
+              </p>
+              <ul className="mt-3 flex flex-wrap justify-center gap-2">
+                {p.contact.topics.map((topic) => (
+                  <li
+                    key={topic}
+                    className="rounded-md border border-glow/15 bg-cavern/40 px-3 py-1.5 font-body text-xs text-ivory/75"
+                  >
+                    {topic}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </AnimatedInView>
       </PressSection>
+
+      <footer className="border-t border-glow/10 bg-abyss px-5 py-10 text-center">
+        <p className="anime-heading font-display text-lg text-lily">{p.footer.title}</p>
+        <p className="mt-2 font-body text-sm text-ivory/60">{p.footer.description}</p>
+      </footer>
     </>
   );
 }

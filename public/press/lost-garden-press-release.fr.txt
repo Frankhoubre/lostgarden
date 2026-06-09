@@ -1,22 +1,25 @@
-Un créateur indépendant réalise seul une série animée de 17 minutes grâce à un workflow de production assisté par IA
+Un créateur indépendant réalise seul un épisode animé de 17 minutes avec un workflow de production assisté par IA
 
 Juin 2026
 
-À une époque où la production d'une série d'animation nécessite généralement des dizaines, voire des centaines de personnes, Frank Houbre a relevé un défi inhabituel : produire seul un épisode complet d'une série animée originale.
+À l'heure où la production d'une série animée demande généralement des équipes nombreuses, des mois de coordination et des budgets importants, Frank Houbre présente Lost Garden, une série animée dark fantasy indépendante dont le premier épisode a été produit en solo.
 
-Le résultat s'appelle Lost Garden, une série de dark fantasy se déroulant dans un immense monde souterrain peuplé de chevaliers, d'enfants mystérieux et de créatures oubliées.
+D'une durée de 17 minutes, ce premier épisode a été écrit, dirigé, monté et finalisé par son créateur à l'aide d'un workflow de production assisté par IA.
 
-Publié début juin, le premier épisode a déjà dépassé les 65 000 vues en quelques jours, suscitant de nombreux commentaires enthousiastes de spectateurs impressionnés par la qualité visuelle, la direction artistique et l'ambition du projet.
+Lost Garden se déroule dans un vaste monde souterrain, peuplé de chevaliers silencieux, d'enfants mystérieux, de machines oubliées et de paysages organiques baignés de lumière bleue. Le récit suit Lanterne, un chevalier fragile et muet, guidé par le souvenir d'une enfant nommée Rose.
 
-Pendant plusieurs semaines, Frank Houbre a assuré seul l'ensemble de la production : écriture, direction artistique, storyboard, animation, montage, sound design, musique et post-production.
+Depuis sa publication début juin, l'épisode a dépassé les 65 000 vues en quelques jours et généré de nombreux retours positifs autour de son ambiance, de sa direction artistique, de sa musique et de son ambition narrative.
 
-Contrairement à certaines idées reçues, le projet n'a pas été créé en appuyant sur un simple bouton. L'histoire, les personnages, l'univers, le découpage narratif et les choix artistiques ont été conçus et dirigés par son créateur. L'intelligence artificielle a été utilisée comme un accélérateur de production permettant à un créateur indépendant de concrétiser une vision qui aurait auparavant nécessité un studio complet.
+Le projet ne repose pas sur une génération automatique. L'IA intervient comme un outil de production dans une chaîne créative dirigée humainement : écriture, storyboard, mise en scène, continuité visuelle, montage, sound design et post-production.
 
-Au-delà de Lost Garden, Frank Houbre développe également ScreenWeaver, un logiciel destiné aux scénaristes et créateurs de films permettant de passer de l'écriture d'un scénario à la visualisation storyboard assistée par IA.
+Avec Lost Garden, Frank Houbre explore une nouvelle manière de produire de l'animation indépendante : plus légère, plus directe, mais toujours fondée sur une vision d'auteur.
 
-Cette approche s'inscrit dans une évolution plus large de l'industrie audiovisuelle, où les outils d'intelligence artificielle deviennent progressivement des assistants de création au service des auteurs, réalisateurs et studios.
+Frank Houbre développe également ScreenWeaver, un outil pensé pour aider les auteurs et créateurs audiovisuels à passer plus naturellement du scénario à la visualisation de leurs scènes. Cette recherche autour des nouveaux workflows créatifs prolonge directement l'expérience menée avec Lost Garden.
 
-"Mon objectif n'est pas de remplacer les artistes ou les studios. Au contraire. Je suis convaincu que ces outils vont permettre à une nouvelle génération de créateurs de raconter des histoires qu'ils n'auraient jamais eu les moyens de produire auparavant."
+"Lost Garden n'est pas né d'un bouton magique. C'est un projet écrit, dirigé, monté et construit étape par étape. L'IA m'a permis de produire seul une vision qui aurait normalement demandé une équipe entière."
+— Frank Houbre
+
+"Je ne vois pas ces outils comme une façon de retirer l'humain de la création. Je les vois comme une chance pour des créateurs indépendants de raconter enfin des histoires trop grandes pour leurs moyens habituels."
 — Frank Houbre
 
 ---
