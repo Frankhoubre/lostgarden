@@ -17,9 +17,9 @@
       "description": "How Lost Garden Episode One is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime by Frank Houbre."
     },
     "press": {
-      "title": "Lost Garden Press Kit — Independent Animated Dark Fantasy Series by Frank Houbre",
+      "title": "Lost Garden Press Kit · Independent Animated Dark Fantasy Series by Frank Houbre",
       "description": "Official press kit for Lost Garden, a 17-minute independent animated dark fantasy episode produced solo by Frank Houbre through an AI-assisted creative workflow.",
-      "ogTitle": "Lost Garden Press Kit — Independent Animated Series",
+      "ogTitle": "Lost Garden Press Kit · Independent Animated Series",
       "ogDescription": "A 17-minute episode from a one-person studio. Art direction, audience reception, and official press materials."
     },
     "episodeOnePublic": {
@@ -68,7 +68,15 @@
     "join": "Sign up",
     "joinShort": "Join",
     "experience": "Members",
-    "experienceShort": "Members"
+    "experienceShort": "Members",
+    "home": "Home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This passage leads nowhere. The page you are looking for has faded into the depths.",
+    "cta": "Return to the garden"
   },
   "hero": {
     "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",
@@ -356,7 +364,7 @@
       ]
     },
     "episode": {
-      "title": "Episode 1 — The Awakening of the Lantern Knight",
+      "title": "Episode 1 · The Awakening of the Lantern Knight",
       "paragraphs": [
         "The first episode of Lost Garden follows Lanterne, a silent knight who wakes alone in a vast underground realm crossed by blue forests, ancient ruins, forgotten machines, and ghostly presences.",
         "He does not speak. He does not yet understand what he has become. But a luminous medallion guides him toward Rose, a mysterious child whose memory seems tied to his own existence.",

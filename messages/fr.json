@@ -17,9 +17,9 @@
       "description": "Comment l'épisode 1 de Lost Garden est produit : pipeline d'animation assistée par IA, FAQ et référence pour l'animé généré par IA indie."
     },
     "press": {
-      "title": "Lost Garden Press Kit — Série animée indépendante par Frank Houbre",
+      "title": "Lost Garden Press Kit · Série animée indépendante par Frank Houbre",
       "description": "Press kit officiel de Lost Garden, épisode animé dark fantasy de 17 minutes produit en solo par Frank Houbre avec un workflow de production assisté par IA.",
-      "ogTitle": "Lost Garden Press Kit — Série animée indépendante",
+      "ogTitle": "Lost Garden Press Kit · Série animée indépendante",
       "ogDescription": "Épisode de 17 minutes, studio d'une seule personne, direction artistique et réception du public. Ressources presse officielles."
     },
     "episodeOnePublic": {
@@ -68,7 +68,15 @@
     "join": "Inscription",
     "joinShort": "Compte",
     "experience": "Espace membre",
-    "experienceShort": "Membre"
+    "experienceShort": "Membre",
+    "home": "Accueil",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "Ce passage ne mène nulle part. La page que vous cherchez s'est perdue dans les profondeurs.",
+    "cta": "Retourner au jardin"
   },
   "hero": {
     "tagline": "Certaines choses s'éveillent sous la terre. Un chevalier creux. Une enfant dans la brume. Une forêt qui se souvient.",
@@ -358,7 +366,7 @@
       ]
     },
     "episode": {
-      "title": "Épisode 1 — The Awakening of the Lantern Knight",
+      "title": "Épisode 1 · The Awakening of the Lantern Knight",
       "paragraphs": [
         "Le premier épisode de Lost Garden suit Lanterne, un chevalier silencieux qui se réveille seul dans un monde souterrain immense, traversé par des forêts bleues, des ruines anciennes, des machines oubliées et des présences fantomatiques.",
         "Il ne parle pas. Il ne comprend pas encore ce qu'il est devenu. Mais un médaillon lumineux le guide vers Rose, une enfant mystérieuse dont le souvenir semble lié à sa propre existence.",

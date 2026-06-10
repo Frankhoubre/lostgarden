@@ -17,9 +17,9 @@
       "description": "Lost Garden第1話の制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
     },
     "press": {
-      "title": "Lost Garden プレスキット — Frank Houbreによるインディー・アニメーションシリーズ",
+      "title": "Lost Garden プレスキット · Frank Houbreによるインディー・アニメーションシリーズ",
       "description": "Frank Houbreが一人で制作した、17分のダークファンタジー・アニメーション・エピソード「Lost Garden」の公式プレスキット。AI支援の制作ワークフローによる完成作品。",
-      "ogTitle": "Lost Garden プレスキット — インディー・アニメーションシリーズ",
+      "ogTitle": "Lost Garden プレスキット · インディー・アニメーションシリーズ",
       "ogDescription": "17分の完成エピソード、ワンパーソン制作、美術演出と視聴者の反響。公式プレス素材を掲載。"
     },
     "episodeOnePublic": {
@@ -68,7 +68,15 @@
     "join": "登録",
     "joinShort": "登録",
     "experience": "会員",
-    "experienceShort": "会員"
+    "experienceShort": "会員",
+    "home": "ホーム",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "body": "この道はどこにも通じていません。お探しのページは地の底へ消えてしまいました。",
+    "cta": "庭園へ戻る"
   },
   "hero": {
     "tagline": "地の底で目覚めるものがある。空洞の騎士。霧の中の子供。記憶する森。",
@@ -356,7 +364,7 @@
       ]
     },
     "episode": {
-      "title": "第1話 — The Awakening of the Lantern Knight",
+      "title": "第1話 · The Awakening of the Lantern Knight",
       "paragraphs": [
         "Lost Garden第1話は、静かな騎士ランタンヌが、青い森、古代の遺跡、忘れられた機械、幻影のような存在が交差する広大な地下世界で、たった一人で目を覚ます物語から始まります。",
         "彼は語らない。自分が何者になったのか、まだ理解していない。しかし光るメダリオンが、自身の存在と結びついているように思える謎の少女ローズへと彼を導いていきます。",

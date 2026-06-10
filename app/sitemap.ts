@@ -5,6 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return getSitemapEntries().map((entry) => ({
     url: entry.url,
     lastModified: entry.lastModified,
+    changeFrequency: entry.changeFrequency,
+    priority: entry.priority,
     alternates: entry.alternates,
   }));
 }

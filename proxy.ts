@@ -37,7 +37,7 @@ function detectLocale(request: NextRequest): Locale {
   return pickLocaleFromAcceptLanguage(request.headers.get("accept-language"));
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

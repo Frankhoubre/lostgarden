@@ -3,6 +3,7 @@ import { EPISODE_ONE } from "@/lib/episode";
 import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
+import { SOCIAL_LINKS } from "@/lib/social";
 import type { Dictionary } from "@/lib/i18n/types";
 
 export const SITE_URL =
@@ -11,9 +12,9 @@ export const SITE_URL =
 export const SITE = {
   name: "Lost Garden",
   url: SITE_URL,
-  ogImage: "/images/hero-banner.png",
-  ogImageWidth: 1024,
-  ogImageHeight: 576,
+  ogImage: "/images/og-image.png",
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
   email: LEGAL_PUBLISHER.email,
   creator: LEGAL_PUBLISHER.name,
 } as const;
@@ -30,6 +31,28 @@ export const INDEXABLE_PATH_SUFFIXES = [
 ] as const;
 
 export type IndexablePathSuffix = (typeof INDEXABLE_PATH_SUFFIXES)[number];
+
+type SitemapFrequency =
+  | "always"
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "never";
+
+const SITEMAP_HINTS: Record<
+  IndexablePathSuffix,
+  { changeFrequency: SitemapFrequency; priority: number }
+> = {
+  "/": { changeFrequency: "weekly", priority: 1 },
+  "/episode-1": { changeFrequency: "weekly", priority: 0.9 },
+  "/press": { changeFrequency: "monthly", priority: 0.8 },
+  "/vision": { changeFrequency: "monthly", priority: 0.7 },
+  "/process": { changeFrequency: "monthly", priority: 0.7 },
+  "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
+  "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
+};
 
 type BuildPageMetadataOptions = {
   locale: Locale;
@@ -99,6 +122,9 @@ export function buildPageMetadata({
       url: canonical,
       type: ogType,
       locale: openGraphLocales[locale],
+      alternateLocale: locales
+        .filter((loc) => loc !== locale)
+        .map((loc) => openGraphLocales[loc]),
       siteName: SITE.name,
       images: [
         {
@@ -117,7 +143,17 @@ export function buildPageMetadata({
     },
     robots: noIndex
       ? { index: false, follow: false }
-      : { index: true, follow: true },
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        },
   };
 }
 
@@ -149,8 +185,12 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         "@id": `${SITE.url}/#organization`,
         name: SITE.name,
         url: SITE.url,
-        logo: absoluteUrl("/images/logo-lost-garden.png"),
+        logo: {
+          "@type": "ImageObject",
+          url: absoluteUrl("/images/logo-lost-garden.png"),
+        },
         email: SITE.email,
+        sameAs: Object.values(SOCIAL_LINKS),
         founder: {
           "@type": "Person",
           name: SITE.creator,
@@ -163,8 +203,11 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         description: dict.meta.home.description,
         url: pageUrl,
         image,
-        genre: ["Animation", "Fantasy"],
+        genre: ["Animation", "Dark Fantasy", "Anime"],
         inLanguage: schemaLanguages[locale],
+        numberOfEpisodes: 1,
+        datePublished: "2026-06-02",
+        sameAs: Object.values(SOCIAL_LINKS),
         creator: {
           "@type": "Person",
           name: SITE.creator,
@@ -302,20 +345,27 @@ export function episodeVideoJsonLd({
 export function getSitemapEntries(): Array<{
   url: string;
   lastModified: Date;
+  changeFrequency: SitemapFrequency;
+  priority: number;
   alternates: { languages: Record<string, string> };
 }> {
   const lastModified = new Date();
   const entries: Array<{
     url: string;
     lastModified: Date;
+    changeFrequency: SitemapFrequency;
+    priority: number;
     alternates: { languages: Record<string, string> };
   }> = [];
 
   for (const pathSuffix of INDEXABLE_PATH_SUFFIXES) {
+    const hints = SITEMAP_HINTS[pathSuffix];
     for (const locale of locales) {
       entries.push({
         url: absoluteUrl(localePath(locale, pathSuffix)),
         lastModified,
+        changeFrequency: hints.changeFrequency,
+        priority: hints.priority,
         alternates: { languages: localeHreflangAlternates(pathSuffix) },
       });
     }

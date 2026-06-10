@@ -18,7 +18,7 @@ export function CharactersSection() {
         </SectionTitle>
       </AnimatedInView>
 
-      <div className="mx-auto mt-16 grid max-w-6xl gap-6 md:grid-cols-2">
+      <div className="mx-auto mt-12 grid max-w-6xl gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6">
         {dict.characters.list.map((character, index) => (
           <AnimatedInView
             key={character.name}

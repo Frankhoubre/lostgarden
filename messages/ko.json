@@ -17,9 +17,9 @@
       "description": "Lost Garden 1화 제작 방식: AI 지원 애니메이션 파이프라인, FAQ, 인디 AI 생성 애니메이션 참고 자료."
     },
     "press": {
-      "title": "Lost Garden 프레스 키트 — Frank Houbre의 독립 다크 판타지 애니메이션 시리즈",
+      "title": "Lost Garden 프레스 키트 · Frank Houbre의 독립 다크 판타지 애니메이션 시리즈",
       "description": "Frank Houbre가 1인으로 제작한 17분 독립 다크 판타지 애니메이션 에피소드 Lost Garden의 공식 프레스 키트. AI 지원 크리에이티브 워크플로로 완성.",
-      "ogTitle": "Lost Garden 프레스 키트 — 독립 애니메이션",
+      "ogTitle": "Lost Garden 프레스 키트 · 독립 애니메이션",
       "ogDescription": "17분 완성 에피소드, 1인 제작, 미술 연출과 시청자 반응. 공식 프레스 자료."
     },
     "episodeOnePublic": {
@@ -68,7 +68,15 @@
     "join": "가입",
     "joinShort": "가입",
     "experience": "회원",
-    "experienceShort": "회원"
+    "experienceShort": "회원",
+    "home": "홈",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기"
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "body": "이 길은 어디로도 이어지지 않습니다. 찾으시는 페이지는 땅속 깊은 곳으로 사라졌습니다.",
+    "cta": "정원으로 돌아가기"
   },
   "hero": {
     "tagline": "땅속에서 깨어나는 것들이 있다. 공허한 기사. 안개 속의 아이. 기억하는 숲.",
@@ -356,7 +364,7 @@
       ]
     },
     "episode": {
-      "title": "1화 — The Awakening of the Lantern Knight",
+      "title": "1화 · The Awakening of the Lantern Knight",
       "paragraphs": [
         "Lost Garden 1화는 고요한 기사 랑테른이 푸른 숲, 고대 유적, 잊힌 기계, 유령 같은 존재가 교차하는 광대한 지하 세계에서 홀로 깨어나는 이야기로 시작합니다.",
         "그는 말하지 않는다. 자신이 무엇이 되었는지 아직 이해하지 못한다. 하지만 빛나는 메달리온이, 자신의 존재와 연결되어 있는 듯한 신비한 아이 로즈를 향해 그를 이끕니다.",

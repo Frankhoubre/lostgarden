@@ -184,7 +184,7 @@ export function KnightsCarousel() {
       </div>
 
       <div
-        className="mt-6 hidden flex-wrap justify-center gap-2 sm:flex"
+        className="mt-6 flex flex-wrap justify-center gap-2"
         role="tablist"
         aria-label={knights.dotsAria}
       >

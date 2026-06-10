@@ -60,7 +60,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
   return (
     <>
       {/* Hero */}
-      <section className="press-hero relative isolate min-h-[88vh] overflow-hidden">
+      <section className="press-hero relative isolate min-h-[70svh] overflow-hidden sm:min-h-[88vh]">
         <div className="hero-scene absolute inset-0">
           <Image
             src={PRESS_KIT.heroImageUrl}
@@ -74,12 +74,12 @@ export function PressKit({ locale, dict }: PressKitProps) {
           <div className="hero-reference-veil absolute inset-0" />
         </div>
 
-        <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 sm:px-6 sm:pb-20">
+        <div className="relative z-10 mx-auto flex min-h-[70svh] max-w-6xl flex-col justify-end px-5 pb-12 pt-28 sm:min-h-[88vh] sm:px-6 sm:pb-20">
           <AnimatedInView>
             <p className="anime-label font-display text-[0.65rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
               {p.hero.badge}
             </p>
-            <h1 className="anime-heading mt-4 font-display text-5xl text-lily sm:text-6xl md:text-7xl">
+            <h1 className="anime-heading mt-4 font-display text-[clamp(2.75rem,1.5rem+6vw,4.5rem)] text-lily">
               {p.hero.title}
             </h1>
             <p className="mt-5 max-w-2xl font-body text-lg font-medium leading-relaxed text-ivory/92 sm:text-xl">
@@ -235,7 +235,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               <div className="trailer-frame relative aspect-video w-full overflow-hidden rounded-2xl">
                 <iframe
                   src={`${PRESS_KIT.episodeEmbedUrl}?rel=0`}
-                  title={`${p.watch.title} — YouTube`}
+                  title={`${p.watch.title} · YouTube`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
@@ -260,7 +260,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               <div className="press-tiktok-frame trailer-frame relative w-full overflow-hidden rounded-2xl">
                 <iframe
                   src={PRESS_KIT.tiktokEmbedUrl}
-                  title={`${p.watch.title} — TikTok`}
+                  title={`${p.watch.title} · TikTok`}
                   allow="encrypted-media; fullscreen; picture-in-picture"
                   allowFullScreen
                   className="press-tiktok-embed w-full border-0"

@@ -72,10 +72,23 @@ html {
 
 body {
   background: var(--site-bg);
-  background-attachment: fixed;
   color: var(--lily);
   font-family: var(--font-zen), "Hiragino Sans", "Yu Gothic", sans-serif;
   font-weight: 500;
+}
+
+/* `background-attachment: fixed` causes jank and repaint bugs on iOS/Android,
+   so the parallax backdrop is desktop-only. */
+@media (min-width: 1024px) {
+  body {
+    background-attachment: fixed;
+  }
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 .font-display {
@@ -108,18 +121,12 @@ body {
 .section-pad {
   position: relative;
   overflow: hidden;
-  padding: 5rem 1.25rem;
+  padding: clamp(4rem, 6vw + 2rem, 7rem) clamp(1.25rem, 4vw, 1.5rem);
 }
 
 .section-pad > *:not(.section-atmosphere):not(.login-scene) {
   position: relative;
   z-index: 2;
-}
-
-@media (min-width: 768px) {
-  .section-pad {
-    padding: 7rem 1.5rem;
-  }
 }
 
 .section-abyss {
@@ -1230,6 +1237,92 @@ body {
   .site-nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
+  }
+}
+
+.site-nav-logo {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.site-nav-logo:hover {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 12px rgba(125, 223, 255, 0.35));
+}
+
+.site-nav-logo:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5);
+}
+
+.site-nav-burger {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  border: 2px solid rgba(125, 223, 255, 0.28);
+  background: rgba(6, 22, 47, 0.75);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.site-nav-burger:hover {
+  border-color: rgba(125, 223, 255, 0.55);
+  background: rgba(8, 42, 74, 0.85);
+}
+
+.site-nav-burger:focus-visible {
+  outline: 2px solid var(--mushroom-glow);
+  outline-offset: 2px;
+}
+
+.site-nav-burger-line {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--cyan-pale);
+}
+
+.site-nav-mobile {
+  overflow: hidden;
+  border-top: 1px solid rgba(125, 223, 255, 0.14);
+  background: rgba(2, 8, 23, 0.96);
+}
+
+.site-nav-mobile-link {
+  display: block;
+  border-radius: 0.5rem;
+  padding: 0.8rem 0.75rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.85rem;
+  color: rgba(185, 243, 255, 0.8);
+  transition: color 0.2s ease, background 0.2s ease, padding-left 0.2s ease;
+}
+
+.site-nav-mobile-link:hover {
+  background: rgba(6, 22, 47, 0.8);
+  color: var(--magic);
+  padding-left: 1rem;
+}
+
+.site-nav-mobile-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5);
+}
+
+/* These unlayered rules beat Tailwind's layered `md:hidden` utility,
+   so the desktop visibility switch lives here (after the base rules). */
+@media (min-width: 768px) {
+  .site-nav-burger,
+  .site-nav-mobile {
+    display: none;
   }
 }
 

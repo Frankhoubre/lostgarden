@@ -1,0 +1,35 @@
+# Lost Garden
+
+> Lost Garden is a poetic dark fantasy anime series created solo by Frank Houbre with an AI-assisted, human-led production workflow. Episode One (17 minutes) follows Lanterne (Sol), a voiceless hollow knight who awakens beneath the earth and must protect Rose, a mysterious child. The site is available in English, French, Japanese, and Korean.
+
+Key facts:
+- Creator: Frank Houbre (one-person studio, France)
+- Format: independent animated dark fantasy series, original world and screenplay
+- Episode One: 17 minutes, released 2 June 2026, free on YouTube
+- Production: AI-assisted pipeline supervised by a human creator (writing, art direction, editing, music, sound design)
+- Languages: en (default), fr, ja, ko. Every page exists at /en/, /fr/, /ja/, /ko/ prefixes
+
+## Main pages
+
+- [Home](https://lostgarden.world/en): overview of the series, characters, the Thirteen Knights, and Episode One
+- [Episode 1](https://lostgarden.world/en/episode-1): watch Episode One online
+- [Vision](https://lostgarden.world/en/vision): the creator's essay on making an anime with AI, one scene at a time
+- [AI Process](https://lostgarden.world/en/process): the AI-assisted production pipeline, with FAQ
+- [Press Kit](https://lostgarden.world/en/press): key facts, press release, HD assets, and press contact
+
+## Other languages
+
+- [Accueil (Français)](https://lostgarden.world/fr)
+- [ホーム (日本語)](https://lostgarden.world/ja)
+- [홈 (한국어)](https://lostgarden.world/ko)
+
+## Legal
+
+- [Legal notice](https://lostgarden.world/en/legal-notice)
+- [Privacy policy](https://lostgarden.world/en/privacy-policy)
+
+## Social
+
+- YouTube: https://www.youtube.com/@lostgardenanime
+- Instagram: https://www.instagram.com/lostgarden.world
+- TikTok: https://www.tiktok.com/@lostgarden.world

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Oswald, Zen_Kaku_Gothic_New } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { getLocaleFromHeaders } from "@/lib/i18n/config";
@@ -23,6 +23,20 @@ export const metadata: Metadata = {
     default: SITE.name,
     template: `%s | ${SITE.name}`,
   },
+  applicationName: SITE.name,
+  authors: [{ name: SITE.creator, url: SITE.url }],
+  creator: SITE.creator,
+  publisher: SITE.name,
+  category: "entertainment",
+  formatDetection: {
+    telephone: false,
+    address: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#020817",
+  colorScheme: "dark",
 };
 
 export default async function RootLayout({

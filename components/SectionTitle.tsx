@@ -21,7 +21,7 @@ export function SectionTitle({
   if (prefersReducedMotion) {
     return (
       <header className={`text-center ${className}`}>
-        <Tag className="anime-heading font-display text-3xl text-lily sm:text-4xl md:text-5xl">
+        <Tag className="anime-heading font-display text-[clamp(1.875rem,1rem+3.5vw,3rem)] text-lily">
           {children}
         </Tag>
         {subtitle ? (
@@ -52,7 +52,7 @@ export function SectionTitle({
           },
         }}
       >
-        <Tag className="anime-heading font-display text-3xl text-lily sm:text-4xl md:text-5xl">
+        <Tag className="anime-heading font-display text-[clamp(1.875rem,1rem+3.5vw,3rem)] text-lily">
           {children}
         </Tag>
       </motion.div>
