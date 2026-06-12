@@ -330,6 +330,10 @@
       "ctaDownload": "Download Press Kit",
       "ctaContact": "Press Contact"
     },
+    "humanCraft": {
+      "label": "Hybrid creation",
+      "text": "Lost Garden is semi AI-assisted, under human direction. The screenplay was written by hand. Initial character concepts and sketches were drawn by Frank Houbre, then reworked for animation. Melodies were composed on guitar, then reworked and accompanied with AI."
+    },
     "storyAngle": {
       "title": "Why Lost Garden is drawing attention",
       "lead": "Lost Garden is not a technical demonstration. It is a complete narrative episode with a world, characters, art direction, a soundtrack, and a deliberate pacing of scenes.",

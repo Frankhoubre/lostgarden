@@ -332,6 +332,10 @@
       "ctaDownload": "Télécharger le press kit",
       "ctaContact": "Contact presse"
     },
+    "humanCraft": {
+      "label": "Création hybride",
+      "text": "Lost Garden est semi assisté par l'IA, sous direction humaine. Le scénario a été rédigé à la main. Les premiers concepts et croquis des personnages ont été dessinés par Frank Houbre, puis retravaillés pour l'animation. Les mélodies ont été composées à la guitare, puis retravaillées et accompagnées avec l'aide de l'IA."
+    },
     "storyAngle": {
       "title": "Pourquoi Lost Garden attire l'attention",
       "lead": "Lost Garden n'est pas une démonstration technique. C'est un épisode narratif complet, avec un univers, des personnages, une direction artistique, une bande-son et un rythme de mise en scène.",

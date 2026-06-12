@@ -127,6 +127,21 @@ export function PressKit({ locale, dict }: PressKitProps) {
         </div>
       </section>
 
+      {/* Human-led creative note */}
+      <section
+        className="press-human-craft border-b border-glow/15 bg-cavern/35 px-4 py-5 sm:px-6"
+        aria-label={p.humanCraft.label}
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
+          <p className="anime-label shrink-0 font-display text-[0.65rem] font-semibold tracking-[0.16em] text-magic sm:pt-0.5 sm:text-xs">
+            {p.humanCraft.label}
+          </p>
+          <p className="font-body text-sm leading-relaxed text-ivory/82 sm:text-[0.95rem]">
+            {p.humanCraft.text}
+          </p>
+        </div>
+      </section>
+
       {/* In-page nav */}
       <nav
         className="press-anchor-nav sticky top-[57px] z-40 border-b border-glow/15 bg-abyss/90 backdrop-blur-md"
