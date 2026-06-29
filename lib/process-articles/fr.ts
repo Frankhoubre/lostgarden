@@ -13,9 +13,12 @@ export const processArticleFr: VisionArticle = {
     {
       heading: "Pipeline de production (résumé)",
       list: [
+        "Scénario : rédigé à la main dans ScreenWeaver, qui garde le script comme source de vérité et offre un grand confort d'écriture.",
         "Histoire, personnages, ton et choix éditoriaux : direction humaine.",
+        "Storyboard : intégralement généré par ScreenWeaver à partir du scénario, scène par scène.",
         "Character sheets et bible visuelle : références, puis itérations IA pour la cohérence.",
         "Décors et accessoires : prompts ancrés dans la bible du monde souterrain.",
+        "Production des plans : menée via l'interface de workflow et de production de ScreenWeaver, où la génération image et vidéo reste reliée au contexte du scénario (versions et itérations).",
         "Animation : séquences courtes à partir d'images de référence et de prompts dirigés (Seedance 2 et autres modèles vidéo IA).",
         "Musique et son : exploration assistée par IA, affinée pour l'émotion.",
         "Montage : rythme et intention restent des décisions humaines.",
@@ -41,7 +44,8 @@ export const processArticleFr: VisionArticle = {
     {
       heading: "Outils et modèles",
       paragraphs: [
-        "La stack évolue avec les modèles. Lost Garden utilise des outils image et vidéo contemporains (dont Seedance 2 pour des tests de mouvement) et un montage classique. Ce n'est pas un seul modèle qui fait l'épisode : direction, références et sélection comptent plus que le nom de l'outil.",
+        "La colonne vertébrale de la réalisation est ScreenWeaver, l'outil de création de Frank Houbre : l'écriture du scénario, la génération du storyboard et la production des plans y sont reliées dans un même espace, à partir du contexte du script.",
+        "La stack image et vidéo évolue avec les modèles. Lost Garden utilise des modèles contemporains (dont Seedance 2 pour des tests de mouvement) et un montage classique. Ce n'est pas un seul modèle qui fait l'épisode : direction, références et sélection comptent plus que le nom de l'outil.",
       ],
     },
     {

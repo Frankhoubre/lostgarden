@@ -29,6 +29,7 @@ export const visionArticleFr: VisionArticle = {
         "Que doit-il retenir après l'épisode ?",
       ],
       trailingParagraphs: [
+        "Concrètement, tout Lost Garden vit dans ScreenWeaver, l'outil de création que j'ai conçu. J'y écris le scénario à la main, dans un véritable environnement d'écriture qui m'offre un grand confort de travail et garde le script comme source de vérité. ScreenWeaver génère ensuite l'intégralité du storyboard à partir de ce scénario, scène par scène. Puis je produis tous les plans via son interface de workflow et de production, sans jamais perdre le lien avec le texte de départ.",
         "L'IA est puissante, mais sans direction artistique claire, elle devient aléatoire. Plus le monde est précis, meilleurs sont les résultats.",
       ],
     },
@@ -93,6 +94,7 @@ export const visionArticleFr: VisionArticle = {
       trailingParagraphs: [
         "Il y a quelques années, ces scènes auraient exigé une grande équipe d'animation, un pipeline de studio et beaucoup d'argent rien que pour un prototype.",
         "Aujourd'hui, un créateur avec une idée forte peut commencer à construire des séquences visuelles seul ou avec une très petite équipe.",
+        "Pour Lost Garden, ces plans sont produits dans l'interface de workflow et de production de ScreenWeaver. Chaque plan reste relié à sa scène, du scénario au storyboard généré, ce qui m'évite de me perdre entre des dizaines de fichiers épars : Sol qui se réveille, l'œil qui s'ouvre, l'Arbre Source qui le soulève, tout part du même texte de départ et y revient.",
         "Cela ne veut pas dire que c'est facile.",
         "L'animation IA demande toujours de la direction. Il faut penser aux angles de caméra, à la mise en scène, à la continuité, aux silhouettes, au mouvement, aux temps forts émotionnels, au son et au rythme. Un prompt faible donne une scène faible. Un monde confus donne des images confuses.",
         "Mais la barrière a changé.",

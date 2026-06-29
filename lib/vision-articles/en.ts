@@ -28,6 +28,7 @@ export const visionArticleEn: VisionArticle = {
         "What should they remember after the episode ends?",
       ],
       trailingParagraphs: [
+        "In practice, all of Lost Garden lives inside ScreenWeaver, the creative tool I built. I write the screenplay there by hand, in a real writing environment that makes the work genuinely comfortable and keeps the script as the source of truth. ScreenWeaver then generates the entire storyboard from that screenplay, scene by scene. I produce every shot through its workflow and production interface, without ever losing the link back to the original text.",
         "AI is powerful, but without a clear artistic direction, it becomes random. The more precise the world becomes, the better the results become.",
       ],
     },
@@ -92,6 +93,7 @@ export const visionArticleEn: VisionArticle = {
       trailingParagraphs: [
         "These are scenes that, a few years ago, would have required a large animation team, a studio pipeline, and a lot of money just to prototype.",
         "Now, a creator with a strong idea can start building visual sequences alone or with a very small team.",
+        "For Lost Garden, these shots are produced inside ScreenWeaver's workflow and production interface. Every shot stays tied to its scene, from the screenplay to the generated storyboard, so I never get lost across dozens of scattered files: Sol waking up, the eye opening, the Source Tree lifting him, all of it starts from the same original text and returns to it.",
         "That does not mean it is easy.",
         "AI animation still requires direction. You need to think about camera angles, staging, continuity, silhouettes, movement, emotional beats, sound, and rhythm. A weak prompt gives a weak scene. A confused world gives confused visuals.",
         "But the barrier has changed.",

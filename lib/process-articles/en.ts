@@ -13,9 +13,12 @@ export const processArticleEn: VisionArticle = {
     {
       heading: "Production pipeline (summary)",
       list: [
+        "Screenplay: written by hand in ScreenWeaver, which keeps the script as the source of truth and makes writing genuinely comfortable.",
         "Story, characters, tone, and editorial choices: human direction.",
+        "Storyboard: generated in full by ScreenWeaver from the screenplay, scene by scene.",
         "Character sheets and visual bible: reference art, then AI-assisted iteration for consistency.",
         "Environments and props: prompts anchored to the underground world bible (blue forests, cyan mist, Source Tree, pilgrims).",
+        "Shot production: run through ScreenWeaver's workflow and production interface, where image and video generation stays tied to the screenplay context (versions and iteration).",
         "Animation: short sequences from reference images and directed prompts (tools include Seedance 2 and other AI video models).",
         "Music and sound: AI-assisted exploration, refined for mood (fragile, underground, never generic trailer energy).",
         "Assembly: episode edit, pacing, and emotional rhythm remain human decisions.",
@@ -41,7 +44,8 @@ export const processArticleEn: VisionArticle = {
     {
       heading: "Tools and models",
       paragraphs: [
-        "The stack evolves as models improve. Lost Garden has used contemporary image and video models (including Seedance 2 for motion tests) plus conventional editing. Frank does not claim a single model made the episode: direction, references, and selection matter more than the name on the tool.",
+        "The backbone of the production is ScreenWeaver, Frank Houbre's own creative tool: screenplay writing, storyboard generation, and shot production all connect in one space, driven by the script context.",
+        "The image and video stack evolves as models improve. Lost Garden has used contemporary models (including Seedance 2 for motion tests) plus conventional editing. Frank does not claim a single model made the episode: direction, references, and selection matter more than the name on the tool.",
       ],
     },
     {
