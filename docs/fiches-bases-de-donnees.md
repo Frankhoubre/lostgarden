@@ -6,16 +6,16 @@ Je ne peux pas créer les comptes ni envoyer les formulaires à ta place : ce so
 
 ## État des lieux, vérifié le 4 septembre 2026
 
-Trois fiches existent déjà. Trois manquent. Rien ne sert de recréer ce qui est là.
+Trois fiches existent déjà, une est soumise, et deux bases refusent le projet par principe. Rien ne sert de recréer ce qui est là, ni d'insister là où c'est fermé.
 
 | Base | État | Identifiant | Ce qu'il reste à faire |
 |---|---|---|---|
 | IMDb | Existe, bien remplie | `tt43459291` | Ajouter les genres manquants |
 | TMDB | Existe | `325287` | Synopsis anglais, liens externes |
 | Wikidata | Existe | `Q140266760` | Ajouter les identifiants croisés |
-| Anime News Network | Absente | | À créer, priorité 1 |
-| AniList | Absente | | À créer, priorité 2 |
-| MyAnimeList | Absente | | À créer, priorité 3 |
+| Anime News Network | Soumise le 4 septembre 2026 | | En attente de validation |
+| AniList | Inéligible | | Ne pas soumettre |
+| MyAnimeList | Inéligible | | Ne pas soumettre |
 
 Frank Houbre a aussi son propre élément Wikidata, `Q139094807`, décrit comme « French entrepreneur and AI-assisted animation filmmaker », déjà rattaché à Lost Garden comme créateur, réalisateur et scénariste. Sur IMDb, les crédits sont complets : réalisation, scénario, production, musique, image et montage, tous à son nom.
 
@@ -27,15 +27,27 @@ TMDB n'était donc pas bloqué, contrairement à ce que la règle « amateur con
 
 **La date de sortie est le 29 mai 2026.** La page YouTube de l'épisode donne une mise en ligne au 29 mai 2026 à 14h05, ce qui confirme IMDb, TMDB et Wikidata contre le site. Les données structurées du site ont été corrigées et lisent maintenant cette date depuis `EPISODE_ONE.publishedAt`. Le texte affiché annonce toujours une première au 2 juin, ce qui reste un choix éditorial : si le 2 juin correspond à autre chose, une annonce ou un lancement de site, garde-le, mais ne le mets dans aucune fiche.
 
-## Ordre de priorité pour les trois fiches manquantes
+## AniList et MyAnimeList sont fermés, et ce n'est pas négociable
 
-**1. Anime News Network.** La plus utile des trois. ANN est traité comme source d'autorité sur l'animation par Google et par les modèles de langue, et aucune fiche existante ne la remplace. Vérifié : aucune entrée Lost Garden dans leur encyclopédie aujourd'hui.
+Vérifié le 4 septembre 2026, dans leurs règles officielles.
 
-**2. AniList.** Formulaire direct, modération réactive, entrée visible rapidement. Vérifié : aucun média ni aucun membre d'équipe correspondant.
+**AniList** n'accepte que trois catégories : anime, avec un contrôle créatif significatif de studios japonais ; aeni, studios sud-coréens ; donghua, studios chinois ou taïwanais. Leur propre exemple de refus est RWBY, qui a pourtant un doublage japonais et une diffusion à la télévision japonaise, mais dont la production et l'équipe principale sont américaines. C'est aussi pour ça que leur formulaire ne propose que quatre pays d'origine, Chine, Japon, Corée du Sud, Taïwan, avec Japon par défaut et aucun moyen de vider le champ.
 
-**3. MyAnimeList.** La plus stricte sur l'indépendant diffusé sur le web, donc en dernier. Une fiche ANN et une fiche AniList déjà validées sont l'argument qui fait passer une soumission MAL.
+J'ai rempli leur formulaire jusqu'à ce point puis je me suis arrêté. Soumettre revenait à déclarer une production française comme japonaise dans une base publique, sous ton compte. Ça ne se fait pas, et une soumission refusée abîme la réputation du compte pour les suivantes.
 
-Une fois les trois obtenues, retourne sur Wikidata ajouter les identifiants.
+**MyAnimeList** applique la même logique : l'œuvre doit être produite professionnellement au Japon et destinée au marché japonais. RWBY y est refusé pour les mêmes raisons.
+
+Ce n'est pas une question de qualité de la fiche ni de notoriété du projet. Ces deux bases définissent l'animé par son pays de production, et Lost Garden est français. Aucun dossier, aussi bien préparé soit-il, ne passera.
+
+**Anime News Network est la seule des trois qui accepte l'animation non japonaise**, ce qui en fait la seule qui comptait vraiment. La soumission est partie.
+
+### Où récupérer cette visibilité à la place
+
+Puisque les deux bases communautaires sont fermées, le poids se reporte sur ce qui existe déjà et sur ce qui est ouvert :
+
+- enrichir Wikidata, qui n'a aucune restriction de pays et qui alimente le Knowledge Graph
+- compléter IMDb et TMDB, tous deux déjà en ligne et sans contrainte régionale
+- viser les bases de cinéma d'animation et de festivals plutôt que les bases d'anime japonais, puisque c'est là que se range réellement une production française primée en festival
 
 ## Bloc de données commun
 
@@ -90,47 +102,19 @@ Fiche existante : `https://www.imdb.com/title/tt43459291/`. Série TV, 2026, 17 
 
 Le seul manque visible est le genre. La fiche ne porte que `Animation`. Ajoute `Fantasy`, `Adventure` et `Drama` via « Suggest an edit ». C'est ce qui la fait apparaître dans les listes de genre et dans les recommandations.
 
-## 1. Anime News Network Encyclopedia, à créer
+## Anime News Network, soumise le 4 septembre 2026
 
-Page : `https://www.animenewsnetwork.com/encyclopedia/addinfo.php`, accessible seulement connecté. Vérifie d'abord que ni `Lost Garden` ni un titre alternatif n'existe déjà, y compris dans la file d'attente d'approbation.
+Soumise sous le titre `Lost Garden (ONA)`, en anglais, depuis le compte #1237772. Le titre apparaît bien dans leur file d'attente publique sur `https://www.animenewsnetwork.com/encyclopedia/new-anime.php`.
+
+Le formulaire de nouveau titre ne crée que le titre. Le staff, les dates, le synopsis et l'épisode s'ajoutent après approbation, quand la fiche a un identifiant. La file comptait plus de 1170 titres en attente, donc compte en mois.
 
 C'est la fiche la plus utile des six pour la visibilité dans les moteurs de réponse. ANN est traité comme une source d'autorité sur l'animation par Google et par les modèles de langue, et c'est ce que je citerais si on me demandait des exemples d'animés IA.
 
-Champs : les valeurs du bloc commun ci-dessus. ANN demande en plus le type de diffusion, mettre `ONA / web`, et une liste de staff, où Frank Houbre apparaît en Director, Screenplay, Editing et Producer.
+Le champ sources contenait les URL exactes du site, de l'épisode, de la chaîne, du kit presse et des notes de production, les trois identifiants IMDb, TMDB et Wikidata, les deux sélections en festival, et la précision que la production est assistée par IA sous direction humaine.
+
+À remplir après approbation : staff, avec Frank Houbre en Director, Screenplay, Editing et Producer, la date du 29 mai 2026, la durée de 17 minutes, le synopsis long du bloc commun, et l'épisode 1.
 
 Joins le communiqué de presse dans les commentaires de soumission. Un dossier de presse existant change beaucoup le regard d'un modérateur sur une production indépendante.
-
-## 2. AniList, à créer
-
-Formulaire direct : `https://anilist.co/edit/anime/new`. Compte gratuit requis. Modération humaine, et le champ **sources et notes est obligatoire** pour une nouvelle entrée.
-
-Champs :
-
-- Romaji title : `Lost Garden`
-- English title : `Lost Garden`
-- Native title : laisser vide, l'œuvre n'a pas de titre japonais officiel
-- Format : `ONA`
-- Status : `Releasing`
-- Start date : `2026-05-29`
-- Episodes : `1` diffusé
-- Duration : `17`
-- Country of origin : `France`
-- Source : `Original`
-- Genres : `Fantasy`, `Adventure`, `Drama`
-- Tags : `Dark Fantasy`, `Post-Apocalyptic`, `Male Protagonist`, `Philosophy`
-- Description : le synopsis long
-- External links : site officiel, YouTube, page presse
-- Sources and notes : la note pour modérateurs ci-dessus
-
-Avant d'envoyer, lis leur Animated Media Criteria dans le manuel de soumission. Si un doute subsiste sur l'admissibilité d'une production indépendante, leur Discord a un canal `#submission-support` et une question posée avant soumission vaut mieux qu'un refus.
-
-## 3. MyAnimeList, à créer
-
-Soumission depuis le web uniquement, compte requis, modération humaine. MAL est la plus exigeante des quatre sur les productions indépendantes diffusées sur le web, donc à tenter après AniList et ANN : une fiche déjà validée ailleurs est un argument.
-
-Champs : identiques à la fiche AniList, MAL utilise la même structure ONA.
-
-Leur conseil officiel aux contributeurs : remplir un maximum de champs corrects et joindre les ressources officielles. Un modérateur qui n'a rien à chercher approuve plus vite. Joins donc systématiquement les trois liens : site, épisode YouTube, page presse.
 
 ## TMDB, déjà en ligne
 
