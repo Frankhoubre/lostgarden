@@ -21,11 +21,11 @@ Frank Houbre a aussi son propre élément Wikidata, `Q139094807`, décrit comme 
 
 TMDB n'était donc pas bloqué, contrairement à ce que la règle « amateur content » laissait craindre. Les sélections en festival, notamment le Seoul International AI Film Festival et la finale du AI London Festival, ont fait le travail.
 
-### Deux incohérences à régler avant de créer les fiches manquantes
+### Les deux points litigieux sont tranchés
 
-**La date de sortie.** IMDb, TMDB et Wikidata disent tous les trois le 29 mai 2026. Le site dit le 2 juin 2026. Trois bases contre le site, et ce sont les bases qui se recopient entre elles. Décide laquelle est la bonne : si c'est le 2 juin, corrige les trois fiches existantes avant d'en créer d'autres, sinon la mauvaise date se propage dans les nouvelles.
+**Le nom du chevalier est Lanterne.** Jamais Sol. Le site a été corrigé le 4 septembre 2026 : fiches personnages, page Vision, page Process et nouveaux articles, dans les quatre langues, translittérations japonaise et coréenne comprises. Les clés internes et le nom du fichier image restent inchangés, ils ne sont pas visibles.
 
-**Le nom du chevalier.** Le site dit Sol sur les fiches personnages, la page Vision et la page Process. Le carrousel des chevaliers, le communiqué de presse et le synopsis TMDB disent Lanterne. Le synopsis IMDb contourne le problème en écrivant « an empty knight » sans le nommer. Les modérateurs d'ANN, d'AniList et de MAL recoupent les sources, et cette contradiction est un motif de refus classique. À trancher avant de soumettre.
+**La date de sortie est le 29 mai 2026.** La page YouTube de l'épisode donne une mise en ligne au 29 mai 2026 à 14h05, ce qui confirme IMDb, TMDB et Wikidata contre le site. Les données structurées du site ont été corrigées et lisent maintenant cette date depuis `EPISODE_ONE.publishedAt`. Le texte affiché annonce toujours une première au 2 juin, ce qui reste un choix éditorial : si le 2 juin correspond à autre chose, une annonce ou un lancement de site, garde-le, mais ne le mets dans aucune fiche.
 
 ## Ordre de priorité pour les trois fiches manquantes
 
@@ -43,10 +43,11 @@ Une fois les trois obtenues, retourne sur Wikidata ajouter les identifiants.
 
 - Titre principal : `Lost Garden`
 - Titre de l'épisode 1 : `The Awakening of the Lantern Knight`
+- Protagoniste : `Lanterne`, le 12e Chevalier. Second rôle : `Rose`
 - Type : ONA (Original Net Animation)
 - Format : série, 1 épisode diffusé, épisode 2 en production
 - Durée : 17 min
-- Première diffusion : à confirmer. Le site dit le 2 juin 2026, IMDb, TMDB et Wikidata disent le 29 mai 2026. Tranche avant de remplir ce champ
+- Première diffusion : 29 mai 2026
 - Pays : France
 - Studio / production : indépendant, Frank Houbre (studio d'une personne)
 - Source : original
@@ -67,13 +68,13 @@ Une fois les trois obtenues, retourne sur Wikidata ajouter les identifiants.
 
 Synopsis court, 40 mots, pour les champs limités :
 
-> A hollow knight wakes alone beneath the earth with no memory and no voice. Guided by a glowing medallion, he sets out to protect Rose, a mysterious child, across a buried world of blue forests and forgotten machines.
+> Lanterne, a hollow knight, wakes alone beneath the earth with no memory and no voice. Guided by a glowing medallion, he sets out to protect Rose, a mysterious child, across a buried world of blue forests and forgotten machines.
 
 Synopsis long, pour les champs de description :
 
 > Lost Garden is an independent dark fantasy series set in a vast underground world of blue forests, ancient ruins, forgotten machines and ghostly presences.
 >
-> The first episode follows a silent knight who wakes alone on an altar with no memory of what he has become. He cannot speak. Only hollow metallic sounds and quiet gestures reveal what he feels. A glowing medallion guides him toward Rose, a mysterious child whose memory seems bound to his own existence.
+> The first episode follows Lanterne, a silent knight who wakes alone on an altar with no memory of what he has become. He cannot speak. Only hollow metallic sounds and quiet gestures reveal what he feels. A glowing medallion guides him toward Rose, a mysterious child whose memory seems bound to his own existence.
 >
 > The episode lays the foundations of a series about memory, transmission, sacrifice, and the possibility of still loving in a world almost entirely lost.
 >
@@ -81,7 +82,7 @@ Synopsis long, pour les champs de description :
 
 Note pour les modérateurs, à mettre dans le champ sources ou commentaires :
 
-> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube in 2026, 17 minutes, over 65,000 views. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode link: https://youtu.be/eZ_JlaLDJ-8. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
+> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube on 29 May 2026, 17 minutes, over 65,000 views. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode link: https://youtu.be/eZ_JlaLDJ-8. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
 
 ## IMDb, déjà en ligne
 
@@ -110,7 +111,7 @@ Champs :
 - Native title : laisser vide, l'œuvre n'a pas de titre japonais officiel
 - Format : `ONA`
 - Status : `Releasing`
-- Start date : la date tranchée ci-dessus, `2026-05-29` ou `2026-06-02`
+- Start date : `2026-05-29`
 - Episodes : `1` diffusé
 - Duration : `17`
 - Country of origin : `France`
