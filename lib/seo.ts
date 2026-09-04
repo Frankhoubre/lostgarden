@@ -3,7 +3,7 @@ import { EPISODE_ONE } from "@/lib/episode";
 import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
-import { SOCIAL_LINKS } from "@/lib/social";
+import { CREATOR_WIKIDATA, DATABASE_LINKS, SOCIAL_LINKS } from "@/lib/social";
 import type { Dictionary } from "@/lib/i18n/types";
 
 export const SITE_URL =
@@ -202,6 +202,7 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         founder: {
           "@type": "Person",
           name: SITE.creator,
+          sameAs: [CREATOR_WIKIDATA],
         },
       },
       {
@@ -215,10 +216,14 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         inLanguage: schemaLanguages[locale],
         numberOfEpisodes: 1,
         datePublished: "2026-06-02",
-        sameAs: Object.values(SOCIAL_LINKS),
+        sameAs: [
+          ...Object.values(SOCIAL_LINKS),
+          ...Object.values(DATABASE_LINKS),
+        ],
         creator: {
           "@type": "Person",
           name: SITE.creator,
+          sameAs: [CREATOR_WIKIDATA],
         },
       },
     ],

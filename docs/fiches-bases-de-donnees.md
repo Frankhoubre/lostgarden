@@ -4,26 +4,38 @@ Dossiers de soumission prêts à coller. Chaque section reprend les champs réel
 
 Je ne peux pas créer les comptes ni envoyer les formulaires à ta place : ce sont des inscriptions et des publications en ton nom. Tout le reste est fait ici, il te reste le copier-coller et le bouton d'envoi.
 
-## À trancher avant d'envoyer quoi que ce soit
+## État des lieux, vérifié le 4 septembre 2026
 
-Le site utilise deux noms pour le même personnage. Les fiches personnages disent **Sol** dans les quatre langues, ainsi que les pages Vision et Process. Le carrousel des chevaliers et le communiqué de presse disent **Lanterne**. Les modérateurs de ces bases recoupent les sources, et une incohérence entre le site officiel et la fiche est un motif de refus classique.
+Trois fiches existent déjà. Trois manquent. Rien ne sert de recréer ce qui est là.
 
-Décide lequel est le nom canon, corrige l'autre sur le site, puis soumets. Si Sol est le nom international et Lanterne le nom du 12e Chevalier dans la mythologie interne, il faut que le site le dise explicitement quelque part.
-
-## Ordre de priorité
-
-Les bases n'ont pas les mêmes règles d'admission. Cet ordre suit les chances réelles d'acceptation, pas la notoriété de la base.
-
-| Ordre | Base | Verrou | Chances |
+| Base | État | Identifiant | Ce qu'il reste à faire |
 |---|---|---|---|
-| 1 | IMDb | Vidéo publiquement visible en ligne, c'est tout | Élevées |
-| 2 | AniList | Modération, sources exigées | Bonnes |
-| 3 | ANN Encyclopedia | Modération éditoriale | Moyennes |
-| 4 | MyAnimeList | Modération, la plus stricte sur l'indé web | Moyennes |
-| 5 | TMDB | Règle « amateur content » : festival ou distributeur requis | Bloqué pour l'instant |
-| 6 | Wikidata | Sources de presse indépendantes requises | À faire après couverture presse |
+| IMDb | Existe, bien remplie | `tt43459291` | Ajouter les genres manquants |
+| TMDB | Existe | `325287` | Synopsis anglais, liens externes |
+| Wikidata | Existe | `Q140266760` | Ajouter les identifiants croisés |
+| Anime News Network | Absente | | À créer, priorité 1 |
+| AniList | Absente | | À créer, priorité 2 |
+| MyAnimeList | Absente | | À créer, priorité 3 |
 
-TMDB refuse explicitement les séries publiées sur YouTube tant qu'elles n'ont pas été **sélectionnées dans un festival éligible** ou reprises par un distributeur professionnel. Vu les soumissions festivals déjà en cours, c'est une question de mois, pas une impasse. Dès qu'une sélection tombe, TMDB s'ouvre, et TMDB alimente ensuite Plex, Jellyfin, Trakt et une longue liste d'applications.
+Frank Houbre a aussi son propre élément Wikidata, `Q139094807`, décrit comme « French entrepreneur and AI-assisted animation filmmaker », déjà rattaché à Lost Garden comme créateur, réalisateur et scénariste. Sur IMDb, les crédits sont complets : réalisation, scénario, production, musique, image et montage, tous à son nom.
+
+TMDB n'était donc pas bloqué, contrairement à ce que la règle « amateur content » laissait craindre. Les sélections en festival, notamment le Seoul International AI Film Festival et la finale du AI London Festival, ont fait le travail.
+
+### Deux incohérences à régler avant de créer les fiches manquantes
+
+**La date de sortie.** IMDb, TMDB et Wikidata disent tous les trois le 29 mai 2026. Le site dit le 2 juin 2026. Trois bases contre le site, et ce sont les bases qui se recopient entre elles. Décide laquelle est la bonne : si c'est le 2 juin, corrige les trois fiches existantes avant d'en créer d'autres, sinon la mauvaise date se propage dans les nouvelles.
+
+**Le nom du chevalier.** Le site dit Sol sur les fiches personnages, la page Vision et la page Process. Le carrousel des chevaliers, le communiqué de presse et le synopsis TMDB disent Lanterne. Le synopsis IMDb contourne le problème en écrivant « an empty knight » sans le nommer. Les modérateurs d'ANN, d'AniList et de MAL recoupent les sources, et cette contradiction est un motif de refus classique. À trancher avant de soumettre.
+
+## Ordre de priorité pour les trois fiches manquantes
+
+**1. Anime News Network.** La plus utile des trois. ANN est traité comme source d'autorité sur l'animation par Google et par les modèles de langue, et aucune fiche existante ne la remplace. Vérifié : aucune entrée Lost Garden dans leur encyclopédie aujourd'hui.
+
+**2. AniList.** Formulaire direct, modération réactive, entrée visible rapidement. Vérifié : aucun média ni aucun membre d'équipe correspondant.
+
+**3. MyAnimeList.** La plus stricte sur l'indépendant diffusé sur le web, donc en dernier. Une fiche ANN et une fiche AniList déjà validées sont l'argument qui fait passer une soumission MAL.
+
+Une fois les trois obtenues, retourne sur Wikidata ajouter les identifiants.
 
 ## Bloc de données commun
 
@@ -34,7 +46,7 @@ TMDB refuse explicitement les séries publiées sur YouTube tant qu'elles n'ont 
 - Type : ONA (Original Net Animation)
 - Format : série, 1 épisode diffusé, épisode 2 en production
 - Durée : 17 min
-- Première diffusion : 2 juin 2026
+- Première diffusion : à confirmer. Le site dit le 2 juin 2026, IMDb, TMDB et Wikidata disent le 29 mai 2026. Tranche avant de remplir ce champ
 - Pays : France
 - Studio / production : indépendant, Frank Houbre (studio d'une personne)
 - Source : original
@@ -69,30 +81,25 @@ Synopsis long, pour les champs de description :
 
 Note pour les modérateurs, à mettre dans le champ sources ou commentaires :
 
-> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube on 2 June 2026, 17 minutes, over 65,000 views. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode link: https://youtu.be/eZ_JlaLDJ-8. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
+> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube in 2026, 17 minutes, over 65,000 views. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode link: https://youtu.be/eZ_JlaLDJ-8. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
 
-## 1. IMDb
+## IMDb, déjà en ligne
 
-Formulaire : compte IMDb, puis « Add a new title ». Choisir **Made for TV: TV Series** et ajouter le mot-clé `web-series`, ou **Made for Video** si tu préfères déposer l'épisode seul.
+Fiche existante : `https://www.imdb.com/title/tt43459291/`. Série TV, 2026, 17 min, 1 saison, 1 épisode, 3 photos, date de sortie au 29 mai 2026, pays France, langue anglais, site officiel lié. Les crédits sont complets et tous à ton nom : réalisation, scénario, production, musique originale, image, montage.
 
-La règle IMDb est simple : une vidéo publiquement visible en ligne est éligible, gratuite ou payante. Pas de festival requis. C'est pour ça que c'est la première à faire.
+Le seul manque visible est le genre. La fiche ne porte que `Animation`. Ajoute `Fantasy`, `Adventure` et `Drama` via « Suggest an edit ». C'est ce qui la fait apparaître dans les listes de genre et dans les recommandations.
 
-Champs :
+## 1. Anime News Network Encyclopedia, à créer
 
-- Title : `Lost Garden`
-- Title type : TV Series (web series)
-- Year : `2026`
-- Country : `France`
-- Language : `English`
-- Runtime : `17 min` (épisode)
-- Genres : `Animation, Fantasy, Adventure, Drama`
-- Plot summary : le synopsis court ci-dessus
-- Cast & crew : Frank Houbre, rôles `Writer`, `Director`, `Editor`, `Producer`
-- Links : `https://youtu.be/eZ_JlaLDJ-8` et `https://lostgarden.world`
+Page : `https://www.animenewsnetwork.com/encyclopedia/addinfo.php`, accessible seulement connecté. Vérifie d'abord que ni `Lost Garden` ni un titre alternatif n'existe déjà, y compris dans la file d'attente d'approbation.
 
-Mets le lien YouTube direct dans la section Links. IMDb le recommande explicitement, c'est ce qui permet au vérificateur de confirmer sans chercher.
+C'est la fiche la plus utile des six pour la visibilité dans les moteurs de réponse. ANN est traité comme une source d'autorité sur l'animation par Google et par les modèles de langue, et c'est ce que je citerais si on me demandait des exemples d'animés IA.
 
-## 2. AniList
+Champs : les valeurs du bloc commun ci-dessus. ANN demande en plus le type de diffusion, mettre `ONA / web`, et une liste de staff, où Frank Houbre apparaît en Director, Screenplay, Editing et Producer.
+
+Joins le communiqué de presse dans les commentaires de soumission. Un dossier de presse existant change beaucoup le regard d'un modérateur sur une production indépendante.
+
+## 2. AniList, à créer
 
 Formulaire direct : `https://anilist.co/edit/anime/new`. Compte gratuit requis. Modération humaine, et le champ **sources et notes est obligatoire** pour une nouvelle entrée.
 
@@ -103,7 +110,7 @@ Champs :
 - Native title : laisser vide, l'œuvre n'a pas de titre japonais officiel
 - Format : `ONA`
 - Status : `Releasing`
-- Start date : `2026-06-02`
+- Start date : la date tranchée ci-dessus, `2026-05-29` ou `2026-06-02`
 - Episodes : `1` diffusé
 - Duration : `17`
 - Country of origin : `France`
@@ -116,37 +123,33 @@ Champs :
 
 Avant d'envoyer, lis leur Animated Media Criteria dans le manuel de soumission. Si un doute subsiste sur l'admissibilité d'une production indépendante, leur Discord a un canal `#submission-support` et une question posée avant soumission vaut mieux qu'un refus.
 
-## 3. Anime News Network Encyclopedia
-
-Page : `https://www.animenewsnetwork.com/encyclopedia/addinfo.php`, accessible seulement connecté. Vérifie d'abord que ni `Lost Garden` ni un titre alternatif n'existe déjà, y compris dans la file d'attente d'approbation.
-
-C'est la fiche la plus utile des six pour la visibilité dans les moteurs de réponse. ANN est traité comme une source d'autorité sur l'animation par Google et par les modèles de langue, et c'est ce que je citerais si on me demandait des exemples d'animés IA.
-
-Champs : mêmes valeurs que la fiche AniList. ANN demande en plus le type de diffusion, mettre `ONA / web`, et une liste de staff, où Frank Houbre apparaît en Director, Screenplay, Editing et Producer.
-
-Joins le communiqué de presse dans les commentaires de soumission. Un dossier de presse existant change beaucoup le regard d'un modérateur sur une production indépendante.
-
-## 4. MyAnimeList
+## 3. MyAnimeList, à créer
 
 Soumission depuis le web uniquement, compte requis, modération humaine. MAL est la plus exigeante des quatre sur les productions indépendantes diffusées sur le web, donc à tenter après AniList et ANN : une fiche déjà validée ailleurs est un argument.
 
-Champs : identiques à AniList, MAL utilise la même structure ONA.
+Champs : identiques à la fiche AniList, MAL utilise la même structure ONA.
 
 Leur conseil officiel aux contributeurs : remplir un maximum de champs corrects et joindre les ressources officielles. Un modérateur qui n'a rien à chercher approuve plus vite. Joins donc systématiquement les trois liens : site, épisode YouTube, page presse.
 
-## 5. TMDB, quand une sélection festival tombe
+## TMDB, déjà en ligne
 
-À ne pas tenter maintenant. La règle « amateur content » de TMDB impose une sélection dans un festival éligible ou une reprise par un distributeur professionnel, et les séries YouTube sont supprimées sans cela. Une soumission refusée laisse une trace et complique la suivante.
+Fiche existante : `https://www.themoviedb.org/tv/325287`, série TV 2026, avec un synopsis en français qui nomme le chevalier Lanterne.
 
-Dès qu'une sélection est confirmée : compte TMDB, « Add new TV show », mêmes champs que ci-dessus, et le justificatif de sélection dans le champ de commentaire. TMDB alimente ensuite un écosystème entier d'applications, ce qui en fait la fiche la plus rentable une fois débloquée.
+Deux ajouts utiles une fois connecté : une traduction anglaise du synopsis, parce que TMDB sert la langue du visiteur et que l'anglais est la langue par défaut de la plupart des applications qui consomment ces données, et les liens externes vers le site officiel et la chaîne YouTube.
 
-## 6. Wikidata
+## Wikidata, à enrichir
 
-À faire une fois qu'il existe deux ou trois articles de presse indépendants sur le projet. Wikidata accepte facilement, mais supprime les éléments sans source indépendante, et un élément supprimé est plus difficile à recréer.
+Élément existant : `Q140266760`. Déjà renseigné : nature de l'élément (série d'animation), genre (dark fantasy), créateur, réalisateur et scénariste (Frank Houbre, `Q139094807`), pays (France), langue (anglais), durée (17 min), date de publication (29 mai 2026), identifiant IMDb, identifiant TMDB, site officiel.
 
-L'intérêt : Wikidata alimente directement le Knowledge Graph de Google. C'est ce qui déclenche un panneau à droite des résultats quand quelqu'un cherche Lost Garden.
+Manque, par ordre d'utilité :
 
-Propriétés à renseigner : instance de (série d'animation web), pays d'origine (France), créateur (Frank Houbre), date de première diffusion, site officiel, chaîne YouTube, plus les identifiants IMDb, AniList, MAL et ANN une fois obtenus. Ce sont ces identifiants croisés qui donnent sa valeur à l'élément.
+- les identifiants ANN, AniList et MyAnimeList, dès que les fiches existent, parce que c'est le croisement qui fait la valeur de l'élément
+- le nombre d'épisodes
+- la chaîne YouTube officielle
+- une image sous licence compatible
+- Sol et Rose comme éléments distincts, plus tard, s'ils le méritent
+
+Aucune page Wikipédia n'est liée à l'élément. Wikidata n'en exige pas, mais c'est ce qui manque pour déclencher un panneau de connaissance complet dans Google.
 
 ## Après acceptation
 
