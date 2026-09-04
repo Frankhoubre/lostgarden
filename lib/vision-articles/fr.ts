@@ -7,7 +7,7 @@ export const visionArticleFr: VisionArticle = {
     {
       paragraphs: [
         "Je m'appelle Frank Houbre, et Lost Garden est un projet d'anime original que je crée avec l'aide de l'intelligence artificielle.",
-        "Au fond, Lost Garden est une dark fantasy poétique sur Sol, une armure vide au casque en forme de lanterne, et Rose, une enfant mystérieuse liée à la renaissance d'un monde blessé. L'histoire se déroule dans un vaste univers souterrain : forêts bleues, champignons lumineux, racines géantes, machines étranges, cavernes anciennes, pèlerins silencieux, et des êtres oubliés qui semblent plus vieux que la mémoire.",
+        "Au fond, Lost Garden est une dark fantasy poétique sur Lanterne, une armure vide dont le casque a la forme d'une lanterne, et Rose, une enfant mystérieuse liée à la renaissance d'un monde blessé. L'histoire se déroule dans un vaste univers souterrain : forêts bleues, champignons lumineux, racines géantes, machines étranges, cavernes anciennes, pèlerins silencieux, et des êtres oubliés qui semblent plus vieux que la mémoire.",
         "C'est une série poétique et émotionnelle. Je veux qu'elle soit mystérieuse, belle, dangereuse et profondément humaine, même si l'un des personnages principaux est littéralement une armure vide.",
         "J'ai toujours aimé les histoires qui restent longtemps après la fin. Made in Abyss m'a marqué par son émerveillement, son danger et sa innocence perdue. L'Attaque des Titans m'a impressionné par son échelle, son mystère, sa tragédie, et la façon dont il révèle peu à peu la vraie nature de son monde. Avec Lost Garden, je ne cherche pas à copier ces œuvres. Je cherche à créer quelque chose qui porte le même poids émotionnel. Une histoire vaste, étrange et douloureuse, mais aussi tendre.",
         "Et pour la première fois, grâce à l'IA, je peux vraiment essayer de la construire.",
@@ -18,7 +18,7 @@ export const visionArticleFr: VisionArticle = {
         "L'IA ne m'a pas donné l'histoire. Elle m'a aidé à la rendre visible.",
       paragraphs: [
         "Je veux être clair : l'IA ne « fait pas l'anime à ma place » d'un simple clic magique.",
-        "L'idée, les personnages, la direction émotionnelle, le monde, le ton, les choix narratifs, la relation entre Sol et Rose, tout cela vient d'une intention humaine. L'IA m'aide à transformer ces idées en images, scènes, tests d'animation, directions musicales et matériel de production bien plus vite qu'auparavant.",
+        "L'idée, les personnages, la direction émotionnelle, le monde, le ton, les choix narratifs, la relation entre Lanterne et Rose, tout cela vient d'une intention humaine. L'IA m'aide à transformer ces idées en images, scènes, tests d'animation, directions musicales et matériel de production bien plus vite qu'auparavant.",
         "Pour Lost Garden, le processus commence comme pour tout projet animé : une vision claire.",
       ],
       list: [
@@ -37,7 +37,7 @@ export const visionArticleFr: VisionArticle = {
       heading: "Les fiches personnages sont le socle",
       paragraphs: [
         "L'une des étapes les plus importantes est la création des character sheets.",
-        "Pour Sol, il me fallait un design immédiatement reconnaissable : une vieille armure creuse, un casque en lanterne, pas de vrai visage, pas de corps à l'intérieur, des proportions modestes, une attitude fragile et un peu maladroite. Ce n'est pas un chevalier légendaire tout-puissant. Il est abîmé, poétique, maladroit et protecteur.",
+        "Pour Lanterne, il me fallait un design immédiatement reconnaissable : une vieille armure creuse, un casque en lanterne, pas de vrai visage, pas de corps à l'intérieur, des proportions modestes, une attitude fragile et un peu maladroite. Ce n'est pas un chevalier légendaire tout-puissant. Il est abîmé, poétique, maladroit et protecteur.",
         "Pour Rose, l'énergie inverse : une petite fille, douce, innocente, calme, avec une force émotionnelle discrète. Elle devait donner l'impression d'être utilisée par le monde, tout en étant protégée simplement parce qu'elle est une enfant.",
         "Les fiches aident à garder les personnages cohérents d'une scène à l'autre. Face, profil, gros plans, attitudes, costumes, références émotionnelles. Sans cela, un anime généré par IA devient vite incohérent. Les visages changent, les costumes aussi, les proportions dérivent.",
         "Les character sheets ne sont pas que de jolies images. Ce sont des outils de production.",
@@ -83,18 +83,18 @@ export const visionArticleFr: VisionArticle = {
         "Pour Lost Garden, je peux créer des scènes comme :",
       ],
       list: [
-        "Sol qui se réveille sur un autel de pierre dans une caverne bleue.",
-        "Sol découvrant qu'il est vide à l'intérieur.",
+        "Lanterne qui se réveille sur un autel de pierre dans une caverne bleue.",
+        "Lanterne découvrant qu'il est vide à l'intérieur.",
         "Un œil extraterrestre géant qui s'ouvre sous lui.",
         "Des pèlerins masqués qui se tournent vers lui d'un seul mouvement.",
         "Rose debout sur une colline de lys blancs dans un rêve.",
-        "L'Arbre Source qui soulève Sol doucement dans sa main.",
+        "L'Arbre Source qui soulève Lanterne doucement dans sa main.",
         "Une rose géante qui fleurit de la terre et donne naissance à un Enfant Source.",
       ],
       trailingParagraphs: [
         "Il y a quelques années, ces scènes auraient exigé une grande équipe d'animation, un pipeline de studio et beaucoup d'argent rien que pour un prototype.",
         "Aujourd'hui, un créateur avec une idée forte peut commencer à construire des séquences visuelles seul ou avec une très petite équipe.",
-        "Pour Lost Garden, ces plans sont produits dans l'interface de workflow et de production de ScreenWeaver. Chaque plan reste relié à sa scène, du scénario au storyboard généré, ce qui m'évite de me perdre entre des dizaines de fichiers épars : Sol qui se réveille, l'œil qui s'ouvre, l'Arbre Source qui le soulève, tout part du même texte de départ et y revient.",
+        "Pour Lost Garden, ces plans sont produits dans l'interface de workflow et de production de ScreenWeaver. Chaque plan reste relié à sa scène, du scénario au storyboard généré, ce qui m'évite de me perdre entre des dizaines de fichiers épars : Lanterne qui se réveille, l'œil qui s'ouvre, l'Arbre Source qui le soulève, tout part du même texte de départ et y revient.",
         "Cela ne veut pas dire que c'est facile.",
         "L'animation IA demande toujours de la direction. Il faut penser aux angles de caméra, à la mise en scène, à la continuité, aux silhouettes, au mouvement, aux temps forts émotionnels, au son et au rythme. Un prompt faible donne une scène faible. Un monde confus donne des images confuses.",
         "Mais la barrière a changé.",
@@ -107,9 +107,9 @@ export const visionArticleFr: VisionArticle = {
       paragraphs: [
         "Pour Lost Garden, une partie de la direction musicale et sonore est aussi explorée avec l'IA.",
         "Le projet a besoin d'un son très précis : mystique, fragile, souterrain, émotionnel, parfois science-fiction, parfois sacré, mais jamais une musique de bande-annonce générique.",
-        "Par exemple, quand Sol rencontre l'Arbre Source, la musique ne doit pas être héroïque. Elle doit sembler ancienne et écrasante. Sons de verre doux, violoncelle grave, chœurs sans paroles, réverbération de caverne, craquements de racines de bois, faible résonance métallique d'armure.",
+        "Par exemple, quand Lanterne rencontre l'Arbre Source, la musique ne doit pas être héroïque. Elle doit sembler ancienne et écrasante. Sons de verre doux, violoncelle grave, chœurs sans paroles, réverbération de caverne, craquements de racines de bois, faible résonance métallique d'armure.",
         "Quand une machine extraterrestre se réveille, le son devient plus sci-fi : drones froids, crépitements électriques, grognements mécaniques, tonalités d'alarme, et un cri alien signature.",
-        "Sol lui-même a une identité sonore. Il n'a pas de vraie voix humaine. Il produit des sons d'armure métallique masculine et creuse : craquements, souffles vides, résonances internes, petits grognements de frustration, soupirs métalliques étranges.",
+        "Lanterne lui-même a une identité sonore. Il n'a pas de vraie voix humaine. Il produit des sons d'armure métallique masculine et creuse : craquements, souffles vides, résonances internes, petits grognements de frustration, soupirs métalliques étranges.",
         "Ce genre de détail compte. Le son n'est pas une décoration. Il dit au spectateur ce qu'est un personnage avant qu'il le comprenne vraiment.",
       ],
     },
@@ -150,7 +150,7 @@ export const visionArticleFr: VisionArticle = {
         "Pas seulement visuellement impressionnante.",
         "Pas seulement « faite avec l'IA ».",
         "Pas seulement une démonstration technique.",
-        "Je veux que les gens s'attachent à Sol et Rose.",
+        "Je veux que les gens s'attachent à Lanterne et Rose.",
         "Je veux qu'ils ressentent la solitude d'une armure vide qui cherche pourquoi elle existe. La tendresse d'une enfant qui redonne vie à un monde mourant. Ce mélange étrange d'émerveillement et de peur quand la forêt bleue s'ouvre sur une caverne géante et que quelque chose d'ancien bouge dans la brume.",
         "Si l'IA me permet de rendre cette émotion visible, elle devient plus qu'un outil. Elle devient un pont entre l'imagination et la production.",
         "C'est ce qui m'enthousiasme le plus.",

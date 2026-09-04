@@ -215,7 +215,7 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         genre: ["Animation", "Dark Fantasy", "Anime"],
         inLanguage: schemaLanguages[locale],
         numberOfEpisodes: 1,
-        datePublished: "2026-06-02",
+        datePublished: EPISODE_ONE.publishedAt,
         sameAs: [
           ...Object.values(SOCIAL_LINKS),
           ...Object.values(DATABASE_LINKS),
@@ -385,7 +385,7 @@ export function episodeVideoJsonLd({
     name,
     description,
     thumbnailUrl: image,
-    uploadDate: "2026-06-02",
+    uploadDate: EPISODE_ONE.publishedAt,
     contentUrl: EPISODE_ONE.watchUrl,
     embedUrl: EPISODE_ONE.embedUrl,
     inLanguage: schemaLanguages[locale],

@@ -30,7 +30,7 @@ export const processArticleEn: VisionArticle = {
     {
       heading: "Is Lost Garden fully AI-generated?",
       paragraphs: [
-        "No. AI does not write the story by itself. Frank Houbre defines the world, Sol and Rose, scene intent, camera feeling, and what must be cut. AI accelerates visualization and animation tests that would have required a large studio pipeline only a few years ago.",
+        "No. AI does not write the story by itself. Frank Houbre defines the world, Lanterne and Rose, scene intent, camera feeling, and what must be cut. AI accelerates visualization and animation tests that would have required a large studio pipeline only a few years ago.",
         "Think of it as AI-assisted anime, not one-click anime.",
       ],
     },
@@ -68,7 +68,7 @@ export const processFaqEn = [
   {
     question: "What is Lost Garden?",
     answer:
-      "Lost Garden is an original AI-assisted dark fantasy anime by Frank Houbre, starring Sol (a hollow knight) and Rose (a mysterious child) in a vast underground world.",
+      "Lost Garden is an original AI-assisted dark fantasy anime by Frank Houbre, starring Lanterne (a hollow knight) and Rose (a mysterious child) in a vast underground world.",
   },
   {
     question: "Is Lost Garden an AI anime?",

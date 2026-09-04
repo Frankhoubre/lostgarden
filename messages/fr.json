@@ -10,7 +10,7 @@
     },
     "vision": {
       "title": "Vision | Lost Garden",
-      "description": "Frank Houbre sur Lost Garden, un animé assisté par IA : Sol, Rose, un monde souterrain blessé, et comment l'IA donne forme à la vision artistique."
+      "description": "Frank Houbre sur Lost Garden, un animé assisté par IA : Lanterne, Rose, un monde souterrain blessé, et comment l'IA donne forme à la vision artistique."
     },
     "process": {
       "title": "Process animé IA | Lost Garden",
@@ -40,7 +40,7 @@
     },
     "episodeOnePublic": {
       "title": "Lost Garden épisode 1 | Animé dark fantasy assisté par IA",
-      "description": "Regardez l'épisode 1 de Lost Garden, animé original assisté par IA par Frank Houbre. Sol, Rose et un monde sous la terre."
+      "description": "Regardez l'épisode 1 de Lost Garden, animé original assisté par IA par Frank Houbre. Lanterne, Rose et un monde sous la terre."
     },
     "legalNotice": {
       "title": "Mentions légales | Lost Garden",
@@ -109,11 +109,11 @@
     "subtitle": "Dans les cavernes sous le monde, même ce qui est brisé se souvient protéger.",
     "list": [
       {
-        "name": "Sol",
+        "name": "Lanterne",
         "visual": "sol",
         "type": "Armure creuse",
         "tagline": "Un chevalier vide à tête-lanterne, sans corps, sans voix, avec un devoir qu'il ne comprend pas.",
-        "description": "Sol n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde."
+        "description": "Lanterne n'est pas un guerrier légendaire. Il est abîmé, maladroit et étrangement innocent, une vieille armure réveillée au fond d'une caverne bleue. Il ne parle pas vraiment : seulement des sons métalliques creux, des grincements et des gestes discrets trahissent ce qu'il ressent. Pourtant, quand le danger arrive, il se place entre Rose et le monde."
       },
       {
         "name": "Rose",
@@ -250,7 +250,7 @@
         "text": "Une forêt sans ciel. Champignons bioluminescents, fleurs pâles, racines qui boivent l'obscurité."
       },
       {
-        "title": "Sol & Rose",
+        "title": "Lanterne & Rose",
         "text": "Une armure vide et une enfant silencieuse, l'une faite pour obéir, l'autre qui aurait dû être protégée."
       },
       {

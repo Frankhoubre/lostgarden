@@ -32,7 +32,7 @@ export const aiAnimeArticleEn: AiAnimeArticle = {
       meta: "2026 · independent · created by Frank Houbre · Episode One, 17 minutes",
       verdict: "The most complete single author episode on this list.",
       paragraphs: [
-        "Sol wakes on an altar under the earth with no memory and a lantern where his face should be. Rose is a child he decides to protect without knowing why. Around them is a buried world of blue forests, cyan mist, and thirteen hollow knights bound by an old oath.",
+        "Lanterne wakes on an altar under the earth with no memory and a lantern where his face should be. Rose is a child he decides to protect without knowing why. Around them is a buried world of blue forests, cyan mist, and thirteen hollow knights bound by an old oath.",
         "Episode One runs about seventeen minutes and it holds together, which is the part that is hard. The characters are recognisable across scenes, the underground world obeys its own bible, and the story continues into a second episode rather than stopping at a mood piece.",
         "It is made by one person. Frank Houbre writes the screenplay, directs the shots, and cuts the episode. AI generates images and animation inside that direction, and a generated shot that breaks the world gets thrown away like any bad take. That is the difference between an AI assisted anime and a prompt reel.",
       ],
@@ -144,7 +144,7 @@ export const aiAnimeArticleEn: AiAnimeArticle = {
   productionHeading: "How Lost Garden is produced",
   productionParagraphs: [
     "The script comes first and it is written by hand, in ScreenWeaver, which then generates the storyboard scene by scene from that screenplay.",
-    "Image and video generation runs on Imaginode, an AI creation platform built by Frank Houbre. It puts a large catalogue of image and video models behind a single node canvas, so a shot can be tried on several models without switching tools, and character references stay next to the shots that use them. That matters more than any single model: keeping Sol's armour and Rose's face stable across an episode is a pipeline problem, not a prompt problem.",
+    "Image and video generation runs on Imaginode, an AI creation platform built by Frank Houbre. It puts a large catalogue of image and video models behind a single node canvas, so a shot can be tried on several models without switching tools, and character references stay next to the shots that use them. That matters more than any single model: keeping Lanterne's armour and Rose's face stable across an episode is a pipeline problem, not a prompt problem.",
     "Editing, pacing, sound choices, and every decision about what stays in the episode are human. Generated shots that contradict the world bible get cut, and a lot of them do.",
   ],
   productionLinks: [

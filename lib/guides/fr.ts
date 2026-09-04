@@ -135,7 +135,7 @@ const characterConsistency: Guide = {
       {
         heading: "Concevoir le personnage pour la cohérence dès le départ",
         paragraphs: [
-          "Les personnages qui survivent à la génération sont ceux qui ont une silhouette lisible et un petit nombre de traits durs. Sol est une armure vide avec une lanterne à la place de la tête. Cette forme se reconnaît à n'importe quelle taille, sous n'importe quelle lumière, sous n'importe quel angle, même quand les détails en dessous changent.",
+          "Les personnages qui survivent à la génération sont ceux qui ont une silhouette lisible et un petit nombre de traits durs. Lanterne est une armure vide avec une lanterne à la place de la tête. Cette forme se reconnaît à n'importe quelle taille, sous n'importe quelle lumière, sous n'importe quel angle, même quand les détails en dessous changent.",
           "Si votre personnage repose sur un visage subtil, vous avez choisi le problème le plus difficile qui soit. Donnez-lui une forme, une couleur et un objet. C'est ce que l'œil suit réellement.",
         ],
       },

@@ -30,7 +30,7 @@ export const processArticleJa: VisionArticle = {
     {
       heading: "完全にAI生成ですか？",
       paragraphs: [
-        "いいえ。AIが単独で物語を書くわけではありません。Frank Houbreが世界、SolとRose、シーンの意図、カットを定義します。AIは数年前なら大規模スタジオが必要だった可視化とアニメテストを加速します。",
+        "いいえ。AIが単独で物語を書くわけではありません。Frank Houbreが世界、LanterneとRose、シーンの意図、カットを定義します。AIは数年前なら大規模スタジオが必要だった可視化とアニメテストを加速します。",
         "ワンクリックアニメではなく、AI支援アニメと考えてください。",
       ],
     },
@@ -68,7 +68,7 @@ export const processFaqJa = [
   {
     question: "Lost Gardenとは？",
     answer:
-      "Frank HoubreによるオリジナルのAI支援ダークファンタジーアニメ。空洞の騎士Solと謎の子Roseが地下世界を旅します。",
+      "Frank HoubreによるオリジナルのAI支援ダークファンタジーアニメ。空洞の騎士Lanterneと謎の子Roseが地下世界を旅します。",
   },
   {
     question: "AIアニメですか？",

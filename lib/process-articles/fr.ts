@@ -30,7 +30,7 @@ export const processArticleFr: VisionArticle = {
     {
       heading: "Lost Garden est-il entièrement généré par IA ?",
       paragraphs: [
-        "Non. L'IA n'écrit pas l'histoire seule. Frank Houbre définit le monde, Sol et Rose, l'intention des scènes et ce qui doit être coupé. L'IA accélère la visualisation et les tests d'animation qui demandaient autrefois un gros studio.",
+        "Non. L'IA n'écrit pas l'histoire seule. Frank Houbre définit le monde, Lanterne et Rose, l'intention des scènes et ce qui doit être coupé. L'IA accélère la visualisation et les tests d'animation qui demandaient autrefois un gros studio.",
         "C'est un animé assisté par IA, pas un animé en un clic.",
       ],
     },
@@ -68,7 +68,7 @@ export const processFaqFr = [
   {
     question: "Qu'est-ce que Lost Garden ?",
     answer:
-      "Lost Garden est un anime dark fantasy original assisté par IA, par Frank Houbre, avec Sol (chevalier creux) et Rose (enfant mystérieuse) dans un monde souterrain.",
+      "Lost Garden est un anime dark fantasy original assisté par IA, par Frank Houbre, avec Lanterne (chevalier creux) et Rose (enfant mystérieuse) dans un monde souterrain.",
   },
   {
     question: "Est-ce un animé IA ?",

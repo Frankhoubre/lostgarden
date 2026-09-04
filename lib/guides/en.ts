@@ -135,7 +135,7 @@ const characterConsistency: Guide = {
       {
         heading: "Design for consistency in the first place",
         paragraphs: [
-          "The characters that survive generation are the ones with a readable silhouette and a small number of hard features. Sol is an empty armor with a lantern for a head. That shape is recognisable at any size, in any light, from any angle, even when the details underneath change.",
+          "The characters that survive generation are the ones with a readable silhouette and a small number of hard features. Lanterne is an empty armor with a lantern for a head. That shape is recognisable at any size, in any light, from any angle, even when the details underneath change.",
           "If your character is defined by a subtle face, you have chosen the hardest possible problem. Give them a shape, a colour and one object. That is what the eye actually tracks.",
         ],
       },

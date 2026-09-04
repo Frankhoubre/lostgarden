@@ -10,7 +10,7 @@
     },
     "vision": {
       "title": "Vision | Lost Garden",
-      "description": "Frank Houbre on Lost Garden, an AI-assisted anime: Sol, Rose, a wounded underground world, and how AI helps turn artistic vision into images, animation, and sound."
+      "description": "Frank Houbre on Lost Garden, an AI-assisted anime: Lanterne, Rose, a wounded underground world, and how AI helps turn artistic vision into images, animation, and sound."
     },
     "process": {
       "title": "AI Anime Process | Lost Garden",
@@ -40,7 +40,7 @@
     },
     "episodeOnePublic": {
       "title": "Lost Garden Episode 1 | AI-Assisted Dark Fantasy Anime",
-      "description": "Watch Episode One of Lost Garden, an original AI-assisted anime by Frank Houbre. Hollow knight Sol, Rose, and a world beneath the earth."
+      "description": "Watch Episode One of Lost Garden, an original AI-assisted anime by Frank Houbre. Hollow knight Lanterne, Rose, and a world beneath the earth."
     },
     "legalNotice": {
       "title": "Legal Notice | Lost Garden",
@@ -109,11 +109,11 @@
     "subtitle": "In the caverns beneath the world, even broken things remember how to protect.",
     "list": [
       {
-        "name": "Sol",
+        "name": "Lanterne",
         "visual": "sol",
         "type": "Hollow Armor",
         "tagline": "An empty knight with a lantern-shaped head, no body, no voice, and a duty he does not understand.",
-        "description": "Sol is not a legendary warrior. He is damaged, awkward, and strangely innocent, an old armor awakened in the depths of a blue cavern. He cannot truly speak. Only hollow metallic sounds, creaks, groans, and quiet gestures reveal what he feels. Yet when danger comes, he places himself between Rose and the world."
+        "description": "Lanterne is not a legendary warrior. He is damaged, awkward, and strangely innocent, an old armor awakened in the depths of a blue cavern. He cannot truly speak. Only hollow metallic sounds, creaks, groans, and quiet gestures reveal what he feels. Yet when danger comes, he places himself between Rose and the world."
       },
       {
         "name": "Rose",
@@ -250,7 +250,7 @@
         "text": "A forest without sky. Bioluminescent mushrooms, pale flowers, and roots that drink the dark."
       },
       {
-        "title": "Sol & Rose",
+        "title": "Lanterne & Rose",
         "text": "An empty armor and a quiet child, one made to obey, one who should have been protected."
       },
       {

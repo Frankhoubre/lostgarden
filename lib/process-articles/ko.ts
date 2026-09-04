@@ -30,7 +30,7 @@ export const processArticleKo: VisionArticle = {
     {
       heading: "완전히 AI로 생성되나요?",
       paragraphs: [
-        "아닙니다. AI가 혼자 이야기를 쓰지 않습니다. Frank Houbre가 세계, Sol과 Rose, 장면 의도, 컷을 정합니다. AI는 예전에는 대형 스튜디오가 필요했던 시각화와 애니 테스트를 가속합니다.",
+        "아닙니다. AI가 혼자 이야기를 쓰지 않습니다. Frank Houbre가 세계, Lanterne와 Rose, 장면 의도, 컷을 정합니다. AI는 예전에는 대형 스튜디오가 필요했던 시각화와 애니 테스트를 가속합니다.",
         "원클릭 애니가 아니라 AI 지원 애니메이션입니다.",
       ],
     },
@@ -68,7 +68,7 @@ export const processFaqKo = [
   {
     question: "Lost Garden이란?",
     answer:
-      "Frank Houbre의 오리지널 AI 지원 다크 판타지 애니메이션. 공허한 기사 Sol과 신비한 아이 Rose가 지하 세계를 탐험합니다.",
+      "Frank Houbre의 오리지널 AI 지원 다크 판타지 애니메이션. 공허한 기사 Lanterne와 신비한 아이 Rose가 지하 세계를 탐험합니다.",
   },
   {
     question: "AI 애니메이션인가요?",

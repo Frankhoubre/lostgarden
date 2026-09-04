@@ -32,7 +32,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
       meta: "2026 · indépendant · créé par Frank Houbre · épisode 1, 17 minutes",
       verdict: "L'épisode le plus abouti de cette liste, et le fait d'un seul auteur.",
       paragraphs: [
-        "Sol se réveille sur un autel sous la terre, sans mémoire, une lanterne à la place du visage. Rose est une enfant qu'il décide de protéger sans savoir pourquoi. Autour d'eux, un monde enseveli de forêts bleues, de brume cyan et de treize chevaliers creux liés par un vieux serment.",
+        "Lanterne se réveille sur un autel sous la terre, sans mémoire, une lanterne à la place du visage. Rose est une enfant qu'il décide de protéger sans savoir pourquoi. Autour d'eux, un monde enseveli de forêts bleues, de brume cyan et de treize chevaliers creux liés par un vieux serment.",
         "L'épisode 1 dure environ dix-sept minutes et il tient debout, ce qui est justement la partie difficile. Les personnages restent reconnaissables d'une scène à l'autre, le monde souterrain obéit à sa propre bible, et l'histoire continue dans un deuxième épisode au lieu de s'arrêter à une ambiance.",
         "Le tout est fait par une seule personne. Frank Houbre écrit le scénario, dirige les plans et monte l'épisode. L'IA génère les images et l'animation à l'intérieur de cette direction, et un plan généré qui casse l'univers finit à la poubelle comme n'importe quelle mauvaise prise. C'est la différence entre un animé assisté par IA et un enchaînement de prompts.",
       ],
@@ -144,7 +144,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
   productionHeading: "Comment Lost Garden est produit",
   productionParagraphs: [
     "Le scénario vient en premier et il est écrit à la main, dans ScreenWeaver, qui génère ensuite le storyboard scène par scène à partir de ce texte.",
-    "La génération d'images et de vidéos tourne sur Imaginode, la plateforme de création IA construite par Frank Houbre. Elle réunit un large catalogue de modèles image et vidéo derrière un seul canvas à nodes, ce qui permet de tester un plan sur plusieurs modèles sans changer d'outil, et de garder les références de personnages à côté des plans qui les utilisent. C'est plus déterminant que le choix d'un modèle : tenir l'armure de Sol et le visage de Rose stables sur tout un épisode est un problème de pipeline, pas un problème de prompt.",
+    "La génération d'images et de vidéos tourne sur Imaginode, la plateforme de création IA construite par Frank Houbre. Elle réunit un large catalogue de modèles image et vidéo derrière un seul canvas à nodes, ce qui permet de tester un plan sur plusieurs modèles sans changer d'outil, et de garder les références de personnages à côté des plans qui les utilisent. C'est plus déterminant que le choix d'un modèle : tenir l'armure de Lanterne et le visage de Rose stables sur tout un épisode est un problème de pipeline, pas un problème de prompt.",
     "Le montage, le rythme, les choix sonores et toutes les décisions sur ce qui reste dans l'épisode sont humains. Les plans générés qui contredisent la bible de l'univers sont coupés, et il y en a beaucoup.",
   ],
   productionLinks: [

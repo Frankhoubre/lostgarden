@@ -7,7 +7,7 @@ export const visionArticleEn: VisionArticle = {
     {
       paragraphs: [
         "My name is Frank Houbre, and Lost Garden is an original anime project I'm creating with the help of artificial intelligence.",
-        "At its heart, Lost Garden is a dark fantasy story about Sol, an empty suit of armor with a lantern-shaped helmet, and Rose, a mysterious child connected to the rebirth of a wounded world. The story takes place in a vast underground universe filled with blue forests, glowing mushrooms, giant roots, strange machines, ancient caverns, silent pilgrims, and forgotten beings that seem older than memory.",
+        "At its heart, Lost Garden is a dark fantasy story about Lanterne, an empty suit of armor whose helmet is shaped like a lantern, and Rose, a mysterious child connected to the rebirth of a wounded world. The story takes place in a vast underground universe filled with blue forests, glowing mushrooms, giant roots, strange machines, ancient caverns, silent pilgrims, and forgotten beings that seem older than memory.",
         "It is a poetic, emotional series. I want it to feel mysterious, beautiful, dangerous, and deeply human, even if one of the main characters is literally an empty armor.",
         "I've always loved stories that stay with you long after you finish them. Made in Abyss marked me with its sense of wonder, danger, and lost innocence. Attack on Titan impressed me with its scale, mystery, tragedy, and the way it slowly reveals the true nature of its world. With Lost Garden, I'm not trying to copy those works. I'm trying to create something that carries the same kind of emotional weight. A story that feels vast, strange, and painful, but also tender.",
         "And for the first time, thanks to AI, I can actually try to build it.",
@@ -17,7 +17,7 @@ export const visionArticleEn: VisionArticle = {
       heading: "AI did not give me the story. It helped me make the story visible.",
       paragraphs: [
         "One thing I want to make clear is that AI is not \"making the anime for me\" in some magical one-click way.",
-        "The idea, the characters, the emotional direction, the world, the tone, the story choices, the relationship between Sol and Rose, all of that comes from human intention. AI helps me turn those ideas into images, scenes, animation tests, music directions, and production material much faster than would have been possible before.",
+        "The idea, the characters, the emotional direction, the world, the tone, the story choices, the relationship between Lanterne and Rose, all of that comes from human intention. AI helps me turn those ideas into images, scenes, animation tests, music directions, and production material much faster than would have been possible before.",
         "For Lost Garden, the process starts with the same thing any animated project needs: a clear vision.",
       ],
       list: [
@@ -36,7 +36,7 @@ export const visionArticleEn: VisionArticle = {
       heading: "Character sheets are the foundation",
       paragraphs: [
         "One of the most important parts of the process is creating character sheets.",
-        "For Sol, I needed a design that was instantly recognizable: an old hollow armor, a lantern-shaped helmet, no real face, no body inside, modest proportions, a fragile and slightly awkward attitude. He is not a powerful legendary knight. He is damaged, poetic, clumsy, and protective.",
+        "For Lanterne, I needed a design that was instantly recognizable: an old hollow armor, a lantern-shaped helmet, no real face, no body inside, modest proportions, a fragile and slightly awkward attitude. He is not a powerful legendary knight. He is damaged, poetic, clumsy, and protective.",
         "For Rose, I needed the opposite energy: a small child, soft, innocent, calm, with a quiet emotional strength. She needed to feel like someone the world wants to use, but also someone who must be protected simply because she is a child.",
         "The character sheets help keep the characters consistent from scene to scene. Front view, side view, close-ups, attitude references, costume references, emotional references. Without that, an AI-generated anime can quickly become inconsistent. Faces shift, costumes change, proportions drift.",
         "Character sheets are not just pretty images. They are production tools.",
@@ -82,18 +82,18 @@ export const visionArticleEn: VisionArticle = {
         "For Lost Garden, I can create scenes like:",
       ],
       list: [
-        "Sol waking up on a stone altar in a blue cavern.",
-        "Sol discovering that he is empty inside.",
+        "Lanterne waking up on a stone altar in a blue cavern.",
+        "Lanterne discovering that he is empty inside.",
         "A gigantic alien eye opening beneath him.",
         "Masked pilgrims turning toward him all at once.",
         "Rose standing on a hill of white lilies in a dream.",
-        "The Source Tree lifting Sol gently into her hand.",
+        "The Source Tree lifting Lanterne gently into her hand.",
         "A giant rose blooming from the earth and giving birth to a Source Child.",
       ],
       trailingParagraphs: [
         "These are scenes that, a few years ago, would have required a large animation team, a studio pipeline, and a lot of money just to prototype.",
         "Now, a creator with a strong idea can start building visual sequences alone or with a very small team.",
-        "For Lost Garden, these shots are produced inside ScreenWeaver's workflow and production interface. Every shot stays tied to its scene, from the screenplay to the generated storyboard, so I never get lost across dozens of scattered files: Sol waking up, the eye opening, the Source Tree lifting him, all of it starts from the same original text and returns to it.",
+        "For Lost Garden, these shots are produced inside ScreenWeaver's workflow and production interface. Every shot stays tied to its scene, from the screenplay to the generated storyboard, so I never get lost across dozens of scattered files: Lanterne waking up, the eye opening, the Source Tree lifting him, all of it starts from the same original text and returns to it.",
         "That does not mean it is easy.",
         "AI animation still requires direction. You need to think about camera angles, staging, continuity, silhouettes, movement, emotional beats, sound, and rhythm. A weak prompt gives a weak scene. A confused world gives confused visuals.",
         "But the barrier has changed.",
@@ -106,9 +106,9 @@ export const visionArticleEn: VisionArticle = {
       paragraphs: [
         "For Lost Garden, part of the music and sound direction is also being explored with AI.",
         "The project needs a very specific sound: mystical, fragile, underground, emotional, sometimes science-fiction, sometimes sacred, but never generic trailer music.",
-        "For example, when Sol meets the Source Tree, the music should not be heroic. It should feel ancient and overwhelming. Soft glass tones, low cello, wordless choir textures, cavern reverb, wooden root creaks, faint metallic armor resonance.",
+        "For example, when Lanterne meets the Source Tree, the music should not be heroic. It should feel ancient and overwhelming. Soft glass tones, low cello, wordless choir textures, cavern reverb, wooden root creaks, faint metallic armor resonance.",
         "When an alien machine wakes, the sound should become more sci-fi: cold drones, electric crackles, mechanical groans, alarm-like tones, and a signature alien cry.",
-        "Even Sol himself has a sound identity. He does not have a real human voice. He makes hollow masculine metallic armor sounds: creaks, empty breaths, internal resonances, small grunts of frustration, strange metallic sighs.",
+        "Even Lanterne himself has a sound identity. He does not have a real human voice. He makes hollow masculine metallic armor sounds: creaks, empty breaths, internal resonances, small grunts of frustration, strange metallic sighs.",
         "That kind of detail matters. Sound is not decoration. It tells the viewer what a character is before they fully understand it.",
       ],
     },
@@ -149,7 +149,7 @@ export const visionArticleEn: VisionArticle = {
         "Not just visually impressive.",
         "Not just \"made with AI.\"",
         "Not just a technical demonstration.",
-        "I want people to care about Sol and Rose.",
+        "I want people to care about Lanterne and Rose.",
         "I want them to feel the loneliness of an empty armor trying to understand why it exists. I want them to feel the tenderness of a child who brings life back to a dying world. I want them to feel that strange mixture of wonder and fear when the blue forest opens into a giant cavern and something ancient starts moving in the mist.",
         "If AI allows me to make that emotion visible, then it becomes more than a tool. It becomes a bridge between imagination and production.",
         "That is what excites me the most.",
