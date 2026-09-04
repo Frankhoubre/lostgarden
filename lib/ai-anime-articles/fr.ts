@@ -211,6 +211,8 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
   ],
   relatedHeading: "À lire ensuite",
   relatedLinks: [
+    { label: "Comment faire un animé avec l'IA, étape par étape", href: "/how-to-make-ai-anime" },
+    { label: "Garder un personnage cohérent d'un plan à l'autre", href: "/ai-character-consistency" },
     { label: "Comment Lost Garden est fabriqué, en détail", href: "/process" },
     { label: "Regarder l'épisode 1", href: "/episode-1" },
     { label: "La vision de l'auteur derrière la série", href: "/vision" },

@@ -20,6 +20,18 @@
       "title": "Best AI Anime: 6 Series Actually Made With AI (2026)",
       "description": "The 6 best anime made with AI, ranked and sourced: Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital and Vidu. What the AI really did in each one."
     },
+    "blog": {
+      "title": "Articles | Lost Garden",
+      "description": "Guides and production notes on AI anime: how the episodes are made, character consistency, and the projects worth watching."
+    },
+    "howToMakeAiAnime": {
+      "title": "How to Make an AI Anime, Step by Step (2026)",
+      "description": "The real pipeline behind a 17 minute AI-assisted anime episode made by one person: script, world bible, storyboard, character references, generation, edit and sound."
+    },
+    "aiCharacterConsistency": {
+      "title": "AI Character Consistency: Keep a Face Across Shots",
+      "description": "Why generated characters drift between shots and the working methods that keep them recognisable across a full anime episode."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Independent Animated Dark Fantasy Series by Frank Houbre",
       "description": "Official press kit for Lost Garden, a 17-minute independent animated dark fantasy episode produced solo by Frank Houbre through an AI-assisted creative workflow.",
@@ -270,13 +282,32 @@
     "legalNotice": "Legal notice",
     "privacy": "Privacy",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
-    "bestAiAnime": "Best AI anime"
+    "bestAiAnime": "Best AI anime",
+    "blog": "Articles"
   },
   "bestAiAnime": {
     "headline": "Best AI anime: 6 series actually made with AI",
     "breadcrumbHome": "Home",
     "breadcrumbCurrent": "Best AI anime",
     "keywords": ["AI anime", "best AI anime", "anime made with AI", "AI generated anime", "AI animation", "Lost Garden", "Twins Hinahima", "Anipops"]
+  },
+  "blog": {
+    "headline": "Articles",
+    "lead": "Production notes and guides from Lost Garden, an independent AI-assisted anime."
+  },
+  "guides": {
+    "breadcrumbHome": "Home",
+    "breadcrumbBlog": "Articles",
+    "faqHeading": "Frequently asked questions",
+    "relatedHeading": "Keep reading",
+    "howToMakeAiAnime": {
+      "headline": "How to make an AI anime, step by step",
+      "keywords": ["how to make an AI anime", "make anime with AI", "AI anime pipeline", "AI animation workflow", "AI anime tutorial", "Lost Garden"]
+    },
+    "aiCharacterConsistency": {
+      "headline": "Keeping a character consistent across shots",
+      "keywords": ["AI character consistency", "consistent character AI", "character reference AI video", "AI anime consistency", "Lost Garden"]
+    }
   },
   "cookies": {
     "title": "Cookies & privacy",

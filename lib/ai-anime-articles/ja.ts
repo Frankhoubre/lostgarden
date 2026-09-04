@@ -211,6 +211,8 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
   ],
   relatedHeading: "続けて読む",
   relatedLinks: [
+    { label: "AIでアニメを作る手順", href: "/how-to-make-ai-anime" },
+    { label: "カットをまたいでキャラクターを保つ方法", href: "/ai-character-consistency" },
     { label: "Lost Gardenの作り方を詳しく", href: "/process" },
     { label: "第1話を見る", href: "/episode-1" },
     { label: "作品の背景にある作家のビジョン", href: "/vision" },

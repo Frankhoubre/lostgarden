@@ -49,6 +49,7 @@ export function SiteFooter() {
   ] as const;
 
   const projectLinks: FooterLink[] = [
+    { label: dict.footer.blog, href: localePath(locale, "/blog") },
     {
       label: dict.footer.bestAiAnime,
       href: localePath(locale, "/best-ai-anime"),

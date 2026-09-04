@@ -20,6 +20,18 @@
       "title": "Top 6 des animés créés par IA (2026)",
       "description": "Les 6 meilleurs animés réalisés par intelligence artificielle, classés et sourcés : Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital et Vidu. Ce que l'IA a vraiment fait dans chacun."
     },
+    "blog": {
+      "title": "Articles | Lost Garden",
+      "description": "Guides et notes de production sur l'animé IA : comment les épisodes sont faits, la cohérence des personnages, et les projets qui valent le coup d'œil."
+    },
+    "howToMakeAiAnime": {
+      "title": "Comment faire un animé avec l'IA, étape par étape (2026)",
+      "description": "Le vrai pipeline derrière un épisode d'animé de 17 minutes assisté par IA fait par une seule personne : scénario, bible, storyboard, références personnages, génération, montage et son."
+    },
+    "aiCharacterConsistency": {
+      "title": "Cohérence des personnages IA : garder un visage d'un plan à l'autre",
+      "description": "Pourquoi les personnages générés dérivent entre les plans, et les méthodes de travail qui les gardent reconnaissables sur tout un épisode."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Série animée indépendante par Frank Houbre",
       "description": "Press kit officiel de Lost Garden, épisode animé dark fantasy de 17 minutes produit en solo par Frank Houbre avec un workflow de production assisté par IA.",
@@ -272,13 +284,32 @@
     "legalNotice": "Mentions légales",
     "privacy": "Confidentialité",
     "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés.",
-    "bestAiAnime": "Top animés IA"
+    "bestAiAnime": "Top animés IA",
+    "blog": "Articles"
   },
   "bestAiAnime": {
     "headline": "Top 6 des animés créés par IA",
     "breadcrumbHome": "Accueil",
     "breadcrumbCurrent": "Animés créés par IA",
     "keywords": ["animé IA", "anime IA", "animé créé par IA", "animé réalisé par intelligence artificielle", "meilleur animé IA", "animation IA", "Lost Garden"]
+  },
+  "blog": {
+    "headline": "Articles",
+    "lead": "Notes de production et guides de Lost Garden, un animé indépendant assisté par IA."
+  },
+  "guides": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbBlog": "Articles",
+    "faqHeading": "Questions fréquentes",
+    "relatedHeading": "À lire ensuite",
+    "howToMakeAiAnime": {
+      "headline": "Comment faire un animé avec l'IA, étape par étape",
+      "keywords": ["comment faire un animé avec l'IA", "faire un anime avec l'IA", "pipeline animé IA", "workflow animation IA", "tutoriel animé IA", "Lost Garden"]
+    },
+    "aiCharacterConsistency": {
+      "headline": "Garder un personnage cohérent d'un plan à l'autre",
+      "keywords": ["cohérence personnage IA", "personnage cohérent IA", "référence personnage IA", "cohérence animé IA", "Lost Garden"]
+    }
   },
   "cookies": {
     "title": "Cookies et confidentialité",

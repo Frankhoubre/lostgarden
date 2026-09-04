@@ -20,6 +20,18 @@
       "title": "AI로 만든 애니메이션 베스트 6 (2026)",
       "description": "AI로 제작된 애니메이션 6편을 출처와 함께 순위로 정리했습니다. Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital, Vidu. 각 작품에서 AI가 실제로 한 일까지."
     },
+    "blog": {
+      "title": "아티클 | Lost Garden",
+      "description": "AI 애니메이션 제작 노트와 가이드. 에피소드를 만드는 방법, 캐릭터 일관성, 그리고 볼 만한 작품들."
+    },
+    "howToMakeAiAnime": {
+      "title": "AI로 애니메이션 만드는 법, 단계별로 (2026)",
+      "description": "한 사람이 만든 17분짜리 AI 보조 애니메이션의 실제 파이프라인. 각본, 세계관 설정집, 스토리보드, 캐릭터 레퍼런스, 생성, 편집, 사운드까지."
+    },
+    "aiCharacterConsistency": {
+      "title": "AI 캐릭터 일관성: 컷을 넘어 얼굴 유지하기",
+      "description": "생성한 캐릭터가 컷마다 달라지는 이유와, 한 편 내내 알아볼 수 있게 유지하는 실무적인 방법."
+    },
     "press": {
       "title": "Lost Garden 프레스 키트 · Frank Houbre의 독립 다크 판타지 애니메이션 시리즈",
       "description": "Frank Houbre가 1인으로 제작한 17분 독립 다크 판타지 애니메이션 에피소드 Lost Garden의 공식 프레스 키트. AI 지원 크리에이티브 워크플로로 완성.",
@@ -270,13 +282,32 @@
     "legalNotice": "법적 고지",
     "privacy": "개인정보",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
-    "bestAiAnime": "AI 애니 베스트 6"
+    "bestAiAnime": "AI 애니 베스트 6",
+    "blog": "아티클"
   },
   "bestAiAnime": {
     "headline": "AI로 만든 애니메이션 베스트 6",
     "breadcrumbHome": "홈",
     "breadcrumbCurrent": "AI 애니메이션 베스트 6",
     "keywords": ["AI 애니메이션", "AI로 만든 애니", "AI 생성 애니메이션", "인공지능 애니메이션", "AI 애니 추천", "Lost Garden"]
+  },
+  "blog": {
+    "headline": "아티클",
+    "lead": "독립 AI 보조 애니메이션 Lost Garden의 제작 노트와 가이드."
+  },
+  "guides": {
+    "breadcrumbHome": "홈",
+    "breadcrumbBlog": "아티클",
+    "faqHeading": "자주 묻는 질문",
+    "relatedHeading": "이어서 읽기",
+    "howToMakeAiAnime": {
+      "headline": "AI로 애니메이션 만드는 법, 단계별로",
+      "keywords": ["AI 애니메이션 만드는 법", "AI로 애니 만들기", "AI 애니메이션 파이프라인", "AI 애니 제작 과정", "AI 애니메이션 튜토리얼", "Lost Garden"]
+    },
+    "aiCharacterConsistency": {
+      "headline": "컷을 넘어 캐릭터를 유지하는 법",
+      "keywords": ["AI 캐릭터 일관성", "AI 같은 캐릭터 유지", "캐릭터 레퍼런스 AI", "AI 애니 일관성", "Lost Garden"]
+    }
   },
   "cookies": {
     "title": "쿠키 및 개인정보",

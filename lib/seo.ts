@@ -25,6 +25,9 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/vision",
   "/process",
   "/best-ai-anime",
+  "/blog",
+  "/how-to-make-ai-anime",
+  "/ai-character-consistency",
   "/press",
   "/episode-1",
   "/legal-notice",
@@ -52,6 +55,9 @@ const SITEMAP_HINTS: Record<
   "/vision": { changeFrequency: "monthly", priority: 0.7 },
   "/process": { changeFrequency: "monthly", priority: 0.7 },
   "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
+  "/blog": { changeFrequency: "weekly", priority: 0.7 },
+  "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
+  "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7 },
   "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
   "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
 };
@@ -315,7 +321,12 @@ export function itemListJsonLd({
   name: string;
   description: string;
   path: string;
-  items: ReadonlyArray<{ position: number; name: string; description: string }>;
+  items: ReadonlyArray<{
+    position: number;
+    name: string;
+    description: string;
+    url?: string;
+  }>;
 }) {
   return {
     "@context": "https://schema.org",
@@ -330,6 +341,7 @@ export function itemListJsonLd({
       position: item.position,
       name: item.name,
       description: item.description,
+      ...(item.url ? { url: item.url } : {}),
     })),
   };
 }
