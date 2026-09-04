@@ -32,6 +32,14 @@
       "title": "Cohérence des personnages IA : garder un visage d'un plan à l'autre",
       "description": "Pourquoi les personnages générés dérivent entre les plans, et les méthodes de travail qui les gardent reconnaissables sur tout un épisode."
     },
+    "isAiAnimeRealAnime": {
+      "title": "Un animé fait par IA est-il un vrai animé ?",
+      "description": "AniList et MyAnimeList définissent l'animé par son lieu de production, pas par sa technique de dessin. Ce que ça change pour les séries assistées par IA, règles à l'appui et précédent RWBY."
+    },
+    "aiAnimeVsTraditional": {
+      "title": "Animé IA contre animation traditionnelle : ce qui change vraiment",
+      "description": "Écrit après avoir fini seul un épisode de 17 minutes : ce qu'un pipeline assisté par IA change réellement, ce qu'il laisse intact, et là où il reste nettement moins bon."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Série animée indépendante par Frank Houbre",
       "description": "Press kit officiel de Lost Garden, épisode animé dark fantasy de 17 minutes produit en solo par Frank Houbre avec un workflow de production assisté par IA.",
@@ -309,6 +317,14 @@
     "aiCharacterConsistency": {
       "headline": "Garder un personnage cohérent d'un plan à l'autre",
       "keywords": ["cohérence personnage IA", "personnage cohérent IA", "référence personnage IA", "cohérence animé IA", "Lost Garden"]
+    },
+    "isAiAnimeRealAnime": {
+      "headline": "Un animé fait par IA est-il un vrai animé ?",
+      "keywords": ["animé IA vrai animé", "définition animé IA", "qu'est-ce qu'un animé", "débat animé IA", "animation IA ou animé", "Twins Hinahima", "Lost Garden"]
+    },
+    "aiAnimeVsTraditional": {
+      "headline": "Animé IA contre animation traditionnelle",
+      "keywords": ["animé IA contre animation traditionnelle", "IA remplacer animateurs", "coût animation IA", "animation IA ou dessin à la main", "pipeline animation IA", "Lost Garden"]
     }
   },
   "cookies": {

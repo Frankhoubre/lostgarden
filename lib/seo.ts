@@ -28,6 +28,8 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/blog",
   "/how-to-make-ai-anime",
   "/ai-character-consistency",
+  "/is-ai-anime-real-anime",
+  "/ai-anime-vs-traditional-animation",
   "/press",
   "/episode-1",
   "/legal-notice",
@@ -58,6 +60,8 @@ const SITEMAP_HINTS: Record<
   "/blog": { changeFrequency: "weekly", priority: 0.7 },
   "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
   "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7 },
+  "/is-ai-anime-real-anime": { changeFrequency: "monthly", priority: 0.8 },
+  "/ai-anime-vs-traditional-animation": { changeFrequency: "monthly", priority: 0.7 },
   "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
   "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
 };

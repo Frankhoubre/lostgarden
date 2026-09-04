@@ -32,6 +32,14 @@
       "title": "AIキャラクターの一貫性：カットをまたいで顔を保つ",
       "description": "生成したキャラクターがカットごとに崩れる理由と、1話を通して見分けられる状態に保つ実務的な方法。"
     },
+    "isAiAnimeRealAnime": {
+      "title": "AIで作られたアニメは本当のアニメか",
+      "description": "AniListとMyAnimeListはアニメを作画の手法ではなく制作地で定義しています。AI支援作品にとってそれが何を意味するのか、実際の規則とRWBYの前例から解説します。"
+    },
+    "aiAnimeVsTraditional": {
+      "title": "AIアニメと従来のアニメーション、本当に変わるのは何か",
+      "description": "17分のエピソードを1人で作り終えて書いた比較。AI支援のパイプラインが本当に変えること、変えないこと、そして今も明らかに劣るところ。"
+    },
     "press": {
       "title": "Lost Garden プレスキット · Frank Houbreによるインディー・アニメーションシリーズ",
       "description": "Frank Houbreが一人で制作した、17分のダークファンタジー・アニメーション・エピソード「Lost Garden」の公式プレスキット。AI支援の制作ワークフローによる完成作品。",
@@ -307,6 +315,14 @@
     "aiCharacterConsistency": {
       "headline": "カットをまたいでキャラクターを保つ方法",
       "keywords": ["AI キャラクター 一貫性", "AI 同じキャラクター", "キャラクター リファレンス AI", "AIアニメ 一貫性", "Lost Garden"]
+    },
+    "isAiAnimeRealAnime": {
+      "headline": "AIで作られたアニメは本当のアニメか",
+      "keywords": ["AIアニメ 本当のアニメ", "アニメの定義", "AIアニメ 議論", "生成AI アニメ 是非", "ツインズひなひま", "Lost Garden"]
+    },
+    "aiAnimeVsTraditional": {
+      "headline": "AIアニメと従来のアニメーションの違い",
+      "keywords": ["AIアニメ 従来 比較", "AI アニメーター 代替", "AIアニメ 費用", "AIアニメ 手描き 違い", "AIアニメ 制作工程", "Lost Garden"]
     }
   },
   "cookies": {

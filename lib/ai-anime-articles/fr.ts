@@ -211,6 +211,8 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
   ],
   relatedHeading: "À lire ensuite",
   relatedLinks: [
+    { label: "Un animé fait par IA est-il un vrai animé ?", href: "/is-ai-anime-real-anime" },
+    { label: "Animé IA contre animation traditionnelle", href: "/ai-anime-vs-traditional-animation" },
     { label: "Comment faire un animé avec l'IA, étape par étape", href: "/how-to-make-ai-anime" },
     { label: "Garder un personnage cohérent d'un plan à l'autre", href: "/ai-character-consistency" },
     { label: "Comment Lost Garden est fabriqué, en détail", href: "/process" },

@@ -97,6 +97,8 @@ const howToMakeAiAnime: Guide = {
     },
   ],
   related: [
+    { label: "Is AI anime really anime?", href: "/is-ai-anime-real-anime" },
+    { label: "AI anime vs traditional animation", href: "/ai-anime-vs-traditional-animation" },
     { label: "Keeping a character consistent across shots", href: "/ai-character-consistency" },
     { label: "The 6 best AI anime, ranked", href: "/best-ai-anime" },
     { label: "Lost Garden production notes", href: "/process" },
@@ -185,6 +187,8 @@ const characterConsistency: Guide = {
     },
   ],
   related: [
+    { label: "Is AI anime really anime?", href: "/is-ai-anime-real-anime" },
+    { label: "AI anime vs traditional animation", href: "/ai-anime-vs-traditional-animation" },
     { label: "How to make an AI anime, step by step", href: "/how-to-make-ai-anime" },
     { label: "The 6 best AI anime, ranked", href: "/best-ai-anime" },
     { label: "Lost Garden production notes", href: "/process" },
@@ -192,7 +196,183 @@ const characterConsistency: Guide = {
   ],
 };
 
+const isAiAnimeRealAnime: Guide = {
+  article: {
+    byline:
+      "The question comes up under every AI animation video. The major anime databases already answer it, and their answer has almost nothing to do with AI.",
+    sections: [
+      {
+        paragraphs: [
+          "Short version: the databases that catalogue anime define it by where it is produced, not by how it is drawn. On that definition, an AI-assisted series made in Japan is anime and a hand-drawn series made in France is not. The technique never enters into it.",
+          "That is worth knowing before arguing about it, because most of the argument online is people using two different definitions at once.",
+        ],
+      },
+      {
+        heading: "What AniList actually requires",
+        paragraphs: [
+          "AniList accepts three regional categories and nothing else. Anime needs significant creative control from Japanese studios. Aeni needs South Korean studios. Donghua needs Chinese or Taiwanese studios.",
+          "Their own worked example is RWBY. It has a Japanese dub. It was broadcast on Japanese television. It is still rejected, because the production company and the principal staff are American. Their submission form goes further and offers only four countries of origin, with no way to leave the field empty.",
+        ],
+        callouts: [
+          "A Japanese dub and a Japanese broadcast are not enough. The creative control has to be Japanese.",
+        ],
+      },
+      {
+        heading: "What MyAnimeList requires",
+        paragraphs: [
+          "The same shape of rule. The work must be animated as a work of animation, professionally produced in Japan, and made for the Japanese market, with a narrow allowance for co-productions. RWBY fails there too, for the same reason.",
+          "Anime News Network is the outlier of the three. Its encyclopedia is broader and does catalogue non-Japanese animation, which is why it is the one database an independent Western production can realistically join.",
+        ],
+      },
+      {
+        heading: "So where does AI fit",
+        paragraphs: [
+          "Nowhere in those rules. Not one of them mentions how the images are made.",
+          "Twins Hinahima settles it in practice. It was produced by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025, and roughly 95% of its animation cuts involve generative AI. By every criterion above it is unambiguously anime. Meanwhile a French series drawn entirely by hand over ten years by two hundred people would not be.",
+          "Whatever you think of AI in animation, it is not the line these databases draw.",
+        ],
+      },
+      {
+        heading: "The other definition, the one everyone actually uses",
+        paragraphs: [
+          "In ordinary speech, anime describes a visual and narrative tradition: the character design, the cutting, the register of emotion, the relationship to stillness. Under that definition plenty of non-Japanese work qualifies, and viewers apply it without hesitation.",
+          "In Japan the word is broader still. Anime simply means animation, all of it, including Pixar.",
+          "So there are at least three definitions in circulation: a production-origin one used by databases, a stylistic one used by viewers, and a literal one used in Japan. An argument that does not say which one it is using cannot be settled.",
+        ],
+      },
+      {
+        heading: "Where that leaves Lost Garden",
+        paragraphs: [
+          "Lost Garden is an independent animated series made in France, in the anime tradition, with an AI-assisted pipeline under human direction. It is anime by the stylistic definition and not by the database one, and both of those statements are useful.",
+          "Being precise about it is not modesty, it is practical. It is why the project belongs in the Anime News Network encyclopedia, on IMDb and on TMDB, and not on AniList or MyAnimeList. Submitting to the wrong place wastes everyone's time and gets you rejected on a rule that has nothing to do with your work.",
+        ],
+      },
+    ],
+  },
+  faq: [
+    {
+      question: "Is AI anime real anime?",
+      answer:
+        "It depends which definition you use. AniList and MyAnimeList define anime by Japanese production, so an AI-assisted Japanese series qualifies and a hand-drawn Western one does not. By the stylistic definition most viewers use, AI-assisted work in the anime tradition counts.",
+    },
+    {
+      question: "Has an AI anime been accepted as anime by the industry?",
+      answer:
+        "Yes. Twins Hinahima was produced by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025, and uses generative AI in roughly 95% of its animation cuts. It meets every database criterion.",
+    },
+    {
+      question: "Why do AniList and MyAnimeList reject Western animation?",
+      answer:
+        "Because both define anime by production origin. AniList's own example is RWBY, rejected despite a Japanese dub and Japanese broadcast, because the production and principal staff are American. MyAnimeList requires professional production in Japan for the Japanese market.",
+    },
+    {
+      question: "Which database accepts independent Western animation?",
+      answer:
+        "Anime News Network's encyclopedia is broader than AniList and MyAnimeList and does catalogue non-Japanese animation. IMDb, TMDB and Wikidata have no regional restriction at all.",
+    },
+  ],
+  related: [
+    { label: "The 6 best AI anime, ranked", href: "/best-ai-anime" },
+    { label: "AI anime vs traditional animation", href: "/ai-anime-vs-traditional-animation" },
+    { label: "How to make an AI anime, step by step", href: "/how-to-make-ai-anime" },
+    { label: "Lost Garden production notes", href: "/process" },
+  ],
+};
+
+const aiVsTraditional: Guide = {
+  article: {
+    byline:
+      "A comparison written from the inside, after finishing a seventeen minute episode alone. What an AI-assisted pipeline genuinely changes, what it leaves exactly as it was, and where it is still worse.",
+    sections: [
+      {
+        paragraphs: [
+          "Most comparisons on this subject are written by people selling one side. This one comes from having produced an episode with the AI-assisted pipeline, and from watching what it did and did not solve.",
+        ],
+      },
+      {
+        heading: "What genuinely changes: the floor",
+        paragraphs: [
+          "Seventeen minutes of animation used to require a studio, a schedule and a payroll. It now takes one person and a year. That is the whole story, and everything else people claim about AI animation is smaller than this.",
+          "It does not make animation cheap. It makes it possible at a scale of one, which is a different thing and a more interesting one.",
+        ],
+      },
+      {
+        heading: "What changes: iteration, and therefore taste",
+        paragraphs: [
+          "In a traditional pipeline a shot is expensive enough that you commit to it at the storyboard. In a generated pipeline you can look at forty versions of the same shot before choosing.",
+          "That sounds purely good and is not. Choosing between forty options is a skill, and without a world bible to check against you will pick the prettiest rather than the right one. The bottleneck moves from making images to judging them.",
+        ],
+        callouts: [
+          "The scarce resource stops being production capacity and becomes judgement.",
+        ],
+      },
+      {
+        heading: "What does not change at all",
+        list: [
+          "Writing. A weak scene is weak at any resolution.",
+          "Storyboarding intent. Someone still decides where the camera stands and why.",
+          "Editing. Pacing, holds and cuts are still the difference between a film and a reel.",
+          "Sound. Still half the result, still the half people skip.",
+          "The hit rate. Most takes are bad in both pipelines. Only the cost of a bad take changed.",
+        ],
+      },
+      {
+        heading: "Where AI is clearly worse",
+        paragraphs: [
+          "Character consistency across shots is the obvious one, and it is a pipeline problem rather than a prompting problem. Hands and small props remain unreliable. Long holds on a face betray drift that a two second shot hides.",
+          "Deliberate timing is the deeper gap. A traditional animator decides that a gesture takes eleven frames because eleven is funnier than twelve. Generated motion does not offer that control, and the difference shows in comedy and in fight choreography more than anywhere else.",
+        ],
+      },
+      {
+        heading: "Where AI is clearly better",
+        paragraphs: [
+          "Exploring a visual direction before committing. Environments, light, atmosphere, the texture of a world: these come back faster and richer than a small team could draw them.",
+          "Volume of attempts is the other one. Being able to fail forty times on a shot that matters is a luxury a scheduled production does not have.",
+        ],
+      },
+      {
+        heading: "The honest verdict",
+        paragraphs: [
+          "It is not a replacement pipeline, it is a different set of constraints. A studio still does character acting and choreography that no generated shot reaches. A single person can now finish a coherent episode with a world of their own, which no single person could do before.",
+          "Both of those are true at once, and anyone telling you only one of them is selling something.",
+        ],
+      },
+    ],
+  },
+  faq: [
+    {
+      question: "Is AI animation cheaper than traditional animation?",
+      answer:
+        "Cheaper in payroll, not in time. The cost moves from a team to one person's months. What actually changes is that a production of this length becomes possible for one person at all, which was not the case a few years ago.",
+    },
+    {
+      question: "Is AI animation faster?",
+      answer:
+        "Individual shots are faster. The project is not, because most of the time goes to rejected takes and to the edit. A seventeen minute episode made alone still counts in months.",
+    },
+    {
+      question: "What can traditional animation still do better?",
+      answer:
+        "Deliberate timing and character acting. An animator choosing that a gesture lasts eleven frames rather than twelve has control that generated motion does not offer, and it shows most in comedy and fight choreography.",
+    },
+    {
+      question: "Will AI replace animators?",
+      answer:
+        "It has not replaced the parts of the work that decide whether a scene lands: writing, staging, editing, timing. It has lowered the barrier for people who could not produce animation at all. Those are different effects and both are happening.",
+    },
+  ],
+  related: [
+    { label: "How to make an AI anime, step by step", href: "/how-to-make-ai-anime" },
+    { label: "Keeping a character consistent across shots", href: "/ai-character-consistency" },
+    { label: "Is AI anime really anime?", href: "/is-ai-anime-real-anime" },
+    { label: "AI anime vs traditional animation", href: "/ai-anime-vs-traditional-animation" },
+    { label: "The 6 best AI anime, ranked", href: "/best-ai-anime" },
+  ],
+};
+
 export const guidesEn: Record<GuideSlug, Guide> = {
   "/how-to-make-ai-anime": howToMakeAiAnime,
   "/ai-character-consistency": characterConsistency,
+  "/is-ai-anime-real-anime": isAiAnimeRealAnime,
+  "/ai-anime-vs-traditional-animation": aiVsTraditional,
 };

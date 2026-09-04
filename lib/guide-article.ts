@@ -11,4 +11,8 @@ export type Guide = {
   related: readonly ArticleLink[];
 };
 
-export type GuideSlug = "/how-to-make-ai-anime" | "/ai-character-consistency";
+export type GuideSlug =
+  | "/how-to-make-ai-anime"
+  | "/ai-character-consistency"
+  | "/is-ai-anime-real-anime"
+  | "/ai-anime-vs-traditional-animation";

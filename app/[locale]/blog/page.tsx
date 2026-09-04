@@ -20,6 +20,11 @@ const ARTICLES = [
   { path: "/best-ai-anime", meta: "bestAiAnime" },
   { path: "/how-to-make-ai-anime", meta: "howToMakeAiAnime" },
   { path: "/ai-character-consistency", meta: "aiCharacterConsistency" },
+  { path: "/is-ai-anime-real-anime", meta: "isAiAnimeRealAnime" },
+  {
+    path: "/ai-anime-vs-traditional-animation",
+    meta: "aiAnimeVsTraditional",
+  },
   { path: "/process", meta: "process" },
   { path: "/vision", meta: "vision" },
 ] as const;

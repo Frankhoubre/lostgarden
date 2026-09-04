@@ -32,6 +32,14 @@
       "title": "AI Character Consistency: Keep a Face Across Shots",
       "description": "Why generated characters drift between shots and the working methods that keep them recognisable across a full anime episode."
     },
+    "isAiAnimeRealAnime": {
+      "title": "Is AI Anime Really Anime? What the Databases Say",
+      "description": "AniList and MyAnimeList define anime by where it is produced, not how it is drawn. What that means for AI-assisted series, with the actual rules and the RWBY precedent."
+    },
+    "aiAnimeVsTraditional": {
+      "title": "AI Anime vs Traditional Animation: What Actually Changes",
+      "description": "Written after finishing a 17 minute episode alone: what an AI-assisted pipeline genuinely changes, what it leaves untouched, and where it is still clearly worse."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Independent Animated Dark Fantasy Series by Frank Houbre",
       "description": "Official press kit for Lost Garden, a 17-minute independent animated dark fantasy episode produced solo by Frank Houbre through an AI-assisted creative workflow.",
@@ -307,6 +315,14 @@
     "aiCharacterConsistency": {
       "headline": "Keeping a character consistent across shots",
       "keywords": ["AI character consistency", "consistent character AI", "character reference AI video", "AI anime consistency", "Lost Garden"]
+    },
+    "isAiAnimeRealAnime": {
+      "headline": "Is AI anime really anime?",
+      "keywords": ["is AI anime real anime", "what counts as anime", "AI anime definition", "AI anime debate", "anime vs AI animation", "Twins Hinahima", "Lost Garden"]
+    },
+    "aiAnimeVsTraditional": {
+      "headline": "AI anime vs traditional animation",
+      "keywords": ["AI anime vs traditional animation", "AI animation vs hand drawn", "will AI replace animators", "AI animation cost", "AI animation pipeline", "Lost Garden"]
     }
   },
   "cookies": {

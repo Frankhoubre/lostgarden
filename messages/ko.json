@@ -32,6 +32,14 @@
       "title": "AI 캐릭터 일관성: 컷을 넘어 얼굴 유지하기",
       "description": "생성한 캐릭터가 컷마다 달라지는 이유와, 한 편 내내 알아볼 수 있게 유지하는 실무적인 방법."
     },
+    "isAiAnimeRealAnime": {
+      "title": "AI로 만든 애니메이션은 진짜 애니메이션인가",
+      "description": "AniList와 MyAnimeList는 그리는 방식이 아니라 제작지로 애니메이션을 정의합니다. AI 보조 작품에 그것이 무엇을 뜻하는지, 실제 규칙과 RWBY 선례로 살펴봅니다."
+    },
+    "aiAnimeVsTraditional": {
+      "title": "AI 애니메이션과 전통 애니메이션, 실제로 달라지는 것",
+      "description": "17분짜리 에피소드를 혼자 끝낸 뒤 쓴 비교. AI 보조 파이프라인이 정말 바꾸는 것, 그대로 두는 것, 그리고 아직 분명히 더 못하는 것."
+    },
     "press": {
       "title": "Lost Garden 프레스 키트 · Frank Houbre의 독립 다크 판타지 애니메이션 시리즈",
       "description": "Frank Houbre가 1인으로 제작한 17분 독립 다크 판타지 애니메이션 에피소드 Lost Garden의 공식 프레스 키트. AI 지원 크리에이티브 워크플로로 완성.",
@@ -307,6 +315,14 @@
     "aiCharacterConsistency": {
       "headline": "컷을 넘어 캐릭터를 유지하는 법",
       "keywords": ["AI 캐릭터 일관성", "AI 같은 캐릭터 유지", "캐릭터 레퍼런스 AI", "AI 애니 일관성", "Lost Garden"]
+    },
+    "isAiAnimeRealAnime": {
+      "headline": "AI로 만든 애니메이션은 진짜 애니메이션인가",
+      "keywords": ["AI 애니메이션 진짜 애니", "애니메이션 정의", "AI 애니 논쟁", "생성 AI 애니메이션", "Twins Hinahima", "Lost Garden"]
+    },
+    "aiAnimeVsTraditional": {
+      "headline": "AI 애니메이션과 전통 애니메이션의 차이",
+      "keywords": ["AI 애니메이션 전통 비교", "AI 애니메이터 대체", "AI 애니메이션 비용", "AI 애니 손그림 차이", "AI 애니메이션 제작 과정", "Lost Garden"]
     }
   },
   "cookies": {

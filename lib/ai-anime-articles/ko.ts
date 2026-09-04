@@ -210,6 +210,8 @@ export const aiAnimeArticleKo: AiAnimeArticle = {
   ],
   relatedHeading: "이어서 읽기",
   relatedLinks: [
+    { label: "AI로 만든 애니메이션은 진짜 애니메이션인가", href: "/is-ai-anime-real-anime" },
+    { label: "AI 애니메이션과 전통 애니메이션의 차이", href: "/ai-anime-vs-traditional-animation" },
     { label: "AI로 애니메이션 만드는 법, 단계별로", href: "/how-to-make-ai-anime" },
     { label: "컷을 넘어 캐릭터를 유지하는 법", href: "/ai-character-consistency" },
     { label: "Lost Garden 제작 방식 자세히 보기", href: "/process" },

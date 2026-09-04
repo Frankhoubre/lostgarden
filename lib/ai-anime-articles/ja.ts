@@ -211,6 +211,8 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
   ],
   relatedHeading: "続けて読む",
   relatedLinks: [
+    { label: "AIで作られたアニメは本当のアニメか", href: "/is-ai-anime-real-anime" },
+    { label: "AIアニメと従来のアニメーションの違い", href: "/ai-anime-vs-traditional-animation" },
     { label: "AIでアニメを作る手順", href: "/how-to-make-ai-anime" },
     { label: "カットをまたいでキャラクターを保つ方法", href: "/ai-character-consistency" },
     { label: "Lost Gardenの作り方を詳しく", href: "/process" },

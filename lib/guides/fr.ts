@@ -97,6 +97,8 @@ const howToMakeAiAnime: Guide = {
     },
   ],
   related: [
+    { label: "Un animé fait par IA est-il un vrai animé ?", href: "/is-ai-anime-real-anime" },
+    { label: "Animé IA contre animation traditionnelle", href: "/ai-anime-vs-traditional-animation" },
     { label: "Garder un personnage cohérent d'un plan à l'autre", href: "/ai-character-consistency" },
     { label: "Le top 6 des animés créés par IA", href: "/best-ai-anime" },
     { label: "Notes de production de Lost Garden", href: "/process" },
@@ -185,6 +187,8 @@ const characterConsistency: Guide = {
     },
   ],
   related: [
+    { label: "Un animé fait par IA est-il un vrai animé ?", href: "/is-ai-anime-real-anime" },
+    { label: "Animé IA contre animation traditionnelle", href: "/ai-anime-vs-traditional-animation" },
     { label: "Comment faire un animé avec l'IA, étape par étape", href: "/how-to-make-ai-anime" },
     { label: "Le top 6 des animés créés par IA", href: "/best-ai-anime" },
     { label: "Notes de production de Lost Garden", href: "/process" },
@@ -192,7 +196,183 @@ const characterConsistency: Guide = {
   ],
 };
 
+const isAiAnimeRealAnime: Guide = {
+  article: {
+    byline:
+      "La question revient sous chaque vidéo d'animation IA. Les grandes bases de données d'animés y répondent déjà, et leur réponse n'a presque rien à voir avec l'IA.",
+    sections: [
+      {
+        paragraphs: [
+          "Version courte : les bases qui cataloguent l'animé le définissent par son lieu de production, pas par sa technique de dessin. Selon cette définition, une série assistée par IA faite au Japon est un animé, et une série dessinée à la main faite en France n'en est pas un. La technique n'entre jamais en ligne de compte.",
+          "Ça vaut la peine de le savoir avant d'en débattre, parce que l'essentiel des disputes en ligne vient de gens qui utilisent deux définitions différentes en même temps.",
+        ],
+      },
+      {
+        heading: "Ce qu'exige réellement AniList",
+        paragraphs: [
+          "AniList accepte trois catégories régionales et rien d'autre. Anime demande un contrôle créatif significatif de studios japonais. Aeni demande des studios sud-coréens. Donghua demande des studios chinois ou taïwanais.",
+          "Leur propre exemple est RWBY. La série a un doublage japonais. Elle a été diffusée à la télévision japonaise. Elle est refusée quand même, parce que la société de production et l'équipe principale sont américaines. Leur formulaire va plus loin et ne propose que quatre pays d'origine, sans moyen de laisser le champ vide.",
+        ],
+        callouts: [
+          "Un doublage japonais et une diffusion japonaise ne suffisent pas. Le contrôle créatif doit être japonais.",
+        ],
+      },
+      {
+        heading: "Ce qu'exige MyAnimeList",
+        paragraphs: [
+          "La même règle sous une autre forme. L'œuvre doit être animée en tant qu'œuvre d'animation, produite professionnellement au Japon, et destinée au marché japonais, avec une tolérance étroite pour les coproductions. RWBY y échoue aussi, pour la même raison.",
+          "Anime News Network est l'exception des trois. Son encyclopédie est plus large et catalogue bien de l'animation non japonaise, ce qui en fait la seule base qu'une production occidentale indépendante peut réellement rejoindre.",
+        ],
+      },
+      {
+        heading: "Où se situe l'IA là-dedans",
+        paragraphs: [
+          "Nulle part dans ces règles. Aucune ne mentionne la façon dont les images sont fabriquées.",
+          "Twins Hinahima tranche la question en pratique. Produite par Frontier Works et KaKa Creation, diffusée sur Tokyo MX en mars 2025, avec de l'IA générative sur environ 95 % de ses plans d'animation. Selon tous les critères ci-dessus, c'est un animé sans la moindre ambiguïté. Pendant ce temps, une série française dessinée entièrement à la main pendant dix ans par deux cents personnes n'en serait pas un.",
+          "Quoi qu'on pense de l'IA en animation, ce n'est pas la ligne que tracent ces bases.",
+        ],
+      },
+      {
+        heading: "L'autre définition, celle que tout le monde utilise vraiment",
+        paragraphs: [
+          "Dans le langage courant, animé désigne une tradition visuelle et narrative : le design des personnages, le découpage, le registre d'émotion, le rapport à l'immobilité. Selon cette définition, beaucoup d'œuvres non japonaises qualifient, et les spectateurs l'appliquent sans hésiter.",
+          "Au Japon, le mot est encore plus large. Anime veut simplement dire animation, toute l'animation, Pixar compris.",
+          "Il y a donc au moins trois définitions en circulation : celle des bases, fondée sur l'origine de production, celle des spectateurs, fondée sur le style, et celle du Japon, littérale. Un débat qui ne dit pas laquelle il emploie ne peut pas être tranché.",
+        ],
+      },
+      {
+        heading: "Ce que ça donne pour Lost Garden",
+        paragraphs: [
+          "Lost Garden est une série d'animation indépendante faite en France, dans la tradition de l'animé, avec un pipeline assisté par IA sous direction humaine. C'est un animé selon la définition stylistique et ça n'en est pas un selon celle des bases, et les deux affirmations servent à quelque chose.",
+          "Être précis là-dessus n'est pas de la modestie, c'est pratique. C'est ce qui explique que le projet a sa place dans l'encyclopédie d'Anime News Network, sur IMDb et sur TMDB, et pas sur AniList ni MyAnimeList. Soumettre au mauvais endroit fait perdre du temps à tout le monde et vous vaut un refus sur une règle qui n'a rien à voir avec votre travail.",
+        ],
+      },
+    ],
+  },
+  faq: [
+    {
+      question: "Un animé fait par IA est-il un vrai animé ?",
+      answer:
+        "Ça dépend de la définition. AniList et MyAnimeList définissent l'animé par sa production japonaise, donc une série japonaise assistée par IA qualifie et une série occidentale dessinée à la main non. Selon la définition stylistique employée par la plupart des spectateurs, une œuvre assistée par IA dans la tradition de l'animé compte.",
+    },
+    {
+      question: "Un animé IA a-t-il déjà été accepté comme animé par l'industrie ?",
+      answer:
+        "Oui. Twins Hinahima, produite par Frontier Works et KaKa Creation, a été diffusée sur Tokyo MX en mars 2025 avec de l'IA générative sur environ 95 % de ses plans. Elle remplit tous les critères des bases de données.",
+    },
+    {
+      question: "Pourquoi AniList et MyAnimeList refusent-ils l'animation occidentale ?",
+      answer:
+        "Parce que les deux définissent l'animé par son origine de production. L'exemple d'AniList est RWBY, refusée malgré un doublage et une diffusion au Japon, parce que la production et l'équipe principale sont américaines. MyAnimeList exige une production professionnelle au Japon pour le marché japonais.",
+    },
+    {
+      question: "Quelle base accepte l'animation occidentale indépendante ?",
+      answer:
+        "L'encyclopédie d'Anime News Network est plus large qu'AniList et MyAnimeList et catalogue de l'animation non japonaise. IMDb, TMDB et Wikidata n'ont aucune restriction régionale.",
+    },
+  ],
+  related: [
+    { label: "Le top 6 des animés créés par IA", href: "/best-ai-anime" },
+    { label: "Animé IA contre animation traditionnelle", href: "/ai-anime-vs-traditional-animation" },
+    { label: "Comment faire un animé avec l'IA, étape par étape", href: "/how-to-make-ai-anime" },
+    { label: "Notes de production de Lost Garden", href: "/process" },
+  ],
+};
+
+const aiVsTraditional: Guide = {
+  article: {
+    byline:
+      "Une comparaison écrite de l'intérieur, après avoir fini seul un épisode de dix-sept minutes. Ce qu'un pipeline assisté par IA change vraiment, ce qu'il laisse exactement en l'état, et là où il reste moins bon.",
+    sections: [
+      {
+        paragraphs: [
+          "La plupart des comparaisons sur le sujet sont écrites par des gens qui vendent un camp. Celle-ci vient d'avoir produit un épisode avec le pipeline assisté par IA, et d'avoir observé ce qu'il a résolu et ce qu'il n'a pas résolu.",
+        ],
+      },
+      {
+        heading: "Ce qui change vraiment : le plancher",
+        paragraphs: [
+          "Dix-sept minutes d'animation demandaient un studio, un planning et une masse salariale. Il faut maintenant une personne et un an. C'est toute l'histoire, et tout le reste de ce qu'on raconte sur l'animation IA est plus petit que ça.",
+          "Ça ne rend pas l'animation bon marché. Ça la rend possible à l'échelle d'une seule personne, ce qui est autre chose, et plus intéressant.",
+        ],
+      },
+      {
+        heading: "Ce qui change : l'itération, et donc le goût",
+        paragraphs: [
+          "Dans un pipeline traditionnel, un plan coûte assez cher pour qu'on s'y engage dès le storyboard. Dans un pipeline génératif, on peut regarder quarante versions du même plan avant de choisir.",
+          "Ça sonne comme un pur avantage et ça n'en est pas un. Choisir parmi quarante options est une compétence, et sans bible du monde à laquelle se référer, vous prendrez le plus joli plutôt que le juste. Le goulot d'étranglement se déplace de la fabrication des images vers leur jugement.",
+        ],
+        callouts: [
+          "La ressource rare cesse d'être la capacité de production et devient le jugement.",
+        ],
+      },
+      {
+        heading: "Ce qui ne change pas du tout",
+        list: [
+          "L'écriture. Une scène faible est faible à n'importe quelle résolution.",
+          "L'intention de storyboard. Quelqu'un décide toujours où se place la caméra et pourquoi.",
+          "Le montage. Le rythme, les temps de pause et les coupes font toujours la différence entre un film et une bande d'images.",
+          "Le son. Toujours la moitié du résultat, toujours la moitié qu'on saute.",
+          "Le taux de réussite. La plupart des prises sont mauvaises dans les deux pipelines. Seul le coût d'une mauvaise prise a changé.",
+        ],
+      },
+      {
+        heading: "Là où l'IA est clairement moins bonne",
+        paragraphs: [
+          "La cohérence des personnages d'un plan à l'autre est l'évidence, et c'est un problème de pipeline plutôt que de prompt. Les mains et les petits accessoires restent peu fiables. Un maintien long sur un visage trahit une dérive qu'un plan de deux secondes masque.",
+          "Le timing délibéré est l'écart le plus profond. Un animateur traditionnel décide qu'un geste dure onze images parce que onze est plus drôle que douze. Le mouvement généré n'offre pas ce contrôle, et la différence se voit dans la comédie et dans la chorégraphie de combat plus que partout ailleurs.",
+        ],
+      },
+      {
+        heading: "Là où l'IA est clairement meilleure",
+        paragraphs: [
+          "Explorer une direction visuelle avant de s'engager. Les décors, la lumière, l'atmosphère, la matière d'un monde : tout ça revient plus vite et plus riche qu'une petite équipe ne pourrait le dessiner.",
+          "Le volume de tentatives est l'autre point. Pouvoir échouer quarante fois sur un plan qui compte est un luxe qu'une production planifiée n'a pas.",
+        ],
+      },
+      {
+        heading: "Le verdict honnête",
+        paragraphs: [
+          "Ce n'est pas un pipeline de remplacement, c'est un autre jeu de contraintes. Un studio fait toujours un jeu d'acteur et une chorégraphie qu'aucun plan généré n'atteint. Une seule personne peut désormais finir un épisode cohérent avec un monde à elle, ce qu'aucune personne seule ne pouvait faire avant.",
+          "Les deux sont vrais en même temps, et quiconque ne vous en dit qu'un seul vous vend quelque chose.",
+        ],
+      },
+    ],
+  },
+  faq: [
+    {
+      question: "L'animation IA coûte-t-elle moins cher que l'animation traditionnelle ?",
+      answer:
+        "Moins cher en salaires, pas en temps. Le coût se déplace d'une équipe vers les mois d'une seule personne. Ce qui change réellement, c'est qu'une production de cette durée devient possible pour une personne seule, ce qui n'était pas le cas il y a quelques années.",
+    },
+    {
+      question: "L'animation IA est-elle plus rapide ?",
+      answer:
+        "Les plans pris un par un sont plus rapides. Le projet non, parce que l'essentiel du temps passe dans les prises refusées et dans le montage. Un épisode de dix-sept minutes fait seul se compte toujours en mois.",
+    },
+    {
+      question: "Que fait encore mieux l'animation traditionnelle ?",
+      answer:
+        "Le timing délibéré et le jeu des personnages. Un animateur qui décide qu'un geste dure onze images plutôt que douze a un contrôle que le mouvement généré n'offre pas, et ça se voit surtout dans la comédie et la chorégraphie de combat.",
+    },
+    {
+      question: "L'IA va-t-elle remplacer les animateurs ?",
+      answer:
+        "Elle n'a pas remplacé les parties du travail qui décident si une scène fonctionne : l'écriture, la mise en scène, le montage, le timing. Elle a abaissé la barrière pour des gens qui ne pouvaient pas produire d'animation du tout. Ce sont deux effets différents et les deux ont lieu.",
+    },
+  ],
+  related: [
+    { label: "Comment faire un animé avec l'IA, étape par étape", href: "/how-to-make-ai-anime" },
+    { label: "Garder un personnage cohérent d'un plan à l'autre", href: "/ai-character-consistency" },
+    { label: "Un animé fait par IA est-il un vrai animé ?", href: "/is-ai-anime-real-anime" },
+    { label: "Animé IA contre animation traditionnelle", href: "/ai-anime-vs-traditional-animation" },
+    { label: "Le top 6 des animés créés par IA", href: "/best-ai-anime" },
+  ],
+};
+
 export const guidesFr: Record<GuideSlug, Guide> = {
   "/how-to-make-ai-anime": howToMakeAiAnime,
   "/ai-character-consistency": characterConsistency,
+  "/is-ai-anime-real-anime": isAiAnimeRealAnime,
+  "/ai-anime-vs-traditional-animation": aiVsTraditional,
 };
