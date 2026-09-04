@@ -24,6 +24,7 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/",
   "/vision",
   "/process",
+  "/best-ai-anime",
   "/press",
   "/episode-1",
   "/legal-notice",
@@ -50,6 +51,7 @@ const SITEMAP_HINTS: Record<
   "/press": { changeFrequency: "monthly", priority: 0.8 },
   "/vision": { changeFrequency: "monthly", priority: 0.7 },
   "/process": { changeFrequency: "monthly", priority: 0.7 },
+  "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
   "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
   "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
 };
@@ -254,16 +256,30 @@ export function webPageJsonLd({
   };
 }
 
+const DEFAULT_ARTICLE_KEYWORDS = [
+  "AI anime",
+  "AI-assisted animation",
+  "generative animation",
+  "indie anime",
+  "Lost Garden",
+] as const;
+
 export function articlePageJsonLd({
   locale,
   headline,
   description,
   path,
+  datePublished,
+  dateModified,
+  keywords = DEFAULT_ARTICLE_KEYWORDS,
 }: {
   locale: Locale;
   headline: string;
   description: string;
   path: string;
+  datePublished?: string;
+  dateModified?: string;
+  keywords?: readonly string[];
 }) {
   return {
     "@context": "https://schema.org",
@@ -271,6 +287,7 @@ export function articlePageJsonLd({
     headline,
     description,
     url: absoluteUrl(path),
+    image: absoluteUrl(SITE.ogImage),
     author: {
       "@type": "Person",
       name: SITE.creator,
@@ -279,13 +296,41 @@ export function articlePageJsonLd({
     isPartOf: { "@id": `${SITE.url}/#website` },
     inLanguage: schemaLanguages[locale],
     about: { "@id": `${SITE.url}/#series` },
-    keywords: [
-      "AI anime",
-      "AI-assisted animation",
-      "generative animation",
-      "indie anime",
-      "Lost Garden",
-    ],
+    ...(datePublished ? { datePublished } : {}),
+    ...(dateModified ? { dateModified } : {}),
+    keywords: [...keywords],
+  };
+}
+
+/**
+ * Ranked list markup for the AI anime round-up. Google reads ItemList on
+ * "best of" pages, so each entry carries its position and a short description.
+ */
+export function itemListJsonLd({
+  name,
+  description,
+  path,
+  items,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  items: ReadonlyArray<{ position: number; name: string; description: string }>;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    description,
+    url: absoluteUrl(path),
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: items.length,
+    itemListElement: items.map((item) => ({
+      "@type": "ListItem",
+      position: item.position,
+      name: item.name,
+      description: item.description,
+    })),
   };
 }
 

@@ -10,6 +10,10 @@ type ProcessRelatedLinksProps = {
 
 export function ProcessRelatedLinks({ locale, dict }: ProcessRelatedLinksProps) {
   const links = [
+    {
+      href: localePath(locale, "/best-ai-anime"),
+      label: dict.process.links.bestAiAnime,
+    },
     { href: localePath(locale, "/vision"), label: dict.process.links.vision },
     { href: localePath(locale, "/episode-1"), label: dict.process.links.episode },
     { href: localePath(locale, "/press"), label: dict.process.links.press },

@@ -16,6 +16,10 @@
       "title": "AI Anime Process | Lost Garden",
       "description": "How Lost Garden Episode One is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime by Frank Houbre."
     },
+    "bestAiAnime": {
+      "title": "Best AI Anime: 6 Series Actually Made With AI (2026)",
+      "description": "The 6 best anime made with AI, ranked and sourced: Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital and Vidu. What the AI really did in each one."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Independent Animated Dark Fantasy Series by Frank Houbre",
       "description": "Official press kit for Lost Garden, a 17-minute independent animated dark fantasy episode produced solo by Frank Houbre through an AI-assisted creative workflow.",
@@ -265,7 +269,14 @@
     "episodeOne": "Episode 1",
     "legalNotice": "Legal notice",
     "privacy": "Privacy",
-    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
+    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
+    "bestAiAnime": "Best AI anime"
+  },
+  "bestAiAnime": {
+    "headline": "Best AI anime: 6 series actually made with AI",
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Best AI anime",
+    "keywords": ["AI anime", "best AI anime", "anime made with AI", "AI generated anime", "AI animation", "Lost Garden", "Twins Hinahima", "Anipops"]
   },
   "cookies": {
     "title": "Cookies & privacy",
@@ -293,7 +304,8 @@
     "links": {
       "vision": "Creator vision (full essay)",
       "episode": "Watch Episode One (public)",
-      "press": "Press & media kit"
+      "press": "Press & media kit",
+      "bestAiAnime": "Best AI anime: the ranked list"
     }
   },
   "press": {

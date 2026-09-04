@@ -16,6 +16,10 @@
       "title": "Process animé IA | Lost Garden",
       "description": "Comment l'épisode 1 de Lost Garden est produit : pipeline d'animation assistée par IA, FAQ et référence pour l'animé généré par IA indie."
     },
+    "bestAiAnime": {
+      "title": "Top 6 des animés créés par IA (2026)",
+      "description": "Les 6 meilleurs animés réalisés par intelligence artificielle, classés et sourcés : Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital et Vidu. Ce que l'IA a vraiment fait dans chacun."
+    },
     "press": {
       "title": "Lost Garden Press Kit · Série animée indépendante par Frank Houbre",
       "description": "Press kit officiel de Lost Garden, épisode animé dark fantasy de 17 minutes produit en solo par Frank Houbre avec un workflow de production assisté par IA.",
@@ -267,7 +271,14 @@
     "episodeOne": "Épisode 1",
     "legalNotice": "Mentions légales",
     "privacy": "Confidentialité",
-    "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés."
+    "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés.",
+    "bestAiAnime": "Top animés IA"
+  },
+  "bestAiAnime": {
+    "headline": "Top 6 des animés créés par IA",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbCurrent": "Animés créés par IA",
+    "keywords": ["animé IA", "anime IA", "animé créé par IA", "animé réalisé par intelligence artificielle", "meilleur animé IA", "animation IA", "Lost Garden"]
   },
   "cookies": {
     "title": "Cookies et confidentialité",
@@ -295,7 +306,8 @@
     "links": {
       "vision": "Vision du créateur (essai complet)",
       "episode": "Voir l'épisode 1 (public)",
-      "press": "Presse & media kit"
+      "press": "Presse & media kit",
+      "bestAiAnime": "Top 6 des animés créés par IA"
     }
   },
   "press": {

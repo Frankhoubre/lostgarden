@@ -16,6 +16,10 @@
       "title": "AIアニメ制作プロセス | Lost Garden",
       "description": "Lost Garden第1話の制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
     },
+    "bestAiAnime": {
+      "title": "AIで作られたアニメ・ベスト6（2026年版）",
+      "description": "実際にAIで制作されたアニメ6作品を出典付きでランキング。Lost Garden、ツインズひなひま、Anipops、犬と少年、Corridor Digital、Vidu。それぞれAIが何をしたのかも解説します。"
+    },
     "press": {
       "title": "Lost Garden プレスキット · Frank Houbreによるインディー・アニメーションシリーズ",
       "description": "Frank Houbreが一人で制作した、17分のダークファンタジー・アニメーション・エピソード「Lost Garden」の公式プレスキット。AI支援の制作ワークフローによる完成作品。",
@@ -265,7 +269,14 @@
     "episodeOne": "第1話",
     "legalNotice": "法的通知",
     "privacy": "プライバシー",
-    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved."
+    "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
+    "bestAiAnime": "AIアニメ ベスト6"
+  },
+  "bestAiAnime": {
+    "headline": "AIで作られたアニメ・ベスト6",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbCurrent": "AIアニメ ベスト6",
+    "keywords": ["AIアニメ", "AI 生成 アニメ", "AIで作られたアニメ", "生成AI アニメ", "AIアニメ おすすめ", "Lost Garden", "ツインズひなひま"]
   },
   "cookies": {
     "title": "Cookieとプライバシー",
@@ -293,7 +304,8 @@
     "links": {
       "vision": "クリエイタービジョン（全文）",
       "episode": "第1話を見る（公開）",
-      "press": "プレス・メディアキット"
+      "press": "プレス・メディアキット",
+      "bestAiAnime": "AIで作られたアニメ・ベスト6"
     }
   },
   "press": {

@@ -1,6 +1,6 @@
 import type { VisionArticle, VisionSection } from "@/lib/vision-article";
 
-function VisionBlock({ section }: { section: VisionSection }) {
+export function VisionBlock({ section }: { section: VisionSection }) {
   const bodyClass = section.heading ? "mt-3 space-y-3" : "space-y-3";
 
   return (
