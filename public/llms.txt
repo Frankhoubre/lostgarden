@@ -1,11 +1,11 @@
 # Lost Garden
 
-> Lost Garden is a poetic dark fantasy anime series created solo by Frank Houbre with an AI-assisted, human-led production workflow. Episode One (17 minutes) follows Lanterne (Sol), a voiceless hollow knight who awakens beneath the earth and must protect Rose, a mysterious child. The site is available in English, French, Japanese, and Korean.
+> Lost Garden is a poetic dark fantasy anime series created solo by Frank Houbre with an AI-assisted, human-led production workflow. Episode One (17 minutes) follows Lanterne, a voiceless hollow knight who awakens beneath the earth and must protect Rose, a mysterious child. The site is available in English, French, Japanese, and Korean.
 
 Key facts:
 - Creator: Frank Houbre (one-person studio, France)
 - Format: independent animated dark fantasy series, original world and screenplay
-- Episode One: 17 minutes, released 2 June 2026, free on YouTube
+- Episode One: 17 minutes, released 29 May 2026, free on YouTube, selected at the Seoul International AI Film Festival and finalist at the AI London Festival
 - Production: AI-assisted pipeline supervised by a human creator (writing, art direction, editing, music, sound design)
 - Languages: en (default), fr, ja, ko. Every page exists at /en/, /fr/, /ja/, /ko/ prefixes
 
@@ -16,6 +16,21 @@ Key facts:
 - [Vision](https://www.lostgarden.world/en/vision): the creator's essay on making an anime with AI, one scene at a time
 - [AI Process](https://www.lostgarden.world/en/process): the AI-assisted production pipeline, with FAQ
 - [Press Kit](https://www.lostgarden.world/en/press): key facts, press release, HD assets, and press contact
+- [Articles](https://www.lostgarden.world/en/blog): index of every guide and production note
+
+## Articles on AI anime and AI manga
+
+- [Making of Episode One](https://www.lostgarden.world/en/making-of-episode-1): how the episode was made, what was cut, where the year went
+- [The 6 best AI anime, ranked](https://www.lostgarden.world/en/best-ai-anime): projects genuinely made with AI, with sources
+- [How to make an AI anime, step by step](https://www.lostgarden.world/en/how-to-make-ai-anime): the real pipeline behind a 17 minute episode
+- [AI anime generators: what they really produce](https://www.lostgarden.world/en/ai-anime-generator): clips versus episodes, three kinds of product
+- [Can one person make an anime?](https://www.lostgarden.world/en/can-one-person-make-an-anime): which studio jobs AI covers and which it does not
+- [Can AI make a manga?](https://www.lostgarden.world/en/ai-manga): pages versus chapters, what transfers from the anime pipeline
+- [AI voices and sound in anime](https://www.lostgarden.world/en/ai-anime-voice-and-sound): a main character with no voice, and how the score was briefed
+- [How to tell if an anime was made with AI](https://www.lostgarden.world/en/how-to-tell-if-anime-is-ai): the signs that still work and the ones that do not
+- [Keeping a character consistent across shots](https://www.lostgarden.world/en/ai-character-consistency): reference sets, silhouettes, cutting around drift
+- [Is AI anime really anime?](https://www.lostgarden.world/en/is-ai-anime-real-anime): what AniList, MyAnimeList and ANN actually require
+- [AI anime vs traditional animation](https://www.lostgarden.world/en/ai-anime-vs-traditional-animation): what changes, what does not, where AI is worse
 
 ## Other languages
 

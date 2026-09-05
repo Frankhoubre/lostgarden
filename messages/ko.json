@@ -57,6 +57,30 @@
     "privacy": {
       "title": "개인정보 처리방침 | Lost Garden",
       "description": "Lost Garden의 데이터 수집, 쿠키, Firebase 인증, GDPR 권리에 대해."
+    },
+    "aiManga": {
+      "title": "AI로 만화와 웹툰을 만들 수 있을까? 되는 것과 무너지는 곳 (2026)",
+      "description": "AI는 몇 초 만에 그럴듯한 만화 한 페이지를 그리지만 한 회차는 아직 못 버팁니다. AI 애니메이션 한 편의 캐릭터 시트와 스토리보드가 생성 AI 만화에 대해 알려 주는 것."
+    },
+    "aiAnimeGenerator": {
+      "title": "AI 애니메이션 생성기가 실제로 내놓는 것",
+      "description": "생성기는 클립을 만들지 에피소드를 만들지 않습니다. 세 종류의 제품, 17분짜리 AI 애니메이션이 실제로 쓴 것, 그리고 구독 전에 던질 단 하나의 질문."
+    },
+    "aiAnimeVoiceAndSound": {
+      "title": "애니메이션의 AI 목소리와 사운드: Lost Garden은 어떻게 만들었나",
+      "description": "주인공에게는 목소리가 없습니다. 1화의 갑옷 소리, AI 음성 대사, 생성 음악이 어떻게 만들어졌는지, 그리고 AI 오디오가 아직 못하는 것."
+    },
+    "howToTellIfAnimeIsAi": {
+      "title": "AI로 만든 애니메이션 알아보는 법 (2026)",
+      "description": "아직 AI 애니메이션을 드러내는 신호, 더는 통하지 않는 신호, 그리고 믿을 수 있는 답이 크레딧에 있는 이유. 그걸 1년 동안 숨기려 애쓴 사람이 씁니다."
+    },
+    "makingOfEpisodeOne": {
+      "title": "Lost Garden 1화 메이킹: 17분에 혼자서 1년",
+      "description": "1화는 어떻게 만들어졌나. 잘려 나간 지상 세계, 도구를 견디도록 설계된 기사, 작업 순서, 그리고 1년의 대부분이 실제로 들어간 곳."
+    },
+    "canOnePersonMakeAnAnime": {
+      "title": "혼자서 애니메이션을 만들 수 있을까? 정말 필요한 것",
+      "description": "됩니다. 완성된 에피소드가 여기 있습니다. 스튜디오 직무 중 AI가 이제 맡는 것, 여전히 직접 해야 하는 것, 그리고 혼자 애니메이션을 만드는 비용을 달 단위로."
     }
   },
   "episodeOne": {
@@ -323,6 +347,30 @@
     "aiAnimeVsTraditional": {
       "headline": "AI 애니메이션과 전통 애니메이션의 차이",
       "keywords": ["AI 애니메이션 전통 비교", "AI 애니메이터 대체", "AI 애니메이션 비용", "AI 애니 손그림 차이", "AI 애니메이션 제작 과정", "Lost Garden"]
+    },
+    "aiManga": {
+      "headline": "AI로 만화와 웹툰을 만들 수 있을까",
+      "keywords": ["AI 웹툰", "AI 만화", "AI 웹툰 만들기", "AI로 만화 그리기", "AI 만화 생성", "Lost Garden"]
+    },
+    "aiAnimeGenerator": {
+      "headline": "AI 애니메이션 생성기가 실제로 내놓는 것",
+      "keywords": ["AI 애니메이션 생성기", "애니메이션 생성 AI", "AI 애니 만들기 프로그램", "텍스트로 애니메이션 만들기", "AI 애니 영상 생성", "Lost Garden"]
+    },
+    "aiAnimeVoiceAndSound": {
+      "headline": "애니메이션의 AI 목소리와 사운드",
+      "keywords": ["AI 성우 애니메이션", "AI 음성 애니", "AI 작곡 애니메이션", "애니메이션 사운드 AI", "AI 보이스 생성", "Lost Garden"]
+    },
+    "howToTellIfAnimeIsAi": {
+      "headline": "AI로 만든 애니메이션 알아보는 법",
+      "keywords": ["AI 애니메이션 구별", "AI 생성 애니 특징", "이 애니 AI인가", "AI 애니 판별", "AI 영상 구분법", "Lost Garden"]
+    },
+    "makingOfEpisodeOne": {
+      "headline": "Lost Garden 1화 메이킹",
+      "keywords": ["Lost Garden 메이킹", "AI 애니메이션 제작 비하인드", "AI 애니 제작 기간", "AI 애니메이션 제작 과정", "Lost Garden 1화", "Frank Houbre"]
+    },
+    "canOnePersonMakeAnAnime": {
+      "headline": "혼자서 애니메이션을 만들 수 있을까",
+      "keywords": ["혼자 애니메이션 만들기", "1인 애니메이션 제작", "나만의 애니 만들기", "애니메이션 혼자 만들기", "1인 스튜디오 애니 AI", "Lost Garden"]
     }
   },
   "cookies": {

@@ -57,6 +57,30 @@
     "privacy": {
       "title": "プライバシーポリシー | Lost Garden",
       "description": "Lost Gardenにおけるデータ収集、Cookie、Firebase認証、GDPR上の権利について。"
+    },
+    "aiManga": {
+      "title": "AIで漫画は作れるか。できること、崩れる場所（2026年）",
+      "description": "AIは数秒で説得力のある漫画の1ページを描き、それでも1話は保てない。AIアニメ1話分のキャラクターシートと絵コンテが、生成AI漫画について教えてくれること。"
+    },
+    "aiAnimeGenerator": {
+      "title": "AIアニメ生成ツールが本当に出力するもの",
+      "description": "生成ツールが作るのはクリップで、エピソードではない。製品の3つの種類、17分のAIアニメが実際に使ったもの、そして課金前に問うべきただ一つの質問。"
+    },
+    "aiAnimeVoiceAndSound": {
+      "title": "アニメのAI音声と音。Lost Gardenはどう作られたか",
+      "description": "主人公には声がない。第1話の鎧の音、AI音声の台詞、生成された音楽がどう作られたか、そしてAI音声がまだ苦手なこと。"
+    },
+    "howToTellIfAnimeIsAi": {
+      "title": "AIで作られたアニメの見分け方（2026年）",
+      "description": "今もAIアニメを露わにするサイン、もう効かないサイン、そして信頼できる答えがクレジットにある理由。それを1年かけて隠そうとした側から。"
+    },
+    "makingOfEpisodeOne": {
+      "title": "Lost Garden 第1話メイキング。17分に1人で1年",
+      "description": "第1話はどう作られたか。切られた地上世界、ツールを生き延びるよう設計された騎士、作業の順序、そして1年の大半が実際に費やされた場所。"
+    },
+    "canOnePersonMakeAnAnime": {
+      "title": "1人でアニメは作れるか。本当に必要なもの",
+      "description": "作れます。完成したエピソードがここにあります。スタジオの職種のうちAIが今カバーするもの、自分でやるしかないもの、そして1人でアニメを作る代償を月単位で。"
     }
   },
   "episodeOne": {
@@ -323,6 +347,30 @@
     "aiAnimeVsTraditional": {
       "headline": "AIアニメと従来のアニメーションの違い",
       "keywords": ["AIアニメ 従来 比較", "AI アニメーター 代替", "AIアニメ 費用", "AIアニメ 手描き 違い", "AIアニメ 制作工程", "Lost Garden"]
+    },
+    "aiManga": {
+      "headline": "AIで漫画は作れるか",
+      "keywords": ["AI漫画", "AI漫画 作り方", "生成AI 漫画", "AIマンガ", "AI 漫画 生成", "Lost Garden"]
+    },
+    "aiAnimeGenerator": {
+      "headline": "AIアニメ生成ツールが本当に出力するもの",
+      "keywords": ["AIアニメ 生成", "アニメ 生成AI", "AI アニメ 作成 ツール", "テキスト から アニメ", "アニメ 動画 生成 AI", "Lost Garden"]
+    },
+    "aiAnimeVoiceAndSound": {
+      "headline": "アニメのAI音声と音",
+      "keywords": ["AI 音声 アニメ", "AI 声優 アニメ", "AI 作曲 アニメ", "アニメ 効果音 AI", "AI ボイス 生成", "Lost Garden"]
+    },
+    "howToTellIfAnimeIsAi": {
+      "headline": "AIで作られたアニメの見分け方",
+      "keywords": ["AIアニメ 見分け方", "AI生成 アニメ 特徴", "このアニメ AI", "AI アニメ 判別", "AI 動画 見抜く", "Lost Garden"]
+    },
+    "makingOfEpisodeOne": {
+      "headline": "Lost Garden 第1話メイキング",
+      "keywords": ["Lost Garden メイキング", "AIアニメ 制作 裏側", "AIアニメ 制作期間", "AIアニメ 制作過程", "Lost Garden 第1話", "Frank Houbre"]
+    },
+    "canOnePersonMakeAnAnime": {
+      "headline": "1人でアニメは作れるか",
+      "keywords": ["一人 アニメ 制作", "個人 アニメ 制作", "自分で アニメ 作る", "アニメ 一人で 作る", "個人制作 アニメ AI", "Lost Garden"]
     }
   },
   "cookies": {

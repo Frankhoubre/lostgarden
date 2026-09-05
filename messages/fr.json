@@ -57,6 +57,30 @@
     "privacy": {
       "title": "Politique de confidentialité | Lost Garden",
       "description": "Comment Lost Garden collecte et utilise vos données, cookies, authentification Firebase et vos droits RGPD."
+    },
+    "aiManga": {
+      "title": "L'IA peut-elle créer un manga ? Ce qui marche et où ça casse (2026)",
+      "description": "L'IA dessine une page de manga convaincante en quelques secondes et ne tient toujours pas un chapitre. Ce que les character sheets et le storyboard d'un animé IA apprennent sur le manga généré."
+    },
+    "aiAnimeGenerator": {
+      "title": "Générateurs d'animé IA : ce qu'ils produisent vraiment",
+      "description": "Les générateurs font des clips, pas des épisodes. Les trois familles de produits, ce qu'un épisode d'animé IA de 17 minutes a réellement utilisé, et la seule question à poser avant de s'abonner."
+    },
+    "aiAnimeVoiceAndSound": {
+      "title": "Voix et son par IA dans un animé : comment Lost Garden a été fait",
+      "description": "Le personnage principal n'a pas de voix. Comment les sons d'armure, les répliques en voix IA et la musique générée de l'épisode 1 ont été faits, et ce que l'audio IA rate encore."
+    },
+    "howToTellIfAnimeIsAi": {
+      "title": "Comment reconnaître un animé fait avec l'IA (2026)",
+      "description": "Les signes qui trahissent encore un animé IA, ceux qui ne marchent plus, et pourquoi la réponse fiable est au générique. Par quelqu'un qui a passé un an à les cacher."
+    },
+    "makingOfEpisodeOne": {
+      "title": "Making-of de Lost Garden épisode 1 : un an seul sur 17 minutes",
+      "description": "Comment l'épisode 1 a été fait : le monde de surface coupé, un chevalier conçu pour survivre aux outils, l'ordre des opérations, et où est vraiment passée l'année."
+    },
+    "canOnePersonMakeAnAnime": {
+      "title": "Une seule personne peut-elle faire un animé ? Ce qu'il faut vraiment",
+      "description": "Oui, et voici l'épisode fini. Quels métiers de studio l'IA couvre maintenant, lesquels restent à faire soi-même, et ce que coûte en mois un animé fait seul."
     }
   },
   "episodeOne": {
@@ -325,6 +349,30 @@
     "aiAnimeVsTraditional": {
       "headline": "Animé IA contre animation traditionnelle",
       "keywords": ["animé IA contre animation traditionnelle", "IA remplacer animateurs", "coût animation IA", "animation IA ou dessin à la main", "pipeline animation IA", "Lost Garden"]
+    },
+    "aiManga": {
+      "headline": "L'IA peut-elle créer un manga ?",
+      "keywords": ["manga IA", "manga créé par IA", "manga généré par IA", "faire un manga avec l'IA", "générateur de manga IA", "Lost Garden"]
+    },
+    "aiAnimeGenerator": {
+      "headline": "Générateurs d'animé IA : ce qu'ils produisent vraiment",
+      "keywords": ["générateur d'animé IA", "générateur anime IA", "créer un animé avec l'IA", "texte vers anime", "générateur vidéo anime", "Lost Garden"]
+    },
+    "aiAnimeVoiceAndSound": {
+      "headline": "Voix et son par IA dans un animé",
+      "keywords": ["voix IA animé", "doublage IA anime", "musique IA animé", "sound design animé IA", "générateur de voix anime", "Lost Garden"]
+    },
+    "howToTellIfAnimeIsAi": {
+      "headline": "Comment reconnaître un animé fait avec l'IA",
+      "keywords": ["reconnaître un animé IA", "animé généré par IA signes", "cet animé est-il fait par IA", "détecter animation IA", "Lost Garden"]
+    },
+    "makingOfEpisodeOne": {
+      "headline": "Le making-of de l'épisode 1 de Lost Garden",
+      "keywords": ["Lost Garden making-of", "coulisses animé IA", "combien de temps pour faire un animé IA", "production animé IA", "Lost Garden épisode 1", "Frank Houbre"]
+    },
+    "canOnePersonMakeAnAnime": {
+      "headline": "Une seule personne peut-elle faire un animé ?",
+      "keywords": ["faire un animé seul", "créer son propre animé", "animé solo", "faire un anime tout seul", "studio d'animation d'une personne", "Lost Garden"]
     }
   },
   "cookies": {

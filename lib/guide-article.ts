@@ -15,4 +15,10 @@ export type GuideSlug =
   | "/how-to-make-ai-anime"
   | "/ai-character-consistency"
   | "/is-ai-anime-real-anime"
-  | "/ai-anime-vs-traditional-animation";
+  | "/ai-anime-vs-traditional-animation"
+  | "/ai-manga"
+  | "/ai-anime-generator"
+  | "/ai-anime-voice-and-sound"
+  | "/how-to-tell-if-anime-is-ai"
+  | "/making-of-episode-1"
+  | "/can-one-person-make-an-anime";

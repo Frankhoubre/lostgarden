@@ -57,6 +57,30 @@
     "privacy": {
       "title": "Privacy Policy | Lost Garden",
       "description": "How Lost Garden collects and uses your data, cookies, Firebase auth, and your GDPR rights."
+    },
+    "aiManga": {
+      "title": "Can AI Make a Manga? What Works and Where It Breaks (2026)",
+      "description": "AI draws a convincing manga page in seconds and still cannot hold a chapter. What the character sheets and storyboard of an AI anime episode teach about generated manga."
+    },
+    "aiAnimeGenerator": {
+      "title": "AI Anime Generators: What They Actually Produce",
+      "description": "Generators make clips, not episodes. The three kinds of product, what a 17 minute AI anime episode really used, and the one question to ask before you subscribe."
+    },
+    "aiAnimeVoiceAndSound": {
+      "title": "AI Voices and Sound in Anime: How Lost Garden Was Made",
+      "description": "The main character has no voice. How the armour sounds, the AI voice lines and the generated score of Episode One were made, and what AI audio still does badly."
+    },
+    "howToTellIfAnimeIsAi": {
+      "title": "How to Tell If an Anime Was Made With AI (2026)",
+      "description": "The signs that still give AI anime away, the ones that no longer work, and why the reliable answer is in the credits. Written by someone who spent a year hiding them."
+    },
+    "makingOfEpisodeOne": {
+      "title": "Making of Lost Garden Episode 1: A Year Alone on 17 Minutes",
+      "description": "How Episode One was made: the surface world that got cut, a knight designed to survive the tools, the order of operations, and where most of the year actually went."
+    },
+    "canOnePersonMakeAnAnime": {
+      "title": "Can One Person Make an Anime? What It Really Takes",
+      "description": "Yes, and here is the finished episode. Which studio jobs AI now covers, which ones you still have to do yourself, and what making an anime alone costs in months."
     }
   },
   "episodeOne": {
@@ -323,6 +347,30 @@
     "aiAnimeVsTraditional": {
       "headline": "AI anime vs traditional animation",
       "keywords": ["AI anime vs traditional animation", "AI animation vs hand drawn", "will AI replace animators", "AI animation cost", "AI animation pipeline", "Lost Garden"]
+    },
+    "aiManga": {
+      "headline": "Can AI make a manga?",
+      "keywords": ["AI manga", "AI generated manga", "make manga with AI", "AI manga generator", "AI comic", "Lost Garden"]
+    },
+    "aiAnimeGenerator": {
+      "headline": "AI anime generators: what they really produce",
+      "keywords": ["AI anime generator", "anime AI generator", "text to anime", "anime video generator", "AI anime maker", "Lost Garden"]
+    },
+    "aiAnimeVoiceAndSound": {
+      "headline": "AI voices and sound in anime",
+      "keywords": ["AI anime voice", "AI voice acting anime", "AI anime music", "anime sound design AI", "AI voice generator anime", "Lost Garden"]
+    },
+    "howToTellIfAnimeIsAi": {
+      "headline": "How to tell if an anime was made with AI",
+      "keywords": ["how to tell if anime is AI", "AI generated anime signs", "is this anime AI", "AI anime detection", "spot AI animation", "Lost Garden"]
+    },
+    "makingOfEpisodeOne": {
+      "headline": "Making of Lost Garden Episode One",
+      "keywords": ["Lost Garden making of", "AI anime behind the scenes", "how long to make an AI anime", "AI anime production", "Lost Garden episode 1", "Frank Houbre"]
+    },
+    "canOnePersonMakeAnAnime": {
+      "headline": "Can one person make an anime?",
+      "keywords": ["can one person make an anime", "solo anime production", "make your own anime", "one person anime studio", "make anime alone", "Lost Garden"]
     }
   },
   "cookies": {

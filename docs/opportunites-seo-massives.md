@@ -125,6 +125,26 @@ Ce qui reste à faire hors du code, par Frank :
 - passer la redirection non-www vers www de 307 à 301, dans la configuration du domaine Vercel, le code n'y a pas accès
 - dans Search Console, ajouter la propriété `www.lostgarden.world` si elle n'existe pas, et y resoumettre `https://www.lostgarden.world/sitemap.xml`
 
+## Six articles ajoutés le 5 septembre 2026
+
+Six guides, chacun dans les quatre langues, chacun sur une intention de recherche que le site ne servait pas. Le tableau sert de carte anti-cannibalisation : avant d'écrire une page, vérifier qu'elle ne tombe dans aucune de ces lignes ni dans celles des cinq articles précédents.
+
+| Page | Intention visée | Requêtes type | Se distingue de |
+|---|---|---|---|
+| `/ai-manga` | Manga créé par IA, la moitié immobile du problème | manga IA, AI manga, AI漫画, AI 웹툰 | tout le reste, qui parle d'animation |
+| `/ai-anime-generator` | Les produits « générateur », ce qu'ils sortent | générateur d'animé IA, AI anime generator, AIアニメ 生成 | `/how-to-make-ai-anime`, qui décrit le pipeline, pas la catégorie de produits |
+| `/ai-anime-voice-and-sound` | Voix, son et musique par IA dans un animé | voix IA animé, AI anime voice, AI 声優 アニメ | rien d'autre ne parle du son |
+| `/how-to-tell-if-anime-is-ai` | Reconnaître un animé fait avec l'IA | reconnaître un animé IA, how to tell if anime is AI, AIアニメ 見分け方 | `/is-ai-anime-real-anime`, qui traite la définition, pas la détection |
+| `/making-of-episode-1` | Le récit d'une production, avec les faits vérifiables | Lost Garden making-of, AI anime behind the scenes | `/how-to-make-ai-anime`, qui est un guide générique |
+| `/can-one-person-make-an-anime` | Les métiers, ce que l'IA couvre, ce qui reste | faire un animé seul, can one person make an anime, 一人 アニメ 制作 | `/ai-anime-vs-traditional-animation`, qui compare les pipelines |
+
+Ce qui a été respecté pour chaque texte :
+
+- aucun chiffre qui n'existe pas déjà dans le dépôt. Dix-sept minutes, environ un an, 65 000 vues, le 29 mai 2026, les deux festivals, les outils nommés dans `/process` et `/vision`. Rien sur le nombre de plans, rien sur le coût, parce que ces chiffres ne sont documentés nulle part
+- le japonais et le coréen ne sont pas des traductions mot à mot : `/ai-manga` vise AI漫画 au Japon et AI 웹툰 en Corée, et les mots-clés de chaque langue sont ceux que les gens tapent dans cette langue
+- chaque page renvoie vers deux ou trois autres du cluster, et les deux guides les plus lus (`/how-to-make-ai-anime`, `/ai-character-consistency`) renvoient vers les nouveaux
+- `llms.txt` liste maintenant les onze articles, et deux faits périmés y ont été corrigés au passage, le nom Sol et la date du 2 juin
+
 ## Pas fait, et pourquoi
 
 **Le rendu statique des pages.** Le build sort toutes les routes en dynamique parce que `app/layout.tsx` appelle `headers()` pour poser `lang` sur `<html>`. Tant que c'est le cas, les pages restent en `private, no-store` et le cookie du proxy ne change rien au cache, le retirer seul ne servirait à rien. La solution propre selon la doc Next embarquée est de descendre le layout racine dans `app/[locale]/`, ce qui impose le drapeau expérimental `globalNotFound` pour la page 404. L'alternative est de figer `lang="en"` dans le HTML brut et de le corriger côté client, ce qui dégrade l'accessibilité des pages japonaise et coréenne. Aucune des deux ne se fait à l'aveugle dans une passe de corrections sûres. C'est le prochain chantier technique, et il vaut la peine : c'est ce qui ramènerait le TTFB sous 100 ms et rendrait le cookie du proxy inoffensif.

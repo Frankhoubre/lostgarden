@@ -17,8 +17,14 @@ import {
 
 /** Editorial pages listed on the blog index, newest intent first. */
 const ARTICLES = [
+  { path: "/making-of-episode-1", meta: "makingOfEpisodeOne" },
   { path: "/best-ai-anime", meta: "bestAiAnime" },
   { path: "/how-to-make-ai-anime", meta: "howToMakeAiAnime" },
+  { path: "/ai-anime-generator", meta: "aiAnimeGenerator" },
+  { path: "/can-one-person-make-an-anime", meta: "canOnePersonMakeAnAnime" },
+  { path: "/ai-manga", meta: "aiManga" },
+  { path: "/ai-anime-voice-and-sound", meta: "aiAnimeVoiceAndSound" },
+  { path: "/how-to-tell-if-anime-is-ai", meta: "howToTellIfAnimeIsAi" },
   { path: "/ai-character-consistency", meta: "aiCharacterConsistency" },
   { path: "/is-ai-anime-real-anime", meta: "isAiAnimeRealAnime" },
   {
