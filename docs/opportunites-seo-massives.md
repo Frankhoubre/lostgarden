@@ -29,7 +29,7 @@ Conséquences vérifiées sur la page servie à `www.lostgarden.world/en` :
 - `robots.txt` annonce `Host: https://lostgarden.world` et `Sitemap: https://lostgarden.world/sitemap.xml`
 - le sitemap contient 52 URL, dont **0 en www**, et chaque entrée porte en plus cinq annotations `xhtml:link` vers des URL qui redirigent
 
-Pourquoi c'est grave, et pas juste inélégant : Google exige que les cibles `hreflang` renvoient un 200 et soient auto-canoniques. Une annotation qui redirige est couramment ignorée, et une annotation ignorée casse la réciprocité, donc **le cluster entier**. Or les quatre langues avec hreflang complet sont décrites dans la note de stratégie comme l'avantage structurel numéro un du site. En l'état il est probablement annulé. Le japonais et le coréen, l'angle mort du marché, ne peuvent pas fonctionner tant que ce n'est pas réglé.
+Pourquoi c'est grave, et pas juste inélégant : Google demande que les cibles `hreflang` soient les URL canoniques. Une URL qui redirige n'est pas canonique, et une annotation vers une telle URL est couramment ignorée, et une annotation ignorée casse la réciprocité, donc **le cluster entier**. Or les quatre langues avec hreflang complet sont décrites dans la note de stratégie comme l'avantage structurel numéro un du site. En l'état il est probablement annulé. Le japonais et le coréen, l'angle mort du marché, ne peuvent pas fonctionner tant que ce n'est pas réglé.
 
 Deuxième détail : la redirection non-www vers www est un **307**, temporaire. Une consolidation de domaine se fait en 301.
 
@@ -57,7 +57,7 @@ Mesuré sur `https://www.lostgarden.world/en` :
 ```
 cache-control: private, no-cache, no-store, max-age=0, must-revalidate
 x-vercel-cache: MISS
-ttfb: 0,93 s puis 0,61 s
+ttfb: entre 0,24 s et 0,93 s selon les requêtes, jamais servi depuis le cache
 37 en-têtes Link rel=preload as=font
 182 Ko de HTML
 ```
@@ -66,7 +66,7 @@ Deux causes distinctes.
 
 **Le cookie.** `proxy.ts` pose `lostgarden-locale` sur *chaque* réponse, y compris celles servies aux robots. Une réponse qui pose un cookie devient `private` et ne peut pas être mise en cache au bord. Résultat : `MISS` permanent, rendu serveur à chaque requête, TTFB entre 0,6 et 0,9 s. Le contenu est pourtant strictement statique. Le correctif est de ne poser le cookie que quand la locale vient d'une négociation ou d'un changement explicite, c'est à dire sur les branches de redirection, et pas sur la branche `NextResponse.next()` où la locale est déjà dans l'URL.
 
-**Les polices.** `app/layout.tsx` charge `Zen_Kaku_Gothic_New` en trois graisses comme police de corps globale. C'est une police japonaise, que Next découpe en un grand nombre de sous-ensembles unicode et précharge tous. D'où 37 `preload`, sur toutes les pages et dans toutes les langues, y compris l'anglais qui n'en a pas besoin. C'est le poste le plus lourd du LCP. Passer la police secondaire en `preload: false`, ou ne la charger réellement que sur `ja`, coûte peu et se voit immédiatement dans les Core Web Vitals.
+**Les polices.** `app/layout.tsx` charge `Zen_Kaku_Gothic_New` en trois graisses comme police de corps globale. C'est une police japonaise, que Next découpe en un grand nombre de sous-ensembles unicode et précharge tous. D'où 37 `preload` pour 459 Ko de polices, sur toutes les pages et dans toutes les langues, y compris l'anglais qui n'en a pas besoin. Le CSS livré contient 726 déclarations `@font-face` pour cette seule famille. C'est le poste le plus lourd du LCP. Passer la police secondaire en `preload: false`, ou ne la charger réellement que sur `ja`, coûte peu et se voit immédiatement dans les Core Web Vitals.
 
 Ces deux points comptent au delà du confort de lecture : la vitesse de réponse conditionne le rythme de crawl, et un domaine jeune a besoin d'être crawlé souvent pour que les nouveaux articles sortent vite.
 
@@ -80,9 +80,12 @@ Sur ce terrain le site ne se bat pas contre des SaaS, il se bat contre le vide. 
 
 Mais le balisage ne permet pas encore d'y aller. Sur `/episode-1`, le `VideoObject` contient `name`, `description`, `thumbnailUrl`, `uploadDate`, `contentUrl`, `embedUrl`, `inLanguage`, `creator`, `partOfSeries`, `keywords`. Il manque :
 
-- **`duration`**, sans quoi le résultat vidéo enrichi ne s'affiche pas. C'est le champ qui débloque la fonctionnalité SERP la plus utile pour cette intention
+- `duration`, recommandé par Google et affiché dans le résultat. Précision utile : ce n'est pas un champ requis. Les trois requis, `name`, `thumbnailUrl`, `uploadDate`, sont présents, la page est donc déjà éligible au résultat vidéo. `duration` améliore le résultat, il ne le débloque pas
 - `hasPart` avec des `Clip`, les « moments clés », qui prennent une place verticale considérable dans les résultats et que personne ne fait sur ce sujet
 - `interactionStatistic` avec le nombre de vues, qui est un signal de popularité lisible
+- une vignette propre : `thumbnailUrl` pointe vers l'`og-image.png` partagée par tout le site, et sur l'hôte non-www
+
+Limite honnête : pour une vidéo hébergée sur YouTube, la page YouTube elle-même est en concurrence directe sur la requête, et elle gagne souvent. La page `/episode-1` n'a de sens que si elle apporte ce que YouTube n'a pas : le contexte de la série, les chapitres, les quatre langues, les liens vers les fiches.
 
 Et sur la page d'accueil, le noeud `TVSeries` ne référence pas l'épisode : ni `episode`, ni `containsSeason`, ni `trailer`. Le graphe se coupe exactement là où il devrait mener au contenu. Une page `/episode-1` typée `TVEpisode` et rattachée au `@id` de la série resserre tout l'ensemble.
 
@@ -92,7 +95,7 @@ Et sur la page d'accueil, le noeud `TVSeries` ne référence pas l'épisode : ni
 
 Ce qui manque pour un panneau de connaissance complet, par ordre de coût croissant :
 
-- le noeud `Person` de Frank dans le JSON-LD n'a pas d'`@id`, il n'est donc pas réconcilié avec le `founder` de l'`Organization`. Deux personnes distinctes du point de vue du graphe. Correction triviale
+- le noeud `Person` de Frank apparaît deux fois dans le JSON-LD, en `creator` de la série et en `founder` de l'organisation, sans `@id`. Les deux portent le même `sameAs` Wikidata, ce qui suffit à Google pour les réconcilier. Un `@id` commun est plus propre, ce n'est pas un défaut
 - aucune page Wikipédia n'est liée à `Q140266760`. C'est le seul élément qui manque vraiment, et c'est celui qui déclenche le panneau. Les sélections en festival et la couverture presse sont le début d'un dossier de notoriété, ce n'est pas encore suffisant, mais c'est la cible à garder en tête
 - les identifiants ANN dès que la fiche est validée
 
