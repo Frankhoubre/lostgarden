@@ -11,8 +11,8 @@ const LOGO_SRC = path.join(ROOT, "public/images/logo-lost-garden.png");
 const EPISODE = {
   youtube: "https://youtu.be/eZ_JlaLDJ-8",
   tiktok: "https://www.tiktok.com/@frankhoubre/video/7647885636711501088",
-  site: "https://lostgarden.world",
-  press: "https://lostgarden.world/fr/press",
+  site: "https://www.lostgarden.world",
+  press: "https://www.lostgarden.world/fr/press",
   contact: "lostgarden.world@gmail.com",
 };
 

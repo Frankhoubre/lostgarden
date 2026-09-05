@@ -107,6 +107,28 @@ Au moins trois articles signés Frank sur HackerNoon parlent nommément de Lost 
 
 Même logique pour la description YouTube, déjà notée dans l'autre document et toujours vraie.
 
+## Fait le 5 septembre 2026, dans cette branche
+
+Vérifié sur un build de production servi en local avant d'être poussé.
+
+- `SITE_URL` aligné sur `https://www.lostgarden.world`, l'hôte que Vercel sert réellement. Canonical, hreflang, `og:url`, `robots.txt`, sitemap et JSON-LD sortent maintenant tous en www : 52 URL sur 52 dans le sitemap
+- même correction dans `public/llms.txt`, dans `scripts/build-press-assets.mjs` et dans les fichiers texte du kit presse
+- une date par page dans le sitemap, dérivée de l'historique git de chaque contenu. Trois dates distinctes au lieu d'une seule : le 3 juin pour l'épisode et les pages légales, le 8 juin pour le kit presse, le 4 septembre pour tout ce que la correction Lanterne et les nouveaux articles ont touché. À mettre à jour dans `SITEMAP_HINTS` quand une page change
+- `preload: false` sur Zen Kaku Gothic New. Préchargements de polices par page : 37 avant, 2 après, les deux restants sont les graisses Oswald latines qui servent au titre
+- le graphe JSON-LD ne porte plus qu'un seul noeud `Person` pour Frank, avec un `@id`, référencé par `Organization.founder`, `TVSeries.creator` et `VideoObject.creator`
+- `TVSeries` référence maintenant l'épisode via un noeud `TVEpisode` localisé, avec numéro, durée, date, URL de la page de l'épisode et lien vers le `VideoObject`
+- `duration: PT17M` sur le `VideoObject` et sur l'épisode, lu depuis `EPISODE_ONE.duration`
+
+Ce qui reste à faire hors du code, par Frank :
+
+- **vérifier dans Vercel que la variable `NEXT_PUBLIC_SITE_URL` n'est pas définie sur le non-www.** Si elle l'est, elle écrase la valeur du code et rien ne change en production
+- passer la redirection non-www vers www de 307 à 301, dans la configuration du domaine Vercel, le code n'y a pas accès
+- dans Search Console, ajouter la propriété `www.lostgarden.world` si elle n'existe pas, et y resoumettre `https://www.lostgarden.world/sitemap.xml`
+
+## Pas fait, et pourquoi
+
+**Le rendu statique des pages.** Le build sort toutes les routes en dynamique parce que `app/layout.tsx` appelle `headers()` pour poser `lang` sur `<html>`. Tant que c'est le cas, les pages restent en `private, no-store` et le cookie du proxy ne change rien au cache, le retirer seul ne servirait à rien. La solution propre selon la doc Next embarquée est de descendre le layout racine dans `app/[locale]/`, ce qui impose le drapeau expérimental `globalNotFound` pour la page 404. L'alternative est de figer `lang="en"` dans le HTML brut et de le corriger côté client, ce qui dégrade l'accessibilité des pages japonaise et coréenne. Aucune des deux ne se fait à l'aveugle dans une passe de corrections sûres. C'est le prochain chantier technique, et il vaut la peine : c'est ce qui ramènerait le TTFB sous 100 ms et rendrait le cookie du proxy inoffensif.
+
 ## Dans quel ordre
 
 1. Choisir le domaine canonique et aligner `SITE_URL`, puis resoumettre le sitemap. Rien d'autre ne compte tant que ce n'est pas fait

@@ -14,7 +14,7 @@ Le projet ne repose pas sur une génération automatique. L'IA intervient comme 
 
 Avec Lost Garden, Frank Houbre explore une nouvelle manière de produire de l'animation indépendante : plus légère, plus directe, mais toujours fondée sur une vision d'auteur.
 
-Frank Houbre développe également ScreenWeaver, un outil pensé pour aider les auteurs et créateurs audiovisuels à passer plus naturellement du scénario à la visualisation de leurs scènes. Cette recherche autour des nouveaux workflows créatifs prolonge directement l'expérience menée avec Lost Garden.
+Toute la réalisation s'appuie sur ScreenWeaver, l'outil de création conçu par Frank Houbre. Le scénario y a été rédigé à la main, dans un véritable environnement d'écriture qui a offert un grand confort de travail et garde le script comme source de vérité. Le storyboard a ensuite été intégralement généré par ScreenWeaver, scène par scène, à partir du scénario. Enfin, l'ensemble des plans a été produit via son interface de workflow et de production. Cette recherche autour des nouveaux workflows créatifs prolonge directement l'expérience menée avec Lost Garden.
 
 "Lost Garden n'est pas né d'un bouton magique. C'est un projet écrit, dirigé, monté et construit étape par étape. L'IA m'a permis de produire seul une vision qui aurait normalement demandé une équipe entière."
 — Frank Houbre
@@ -23,5 +23,5 @@ Frank Houbre développe également ScreenWeaver, un outil pensé pour aider les 
 — Frank Houbre
 
 ---
-Press kit: https://lostgarden.world/fr/press
+Press kit: https://www.lostgarden.world/fr/press
 Contact: lostgarden.world@gmail.com

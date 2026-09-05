@@ -11,10 +11,17 @@ const display = Oswald({
   weight: ["500", "600", "700"],
 });
 
+/**
+ * Japanese family, sliced by Google Fonts into dozens of unicode-range
+ * files per weight. Preloading pushed 37 font files (about 460 KB) into
+ * the head of every page in every language. With preload off the browser
+ * fetches only the slices a given page actually uses.
+ */
 const body = Zen_Kaku_Gothic_New({
   variable: "--font-zen",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+  preload: false,
 });
 
 export const metadata: Metadata = {

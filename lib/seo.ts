@@ -6,8 +6,14 @@ import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { CREATOR_WIKIDATA, DATABASE_LINKS, SOCIAL_LINKS } from "@/lib/social";
 import type { Dictionary } from "@/lib/i18n/types";
 
+/**
+ * Canonical origin. Vercel serves the site on the `www` host and
+ * 307-redirects the bare domain to it, so every canonical, hreflang,
+ * sitemap and JSON-LD URL must be built on `www` as well. A canonical or
+ * hreflang target that redirects is not treated as canonical by Google.
+ */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lostgarden.world";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lostgarden.world";
 
 export const SITE = {
   name: "Lost Garden",
@@ -47,23 +53,28 @@ type SitemapFrequency =
   | "yearly"
   | "never";
 
+/**
+ * `lastModified` is the date the page content last changed, per page.
+ * Bump it when you edit that page's copy. A single shared build date on
+ * every entry teaches Google to ignore the field entirely.
+ */
 const SITEMAP_HINTS: Record<
   IndexablePathSuffix,
-  { changeFrequency: SitemapFrequency; priority: number }
+  { changeFrequency: SitemapFrequency; priority: number; lastModified: string }
 > = {
-  "/": { changeFrequency: "weekly", priority: 1 },
-  "/episode-1": { changeFrequency: "weekly", priority: 0.9 },
-  "/press": { changeFrequency: "monthly", priority: 0.8 },
-  "/vision": { changeFrequency: "monthly", priority: 0.7 },
-  "/process": { changeFrequency: "monthly", priority: 0.7 },
-  "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/blog": { changeFrequency: "weekly", priority: 0.7 },
-  "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7 },
-  "/is-ai-anime-real-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/ai-anime-vs-traditional-animation": { changeFrequency: "monthly", priority: 0.7 },
-  "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
-  "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
+  "/": { changeFrequency: "weekly", priority: 1, lastModified: "2026-09-04" },
+  "/episode-1": { changeFrequency: "weekly", priority: 0.9, lastModified: "2026-06-03" },
+  "/press": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-06-08" },
+  "/vision": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/process": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/blog": { changeFrequency: "weekly", priority: 0.7, lastModified: "2026-09-04" },
+  "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/is-ai-anime-real-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/ai-anime-vs-traditional-animation": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/legal-notice": { changeFrequency: "yearly", priority: 0.2, lastModified: "2026-06-03" },
+  "/privacy-policy": { changeFrequency: "yearly", priority: 0.2, lastModified: "2026-06-03" },
 };
 
 type BuildPageMetadataOptions = {
@@ -203,12 +214,9 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         },
         email: SITE.email,
         sameAs: Object.values(SOCIAL_LINKS),
-        founder: {
-          "@type": "Person",
-          name: SITE.creator,
-          sameAs: [CREATOR_WIKIDATA],
-        },
+        founder: { "@id": CREATOR_ID },
       },
+      creatorJsonLd(),
       {
         "@type": "TVSeries",
         "@id": `${SITE.url}/#series`,
@@ -224,13 +232,44 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
           ...Object.values(SOCIAL_LINKS),
           ...Object.values(DATABASE_LINKS),
         ],
-        creator: {
-          "@type": "Person",
-          name: SITE.creator,
-          sameAs: [CREATOR_WIKIDATA],
-        },
+        creator: { "@id": CREATOR_ID },
+        episode: episodeJsonLd(locale, dict),
       },
     ],
+  };
+}
+
+const CREATOR_ID = `${SITE_URL}/#creator`;
+const EPISODE_ONE_ID = `${SITE_URL}/#episode-1`;
+const EPISODE_ONE_VIDEO_ID = `${SITE_URL}/#episode-1-video`;
+
+/** Single Person node shared by Organization.founder and TVSeries.creator. */
+function creatorJsonLd() {
+  return {
+    "@type": "Person",
+    "@id": CREATOR_ID,
+    name: SITE.creator,
+    url: SITE.url,
+    sameAs: [CREATOR_WIKIDATA],
+  };
+}
+
+/**
+ * Episode node embedded in the TVSeries graph so the series entity leads
+ * straight to the watchable content, in the visitor's language.
+ */
+function episodeJsonLd(locale: Locale, dict: Dictionary) {
+  return {
+    "@type": "TVEpisode",
+    "@id": EPISODE_ONE_ID,
+    name: dict.meta.episodeOnePublic.title,
+    episodeNumber: 1,
+    url: absoluteUrl(localePath(locale, "/episode-1")),
+    datePublished: EPISODE_ONE.publishedAt,
+    duration: EPISODE_ONE.duration,
+    inLanguage: schemaLanguages[locale],
+    partOfSeries: { "@id": `${SITE_URL}/#series` },
+    video: { "@id": EPISODE_ONE_VIDEO_ID },
   };
 }
 
@@ -386,17 +425,16 @@ export function episodeVideoJsonLd({
   return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
+    "@id": EPISODE_ONE_VIDEO_ID,
     name,
     description,
     thumbnailUrl: image,
     uploadDate: EPISODE_ONE.publishedAt,
+    duration: EPISODE_ONE.duration,
     contentUrl: EPISODE_ONE.watchUrl,
     embedUrl: EPISODE_ONE.embedUrl,
     inLanguage: schemaLanguages[locale],
-    creator: {
-      "@type": "Person",
-      name: SITE.creator,
-    },
+    creator: creatorJsonLd(),
     partOfSeries: { "@id": `${SITE.url}/#series` },
     keywords: [
       "AI anime",
@@ -415,7 +453,6 @@ export function getSitemapEntries(): Array<{
   priority: number;
   alternates: { languages: Record<string, string> };
 }> {
-  const lastModified = new Date();
   const entries: Array<{
     url: string;
     lastModified: Date;
@@ -429,7 +466,7 @@ export function getSitemapEntries(): Array<{
     for (const locale of locales) {
       entries.push({
         url: absoluteUrl(localePath(locale, pathSuffix)),
-        lastModified,
+        lastModified: new Date(hints.lastModified),
         changeFrequency: hints.changeFrequency,
         priority: hints.priority,
         alternates: { languages: localeHreflangAlternates(pathSuffix) },
