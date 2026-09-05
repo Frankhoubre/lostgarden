@@ -81,6 +81,46 @@
     "canOnePersonMakeAnAnime": {
       "title": "Une seule personne peut-elle faire un animé ? Ce qu'il faut vraiment",
       "description": "Oui, et voici l'épisode fini. Quels métiers de studio l'IA couvre maintenant, lesquels restent à faire soi-même, et ce que coûte en mois un animé fait seul."
+    },
+    "aiAnimeStoryboard": {
+      "title": "Storyboard d'animé IA : ce que le board décide (2026)",
+      "description": "Un storyboard généré, oui. Un film généré, non. Ce que le board doit décider avant qu'un seul plan existe, et comment celui de l'épisode 1 de Lost Garden a été construit à partir du scénario."
+    },
+    "aiAnimeBackgrounds": {
+      "title": "Décors d'animé IA : un seul monde, pas une moyenne",
+      "description": "Les décors générés sont superbes et n'appartiennent à personne. Comment le monde souterrain de Lost Garden a gardé une seule identité sur tout un épisode, avec une bible faite d'interdits."
+    },
+    "aiAnimeScript": {
+      "title": "Faut-il écrire un scénario d'animé avec l'IA ?",
+      "description": "L'IA écrit un scénario correct, et c'est le problème. Pourquoi Lost Garden est écrit à la main, où l'IA aide vraiment à écrire, et le seul test que chaque scène doit passer."
+    },
+    "aiAnimeCopyright": {
+      "title": "Droit d'auteur et animé IA : à qui ça appartient, ce qui est protégé",
+      "description": "Les parties écrites par un humain se protègent, les parties purement générées en général non. Comment un animé IA indépendant se construit pour que la réponse soit claire : archives, transparence, personnages originaux."
+    },
+    "historyOfAiAnime": {
+      "title": "Le premier animé IA : une courte histoire, 2023 à 2026",
+      "description": "Des décors IA dans un court de Netflix à une série diffusée puis à un épisode fait seul. Qui a fait le premier animé IA, avec les dates, et ce que chaque étape a réellement prouvé."
+    },
+    "animeStylePrompts": {
+      "title": "Prompts style animé : comment une production les écrit vraiment",
+      "description": "Pas de mots magiques. Comment les prompts de Lost Garden se construisent à partir de références, de décisions de caméra et d'interdits, pourquoi un prompt court tient mieux, et pourquoi nommer un studio est une mauvaise idée."
+    },
+    "editingAiAnime": {
+      "title": "Monter un animé IA : là où l'épisode se fabrique vraiment",
+      "description": "Les clips générés sont de la matière brute. Couper sur le mouvement, court sur les visages, couper vers ce qu'ils regardent, régénérer ou contourner : comment dix-sept minutes d'animation IA sont devenues un film."
+    },
+    "whyAiAnimeLooksBad": {
+      "title": "Pourquoi l'animé IA est moche, et les six remèdes",
+      "description": "C'est rarement le modèle. Pas d'histoire, le look moyen, des visages qui dérivent, un mouvement qui flotte, de la musique partout et pas de montage : six raisons, et ce qu'un épisode fini a fait pour chacune."
+    },
+    "aiFilmFestivalsAnimation": {
+      "title": "Festivals de films IA pour l'animation : ce qu'une sélection change",
+      "description": "Lost Garden a été sélectionné à Séoul et finaliste à Londres. Quels festivals acceptent l'animation IA, ce que la sélection a réellement changé, et comment candidater sans jeter les frais par les fenêtres."
+    },
+    "lostGardenStoryAndCharacters": {
+      "title": "Lost Garden : l'histoire, le monde et les personnages",
+      "description": "Un chevalier creux, une enfant qui fait pousser les fleurs, treize armures liées par un serment, et un monde sans ciel. De quoi parle Lost Garden et qui s'y trouve, sans dévoiler la fin."
     }
   },
   "episodeOne": {
@@ -373,6 +413,46 @@
     "canOnePersonMakeAnAnime": {
       "headline": "Une seule personne peut-elle faire un animé ?",
       "keywords": ["faire un animé seul", "créer son propre animé", "animé solo", "faire un anime tout seul", "studio d'animation d'une personne", "Lost Garden"]
+    },
+    "aiAnimeStoryboard": {
+      "headline": "Storyboard d'animé IA : ce que le board décide",
+      "keywords": ["storyboard IA", "storyboard animé IA", "générateur de storyboard IA", "storyboard avec l'IA", "Lost Garden"]
+    },
+    "aiAnimeBackgrounds": {
+      "headline": "Décors d'animé IA : un seul monde, pas une moyenne",
+      "keywords": ["décor animé IA", "générateur de décor anime", "environnement IA cohérent", "background anime IA", "Lost Garden"]
+    },
+    "aiAnimeScript": {
+      "headline": "Faut-il écrire un scénario d'animé avec l'IA ?",
+      "keywords": ["scénario animé IA", "écrire un scénario avec l'IA", "générateur de scénario anime", "histoire animé IA", "ScreenWeaver", "Lost Garden"]
+    },
+    "aiAnimeCopyright": {
+      "headline": "Droit d'auteur et animé IA : ce qui se protège",
+      "keywords": ["droit d'auteur animé IA", "copyright IA animation", "propriété animé généré par IA", "droits image IA", "Lost Garden"]
+    },
+    "historyOfAiAnime": {
+      "headline": "Le premier animé IA : une courte histoire",
+      "keywords": ["premier animé IA", "premier anime généré par IA", "histoire de l'animé IA", "chronologie animé IA", "Twins Hinahima", "Lost Garden"]
+    },
+    "animeStylePrompts": {
+      "headline": "Écrire un prompt style animé qui vous appartient",
+      "keywords": ["prompt style animé", "prompt anime IA", "guide prompt anime", "prompt dessin manga IA", "Lost Garden"]
+    },
+    "editingAiAnime": {
+      "headline": "Monter un animé IA : là où l'épisode se fabrique",
+      "keywords": ["montage animé IA", "monter une vidéo générée par IA", "montage animation IA", "couper vidéo IA", "Lost Garden"]
+    },
+    "whyAiAnimeLooksBad": {
+      "headline": "Pourquoi l'animé IA est moche, et les remèdes",
+      "keywords": ["pourquoi l'animé IA est moche", "animation IA bizarre", "animé IA problèmes", "animation IA uncanny", "Lost Garden"]
+    },
+    "aiFilmFestivalsAnimation": {
+      "headline": "Les festivals de films IA qui acceptent l'animation",
+      "keywords": ["festival film IA", "festival animation IA", "soumettre un film IA à un festival", "Seoul International AI Film Festival", "AI London Festival", "Lost Garden"]
+    },
+    "lostGardenStoryAndCharacters": {
+      "headline": "Lost Garden : l'histoire, le monde et les personnages",
+      "keywords": ["Lost Garden animé", "Lost Garden personnages", "Lanterne chevalier", "Lost Garden histoire", "Treize Chevaliers", "Frank Houbre"]
     }
   },
   "cookies": {

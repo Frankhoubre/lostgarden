@@ -6,7 +6,6 @@ import { PressGallery } from "@/components/press/PressGallery";
 import { SectionTitle } from "@/components/SectionTitle";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/types";
-import { localePath } from "@/lib/i18n/navigation";
 import {
   PRESS_ASSET_FILES,
   PRESS_KIT,

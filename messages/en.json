@@ -81,6 +81,46 @@
     "canOnePersonMakeAnAnime": {
       "title": "Can One Person Make an Anime? What It Really Takes",
       "description": "Yes, and here is the finished episode. Which studio jobs AI now covers, which ones you still have to do yourself, and what making an anime alone costs in months."
+    },
+    "aiAnimeStoryboard": {
+      "title": "AI Anime Storyboards: What the Board Decides (2026)",
+      "description": "A generated storyboard is fine, a generated film is not. What the board must decide before any shot exists, and how the board of Lost Garden Episode One was built from the script."
+    },
+    "aiAnimeBackgrounds": {
+      "title": "AI Anime Backgrounds: One World, Not an Average",
+      "description": "Generated environments look great and belong to nobody. How the underground world of Lost Garden was kept to one identity across an episode, with a bible made of forbidden things."
+    },
+    "aiAnimeScript": {
+      "title": "Should You Write an Anime Script With AI?",
+      "description": "AI writes a competent script, and that is the problem. Why Lost Garden is written by hand, where AI genuinely helps in writing, and the one test every scene has to pass."
+    },
+    "aiAnimeCopyright": {
+      "title": "AI Anime Copyright: Who Owns It, What Is Protected",
+      "description": "The human-authored parts can be protected, the purely generated ones generally cannot. How an independent AI anime is built so the answer is clear, with records, disclosure and original characters."
+    },
+    "historyOfAiAnime": {
+      "title": "The First AI Anime: A Short History, 2023 to 2026",
+      "description": "From AI backgrounds in a Netflix short to a broadcast series and a solo episode. Who made the first AI anime, with dates, and what each step actually proved."
+    },
+    "animeStylePrompts": {
+      "title": "Anime Style Prompts: How a Production Actually Writes Them",
+      "description": "No magic words. How prompts are built on Lost Garden from references, camera decisions and forbidden things, why shorter prompts hold better, and why naming a studio is a bad idea."
+    },
+    "editingAiAnime": {
+      "title": "Editing AI Anime: Where the Episode Is Actually Made",
+      "description": "Generated clips are raw material. Cut on movement, short on faces, cut to what they see, regenerate or cut around: how seventeen minutes of AI animation were edited into a film."
+    },
+    "whyAiAnimeLooksBad": {
+      "title": "Why AI Anime Looks Bad, and the Six Fixes",
+      "description": "It is rarely the model. No story, the average look, drifting faces, floating motion, music under everything and no edit: the six reasons AI anime looks bad and what a finished episode did about each."
+    },
+    "aiFilmFestivalsAnimation": {
+      "title": "AI Film Festivals for Animation: What Selection Does",
+      "description": "Lost Garden was selected in Seoul and reached the final in London. Which festivals accept AI animation, what selection actually changed, and how to submit without wasting the fee."
+    },
+    "lostGardenStoryAndCharacters": {
+      "title": "Lost Garden: Story, World and Characters",
+      "description": "A hollow knight, a child who makes flowers grow, thirteen armours bound by an oath, and a world with no sky. What Lost Garden is about and who is in it, without spoiling the ending."
     }
   },
   "episodeOne": {
@@ -371,6 +411,46 @@
     "canOnePersonMakeAnAnime": {
       "headline": "Can one person make an anime?",
       "keywords": ["can one person make an anime", "solo anime production", "make your own anime", "one person anime studio", "make anime alone", "Lost Garden"]
+    },
+    "aiAnimeStoryboard": {
+      "headline": "AI anime storyboards: what the board decides",
+      "keywords": ["AI storyboard", "AI anime storyboard", "storyboard generator AI", "anime storyboard with AI", "Lost Garden"]
+    },
+    "aiAnimeBackgrounds": {
+      "headline": "AI anime backgrounds: one world, not an average",
+      "keywords": ["AI anime background", "anime background generator", "AI environment generation", "consistent AI backgrounds", "Lost Garden"]
+    },
+    "aiAnimeScript": {
+      "headline": "Should you write an anime script with AI?",
+      "keywords": ["AI anime script", "write anime script with AI", "AI screenplay generator", "anime story AI", "ScreenWeaver", "Lost Garden"]
+    },
+    "aiAnimeCopyright": {
+      "headline": "Copyright and AI anime: what can be protected",
+      "keywords": ["AI anime copyright", "can you copyright AI anime", "AI generated anime ownership", "AI animation copyright", "Lost Garden"]
+    },
+    "historyOfAiAnime": {
+      "headline": "The first AI anime: a short history",
+      "keywords": ["first AI anime", "first AI generated anime", "history of AI anime", "AI anime timeline", "Twins Hinahima", "The Dog and the Boy", "Lost Garden"]
+    },
+    "animeStylePrompts": {
+      "headline": "How to prompt an anime style that is yours",
+      "keywords": ["anime style prompt", "AI anime prompt", "anime prompt guide", "prompt for anime art", "Lost Garden"]
+    },
+    "editingAiAnime": {
+      "headline": "Editing AI anime: where the episode is made",
+      "keywords": ["editing AI anime", "how to edit AI generated video", "AI animation editing", "cut AI video", "Lost Garden"]
+    },
+    "whyAiAnimeLooksBad": {
+      "headline": "Why AI anime looks bad, and the fixes",
+      "keywords": ["why does AI anime look bad", "AI anime looks weird", "AI animation uncanny", "AI anime problems", "Lost Garden"]
+    },
+    "aiFilmFestivalsAnimation": {
+      "headline": "AI film festivals that accept animation",
+      "keywords": ["AI film festival", "AI animation festival", "submit AI film to festival", "Seoul International AI Film Festival", "AI London Festival", "Lost Garden"]
+    },
+    "lostGardenStoryAndCharacters": {
+      "headline": "Lost Garden: story, world and characters",
+      "keywords": ["Lost Garden anime", "Lost Garden characters", "Lanterne knight", "Lost Garden story", "Thirteen Knights", "Frank Houbre"]
     }
   },
   "cookies": {

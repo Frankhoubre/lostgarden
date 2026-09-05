@@ -21,4 +21,14 @@ export type GuideSlug =
   | "/ai-anime-voice-and-sound"
   | "/how-to-tell-if-anime-is-ai"
   | "/making-of-episode-1"
-  | "/can-one-person-make-an-anime";
+  | "/can-one-person-make-an-anime"
+  | "/ai-anime-storyboard"
+  | "/ai-anime-backgrounds"
+  | "/ai-anime-script"
+  | "/ai-anime-copyright"
+  | "/history-of-ai-anime"
+  | "/anime-style-prompts"
+  | "/editing-ai-anime"
+  | "/why-ai-anime-looks-bad"
+  | "/ai-film-festivals-animation"
+  | "/lost-garden-story-and-characters";

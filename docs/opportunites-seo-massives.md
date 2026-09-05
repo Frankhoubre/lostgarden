@@ -145,6 +145,32 @@ Ce qui a été respecté pour chaque texte :
 - chaque page renvoie vers deux ou trois autres du cluster, et les deux guides les plus lus (`/how-to-make-ai-anime`, `/ai-character-consistency`) renvoient vers les nouveaux
 - `llms.txt` liste maintenant les onze articles, et deux faits périmés y ont été corrigés au passage, le nom Sol et la date du 2 juin
 
+## Dix articles de plus, le 5 septembre 2026
+
+Même méthode, même carte. Le site compte maintenant 21 articles en quatre langues, 116 URL dans le sitemap.
+
+| Page | Intention visée | Se distingue de |
+|---|---|---|
+| `/ai-anime-storyboard` | storyboard IA, AI storyboard | le guide pipeline, dont c'est une seule étape |
+| `/ai-anime-backgrounds` | décor animé IA, anime background generator | la cohérence des personnages, qui est un autre problème |
+| `/ai-anime-script` | scénario animé IA, AI anime script | rien d'autre ne parle d'écriture |
+| `/ai-anime-copyright` | droit d'auteur animé IA | la page définition, qui parle des bases de données |
+| `/history-of-ai-anime` | premier animé IA, first AI anime | le classement, qui note et ne date pas |
+| `/anime-style-prompts` | prompt style animé, anime style prompt | la page générateurs, qui décrit des produits |
+| `/editing-ai-anime` | montage animé IA, editing AI anime | rien d'autre ne parle du montage |
+| `/why-ai-anime-looks-bad` | pourquoi l'animé IA est moche | la page détection, qui s'adresse au spectateur et pas au créateur |
+| `/ai-film-festivals-animation` | festival film IA | le making-of, qui raconte et ne conseille pas |
+| `/lost-garden-story-and-characters` | Lost Garden personnages, Lanterne | la page d'accueil, qui présente et n'explique pas |
+
+Points de vigilance pour ces dix :
+
+- la page droit d'auteur cite la position du Copyright Office américain et rien d'autre, avec la mention que ce n'est pas un conseil juridique. Ne pas y ajouter de juridiction sans source
+- la page histoire ne contient que des dates déjà présentes sur `/best-ai-anime`, plus la date de sortie de l'épisode. Pas de nouvelle affirmation
+- la page festivals ne nomme que les deux festivals du dépôt. Le reste est du conseil général
+- la page personnages est entièrement tirée des textes de l'accueil : Lanterne douzième chevalier, Serrure neuvième, Aren dont le réveil clôt l'épisode, les Machines Endormies, les Pèlerins Masqués
+
+Aussi corrigé dans cette passe : les six problèmes de lint. Le cookie banner et la notice d'inscription lisent leur état via `useSyncExternalStore` au lieu d'un `setState` dans un effet, l'écriture du cookie de langue est partagée dans `setLocaleCookie`, et deux imports inutilisés ont disparu. `npm run lint` sort à zéro.
+
 ## Pas fait, et pourquoi
 
 **Le rendu statique des pages.** Le build sort toutes les routes en dynamique parce que `app/layout.tsx` appelle `headers()` pour poser `lang` sur `<html>`. Tant que c'est le cas, les pages restent en `private, no-store` et le cookie du proxy ne change rien au cache, le retirer seul ne servirait à rien. La solution propre selon la doc Next embarquée est de descendre le layout racine dans `app/[locale]/`, ce qui impose le drapeau expérimental `globalNotFound` pour la page 404. L'alternative est de figer `lang="en"` dans le HTML brut et de le corriger côté client, ce qui dégrade l'accessibilité des pages japonaise et coréenne. Aucune des deux ne se fait à l'aveugle dans une passe de corrections sûres. C'est le prochain chantier technique, et il vaut la peine : c'est ce qui ramènerait le TTFB sous 100 ms et rendrait le cookie du proxy inoffensif.

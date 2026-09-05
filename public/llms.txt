@@ -31,6 +31,16 @@ Key facts:
 - [Keeping a character consistent across shots](https://www.lostgarden.world/en/ai-character-consistency): reference sets, silhouettes, cutting around drift
 - [Is AI anime really anime?](https://www.lostgarden.world/en/is-ai-anime-real-anime): what AniList, MyAnimeList and ANN actually require
 - [AI anime vs traditional animation](https://www.lostgarden.world/en/ai-anime-vs-traditional-animation): what changes, what does not, where AI is worse
+- [Lost Garden: story, world and characters](https://www.lostgarden.world/en/lost-garden-story-and-characters): Lanterne, Rose, the Thirteen Knights, the Sleeping Machines
+- [The first AI anime: a short history](https://www.lostgarden.world/en/history-of-ai-anime): dated timeline from 2023 to 2026
+- [Why AI anime looks bad, and the fixes](https://www.lostgarden.world/en/why-ai-anime-looks-bad): six recurring causes, none of them the model
+- [Anime style prompts](https://www.lostgarden.world/en/anime-style-prompts): references, camera, forbidden things, short text
+- [Should you write an anime script with AI?](https://www.lostgarden.world/en/ai-anime-script): why the script is written by hand
+- [AI anime storyboards](https://www.lostgarden.world/en/ai-anime-storyboard): what the board decides before any shot exists
+- [AI anime backgrounds](https://www.lostgarden.world/en/ai-anime-backgrounds): one world, not an average
+- [Editing AI anime](https://www.lostgarden.world/en/editing-ai-anime): cut on movement, short on faces, regenerate or cut around
+- [Copyright and AI anime](https://www.lostgarden.world/en/ai-anime-copyright): what can be protected, records and disclosure
+- [AI film festivals for animation](https://www.lostgarden.world/en/ai-film-festivals-animation): which accept the format, what selection changes
 
 ## Other languages
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { locales, localeLabels, LOCALE_COOKIE, type Locale } from "@/lib/i18n/config";
-import { replaceLocaleInPath } from "@/lib/i18n/navigation";
+import { locales, localeLabels, type Locale } from "@/lib/i18n/config";
+import { replaceLocaleInPath, setLocaleCookie } from "@/lib/i18n/navigation";
 import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function LanguageSwitcher({ className = "" }: { className?: string }) {
@@ -12,7 +12,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
   function onChange(nextLocale: Locale) {
     if (nextLocale === locale) return;
-    document.cookie = `${LOCALE_COOKIE}=${nextLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    setLocaleCookie(nextLocale);
     router.push(replaceLocaleInPath(pathname, nextLocale));
   }
 

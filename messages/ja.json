@@ -81,6 +81,46 @@
     "canOnePersonMakeAnAnime": {
       "title": "1人でアニメは作れるか。本当に必要なもの",
       "description": "作れます。完成したエピソードがここにあります。スタジオの職種のうちAIが今カバーするもの、自分でやるしかないもの、そして1人でアニメを作る代償を月単位で。"
+    },
+    "aiAnimeStoryboard": {
+      "title": "AIアニメの絵コンテ。コンテが決めること（2026年）",
+      "description": "生成した絵コンテは構わない。生成した映画は駄目。どのカットも存在しない段階でコンテが決めねばならないこと、そしてLost Garden第1話のコンテが脚本からどう作られたか。"
+    },
+    "aiAnimeBackgrounds": {
+      "title": "AIアニメの背景。平均ではなく、一つの世界",
+      "description": "生成された環境は見事で、誰のものでもない。Lost Gardenの地下世界が、禁止事項でできた設定資料によって、1話を通じて一つの個性を保った方法。"
+    },
+    "aiAnimeScript": {
+      "title": "アニメの脚本をAIで書くべきか",
+      "description": "AIはそつのない脚本を書く。それが問題。Lost Gardenが手書きである理由、執筆でAIが本当に役立つ場所、そしてすべてのシーンが通らねばならない一つの試験。"
+    },
+    "aiAnimeCopyright": {
+      "title": "AIアニメの著作権。誰のものか、何が守られるか",
+      "description": "人が作った部分は守られ、純粋な生成物は概して守られない。独立系AIアニメが答えを明確にするために、記録、開示、オリジナルキャラクターをどう組み立てているか。"
+    },
+    "historyOfAiAnime": {
+      "title": "最初のAIアニメ。2023年から2026年までの短い歴史",
+      "description": "Netflixの短編のAI背景から、放送シリーズ、そして1人で作ったエピソードまで。誰が最初のAIアニメを作ったのか、日付付きで、各段階が実際に証明したこと。"
+    },
+    "animeStylePrompts": {
+      "title": "アニメ風プロンプト。制作現場での本当の書き方",
+      "description": "魔法の言葉はない。Lost Gardenのプロンプトがリファレンス、カメラの決定、禁止事項からどう組まれるか、短いプロンプトのほうが保つ理由、スタジオ名を書くのが悪手である理由。"
+    },
+    "editingAiAnime": {
+      "title": "AIアニメの編集。エピソードが実際に作られる場所",
+      "description": "生成クリップは素材にすぎない。動きでカットする、顔は短く、見ているものへ切り替える、再生成か回避か。17分のAIアニメーションが映画に編集された方法。"
+    },
+    "whyAiAnimeLooksBad": {
+      "title": "AIアニメがひどく見える理由と、6つの直し方",
+      "description": "モデルのせいであることは稀。物語がない、平均的なルック、ブレる顔、浮く動き、全編に音楽、編集がない。AIアニメがひどく見える6つの理由と、完成したエピソードが各々にしたこと。"
+    },
+    "aiFilmFestivalsAnimation": {
+      "title": "アニメーションのためのAI映画祭。選出が何をもたらすか",
+      "description": "Lost Gardenはソウルで選出され、ロンドンでファイナルに残った。AIアニメーションを受け入れる映画祭、選出が実際に変えたこと、出品料を無駄にしない応募の仕方。"
+    },
+    "lostGardenStoryAndCharacters": {
+      "title": "Lost Garden。物語、世界、登場人物",
+      "description": "空っぽの騎士、花を咲かせる子ども、誓いに縛られた13の鎧、空のない世界。Lost Gardenが何の物語で誰が登場するのか、結末は伏せて。"
     }
   },
   "episodeOne": {
@@ -371,6 +411,46 @@
     "canOnePersonMakeAnAnime": {
       "headline": "1人でアニメは作れるか",
       "keywords": ["一人 アニメ 制作", "個人 アニメ 制作", "自分で アニメ 作る", "アニメ 一人で 作る", "個人制作 アニメ AI", "Lost Garden"]
+    },
+    "aiAnimeStoryboard": {
+      "headline": "AIアニメの絵コンテ。コンテが決めること",
+      "keywords": ["AI 絵コンテ", "AIアニメ 絵コンテ", "絵コンテ 生成 AI", "AI コンテ 作成", "Lost Garden"]
+    },
+    "aiAnimeBackgrounds": {
+      "headline": "AIアニメの背景。平均ではなく、一つの世界",
+      "keywords": ["AI アニメ 背景", "アニメ 背景 生成", "AI 背景 一貫性", "AI 環境 生成", "Lost Garden"]
+    },
+    "aiAnimeScript": {
+      "headline": "アニメの脚本をAIで書くべきか",
+      "keywords": ["AI 脚本 アニメ", "AI で 脚本 を 書く", "脚本 生成 AI", "アニメ ストーリー AI", "ScreenWeaver", "Lost Garden"]
+    },
+    "aiAnimeCopyright": {
+      "headline": "AIアニメの著作権。何が守られるか",
+      "keywords": ["AIアニメ 著作権", "AI 生成 アニメ 著作権", "AI アニメーション 権利", "生成AI 著作権 映像", "Lost Garden"]
+    },
+    "historyOfAiAnime": {
+      "headline": "最初のAIアニメ。短い歴史",
+      "keywords": ["最初の AIアニメ", "AI 生成 アニメ 最初", "AIアニメ 歴史", "AIアニメ 年表", "Twins Hinahima", "Lost Garden"]
+    },
+    "animeStylePrompts": {
+      "headline": "自分のものになるアニメ風プロンプトの書き方",
+      "keywords": ["アニメ風 プロンプト", "AI アニメ プロンプト", "アニメ プロンプト 書き方", "アニメ 絵 プロンプト", "Lost Garden"]
+    },
+    "editingAiAnime": {
+      "headline": "AIアニメの編集。エピソードが作られる場所",
+      "keywords": ["AIアニメ 編集", "AI 生成 動画 編集", "AI アニメーション 編集", "AI 動画 カット", "Lost Garden"]
+    },
+    "whyAiAnimeLooksBad": {
+      "headline": "AIアニメがひどく見える理由と直し方",
+      "keywords": ["AIアニメ ひどい 理由", "AI アニメ 不自然", "AI アニメーション 違和感", "AIアニメ 問題", "Lost Garden"]
+    },
+    "aiFilmFestivalsAnimation": {
+      "headline": "アニメーションを受け入れるAI映画祭",
+      "keywords": ["AI 映画祭", "AI アニメーション 映画祭", "AI 映画 応募", "Seoul International AI Film Festival", "AI London Festival", "Lost Garden"]
+    },
+    "lostGardenStoryAndCharacters": {
+      "headline": "Lost Garden。物語、世界、登場人物",
+      "keywords": ["Lost Garden アニメ", "Lost Garden 登場人物", "ランタン 騎士", "Lost Garden あらすじ", "13人の騎士", "Frank Houbre"]
     }
   },
   "cookies": {

@@ -1,43 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
-import type { User } from "firebase/auth";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { EPISODE_ONE } from "@/lib/episode";
 import { localePath } from "@/lib/i18n/navigation";
 
 const JOINED_STORAGE_KEY = "lostgarden-joined-notice";
 
-type ExperienceJoinedNoticeProps = {
-  user: User;
-};
+/**
+ * The "you just joined" flag lives in sessionStorage and is read through an
+ * external store, so visibility is derived rather than set inside an effect.
+ */
+const listeners = new Set<() => void>();
 
-export function ExperienceJoinedNotice({ user: _user }: ExperienceJoinedNoticeProps) {
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function readJoined(): boolean {
+  return sessionStorage.getItem(JOINED_STORAGE_KEY) === "1";
+}
+
+function serverJoined(): boolean {
+  return false;
+}
+
+function writeJoined(value: boolean) {
+  if (value) sessionStorage.setItem(JOINED_STORAGE_KEY, "1");
+  else sessionStorage.removeItem(JOINED_STORAGE_KEY);
+  for (const listener of listeners) listener();
+}
+
+export function ExperienceJoinedNotice() {
   const searchParams = useSearchParams();
   const { locale, dict } = useLocale();
-  const [visible, setVisible] = useState(false);
   const experiencePath = localePath(locale, "/experience");
+  const visible = useSyncExternalStore(subscribe, readJoined, serverJoined);
+  const justJoined = searchParams.get("joined") === "1";
 
   useEffect(() => {
-    if (searchParams.get("joined") === "1") {
-      setVisible(true);
-      sessionStorage.setItem(JOINED_STORAGE_KEY, "1");
-      window.history.replaceState(null, "", experiencePath);
-      return;
-    }
-    if (sessionStorage.getItem(JOINED_STORAGE_KEY) === "1") {
-      setVisible(true);
-    }
-  }, [searchParams, experiencePath]);
+    if (!justJoined) return;
+    writeJoined(true);
+    window.history.replaceState(null, "", experiencePath);
+  }, [justJoined, experiencePath]);
 
   if (!visible) return null;
 
   const { postSignup } = dict.experience;
 
   function dismiss() {
-    setVisible(false);
-    sessionStorage.removeItem(JOINED_STORAGE_KEY);
+    writeJoined(false);
   }
 
   return (
