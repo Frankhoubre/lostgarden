@@ -64,7 +64,7 @@
     },
     "aiAnimeGenerator": {
       "title": "AI 애니메이션 생성기가 실제로 내놓는 것",
-      "description": "생성기는 클립을 만들지 에피소드를 만들지 않습니다. 세 종류의 제품, 17분짜리 AI 애니메이션이 실제로 쓴 것, 그리고 구독 전에 던질 단 하나의 질문."
+      "description": "생성기는 클립을 만들지 에피소드를 만들지 않습니다. 세 종류의 제품, 17분짜리 AI 애니메이션 한 편이 실제로 쓴 것, 그리고 구독 전에 던질 단 하나의 질문."
     },
     "aiAnimeVoiceAndSound": {
       "title": "애니메이션의 AI 목소리와 사운드: Lost Garden은 어떻게 만들었나",
@@ -96,7 +96,7 @@
     },
     "aiAnimeCopyright": {
       "title": "AI 애니메이션 저작권: 누구의 것이고 무엇이 보호되나",
-      "description": "사람이 쓴 부분은 보호되고, 순수 생성물은 대체로 보호되지 않습니다. 독립 AI 애니메이션이 답을 분명하게 만들기 위해 기록, 공개, 오리지널 캐릭터를 어떻게 갖추는지."
+      "description": "사람이 저작한 부분은 보호되고, 순수 생성물은 대체로 보호되지 않습니다. 독립 AI 애니메이션이 답을 분명하게 만들기 위해 기록, 공개, 오리지널 캐릭터를 어떻게 갖추는지."
     },
     "historyOfAiAnime": {
       "title": "최초의 AI 애니메이션: 2023년부터 2026년까지의 짧은 역사",
@@ -430,7 +430,7 @@
     },
     "historyOfAiAnime": {
       "headline": "최초의 AI 애니메이션: 짧은 역사",
-      "keywords": ["최초의 AI 애니메이션", "AI 생성 애니 최초", "AI 애니메이션 역사", "AI 애니 연표", "Twins Hinahima", "Lost Garden"]
+      "keywords": ["최초의 AI 애니메이션", "AI 생성 애니 최초", "AI 애니메이션 역사", "AI 애니 연표", "트윈즈 히나히마", "Lost Garden"]
     },
     "animeStylePrompts": {
       "headline": "나만의 것이 되는 애니메이션 스타일 프롬프트",
