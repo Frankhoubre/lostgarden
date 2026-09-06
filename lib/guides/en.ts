@@ -1220,9 +1220,9 @@ const historyOfAiAnime: Guide = {
         ],
       },
       {
-        heading: "2025: the first broadcast series",
+        heading: "2025: the first broadcast anime",
         paragraphs: [
-          "Twins Hinahima, produced by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025. Roughly 95% of its animation cuts involved generative AI. It was a real television anime, in Japan, made for the Japanese market, and by every definition the anime databases use it counts. That is the answer to first AI anime series in the strict sense.",
+          "Twins Hinahima, produced by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025. Roughly 95% of its animation cuts involved generative AI. It was a real television anime, a single 24 minute special, made in Japan for the Japanese market, and by every definition the anime databases use it counts. That is the answer to first broadcast AI anime in the strict sense.",
           "The same year Vidu and Aura Productions released a fifty-episode science fiction series of shorts, which showed the volume side of the story: not one prestige episode but a schedule.",
         ],
         callouts: [
@@ -1240,7 +1240,7 @@ const historyOfAiAnime: Guide = {
         heading: "What each step actually proved",
         list: [
           "2023 proved that AI could make a shot that looked like anime, and that audiences would be angry about it.",
-          "2025 proved that a full series could be broadcast on television and counted as anime by the strictest definition.",
+          "2025 proved that an AI anime could be broadcast on television and counted as anime by the strictest definition.",
           "2026 proved that the format had customers, and that one person could finish an episode with a world of their own.",
         ],
         trailingParagraphs: [
@@ -1259,12 +1259,12 @@ const historyOfAiAnime: Guide = {
     {
       question: "What was the first AI anime?",
       answer:
-        "It depends what you count. The first short from a major studio with AI-generated backgrounds was The Dog & the Boy, Netflix Japan and WIT Studio, January 2023. The first broadcast series was Twins Hinahima on Tokyo MX in March 2025, with generative AI in about 95% of its cuts. The first full-length original episode made by one person, as far as is known, is Lost Garden, released 29 May 2026.",
+        "It depends what you count. The first short from a major studio with AI-generated backgrounds was The Dog & the Boy, Netflix Japan and WIT Studio, January 2023. The first broadcast anime was Twins Hinahima, a 24 minute TV special, on Tokyo MX in March 2025, with generative AI in about 95% of its cuts. The first full-length original episode made by one person, as far as is known, is Lost Garden, released 29 May 2026.",
     },
     {
       question: "Was Twins Hinahima the first AI anime?",
       answer:
-        "It was the first AI anime television series in the strict sense: produced in Japan by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025, and counted as anime by the databases' own rules. Shorts using AI predate it by two years.",
+        "It was the first AI anime broadcast on television in the strict sense, a 24 minute special: produced in Japan by Frontier Works and KaKa Creation, aired on Tokyo MX in March 2025, and counted as anime by the databases' own rules. Shorts using AI predate it by two years.",
     },
     {
       question: "Is Lost Garden the first AI anime?",

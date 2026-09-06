@@ -5,6 +5,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { ProcessFaq } from "@/components/process/ProcessFaq";
 import { VisionArticle } from "@/components/vision/VisionArticle";
+import { ArticleHero } from "@/components/blog/ArticleHero";
+import { EpisodeWatchBlock } from "@/components/EpisodeWatchBlock";
+import type { ArticleImage } from "@/lib/article-media";
 
 const linkClass =
   "font-body text-cyan-pale/90 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm";
@@ -30,6 +33,8 @@ type GuideBodyProps = {
   siteName: string;
   faqHeading: string;
   relatedHeading: string;
+  hero?: { image: ArticleImage; alt: string };
+  episode?: { heading: string; embedTitle: string };
 };
 
 export function GuideBody({
@@ -38,10 +43,21 @@ export function GuideBody({
   siteName,
   faqHeading,
   relatedHeading,
+  hero,
+  episode,
 }: GuideBodyProps) {
   return (
     <>
+      {hero ? <ArticleHero image={hero.image} alt={hero.alt} /> : null}
       <VisionArticle article={guide.article} siteName={siteName} />
+      {episode ? (
+        <section className="mt-12 border-t border-glow/20 pt-8">
+          <h2 className="anime-heading font-display text-xl text-lily sm:text-2xl">
+            {episode.heading}
+          </h2>
+          <EpisodeWatchBlock className="mt-6" title={episode.embedTitle} compact />
+        </section>
+      ) : null}
       <ProcessFaq heading={faqHeading} items={guide.faq} />
       <section className="mt-12 border-t border-glow/20 pt-8">
         <h2 className="anime-heading font-display text-xl text-lily">

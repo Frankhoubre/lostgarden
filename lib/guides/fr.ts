@@ -1216,9 +1216,9 @@ const historyOfAiAnime: Guide = {
         ],
       },
       {
-        heading: "2025 : la première série diffusée",
+        heading: "2025 : le premier animé diffusé",
         paragraphs: [
-          "Twins Hinahima, produite par Frontier Works et KaKa Creation, a été diffusée sur Tokyo MX en mars 2025. Environ 95 % de ses plans d'animation impliquaient de l'IA générative. C'était un vrai animé de télévision, au Japon, fait pour le marché japonais, et selon toutes les définitions qu'utilisent les bases de données, elle compte. C'est la réponse à la question du premier animé IA au sens strict.",
+          "Twins Hinahima, produite par Frontier Works et KaKa Creation, a été diffusée sur Tokyo MX en mars 2025. Environ 95 % de ses plans d'animation impliquaient de l'IA générative. C'était un vrai animé de télévision, un spécial unique de 24 minutes, fait au Japon pour le marché japonais, et selon toutes les définitions qu'utilisent les bases de données, elle compte. C'est la réponse à la question du premier animé IA diffusé, au sens strict.",
           "La même année, Vidu et Aura Productions ont sorti une série de science-fiction de cinquante courts épisodes, qui a montré le versant volume de l'histoire : pas un épisode de prestige, mais une cadence.",
         ],
         callouts: [
@@ -1236,7 +1236,7 @@ const historyOfAiAnime: Guide = {
         heading: "Ce que chaque étape a réellement prouvé",
         list: [
           "2023 a prouvé que l'IA pouvait faire un plan qui ressemble à de l'animé, et que le public s'en indignerait.",
-          "2025 a prouvé qu'une série complète pouvait être diffusée à la télévision et comptée comme animé selon la définition la plus stricte.",
+          "2025 a prouvé qu'un animé IA pouvait être diffusé à la télévision et compté comme animé selon la définition la plus stricte.",
           "2026 a prouvé que le format avait des clients, et qu'une seule personne pouvait finir un épisode avec un monde à elle.",
         ],
         trailingParagraphs: [
@@ -1255,12 +1255,12 @@ const historyOfAiAnime: Guide = {
     {
       question: "Quel a été le premier animé IA ?",
       answer:
-        "Ça dépend de ce qu'on compte. Le premier court d'un grand studio avec des décors générés par IA est The Dog & the Boy, Netflix Japon et WIT Studio, janvier 2023. La première série diffusée est Twins Hinahima sur Tokyo MX en mars 2025, avec de l'IA générative dans environ 95 % de ses plans. Le premier épisode complet d'une série originale fait par une seule personne, à notre connaissance, est Lost Garden, sorti le 29 mai 2026.",
+        "Ça dépend de ce qu'on compte. Le premier court d'un grand studio avec des décors générés par IA est The Dog & the Boy, Netflix Japon et WIT Studio, janvier 2023. Le premier animé diffusé est Twins Hinahima, un spécial TV de 24 minutes, sur Tokyo MX en mars 2025, avec de l'IA générative dans environ 95 % de ses plans. Le premier épisode complet d'une série originale fait par une seule personne, à notre connaissance, est Lost Garden, sorti le 29 mai 2026.",
     },
     {
       question: "Twins Hinahima est-elle le premier animé IA ?",
       answer:
-        "C'est la première série télévisée d'animé IA au sens strict : produite au Japon par Frontier Works et KaKa Creation, diffusée sur Tokyo MX en mars 2025, et comptée comme animé selon les règles des bases de données elles-mêmes. Des courts utilisant l'IA la précèdent de deux ans.",
+        "C'est le premier animé IA diffusé à la télévision au sens strict, un spécial de 24 minutes : produite au Japon par Frontier Works et KaKa Creation, diffusée sur Tokyo MX en mars 2025, et comptée comme animé selon les règles des bases de données elles-mêmes. Des courts utilisant l'IA la précèdent de deux ans.",
     },
     {
       question: "Lost Garden est-il le premier animé IA ?",

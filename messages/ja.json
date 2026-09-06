@@ -696,5 +696,24 @@
     "processLink": "制作方法（AIプロセス）",
     "visionLink": "クリエイタービジョン",
     "pressLink": "プレス・メディアキット"
+  },
+  "media": {
+    "playTrailer": "動画を再生",
+    "episodeHeading": "第1話を観る",
+    "noVideo": "公式の埋め込み可能な動画はありません。下の出典をご覧ください。",
+    "alt": {
+      "sol": "ランタン型の兜をかぶった空っぽの騎士Lanterneが、青い洞窟の石の祭壇で目覚める場面、Lost Garden",
+      "rose": "青い森でLanterneの腕を引いて笑うRose、Lost Garden",
+      "serrure": "9番目の騎士Serrure、Lost Gardenの十三騎士の一人",
+      "blueForest": "地下の青い森、光るキノコと青緑の霧、Lost Garden",
+      "forestReference": "世界観の設定資料として使った地下の青い森のリファレンス画、Lost Garden",
+      "heroBanner": "Lost Gardenの地下世界のLanterneとRose、第1話",
+      "heroCavern": "浮かぶ石の足場がある巨大な地下洞窟、Lost Garden",
+      "pelerins": "霧の中の石橋を渡る仮面の巡礼者たち、Lost Garden",
+      "sleepingMachines": "青い森の苔の下に埋もれた、半ば機械で半ば有機の眠る機械、Lost Garden",
+      "undergroundCavern": "世界の下の洞窟、青緑の光の中の根と濡れた石、Lost Garden",
+      "tavernKnights": "地下酒場のSerrureとLanterne、Lost Garden",
+      "roseCapsule": "光るカプセルの中のRose、Lost Garden"
+    }
   }
 }

@@ -4,6 +4,7 @@ import { AiAnimeArticleBody } from "@/components/blog/AiAnimeArticleBody";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAiAnimeArticle } from "@/lib/ai-anime-articles";
+import { getArticleMedia, ogCardPath } from "@/lib/article-media";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
@@ -15,6 +16,7 @@ import {
   itemListJsonLd,
 } from "@/lib/seo";
 
+const SLUG = "/best-ai-anime" as const;
 const PUBLISHED = "2026-09-04";
 
 type BestAiAnimePageProps = {
@@ -28,15 +30,24 @@ export async function generateMetadata({
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
+  const media = getArticleMedia(SLUG);
 
   return buildPageMetadata({
     locale,
     title: dict.meta.bestAiAnime.title,
     description: dict.meta.bestAiAnime.description,
-    path: localePath(locale, "/best-ai-anime"),
-    pathSuffix: "/best-ai-anime",
+    path: localePath(locale, SLUG),
+    pathSuffix: SLUG,
     absoluteTitle: true,
     ogType: "article",
+    ...(media
+      ? {
+          ogImage: ogCardPath(locale, SLUG),
+          ogImageWidth: 1200,
+          ogImageHeight: 630,
+          ogImageAlt: dict.media.alt[media.imageData.altKey],
+        }
+      : {}),
   });
 }
 
@@ -46,7 +57,8 @@ export default async function BestAiAnimePage({ params }: BestAiAnimePageProps) 
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
   const article = getAiAnimeArticle(locale);
-  const pagePath = localePath(locale, "/best-ai-anime");
+  const media = getArticleMedia(SLUG);
+  const pagePath = localePath(locale, SLUG);
 
   const breadcrumbs = [
     { name: dict.bestAiAnime.breadcrumbHome, path: localePath(locale, "/") },
@@ -65,6 +77,7 @@ export default async function BestAiAnimePage({ params }: BestAiAnimePageProps) 
           datePublished: PUBLISHED,
           dateModified: PUBLISHED,
           keywords: dict.bestAiAnime.keywords,
+          ...(media ? { image: media.imageData.src } : {}),
         })}
       />
       <JsonLd
@@ -85,6 +98,12 @@ export default async function BestAiAnimePage({ params }: BestAiAnimePageProps) 
           article={article}
           locale={locale}
           siteName={dict.common.siteName}
+          playLabel={dict.media.playTrailer}
+          hero={
+            media
+              ? { image: media.imageData, alt: dict.media.alt[media.imageData.altKey] }
+              : undefined
+          }
         />
       </LegalPageShell>
     </>

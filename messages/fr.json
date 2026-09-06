@@ -698,5 +698,24 @@
     "processLink": "Comment c'est fait (process IA)",
     "visionLink": "Vision du créateur",
     "pressLink": "Presse & media kit"
+  },
+  "media": {
+    "playTrailer": "Lancer la vidéo",
+    "episodeHeading": "Regarder l'épisode 1",
+    "noVideo": "Pas de vidéo officielle intégrable, voir les sources plus bas.",
+    "alt": {
+      "sol": "Lanterne, le chevalier creux au heaume en forme de lanterne, se réveillant sur un autel de pierre dans une caverne bleue, Lost Garden",
+      "rose": "Rose qui rit et tire Lanterne par le bras à travers la forêt bleue, Lost Garden",
+      "serrure": "Serrure, le neuvième chevalier, une armure parmi les Treize Chevaliers de Lost Garden",
+      "blueForest": "La forêt bleue sous la terre, champignons lumineux et brume cyan, Lost Garden",
+      "forestReference": "Image de référence de la forêt bleue souterraine, utilisée comme bible du monde, Lost Garden",
+      "heroBanner": "Lanterne et Rose dans le monde souterrain de Lost Garden, épisode 1",
+      "heroCavern": "Une immense caverne souterraine aux plateformes de pierre flottantes, Lost Garden",
+      "pelerins": "Les Pèlerins Masqués traversant un pont de pierre dans la brume, Lost Garden",
+      "sleepingMachines": "Une Machine Endormie, mi-mécanique mi-organique, enfouie sous la mousse dans la forêt bleue, Lost Garden",
+      "undergroundCavern": "Les cavernes sous le monde, racines et pierre mouillée dans une lumière cyan, Lost Garden",
+      "tavernKnights": "Serrure et Lanterne dans une taverne souterraine, Lost Garden",
+      "roseCapsule": "Rose dans une capsule lumineuse, Lost Garden"
+    }
   }
 }

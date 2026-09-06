@@ -4,6 +4,7 @@ import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { CREATOR_WIKIDATA, DATABASE_LINKS, SOCIAL_LINKS } from "@/lib/social";
+import { ARTICLE_IMAGES, ARTICLE_MEDIA } from "@/lib/article-media";
 import type { Dictionary } from "@/lib/i18n/types";
 
 /**
@@ -358,6 +359,7 @@ export function articlePageJsonLd({
   datePublished,
   dateModified,
   keywords = DEFAULT_ARTICLE_KEYWORDS,
+  image = SITE.ogImage,
 }: {
   locale: Locale;
   headline: string;
@@ -366,6 +368,8 @@ export function articlePageJsonLd({
   datePublished?: string;
   dateModified?: string;
   keywords?: readonly string[];
+  /** Site-relative path of the article's lead still. */
+  image?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -373,7 +377,7 @@ export function articlePageJsonLd({
     headline,
     description,
     url: absoluteUrl(path),
-    image: absoluteUrl(SITE.ogImage),
+    image: absoluteUrl(image),
     author: {
       "@type": "Person",
       name: SITE.creator,
@@ -484,6 +488,7 @@ export function getSitemapEntries(): Array<{
   changeFrequency: SitemapFrequency;
   priority: number;
   alternates: { languages: Record<string, string> };
+  images?: string[];
 }> {
   const entries: Array<{
     url: string;
@@ -491,10 +496,13 @@ export function getSitemapEntries(): Array<{
     changeFrequency: SitemapFrequency;
     priority: number;
     alternates: { languages: Record<string, string> };
+    images?: string[];
   }> = [];
 
   for (const pathSuffix of INDEXABLE_PATH_SUFFIXES) {
     const hints = SITEMAP_HINTS[pathSuffix];
+    const media = ARTICLE_MEDIA[pathSuffix];
+    const images = media ? [absoluteUrl(ARTICLE_IMAGES[media.image].src)] : undefined;
     for (const locale of locales) {
       entries.push({
         url: absoluteUrl(localePath(locale, pathSuffix)),
@@ -502,6 +510,7 @@ export function getSitemapEntries(): Array<{
         changeFrequency: hints.changeFrequency,
         priority: hints.priority,
         alternates: { languages: localeHreflangAlternates(pathSuffix) },
+        ...(images ? { images } : {}),
       });
     }
   }

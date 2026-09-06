@@ -171,6 +171,21 @@ Points de vigilance pour ces dix :
 
 Aussi corrigé dans cette passe : les six problèmes de lint. Le cookie banner et la notice d'inscription lisent leur état via `useSyncExternalStore` au lieu d'un `setState` dans un effet, l'écriture du cookie de langue est partagée dans `setLocaleCookie`, et deux imports inutilisés ont disparu. `npm run lint` sort à zéro.
 
+## Médias sur les articles, le 5 septembre 2026
+
+Le classement des six animés IA n'avait pas une image. Corrigé, avec trois mécanismes.
+
+- **Une image d'en-tête par article**, prise dans les scènes de l'épisode et le kit presse (`lib/article-media.ts`), avec un texte alternatif traduit dans les quatre langues (`media.alt` dans les dictionnaires). La même image sert d'`image` au balisage `Article` et est déclarée dans le sitemap : 84 entrées `image:image`
+- **Une vignette Open Graph générée par page et par langue**, route `/og?locale=&path=`, avec la scène de l'article, le titre dans la police de la langue (Noto Sans, JP ou KR chargée depuis Google Fonts) et le nom de la série. Cache d'une semaine au bord. Si le rendu échoue, la route renvoie la scène brute, jamais une image cassée. Le proxy de langue laisse passer `/og`
+- **Les vidéos officielles sur le classement**, en lecteur léger (vignette, puis iframe au clic) : Lost Garden, le PV de Twins Hinahima sur la chaîne officielle, Le Chien et le Garçon sur la chaîne Netflix Japan, Anime Rock, Paper, Scissors sur celle de Corridor Digital. Chaque identifiant a été vérifié par l'endpoint oEmbed de YouTube contre le nom de la chaîne. Anipops et la série Vidu / Aura n'ont pas d'upload officiel intégrable, elles gardent un lien
+- Le lecteur de l'épisode 1 est intégré sur les cinq articles où il a sa place : making-of, voix et son, montage, une seule personne, histoire et personnages
+- L'index des articles affiche une vignette par entrée
+
+Deux choses apprises en route :
+
+- tous les fichiers `.png` du site sauf le logo sont en réalité des JPEG. Ça n'empêche rien, les navigateurs devinent le format, mais c'est ce qui faisait échouer la génération de vignette tant que l'image était passée avec un type déclaré. À renommer un jour, avec les références
+- Twins Hinahima est un spécial TV unique de 24 minutes, pas une série. Les pages qui parlaient de « série » ont été corrigées
+
 ## Pas fait, et pourquoi
 
 **Le rendu statique des pages.** Le build sort toutes les routes en dynamique parce que `app/layout.tsx` appelle `headers()` pour poser `lang` sur `<html>`. Tant que c'est le cas, les pages restent en `private, no-store` et le cookie du proxy ne change rien au cache, le retirer seul ne servirait à rien. La solution propre selon la doc Next embarquée est de descendre le layout racine dans `app/[locale]/`, ce qui impose le drapeau expérimental `globalNotFound` pour la page 404. L'alternative est de figer `lang="en"` dans le HTML brut et de le corriger côté client, ce qui dégrade l'accessibilité des pages japonaise et coréenne. Aucune des deux ne se fait à l'aveugle dans une passe de corrections sûres. C'est le prochain chantier technique, et il vaut la peine : c'est ce qui ramènerait le TTFB sous 100 ms et rendrait le cookie du proxy inoffensif.

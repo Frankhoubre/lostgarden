@@ -696,5 +696,24 @@
     "processLink": "How it was made (AI process)",
     "visionLink": "Creator vision",
     "pressLink": "Press & media kit"
+  },
+  "media": {
+    "playTrailer": "Play the video",
+    "episodeHeading": "Watch Episode One",
+    "noVideo": "No official embeddable video, see the sources below.",
+    "alt": {
+      "sol": "Lanterne, the hollow knight with a lantern-shaped helmet, waking on a stone altar in a blue cavern, Lost Garden",
+      "rose": "Rose laughing and pulling Lanterne by the arm through the blue forest, Lost Garden",
+      "serrure": "Serrure, the ninth knight, an armour among the Thirteen Knights of Lost Garden",
+      "blueForest": "The blue forest beneath the earth, glowing mushrooms and cyan mist, Lost Garden",
+      "forestReference": "Reference frame of the underground blue forest used as the world bible, Lost Garden",
+      "heroBanner": "Lanterne and Rose in the underground world of Lost Garden, Episode One",
+      "heroCavern": "An immense underground cavern with floating stone platforms, Lost Garden",
+      "pelerins": "The Masked Pilgrims crossing a stone bridge in the mist, Lost Garden",
+      "sleepingMachines": "A Sleeping Machine, half mechanical and half organic, buried under moss in the blue forest, Lost Garden",
+      "undergroundCavern": "The caverns beneath the world, roots and wet stone in cyan light, Lost Garden",
+      "tavernKnights": "Serrure and Lanterne in an underground tavern, Lost Garden",
+      "roseCapsule": "Rose inside a luminous capsule, Lost Garden"
+    }
   }
 }

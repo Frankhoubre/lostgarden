@@ -4,6 +4,7 @@ import { GuideBody } from "@/components/blog/GuideBody";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getGuide } from "@/lib/guides";
+import { getArticleMedia, ogCardPath } from "@/lib/article-media";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
+  const media = getArticleMedia(SLUG);
 
   return buildPageMetadata({
     locale,
@@ -33,6 +35,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     pathSuffix: SLUG,
     absoluteTitle: true,
     ogType: "article",
+    ...(media
+      ? {
+          ogImage: ogCardPath(locale, SLUG),
+          ogImageWidth: 1200,
+          ogImageHeight: 630,
+          ogImageAlt: dict.media.alt[media.imageData.altKey],
+        }
+      : {}),
   });
 }
 
@@ -42,6 +52,7 @@ export default async function LostGardenStoryAndCharactersPage({ params }: PageP
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
   const guide = getGuide(locale, SLUG);
+  const media = getArticleMedia(SLUG);
   const page = dict.guides.lostGardenStoryAndCharacters;
   const pagePath = localePath(locale, SLUG);
 
@@ -63,6 +74,7 @@ export default async function LostGardenStoryAndCharactersPage({ params }: PageP
           datePublished: PUBLISHED,
           dateModified: PUBLISHED,
           keywords: page.keywords,
+          ...(media ? { image: media.imageData.src } : {}),
         })}
       />
       <JsonLd data={faqPageJsonLd(guide.faq)} />
@@ -73,6 +85,16 @@ export default async function LostGardenStoryAndCharactersPage({ params }: PageP
           siteName={dict.common.siteName}
           faqHeading={dict.guides.faqHeading}
           relatedHeading={dict.guides.relatedHeading}
+          hero={
+            media
+              ? { image: media.imageData, alt: dict.media.alt[media.imageData.altKey] }
+              : undefined
+          }
+          episode={
+            media?.episode
+              ? { heading: dict.media.episodeHeading, embedTitle: dict.trailer.embedTitle }
+              : undefined
+          }
         />
       </LegalPageShell>
     </>

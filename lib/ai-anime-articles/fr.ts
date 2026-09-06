@@ -29,6 +29,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
     {
       rank: 1,
       title: "Lost Garden",
+      youtubeId: "eZ_JlaLDJ-8",
       meta: "2026 · indépendant · créé par Frank Houbre · épisode 1, 17 minutes",
       verdict: "L'épisode le plus abouti de cette liste, et le fait d'un seul auteur.",
       paragraphs: [
@@ -48,6 +49,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
     {
       rank: 2,
       title: "Twins Hinahima",
+      youtubeId: "CjUa9RladYQ",
       meta: "2025 · Japon · Frontier Works et KaKa Creation · diffusion télé",
       verdict:
         "Le premier animé diffusé à la télévision japonaise avec de l'IA générative sur environ 95 % de ses plans.",
@@ -77,6 +79,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
     {
       rank: 4,
       title: "The Dog & the Boy",
+      youtubeId: "J9DpusAZV_0",
       meta: "2023 · Japon · Netflix Anime Creators Base, WIT Studio, rinna · 3 minutes",
       verdict: "Le court-métrage qui a déclenché la polémique.",
       paragraphs: [
@@ -91,6 +94,7 @@ export const aiAnimeArticleFr: AiAnimeArticle = {
     {
       rank: 5,
       title: "Anime Rock, Paper, Scissors",
+      youtubeId: "GVT3WUa-48Y",
       meta: "2023 · États-Unis · Corridor Digital · 7 minutes",
       verdict: "Celui que presque tout le monde a vu avant même de savoir que la vidéo IA existait.",
       paragraphs: [

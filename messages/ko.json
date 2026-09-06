@@ -696,5 +696,24 @@
     "processLink": "제작 방식 (AI 과정)",
     "visionLink": "창작자 비전",
     "pressLink": "보도자료 & 미디어 키트"
+  },
+  "media": {
+    "playTrailer": "영상 재생",
+    "episodeHeading": "1화 보기",
+    "noVideo": "공식 임베드 영상이 없습니다. 아래 출처를 참고하세요.",
+    "alt": {
+      "sol": "랜턴 모양 투구를 쓴 속 빈 기사 Lanterne이 푸른 동굴의 돌 제단에서 깨어나는 장면, Lost Garden",
+      "rose": "푸른 숲에서 Lanterne의 팔을 끌며 웃는 Rose, Lost Garden",
+      "serrure": "아홉 번째 기사 Serrure, Lost Garden 열세 기사 중 하나",
+      "blueForest": "땅 밑의 푸른 숲, 빛나는 버섯과 청록 안개, Lost Garden",
+      "forestReference": "세계관 설정집으로 쓴 지하 푸른 숲의 레퍼런스 프레임, Lost Garden",
+      "heroBanner": "Lost Garden 지하 세계의 Lanterne과 Rose, 1화",
+      "heroCavern": "떠 있는 돌 발판이 있는 거대한 지하 동굴, Lost Garden",
+      "pelerins": "안개 속 돌다리를 건너는 가면 쓴 순례자들, Lost Garden",
+      "sleepingMachines": "푸른 숲의 이끼 아래 묻힌, 반은 기계이고 반은 유기체인 잠든 기계, Lost Garden",
+      "undergroundCavern": "세계 아래의 동굴, 청록 빛 속의 뿌리와 젖은 돌, Lost Garden",
+      "tavernKnights": "지하 선술집의 Serrure와 Lanterne, Lost Garden",
+      "roseCapsule": "빛나는 캡슐 안의 Rose, Lost Garden"
+    }
   }
 }
