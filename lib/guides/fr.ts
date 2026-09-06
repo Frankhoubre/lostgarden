@@ -378,7 +378,7 @@ const aiManga: Guide = {
     sections: [
       {
         paragraphs: [
-          "Je n'ai pas publié de manga. Ce que j'ai fait, c'est la partie d'une production d'animé qui y ressemble trait pour trait : des character sheets, un storyboard scène par scène, un paquet d'images fixes jugées contre une bible avant la moindre seconde de mouvement. Cette étape, c'est du manga sans le lettrage, et c'est de là que viennent les leçons qui suivent.",
+          "Je n'ai pas publié de manga. Ce que j'ai fait, c'est la partie d'une production d'animé qui y ressemble trait pour trait : des character sheets, un storyboard scène par scène, des planches entières d'images fixes jugées contre une bible avant la moindre seconde de mouvement. Cette étape, c'est du manga sans le lettrage, et c'est de là que viennent les leçons qui suivent.",
           "En une phrase : l'IA sait déjà faire une page de manga. Elle ne sait pas encore faire un chapitre. Et la différence, c'est exactement ce qui compte pour un lecteur.",
         ],
       },
@@ -389,7 +389,7 @@ const aiManga: Guide = {
           "Maintenant demandez la case suivante. Même personnage, même pièce, trois secondes plus tard, vu de l'autre côté. C'est là que la dérive qui ruine l'animation IA apparaît sur le papier, et elle apparaît plus fort, parce qu'un lecteur tient la page immobile et compare. En mouvement, vous pouvez couper avant qu'un visage raté se voie. Sur une page, le visage raté reste à côté du bon pour toujours.",
         ],
         callouts: [
-          "En animation, l'oeil pardonne ce qu'il ne voit qu'une seconde. Une page de manga lui laisse tout le temps du monde.",
+          "En animation, l'œil pardonne ce qu'il ne voit qu'une seconde. Une page de manga lui laisse tout le temps du monde.",
         ],
       },
       {
@@ -402,7 +402,7 @@ const aiManga: Guide = {
       {
         heading: "Ce qui ne se transfère pas, et qui fait mal",
         paragraphs: [
-          "Les mains. Deux personnages qui se touchent. Tout ce qui porte du texte, de l'enseigne de boutique à la bulle de dialogue. Les bordures de cases et le sens de lecture, que le modèle ne comprend pas du tout et que vous poserez vous-même. Et la laideur volontaire dont le manga se sert pour appuyer : la goutte de sueur, la case chibi, les lignes de vitesse qui cassent la perspective exprès. Les modèles lissent tout ça, parce qu'ils ont appris sur des pages finies qui l'évitent la plupart du temps.",
+          "Les mains. Deux personnages qui se touchent. Tout ce qui porte du texte, de l'enseigne de boutique à la bulle de dialogue. Les bordures de cases et le sens de lecture, que le modèle ne comprend pas du tout et que vous poserez vous-même. Et la laideur volontaire dont le manga se sert pour souligner : la goutte de sueur, la case chibi, les lignes de vitesse qui cassent la perspective exprès. Les modèles lissent tout ça, parce qu'ils ont appris sur des pages finies qui l'évitent la plupart du temps.",
           "Le lettrage est le point à prendre au sérieux. Une bulle générée est une image de texte, pas du texte. Tous les vrais workflows de manga avec de l'IA dedans dessinent l'image puis lettrent à la main après coup, et il n'existe pas encore de raccourci qui se lise bien.",
         ],
       },
@@ -430,7 +430,7 @@ const aiManga: Guide = {
     {
       question: "Le manga IA est-il plus facile que l'animé IA ?",
       answer:
-        "Par image, oui, il n'y a pas de mouvement à combattre. Par oeuvre, pas vraiment, parce que le papier laisse au lecteur le temps de comparer les cases et que chaque incohérence est définitive. L'animation peut couper avant une erreur. Une page ne peut pas.",
+        "Par image, oui, il n'y a pas de mouvement à combattre. Par œuvre, pas vraiment, parce que le papier laisse au lecteur le temps de comparer les cases et que chaque incohérence est définitive. L'animation peut couper pour cacher une erreur. Une page ne peut pas.",
     },
     {
       question: "Comment garder un personnage de manga cohérent avec l'IA ?",
@@ -478,7 +478,7 @@ const aiAnimeGenerator: Guide = {
         list: [
           "Les applis anime en un clic. Un prompt, un preset de style, un clip. Utile pour un test d'ambiance ou un post, inutile pour la continuité, et le plus cher à la seconde exploitable.",
           "Les modèles vidéo bruts avec une interface. Seedance, Kling, Veo et leurs successeurs. C'est là qu'est la qualité, et c'est là que le travail de références, de prompt et de sélection vous revient.",
-          "Les espaces de travail qui mettent plusieurs modèles derrière un même canvas, avec vos références gardées à côté des plans. Pas un générateur, un endroit pour faire tourner des générateurs. C'est la famille d'Imaginode, et celle dans laquelle un épisode se fabrique réellement.",
+          "Les espaces de travail qui mettent plusieurs modèles derrière un même canvas, avec vos références gardées à côté des plans. Pas un générateur, un endroit pour faire tourner des générateurs. C'est la famille à laquelle appartient Imaginode, et celle dans laquelle un épisode se fabrique réellement.",
         ],
         trailingParagraphs: [
           "La première famille, c'est là où atterrissent la plupart des recherches sur un générateur d'animé. La troisième est la seule qui tient la distance d'une histoire.",
@@ -487,7 +487,7 @@ const aiAnimeGenerator: Guide = {
       {
         heading: "Ce que Lost Garden a utilisé, et pour quoi",
         paragraphs: [
-          "Rien dans l'épisode 1 ne vient d'une appli en un clic. Le scénario est écrit à la main dans ScreenWeaver, qui génère ensuite le storyboard à partir du texte. La génération d'images et de vidéo tourne sur Imaginode, où un large catalogue de modèles se trouve derrière un seul canvas à noeuds, et où les références de Lanterne et de Rose restent accrochées à chaque plan qui en a besoin.",
+          "Rien dans l'épisode 1 ne vient d'une appli en un clic. Le scénario est écrit à la main dans ScreenWeaver, qui génère ensuite le storyboard à partir du texte. La génération d'images et de vidéo tourne sur Imaginode, où un large catalogue de modèles se trouve derrière un seul canvas à nodes, et où les références de Lanterne et de Rose restent accrochées à chaque plan qui en a besoin.",
           "Le mouvement vient de plusieurs modèles vidéo, Seedance 2 parmi eux, et le modèle changeait selon le plan. C'est la partie qu'aucun générateur seul ne sait faire : essayer le même plan sur trois modèles et garder celui qui tient l'armure, sans tout reconstruire à chaque fois.",
         ],
       },
@@ -516,7 +516,7 @@ const aiAnimeGenerator: Guide = {
     {
       question: "Un générateur d'animé IA peut-il faire un épisode complet ?",
       answer:
-        "Non. Les générateurs produisent des clips de quelques secondes sans mémoire entre eux. Un épisode, c'est un scénario, des références, des plans jugés un par un contre une bible, un montage et un mixage. L'épisode 1 de Lost Garden a pris à une personne environ un an, et aucune étape n'a tenu en un clic.",
+        "Non. Les générateurs produisent des clips de quelques secondes sans mémoire entre eux. Un épisode, c'est un scénario, des références, des plans jugés un par un contre une bible, un montage et un mixage. L'épisode 1 de Lost Garden a demandé environ un an à une seule personne, et aucune étape n'a tenu en un clic.",
     },
     {
       question: "Les générateurs d'animé IA gratuits valent-ils le coup ?",
@@ -546,14 +546,14 @@ const aiAnimeVoiceAndSound: Guide = {
       {
         paragraphs: [
           "Le son, c'est la moitié d'un animé IA dont personne ne parle, et c'est la moitié qui décide si le spectateur croit à l'espace. Tous les articles sur le sujet parlent d'images. Celui-ci parle de l'autre canal.",
-          "Lost Garden a eu la chance de poser la question tôt. Lanterne est une armure vide avec une lanterne en guise de tête. Pas de bouche, pas de poumons, pas de voix. Tout ce qu'il ressent doit sortir en son, et aucun de ces sons ne pouvait être quelqu'un qui parle.",
+          "Ça aide que Lost Garden ait forcé la question dès le départ. Lanterne est une armure vide avec une lanterne en guise de tête. Pas de bouche, pas de poumons, pas de voix. Tout ce qu'il ressent doit sortir en son, et aucun de ces sons ne pouvait être quelqu'un qui parle.",
         ],
       },
       {
         heading: "Un personnage sans voix",
         paragraphs: [
           "Toute l'identité vocale de Lanterne est faite de métal creux : des grincements, des souffles vides, des résonances internes, des petits grognements de frustration, un soupir métallique étrange quand quelque chose tourne mal. Ces sons ont été explorés avec des outils audio IA, puis choisis, superposés et placés à la main, une réaction à la fois.",
-          "La contrainte s'est révélée être un cadeau. Un personnage qui ne peut pas s'expliquer ne peut pas être sur-écrit, et un spectateur qui doit lire un grincement comme de la déception fait le travail qui le rend attaché. Le son a dit au public ce qu'était Lanterne avant que l'histoire ne le dise.",
+          "La contrainte s'est révélée être un cadeau. Un personnage qui ne peut pas s'expliquer ne peut pas être trop écrit, et un spectateur qui doit lire un grincement comme de la déception fait le travail qui le fait s'attacher. Le son a dit au public ce qu'était Lanterne avant que l'histoire ne le dise.",
         ],
         callouts: [
           "Une voix vous dit ce qu'un personnage dit. Un son vous dit ce qu'un personnage est.",
@@ -569,8 +569,8 @@ const aiAnimeVoiceAndSound: Guide = {
       {
         heading: "La musique a eu des règles avant d'avoir des notes",
         paragraphs: [
-          "La bible du son était aussi stricte que celle des images. Mystique, fragile, souterraine, parfois science-fiction, parfois sacrée, et jamais de la musique de bande-annonce. Quand Lanterne rencontre l'Arbre Source, la partition n'est pas héroïque. Elle est ancienne et trop grande : des tons de verre doux, un violoncelle grave, des textures de choeur sans paroles, la réverbération d'une caverne, le craquement des racines, une faible résonance venue de l'armure elle-même.",
-          "Quand une machine endormie se réveille, la palette bascule : des drones froids, des crépitements électriques, des gémissements mécaniques, des tonalités d'alarme et un cri extraterrestre signature. Ces deux palettes ont été explorées avec des outils de musique IA à partir de briefs écrits, et les briefs étaient le véritable travail. Un modèle à qui l'on donne le mot épique renvoie la moyenne de toutes les partitions épiques jamais composées. Un modèle à qui l'on donne une liste d'instruments interdits renvoie quelque chose qui appartient à un seul film.",
+          "La bible du son était aussi stricte que celle des images. Mystique, fragile, souterraine, parfois science-fiction, parfois sacrée, et jamais de la musique de bande-annonce. Quand Lanterne rencontre l'Arbre Source, la partition n'est pas héroïque. Elle est ancienne et trop grande : des tons de verre doux, un violoncelle grave, des textures de chœur sans paroles, la réverbération d'une caverne, le craquement des racines, une faible résonance venue de l'armure elle-même.",
+          "Quand une machine endormie se réveille, la palette bascule : des drones froids, des crépitements électriques, des gémissements mécaniques, des tonalités d'alarme et un cri extraterrestre qui fait office de signature. Ces deux palettes ont été explorées avec des outils de musique IA à partir de briefs écrits, et les briefs étaient le véritable travail. Un modèle à qui l'on donne le mot épique renvoie la moyenne de toutes les partitions épiques jamais composées. Un modèle à qui l'on donne une liste d'instruments interdits renvoie quelque chose qui appartient à un seul film.",
         ],
       },
       {
@@ -625,11 +625,11 @@ const howToTellIfAnimeIsAi: Guide = {
     sections: [
       {
         paragraphs: [
-          "La question est posée sous chaque clip animé maintenant, et les réponses sûres d'elles se trompent le plus souvent dans les deux sens. Du dessin à la main se fait accuser parce qu'il a des dégradés lisses. Du généré passe parce qu'il a un trait griffé. Voici ce qui se voit réellement, du côté de la personne qui essaie que ça ne se voie pas.",
+          "La question est posée sous chaque clip animé maintenant, et les réponses sûres d'elles se trompent le plus souvent dans les deux sens. Un travail dessiné à la main se fait accuser parce qu'il a des dégradés lisses. Un travail généré passe parce qu'il a un trait griffé. Voici ce qui se voit réellement, du côté de la personne qui fait tout pour que ça ne se voie pas.",
         ],
       },
       {
-        heading: "Regardez la coupe avant le plan",
+        heading: "Regardez la coupe avant la suivante",
         paragraphs: [
           "Le signe le plus fort n'est dans aucun plan pris seul. Il est entre les plans. Le visage d'un personnage, le volume de ses cheveux, la forme exacte d'un col ou d'une sangle : si tout ça bouge légèrement à chaque coupe, les plans ont été générés séparément et personne n'a pu les verrouiller complètement. L'animation traditionnelle dérive aussi, mais elle dérive à l'intérieur d'une scène quand l'animateur fatigue, pas à chaque point de montage.",
           "Le signe qui va avec, c'est la durée des plans. Les projets générés coupent vite sur les visages et s'attardent sur les décors, parce qu'un visage de deux secondes cache la dérive et qu'une caverne de huit secondes n'a rien à trahir. Un épisode entier presque sans plan long sur un personnage vous dit quelque chose.",
@@ -648,8 +648,8 @@ const howToTellIfAnimeIsAi: Guide = {
       {
         heading: "Le mouvement qui flotte",
         paragraphs: [
-          "Le mouvement généré est fluide d'une manière que l'animation à la main refuse volontairement. L'animé tient une pose, claque sur la suivante, saute des images exprès pour l'impact. Les modèles vidéo interpolent tout, donc un personnage qui devrait frapper une pose y glisse à la place. Les cycles de marche sont le cas le plus net : regardez si les pieds se plantent ou s'ils patinent.",
-          "Ce signe s'efface vite, et on peut diriger contre, mais en 2026 c'est encore ce qu'il y a de plus fiable à regarder dans une scène d'action.",
+          "Le mouvement généré est fluide d'une manière que l'animation à la main refuse volontairement. L'animé tient une pose, claque sur la suivante, saute des images exprès pour l'impact. Les modèles vidéo interpolent tout, donc un personnage qui devrait tomber net sur une pose y glisse à la place. Les cycles de marche sont le cas le plus net : regardez si les pieds se plantent ou s'ils patinent.",
+          "Ce signe s'efface vite, et on peut le contrer à la réalisation, mais en 2026 c'est encore ce qu'il y a de plus fiable à regarder dans une scène d'action.",
         ],
       },
       {
@@ -669,7 +669,7 @@ const howToTellIfAnimeIsAi: Guide = {
       {
         heading: "La seule méthode fiable",
         paragraphs: [
-          "Lisez le générique, la description ou les notes de production. Lost Garden dit sur son propre site que l'épisode 1 est assisté par IA sous direction humaine, liste les outils et explique ce qui est humain et ce qui est généré. Twins Hinahima a été transparent sur son usage de l'IA dès le départ. Les projets qui le cachent sont ceux pour lesquels les tests ci-dessus existent, et ces tests perdent en fiabilité chaque mois.",
+          "Lisez le générique, la description ou les notes de production. Lost Garden dit sur son propre site que l'épisode 1 est assisté par IA sous direction humaine, liste les outils et explique ce qui est humain et ce qui est généré. Twins Hinahima a été transparente sur son usage de l'IA dès le départ. Les projets qui le cachent sont ceux pour lesquels les tests ci-dessus existent, et ces tests perdent en fiabilité chaque mois.",
           "Donc la question utile est en train de passer de est-ce que je peux le voir à est-ce qu'on me l'a dit. C'est une question sur les gens, et elle ne se périme pas.",
         ],
       },
@@ -713,7 +713,7 @@ const makingOfEpisodeOne: Guide = {
     sections: [
       {
         paragraphs: [
-          "L'épisode 1 est sorti le 29 mai 2026. Dix-sept minutes, écrites, réalisées, générées, montées et mixées par une seule personne. Depuis, il a passé les soixante-cinq mille vues, il a été sélectionné au Seoul International AI Film Festival et il est arrivé en finale de l'AI London Festival. Voici le récit de sa fabrication, sans les parties qu'on lisse d'habitude.",
+          "L'épisode 1 est sorti le 29 mai 2026. Dix-sept minutes, écrites, réalisées, générées, montées et mixées par une seule personne. Depuis, il a dépassé les soixante-cinq mille vues, il a été sélectionné au Seoul International AI Film Festival et il est arrivé en finale de l'AI London Festival. Voici le récit de sa fabrication, sans les parties qu'on lisse d'habitude.",
         ],
       },
       {
@@ -737,7 +737,7 @@ const makingOfEpisodeOne: Guide = {
         heading: "L'ordre des opérations",
         paragraphs: [
           "Le scénario a été écrit à la main dans ScreenWeaver et il est resté l'unique source de vérité pour tout ce qui a suivi. ScreenWeaver en a généré le storyboard, scène par scène, et chaque plan a été produit dans son workflow pour qu'aucune image ne perde jamais le lien avec la ligne de scénario qu'elle servait.",
-          "La génération a tourné sur Imaginode, un canvas à noeuds avec un large catalogue de modèles d'image et de vidéo derrière. L'intérêt de ce montage n'a jamais été le choix d'un modèle. C'était de pouvoir essayer le même plan sur plusieurs, avec les références de personnage toujours accrochées, et garder celui qui tenait l'armure. Seedance 2 a pris beaucoup de mouvement. Ce n'était pas le seul, et le modèle gagnant changeait plan par plan.",
+          "La génération a tourné sur Imaginode, un canvas à nodes avec un large catalogue de modèles d'image et de vidéo derrière. L'intérêt de ce dispositif n'a jamais été le choix d'un modèle. C'était de pouvoir essayer le même plan sur plusieurs, avec les références de personnage toujours accrochées, et garder celui qui tenait l'armure. Seedance 2 a pris en charge une bonne partie du mouvement. Ce n'était pas le seul, et le modèle gagnant changeait plan par plan.",
         ],
       },
       {
@@ -781,7 +781,7 @@ const makingOfEpisodeOne: Guide = {
     {
       question: "Lost Garden a-t-il été montré en festival ?",
       answer:
-        "Oui. L'épisode 1 a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival. Il a aussi passé les soixante-cinq mille vues sur YouTube.",
+        "Oui. L'épisode 1 a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival. Il a aussi dépassé les soixante-cinq mille vues sur YouTube.",
     },
   ],
   related: [
@@ -813,7 +813,7 @@ const canOnePersonMakeAnAnime: Guide = {
       {
         heading: "Ce que l'IA vous enlève des mains",
         paragraphs: [
-          "L'intervalle, la couleur, l'essentiel de la peinture des décors, la production brute des images. Sur Lost Garden, tout ça est passé par Imaginode avec plusieurs modèles vidéo, et c'est ce travail-là qui demandait autrefois un étage entier de gens. Comme goulot d'étranglement, il a vraiment disparu, et c'est toute la raison pour laquelle un épisode solo existe.",
+          "Les intervalles, la couleur, l'essentiel de la peinture des décors, la production brute des images. Sur Lost Garden, tout ça est passé par Imaginode avec plusieurs modèles vidéo, et c'est ce travail-là qui demandait autrefois un étage entier de gens. Comme goulot d'étranglement, il a vraiment disparu, et c'est toute la raison pour laquelle un épisode solo existe.",
           "Elle prend aussi le premier jet du storyboard, que ScreenWeaver génère à partir du scénario, et une première passe de voix et de musique à partir de briefs écrits. Des premiers jets et des premières passes. Pas des versions finales.",
         ],
         callouts: [
@@ -827,16 +827,16 @@ const canOnePersonMakeAnAnime: Guide = {
           "Un réalisateur. Où se tient la caméra, ce que le spectateur sait, quand couper. C'est l'essentiel de l'année.",
           "Un monteur. L'épisode devient un épisode au montage. La dérive s'y cache, le rythme s'y trouve, les mauvais plans y meurent.",
           "Quelqu'un pour le son. La moitié du film, et la moitié que les créateurs solo sautent. Lanterne n'a pas de voix, donc sur ce projet le son, c'était le personnage.",
-          "Un producteur, c'est à dire la personne qui décide qu'une scène sera réécrite plutôt que régénérée pendant un mois de plus.",
+          "Un producteur, c'est-à-dire la personne qui décide qu'une scène sera réécrite plutôt que régénérée pendant un mois de plus.",
         ],
         trailingParagraphs: [
-          "Remarquez qu'aucun de ces métiers n'est dessiner. Vous n'avez pas besoin de dessiner. Vous avez besoin de savoir ce qui cloche dans une image et pourquoi, ce qui est plus proche de la réalisation que de l'illustration.",
+          "Remarquez qu'aucun de ces métiers n'est le dessin. Vous n'avez pas besoin de dessiner. Vous avez besoin de savoir ce qui cloche dans une image et pourquoi, ce qui est plus proche de la réalisation que de l'illustration.",
         ],
       },
       {
-        heading: "Ce que seul coûte",
+        heading: "Ce que ça coûte d'être seul",
         paragraphs: [
-          "Du temps, en mois. L'épisode 1 a pris environ un an pour dix-sept minutes, et l'essentiel est parti dans les prises refusées et le montage, pas dans la frappe de prompts. Il n'y a personne à qui refiler la partie ennuyeuse, et la partie ennuyeuse, c'est presque tout.",
+          "Du temps, en mois. L'épisode 1 a pris environ un an pour dix-sept minutes, et l'essentiel est parti dans les prises refusées et le montage, pas à taper des prompts. Il n'y a personne à qui refiler la partie ennuyeuse, et la partie ennuyeuse, c'est presque tout.",
           "La fatigue du goût, c'est le coût dont personne ne vous prévient. Choisir entre quarante versions d'un plan, scène après scène, use exactement le jugement dont tout dépend. Une bible du monde, c'est ce qui vous permet de continuer à décider quand vous êtes fatigué : le plan respecte la règle ou il ne la respecte pas.",
         ],
       },
@@ -918,13 +918,13 @@ const aiAnimeStoryboard: Guide = {
         heading: "Un board à partir du scénario, jamais à partir d'une ambiance",
         paragraphs: [
           "Le board est généré à partir du scénario parce que le scénario est la source de vérité de tout ce qui suit. Quand le board vient d'une ambiance, d'un film de référence, d'un lot d'images que vous aimez, l'histoire se plie pour leur correspondre, et vous ne le remarquerez qu'au montage.",
-          "Concrètement, chaque case du board de Lost Garden peut être ramenée à une ligne du scénario. Quand une case ne le peut pas, c'est soit une ligne qui manque, soit un plan qui n'a rien à faire là.",
+          "Concrètement, chaque case du board de Lost Garden peut être rattachée à une ligne du scénario. Quand une case ne le peut pas, c'est soit une ligne qui manque, soit un plan qui n'a rien à faire là.",
         ],
       },
       {
         heading: "Ce que le board a appris à l'épisode",
         paragraphs: [
-          "Qu'une page de dialogue ne devient une séquence que quand quelqu'un décide où se placer. Qu'une scène avec une caméra révèle une scène sans point de vue. Et que Lanterne, qui ne peut pas parler, avait besoin de plus de plans que le scénario ne le suggérait, parce qu'un grincement et un geste prennent un temps d'écran qu'une réplique ne prend pas.",
+          "Qu'une page de dialogue ne devient une séquence que quand quelqu'un décide où se placer. Qu'une scène avec une caméra révèle une scène qui n'a pas de raison d'être. Et que Lanterne, qui ne peut pas parler, avait besoin de plus de plans que le scénario ne le suggérait, parce qu'un grincement et un geste prennent un temps d'écran qu'une réplique ne prend pas.",
           "Plusieurs scènes ont été réécrites après le board, pas après la génération. C'est le moment le moins cher pour changer d'avis, et le board est ce qui le rend visible.",
         ],
       },
@@ -945,7 +945,7 @@ const aiAnimeStoryboard: Guide = {
     {
       question: "Faut-il un storyboard pour un animé IA ?",
       answer:
-        "Plus encore que pour un animé traditionnel. La génération rend bon marché la production de plans sans raison, et le board est l'endroit où chaque plan en reçoit une. Le sauter est la façon la plus courante de finir avec un dossier de beaux clips qui ne se montent pas ensemble.",
+        "Plus encore que pour un animé traditionnel. Avec la génération, produire un plan sans raison ne coûte presque rien, et le board est l'endroit où chaque plan en reçoit une. Le sauter est la façon la plus courante de finir avec un dossier de beaux clips qui ne se montent pas ensemble.",
     },
     {
       question: "Les images du storyboard doivent-elles servir dans l'épisode final ?",
@@ -973,7 +973,7 @@ const aiAnimeBackgrounds: Guide = {
     sections: [
       {
         paragraphs: [
-          "Les décors, c'est là que la génération brille et là que les projets meurent en silence. Un modèle rend une caverne, une forêt, une salle en ruine avec plus de richesse qu'une petite équipe ne pourrait les peindre, en quelques secondes. Il rend aussi la moyenne de toutes les cavernes qu'il a vues, et un épisode bâti sur des moyennes n'appartient à personne.",
+          "Les décors, c'est là que la génération brille et là que les projets meurent en silence. Un modèle renvoie une caverne, une forêt, une salle en ruine avec plus de richesse qu'une petite équipe ne pourrait les peindre, en quelques secondes. Il renvoie aussi la moyenne de toutes les cavernes qu'il a vues, et un épisode bâti sur des moyennes n'appartient à personne.",
           "Lost Garden est un monde entièrement souterrain. Forêts bleues, brume cyan, champignons lumineux, lys blancs, racines géantes, plateformes de pierre flottantes, rivières dans le noir, machines endormies sous la mousse. Garder ce monde identique pendant dix-sept minutes a été plus dur que garder les personnages.",
         ],
       },
@@ -997,19 +997,19 @@ const aiAnimeBackgrounds: Guide = {
       {
         heading: "La cohérence est un problème plus petit que pour les personnages, et différent",
         paragraphs: [
-          "Personne ne suit un rocher des yeux. Une caverne peut être régénérée entre deux plans et aucun spectateur ne remarquera qu'une fissure a bougé, tant que la lumière, la palette et l'échelle tiennent. Ce qu'il remarque, c'est un changement d'humeur : une caverne humide et froide qui devient sèche et chaude d'une coupe à l'autre.",
+          "Personne ne suit un rocher des yeux. Une caverne peut être régénérée entre deux plans et aucun spectateur ne remarquera qu'une fissure a bougé, tant que la lumière, la palette et l'échelle tiennent. Ce qu'il remarque, c'est un changement d'ambiance : une caverne humide et froide qui devient sèche et chaude d'une coupe à l'autre.",
           "Donc la référence d'un décor n'est pas une image unique à copier. Ce sont deux ou trois plans d'ancrage par lieu qui fixent la lumière et l'échelle, et chaque nouveau plan de cet endroit se juge contre eux.",
         ],
       },
       {
         heading: "Le problème de la moyenne",
         paragraphs: [
-          "Demandez une forêt mystique et vous obtenez la moyenne de toutes les forêts mystiques : symétrique, centrée, éclairée uniformément, chaque arbre en héros. Ce look est ce qui rend les décors IA reconnaissables au premier coup d'oeil. Le casser, c'est demander le spécifique : une forêt où les champignons sont la seule lumière, où les racines sont plus grosses que les arbres, où la caméra est basse et la moitié du cadre dans la brume.",
-          "Spécifique ne veut pas dire détaillé. L'excès de détail est lui-même un indice. Un décor dessiné a des zones plates parce qu'un peintre a décidé de ce qui comptait. Un décor généré texture tout, sauf si vous lui dites de ne pas le faire.",
+          "Demandez une forêt mystique et vous obtenez la moyenne de toutes les forêts mystiques : symétrique, centrée, éclairée uniformément, chaque arbre en vedette. Ce look est ce qui rend les décors IA reconnaissables au premier coup d'œil. Le casser, c'est demander le spécifique : une forêt où les champignons sont la seule lumière, où les racines sont plus grosses que les arbres, où la caméra est basse et la moitié du cadre dans la brume.",
+          "Spécifique ne veut pas dire détaillé. L'excès de détail est lui-même un indice. Un décor dessiné a des zones plates parce qu'un peintre a décidé de ce qui comptait. Un décor généré remplit tout de texture, sauf si vous lui dites de ne pas le faire.",
         ],
       },
       {
-        heading: "Quoi faire",
+        heading: "Que faire",
         paragraphs: [
           "Écrivez les règles négatives d'abord. Fixez une palette et un seul accent chaud. Réduisez le monde aux lieux qui partagent une identité. Faites deux ou trois plans d'ancrage par lieu et jugez chaque nouveau plan contre eux. Et demandez ce qui est étrange dans votre monde, pas ce qui est beau dans les mondes en général.",
         ],
@@ -1020,7 +1020,7 @@ const aiAnimeBackgrounds: Guide = {
     {
       question: "L'IA peut-elle générer des décors d'animé ?",
       answer:
-        "Oui, et souvent mieux qu'une petite équipe ne pourrait les peindre. Le problème n'est pas la qualité mais l'identité : un modèle rend la moyenne de tous les lieux similaires qu'il a vus, et un épisode bâti sur des moyennes ressemble à tous les autres projets IA. Une bible avec des règles négatives est ce qui garde les décors dans un seul lieu.",
+        "Oui, et souvent mieux qu'une petite équipe ne pourrait les peindre. Le problème n'est pas la qualité mais l'identité : un modèle renvoie la moyenne de tous les lieux similaires qu'il a vus, et un épisode bâti sur des moyennes ressemble à tous les autres projets IA. Une bible avec des règles négatives est ce qui fait des décors un seul lieu.",
     },
     {
       question: "Comment garder des décors IA cohérents entre les plans ?",
@@ -1030,7 +1030,7 @@ const aiAnimeBackgrounds: Guide = {
     {
       question: "Pourquoi les décors d'animé IA se ressemblent-ils tous ?",
       answer:
-        "Parce que les prompts génériques rendent des moyennes génériques : centrées, symétriques, éclairées uniformément, texturées partout. Demander ce qui est spécifique et étrange dans votre monde, et interdire ce qui n'y appartient pas, est ce qui casse le look.",
+        "Parce que les prompts génériques renvoient des moyennes génériques : centrées, symétriques, éclairées uniformément, texturées partout. Demander ce qui est spécifique et étrange dans votre monde, et interdire ce qui n'y appartient pas, est ce qui casse le look.",
     },
     {
       question: "Quelle est la bible du monde de Lost Garden ?",
@@ -1049,7 +1049,7 @@ const aiAnimeBackgrounds: Guide = {
 const aiAnimeScript: Guide = {
   article: {
     byline:
-      "La question la plus cherchée du domaine, c'est de savoir si l'IA peut écrire votre animé. Elle peut. L'épisode de ce site n'a pas été écrit comme ça, et voici pourquoi, de la part de quelqu'un qui construit des outils d'écriture pour vivre.",
+      "La question la plus recherchée dans ce domaine, c'est de savoir si l'IA peut écrire votre animé. Elle peut. L'épisode de ce site n'a pas été écrit comme ça, et voici pourquoi, de la part de quelqu'un dont le métier est de construire des outils d'écriture.",
     sections: [
       {
         paragraphs: [
@@ -1069,7 +1069,7 @@ const aiAnimeScript: Guide = {
       {
         heading: "Lost Garden n'y survivrait pas",
         paragraphs: [
-          "Le personnage principal ne peut pas parler. L'enfant n'est pas une arme, pas un miracle à dépenser, pas un symbole. Le chevalier est l'un des plus faibles des treize et c'est le point. Le monde est entièrement souterrain et il n'y a pas de ciel. Chacun de ces choix, un modèle le signalerait comme un problème et le corrigerait discrètement, parce que chacun rend l'histoire plus difficile à raconter de façon conventionnelle.",
+          "Le personnage principal ne peut pas parler. L'enfant n'est pas une arme, pas un miracle à dépenser, pas un symbole. Le chevalier est l'un des plus faibles des treize et c'est voulu. Le monde est entièrement souterrain et il n'y a pas de ciel. Chacun de ces choix, un modèle le signalerait comme un problème et le corrigerait discrètement, parce que chacun rend l'histoire plus difficile à raconter de façon conventionnelle.",
           "Ces choix difficiles sont l'histoire. Retirez-les et vous avez une fantasy correcte sur un chevalier fort qui sauve une fille magique, ce qui existe déjà dix mille fois.",
         ],
       },
@@ -1126,15 +1126,15 @@ const aiAnimeCopyright: Guide = {
     sections: [
       {
         paragraphs: [
-          "C'est la question sous chaque animation IA qui attire un peu d'attention, et elle mérite une réponse simple plutôt qu'un haussement d'épaules. En bref : les parties qu'un humain a écrites peuvent être protégées, celles qu'une machine a générées seule ne le peuvent en général pas, et le travail utile consiste à savoir lesquelles sont lesquelles dans votre propre projet avant qu'on vous le demande.",
+          "C'est la question sous chaque animation IA qui attire un peu d'attention, et elle mérite une réponse simple plutôt qu'un haussement d'épaules. En bref : les parties dont un humain est l'auteur peuvent être protégées, celles qu'une machine a générées seule ne le peuvent en général pas, et le travail utile consiste à savoir lesquelles sont lesquelles dans votre propre projet avant qu'on vous le demande.",
           "Rien ici n'est un conseil juridique. Les règles diffèrent selon les pays et bougent encore. Ce qui suit, c'est la façon dont une production indépendante s'y prend.",
         ],
       },
       {
-        heading: "Où en est la position, en gros",
+        heading: "Où en est la situation, en gros",
         paragraphs: [
-          "Les déclarations publiques les plus claires à ce jour viennent du Copyright Office américain, qui a dit qu'un contenu généré entièrement par une machine, sans auteur humain, ne peut pas être enregistré, alors que les contributions humaines à une oeuvre, son écriture, sa sélection et son agencement, son montage, le peuvent. D'autres juridictions ont été moins explicites, et aucune n'a dit le contraire.",
-          "Lisez ça attentivement et ça décrit assez bien un film assisté par IA. Le scénario est écrit. Le montage est écrit. Le choix de quarante prises refusées et d'une gardée est un acte d'auteur. Les pixels à l'intérieur d'un seul plan généré sont la zone grise.",
+          "Les déclarations publiques les plus claires à ce jour viennent du Copyright Office américain, qui a dit qu'un contenu généré entièrement par une machine, sans auteur humain, ne peut pas être enregistré, alors que les contributions humaines à une œuvre, son écriture, sa sélection et son agencement, son montage, le peuvent. D'autres juridictions ont été moins explicites, et aucune n'a dit le contraire.",
+          "Lisez ça attentivement et ça décrit assez bien un film assisté par IA. Le scénario a un auteur. Le montage a un auteur. Le choix de quarante prises refusées et d'une gardée a un auteur. Les pixels à l'intérieur d'un seul plan généré sont la zone grise.",
         ],
         callouts: [
           "Le film est la somme des décisions humaines. Le plan est l'endroit où la machine a fait sa part. La protection suit les décisions.",
@@ -1163,7 +1163,7 @@ const aiAnimeCopyright: Guide = {
       {
         heading: "Ce que ça ne règle pas",
         paragraphs: [
-          "Si une seule image générée peut être protégée. Si l'entraînement était loyal. Si les règles seront les mêmes dans deux ans. Rien de tout ça n'est au pouvoir d'un réalisateur indépendant. Ce qui est en votre pouvoir, c'est de faire une oeuvre où l'apport humain est réel, visible et documenté, pour que, quoi que les règles deviennent, votre film soit du bon côté.",
+          "Si une seule image générée peut être protégée. Si l'entraînement était loyal. Si les règles seront les mêmes dans deux ans. Rien de tout ça n'est au pouvoir d'un réalisateur indépendant. Ce qui est en votre pouvoir, c'est de faire une œuvre où l'apport humain est réel, visible et documenté, pour que, quoi que les règles deviennent, votre film soit du bon côté.",
         ],
       },
     ],
@@ -1172,7 +1172,7 @@ const aiAnimeCopyright: Guide = {
     {
       question: "Peut-on protéger un animé IA par le droit d'auteur ?",
       answer:
-        "Les parties écrites par un humain, en général oui : le scénario, le montage, la sélection et l'agencement des plans, les personnages et le monde originaux. Un contenu purement généré sans auteur humain a été décrit comme non enregistrable, notamment par le Copyright Office américain. Les règles diffèrent selon les pays et ceci n'est pas un conseil juridique.",
+        "Les parties dont un humain est l'auteur, en général oui : le scénario, le montage, la sélection et l'agencement des plans, les personnages et le monde originaux. Un contenu purement généré sans auteur humain a été décrit comme non enregistrable, notamment par le Copyright Office américain. Les règles diffèrent selon les pays et ceci n'est pas un conseil juridique.",
     },
     {
       question: "À qui appartient Lost Garden ?",
@@ -1187,7 +1187,7 @@ const aiAnimeCopyright: Guide = {
     {
       question: "Dois-je dire que mon animé utilise l'IA ?",
       answer:
-        "Oui. C'est la position honnête, c'est ce qu'attendent les bases de données et les festivals qui acceptent les oeuvres IA, et le cacher est la seule chose qui transforme à coup sûr une question technique en question de réputation.",
+        "Oui. C'est la position honnête, c'est ce qu'attendent les bases de données et les festivals qui acceptent les œuvres IA, et le cacher est la seule chose qui transforme à coup sûr une question technique en question de réputation.",
     },
   ],
   related: [
@@ -1205,7 +1205,7 @@ const historyOfAiAnime: Guide = {
     sections: [
       {
         paragraphs: [
-          "La question du premier animé IA est souvent posée et mal répondue, parce qu'elle a trois réponses honnêtes selon qu'on parle d'un court métrage, d'une série diffusée ou d'un épisode indépendant complet. Les voici dans l'ordre, avec les dates.",
+          "On pose souvent la question du premier animé IA et on y répond mal, parce qu'elle a trois réponses honnêtes selon qu'on parle d'un court métrage, d'une série diffusée ou d'un épisode indépendant complet. Les voici dans l'ordre, avec les dates.",
         ],
       },
       {
@@ -1218,8 +1218,8 @@ const historyOfAiAnime: Guide = {
       {
         heading: "2025 : la première série diffusée",
         paragraphs: [
-          "Twins Hinahima, produit par Frontier Works et KaKa Creation, a été diffusé sur Tokyo MX en mars 2025. Environ 95 % de ses plans d'animation impliquaient de l'IA générative. C'était un vrai animé de télévision, au Japon, fait pour le marché japonais, et selon toutes les définitions qu'utilisent les bases de données, il compte. C'est la réponse à la question du premier animé IA au sens strict.",
-          "La même année, Vidu et Aura Productions ont sorti une série de science-fiction de cinquante courts épisodes, qui a montré le versant volume de l'histoire : pas un épisode de prestige, mais un calendrier.",
+          "Twins Hinahima, produite par Frontier Works et KaKa Creation, a été diffusée sur Tokyo MX en mars 2025. Environ 95 % de ses plans d'animation impliquaient de l'IA générative. C'était un vrai animé de télévision, au Japon, fait pour le marché japonais, et selon toutes les définitions qu'utilisent les bases de données, elle compte. C'est la réponse à la question du premier animé IA au sens strict.",
+          "La même année, Vidu et Aura Productions ont sorti une série de science-fiction de cinquante courts épisodes, qui a montré le versant volume de l'histoire : pas un épisode de prestige, mais une cadence.",
         ],
         callouts: [
           "En 2025, la question a cessé d'être de savoir si l'animé IA pouvait exister, pour devenir de savoir si quelqu'un en voulait.",
@@ -1240,7 +1240,7 @@ const historyOfAiAnime: Guide = {
           "2026 a prouvé que le format avait des clients, et qu'une seule personne pouvait finir un épisode avec un monde à elle.",
         ],
         trailingParagraphs: [
-          "Rien n'a encore prouvé que l'animé IA peut être grand. C'est l'étape ouverte, et elle n'est pas technique.",
+          "Rien n'a encore prouvé que l'animé IA peut être excellent. C'est l'étape ouverte, et elle n'est pas technique.",
         ],
       },
       {
@@ -1258,7 +1258,7 @@ const historyOfAiAnime: Guide = {
         "Ça dépend de ce qu'on compte. Le premier court d'un grand studio avec des décors générés par IA est The Dog & the Boy, Netflix Japon et WIT Studio, janvier 2023. La première série diffusée est Twins Hinahima sur Tokyo MX en mars 2025, avec de l'IA générative dans environ 95 % de ses plans. Le premier épisode complet d'une série originale fait par une seule personne, à notre connaissance, est Lost Garden, sorti le 29 mai 2026.",
     },
     {
-      question: "Twins Hinahima est-il le premier animé IA ?",
+      question: "Twins Hinahima est-elle le premier animé IA ?",
       answer:
         "C'est la première série télévisée d'animé IA au sens strict : produite au Japon par Frontier Works et KaKa Creation, diffusée sur Tokyo MX en mars 2025, et comptée comme animé selon les règles des bases de données elles-mêmes. Des courts utilisant l'IA la précèdent de deux ans.",
     },
@@ -1270,7 +1270,7 @@ const historyOfAiAnime: Guide = {
     {
       question: "À quelle vitesse l'animé IA change-t-il ?",
       answer:
-        "Trois ans séparent des décors IA corrigés dans un court de trois minutes d'un épisode solo de dix-sept minutes. Des plans faits sur les outils d'aujourd'hui seront dépassés avant la fin de la production.",
+        "Trois ans séparent des décors IA corrigés dans un court de trois minutes d'un épisode solo de dix-sept minutes. Des projets planifiés sur les outils d'aujourd'hui seront dépassés avant la fin de la production.",
     },
   ],
   related: [
@@ -1294,7 +1294,7 @@ const animeStylePrompts: Guide = {
       {
         heading: "Le modèle vous donne la moyenne",
         paragraphs: [
-          "Un modèle a vu un très grand nombre d'images d'animé et, quand on lui en demande une, rend leur centre. Composition centrée, visage symétrique, tout net, rien de coupé, rien dans l'ombre. Ce centrage est la signature la plus reconnaissable des images générées, et il vient du fait que le prompt est général.",
+          "Un modèle a vu un très grand nombre d'images d'animé et, quand on lui en demande une, renvoie leur centre. Composition centrée, visage symétrique, tout net, rien de coupé, rien dans l'ombre. Ce centrage est la signature la plus reconnaissable des images générées, et il vient du fait que le prompt est général.",
           "Donc le premier travail d'un prompt n'est pas la description. C'est le déplacement : pousser le résultat loin du centre, dans une direction qui appartient à votre film.",
         ],
         callouts: [
@@ -1307,7 +1307,7 @@ const animeStylePrompts: Guide = {
           "La référence d'abord. Une character sheet ou un plan d'ancrage du lieu, attaché, pas décrit. Les mots dérivent, les images non.",
           "La caméra. Basse, large, de dos, la moitié du cadre dans la brume. Une décision de caméra est ce qui arrête le centrage.",
           "Les règles de la bible. Bleu et cyan, pierre mouillée, pas de ciel, une seule lumière chaude. Identiques sur chaque plan.",
-          "Ce qui est interdit. Pas de soleil, pas de lumière ambiante chaude, pas de foule, pas d'architecture propre. La liste négative fait plus que la positive.",
+          "Ce qui est interdit. Pas de soleil, pas de lumière ambiante chaude, pas de foule, pas d'architecture nette. La liste négative fait plus que la positive.",
           "Puis, en dernier et en plus court, l'action du plan.",
         ],
         trailingParagraphs: [
@@ -1317,13 +1317,13 @@ const animeStylePrompts: Guide = {
       {
         heading: "Plus court, pas plus long",
         paragraphs: [
-          "L'instinct dit qu'un prompt plus long est plus maîtrisé. C'est l'inverse. Chaque terme de plus est une chose de plus que le modèle peut pondérer différemment d'une exécution à l'autre, et les prompts longs dérivent plus entre les plans, pas moins. La cohérence d'un épisode vient des références et des règles identiques sur chaque plan, et d'un texte libre court.",
+          "L'instinct dit qu'un prompt plus long est plus maîtrisé. C'est l'inverse. Chaque terme de plus est une chose de plus que le modèle peut pondérer différemment d'une génération à l'autre, et les prompts longs dérivent plus entre les plans, pas moins. La cohérence d'un épisode vient des références et des règles identiques sur chaque plan, et d'un texte libre court.",
         ],
       },
       {
         heading: "Ne nommez ni un studio ni un artiste",
         paragraphs: [
-          "Ça marche, c'est bien le problème. Un prompt qui nomme un studio connu rend le look de ce studio, et votre film devient la copie de quelque chose qui a un avocat. C'est aussi le moyen le plus rapide de faire que le style ne soit pas le vôtre. Construisez le look à partir de vos propres références et de vos propres règles. Ça prend plus de temps et c'est la seule chose qui survit.",
+          "Ça marche, c'est bien le problème. Un prompt qui nomme un studio connu renvoie le look de ce studio, et votre film devient la copie de quelque chose qui a un avocat. C'est aussi le moyen le plus rapide de faire en sorte que le style ne soit pas le vôtre. Construisez le look à partir de vos propres références et de vos propres règles. Ça prend plus de temps et c'est la seule chose qui survit.",
         ],
       },
       {
@@ -1338,17 +1338,17 @@ const animeStylePrompts: Guide = {
     {
       question: "Quel est le meilleur prompt pour un style animé ?",
       answer:
-        "Il n'y a pas de formule magique, parce que tout prompt général rend l'image d'animé moyenne : centrée, symétrique, éclairée uniformément. Un prompt de production se construit à partir d'une référence attachée, d'une décision de caméra, des règles de la bible, d'une liste d'interdits et d'une courte description de l'action. Le style vient des références, pas des mots.",
+        "Il n'y a pas de formule magique, parce que tout prompt général renvoie l'image d'animé moyenne : centrée, symétrique, éclairée uniformément. Un prompt de production se construit à partir d'une référence attachée, d'une décision de caméra, des règles de la bible, d'une liste d'interdits et d'une courte description de l'action. Le style vient des références, pas des mots.",
     },
     {
       question: "Pourquoi mes images d'animé IA sont-elles toutes centrées et pareilles ?",
       answer:
-        "Parce qu'un prompt général rend la moyenne des données d'entraînement, et la moyenne est centrée. Une décision de caméra dans le prompt, basse, large, de dos, coupée, est ce qui la déplace. Attachez des références au lieu de les décrire.",
+        "Parce qu'un prompt général renvoie la moyenne des données d'entraînement, et la moyenne est centrée. Une décision de caméra dans le prompt, basse, large, de dos, coupée, est ce qui la déplace. Attachez des références au lieu de les décrire.",
     },
     {
       question: "Faut-il écrire des prompts longs pour la cohérence ?",
       answer:
-        "Non. Les prompts longs dérivent plus entre les plans, parce que chaque terme de plus peut être pondéré différemment à chaque exécution. La cohérence vient de références et de règles identiques sur chaque plan et d'un texte libre court.",
+        "Non. Les prompts longs dérivent plus entre les plans, parce que chaque terme de plus peut être pondéré différemment à chaque génération. La cohérence vient de références et de règles identiques sur chaque plan et d'un texte libre court.",
     },
     {
       question: "Peut-on prompter dans le style d'un studio connu ?",
@@ -1371,14 +1371,14 @@ const editingAiAnime: Guide = {
     sections: [
       {
         paragraphs: [
-          "Tous les guides sur l'animé IA s'arrêtent à la génération, comme si les clips étaient le film. Ce sont la matière première. L'épisode existe dans le montage : le rythme, les plans tenus, le choix de ce que le spectateur voit et pendant combien de temps, et les cent décisions de perdre un beau plan parce qu'il était faux pour la scène. Rien de ça n'est sorti d'un modèle, et c'est à tout ça que les gens ont réagi.",
+          "Tous les guides sur l'animé IA s'arrêtent à la génération, comme si les clips étaient le film. C'est la matière première. L'épisode existe dans le montage : le rythme, les plans tenus, le choix de ce que le spectateur voit et pendant combien de temps, et les cent décisions de perdre un beau plan parce qu'il était faux pour la scène. Rien de ça n'est sorti d'un modèle, et c'est à tout ça que les gens ont réagi.",
         ],
       },
       {
         heading: "Couper sur le mouvement",
         paragraphs: [
-          "La plus vieille règle du montage est ici la plus utile. Une coupe qui tombe sur un mouvement, un demi-tour, un pas, une main qui se tend, est invisible, et une coupe invisible cache la petite dérive entre deux plans générés. Une coupe sur une image immobile invite l'oeil à comparer, et la comparaison est là où l'IA se voit.",
-          "C'est pour ça que le board décide de la durée des plans avant la génération. Vous coupez vers le mouvement que vous aviez prévu, pas à la recherche d'un mouvement après coup.",
+          "La plus vieille règle du montage est ici la plus utile. Une coupe qui tombe sur un mouvement, un demi-tour, un pas, une main qui se tend, est invisible, et une coupe invisible cache la petite dérive entre deux plans générés. Une coupe sur une image immobile invite l'œil à comparer, et la comparaison est là où l'IA se voit.",
+          "C'est pour ça que le board décide de la durée des plans avant la génération. Vous coupez sur le mouvement que vous aviez prévu, au lieu d'en chercher un après coup.",
         ],
         callouts: [
           "Un spectateur pardonne un visage qui change pendant un demi-tour. Il ne pardonne jamais un visage qui change pendant qu'il le regarde.",
@@ -1388,7 +1388,7 @@ const editingAiAnime: Guide = {
         heading: "Court sur les visages, long sur le monde",
         paragraphs: [
           "La dérive est fonction de la durée. Deux secondes sur un visage se trahissent rarement, huit secondes toujours. Donc les plans de personnage sont courts et les plans de décor sont longs, et le rythme d'un animé IA tend vers ce schéma que ça vous plaise ou non.",
-          "L'astuce, c'est d'en faire une vertu. Lost Garden est un film lent et silencieux, et ses plans longs sont sur des cavernes, des machines, de la brume, pas sur un visage qui fait semblant de jouer. C'est un choix de style né d'une limite technique, et la plupart des styles le sont.",
+          "L'astuce, c'est d'en faire une vertu. Lost Garden est un film lent et calme, et ses plans longs sont sur des cavernes, des machines, de la brume, pas sur un visage qui fait semblant de jouer. C'est un choix de style né d'une limite technique, et la plupart des styles le sont.",
         ],
       },
       {
@@ -1400,7 +1400,7 @@ const editingAiAnime: Guide = {
       {
         heading: "Régénérer ou contourner : la seule vraie décision",
         paragraphs: [
-          "Chaque plan défectueux pose la même question. Est-il faux, ou seulement imparfait. Faux veut dire régénérer : le plan contredit la bible, le personnage est quelqu'un d'autre, l'action n'est pas l'action. Imparfait veut dire contourner : le raccourcir, passer en large, mettre le défaut dans l'ombre, couper avant que l'oeil le trouve.",
+          "Chaque plan défectueux pose la même question. Est-il faux, ou seulement imparfait. Faux veut dire régénérer : le plan contredit la bible, le personnage est quelqu'un d'autre, l'action n'est pas l'action. Imparfait veut dire contourner : le raccourcir, passer en large, mettre le défaut dans l'ombre, couper avant que l'œil le trouve.",
           "Distinguer les deux vite, c'est l'essentiel du métier. Régénérer tout ce qui est imparfait ne finit jamais. Contourner tout ce qui est faux fait un film que personne ne croit.",
         ],
       },
@@ -1461,13 +1461,13 @@ const whyAiAnimeLooksBad: Guide = {
       {
         heading: "1. Il n'y a pas d'histoire, donc rien vers quoi couper",
         paragraphs: [
-          "Une bobine de beaux plans sans scène entre eux paraît mauvaise même quand chaque image est bonne, parce que l'oeil n'a rien à suivre. C'est la cause la plus courante et la moins discutée, puisqu'elle n'a rien à voir avec l'IA. Le remède, c'est un scénario avec des scènes qui changent quelque chose, avant toute génération.",
+          "Une bobine de beaux plans sans scène entre eux paraît mauvaise même quand chaque image est bonne, parce que l'œil n'a rien à suivre. C'est la cause la plus courante et la moins discutée, puisqu'elle n'a rien à voir avec l'IA. Le remède, c'est un scénario avec des scènes qui changent quelque chose, avant toute génération.",
         ],
       },
       {
         heading: "2. C'est la moyenne",
         paragraphs: [
-          "Personnages centrés, visages symétriques, pièces éclairées uniformément, chaque arbre en héros, de la texture partout. Ce look est la moyenne des données d'entraînement et c'est ce qu'un prompt général rend. Il se reconnaît en une seconde et n'appartient à personne. Le remède, c'est une bible avec des règles et des interdits, des références attachées plutôt que décrites, et une décision de caméra dans chaque prompt.",
+          "Personnages centrés, visages symétriques, pièces éclairées uniformément, chaque arbre en vedette, de la texture partout. Ce look est la moyenne des données d'entraînement et c'est ce qu'un prompt général renvoie. Il se reconnaît en une seconde et n'appartient à personne. Le remède, c'est une bible avec des règles et des interdits, des références attachées plutôt que décrites, et une décision de caméra dans chaque prompt.",
         ],
         callouts: [
           "Un mauvais animé IA n'est pas laid. Il est moyen, ce qui est pire, parce que la laideur au moins appartient à quelqu'un.",
@@ -1482,11 +1482,11 @@ const whyAiAnimeLooksBad: Guide = {
       {
         heading: "4. Tout flotte",
         paragraphs: [
-          "Le mouvement généré interpole. L'animé claque, tient, saute des images exprès. Donc les personnages générés glissent vers des poses qu'ils devraient frapper, les pieds patinent au lieu de se planter, et un combat ressemble à une danse sous l'eau. Le remède, c'est en partie de diriger contre, en partie de choisir ce qu'on montre : Lost Garden est silencieux et lent, et son action est surtout des choses qui se réveillent, parce que c'est ce que le mouvement fait bien.",
+          "Le mouvement généré interpole. L'animé claque, tient, saute des images exprès. Donc les personnages générés glissent vers des poses sur lesquelles ils devraient tomber net, les pieds patinent au lieu de se planter, et un combat ressemble à une danse sous l'eau. Le remède, c'est en partie de le contrer à la réalisation, en partie de choisir ce qu'on montre : Lost Garden est calme et lent, et son action est surtout des choses qui se réveillent, parce que c'est ce que le mouvement fait bien.",
         ],
       },
       {
-        heading: "5. De la musique sous tout",
+        heading: "5. De la musique partout",
         paragraphs: [
           "Les partitions ne coûtent plus rien, donc chaque scène en reçoit une, et l'épisode s'aplatit en bande-annonce de dix-sept minutes. Le remède, c'est une bible du son aussi stricte que la bible visuelle, des pas et des ambiances placés à la main, et du silence là où un projet moins exigeant remplirait. La moitié de ce qui rend un animé IA réel est dans l'audio, et c'est la moitié que la plupart des projets sautent entièrement.",
         ],
@@ -1494,7 +1494,7 @@ const whyAiAnimeLooksBad: Guide = {
       {
         heading: "6. Il n'a jamais été monté",
         paragraphs: [
-          "Des clips mis bout à bout dans l'ordre de génération ne sont pas un montage. Le rythme, les plans tenus, couper vers ce qu'un personnage voit plutôt que vers lui, perdre le beau plan qui n'a rien à faire là : c'est là qu'un film se fabrique, et c'est l'étape que la plupart des projets IA traitent comme un export. Le remède, c'est de couper comme un monteur, c'est à dire accepter de jeter la majeure partie de ce qui a été généré.",
+          "Des clips mis bout à bout dans l'ordre de génération ne sont pas un montage. Le rythme, les plans tenus, couper vers ce qu'un personnage voit plutôt que vers lui, perdre le beau plan qui n'a rien à faire là : c'est là qu'un film se fabrique, et c'est l'étape que la plupart des projets IA traitent comme un export. Le remède, c'est de couper comme un monteur, c'est-à-dire accepter de jeter la majeure partie de ce qui a été généré.",
         ],
       },
       {
@@ -1509,17 +1509,17 @@ const whyAiAnimeLooksBad: Guide = {
     {
       question: "Pourquoi l'animé IA est-il moche ?",
       answer:
-        "Six raisons qui reviennent sur presque tous les projets, et aucune n'est le modèle : pas d'histoire donc rien ne se monte, des prompts génériques qui rendent le look moyen, des visages qui dérivent dans des plans longs, un mouvement interpolé qui flotte, de la musique sous chaque scène, et pas de vrai montage. Chacune est une décision, et chacune a un remède.",
+        "Six raisons qui reviennent sur presque tous les projets, et aucune n'est le modèle : pas d'histoire donc rien ne se monte, des prompts génériques qui renvoient le look moyen, des visages qui dérivent dans des plans longs, un mouvement interpolé qui flotte, de la musique sous chaque scène, et pas de vrai montage. Chacune est une décision, et chacune a un remède.",
     },
     {
       question: "Pourquoi l'animation IA a-t-elle l'air si lisse et flottante ?",
       answer:
-        "Parce que les modèles vidéo interpolent tout, alors que l'animé tient des poses, claque de l'une à l'autre et saute des images exprès. Diriger contre aide, et choisir ce qu'on montre aussi : une action lente et silencieuse convient au mouvement généré, une chorégraphie rapide l'expose.",
+        "Parce que les modèles vidéo interpolent tout, alors que l'animé tient des poses, claque de l'une à l'autre et saute des images exprès. Le contrer à la réalisation aide, et choisir ce qu'on montre aussi : une action lente et calme convient au mouvement généré, une chorégraphie rapide l'expose.",
     },
     {
       question: "Pourquoi tous les animés IA se ressemblent-ils ?",
       answer:
-        "Les prompts généraux rendent la moyenne des données d'entraînement : centrée, symétrique, éclairée uniformément, texturée partout. Une bible avec des interdits, des références attachées et une décision de caméra dans chaque prompt sont ce qui fait qu'un projet se ressemble à lui-même.",
+        "Les prompts généraux renvoient la moyenne des données d'entraînement : centrée, symétrique, éclairée uniformément, texturée partout. Une bible avec des interdits, des références attachées et une décision de caméra dans chaque prompt sont ce qui fait qu'un projet ressemble à lui-même.",
     },
     {
       question: "De meilleurs modèles vont-ils réparer l'animé IA ?",
@@ -1539,18 +1539,18 @@ const whyAiAnimeLooksBad: Guide = {
 const aiFilmFestivalsAnimation: Guide = {
   article: {
     byline:
-      "L'épisode 1 a été sélectionné à Séoul et est arrivé en finale à Londres. Ce qu'une sélection en festival a fait pour un animé IA indépendant, quels festivals acceptent le format, et comment candidater sans jeter les frais par les fenêtres.",
+      "L'épisode 1 a été sélectionné à Séoul et est arrivé en finale à Londres. Ce qu'une sélection en festival a fait pour un animé IA indépendant, quels festivals acceptent le format, et comment candidater sans jeter votre argent par les fenêtres.",
     sections: [
       {
         paragraphs: [
-          "Les festivals sont la seule référence qu'une animation IA indépendante peut gagner sans qu'elle vienne d'un compteur de vues. L'épisode 1 de Lost Garden a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival, et ces deux lignes ont fait plus pour le projet que le nombre de vues : elles ont ouvert une fiche dans une base de données, une conversation avec la presse, et une raison pour un inconnu de prendre dix-sept minutes au sérieux.",
+          "Les festivals sont la seule référence qu'une animation IA indépendante peut gagner qui ne vienne pas d'un compteur de vues. L'épisode 1 de Lost Garden a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival, et ces deux lignes ont fait plus pour le projet que le nombre de vues : elles ont ouvert une fiche dans une base de données, une conversation avec la presse, et une raison pour un inconnu de prendre dix-sept minutes au sérieux.",
         ],
       },
       {
         heading: "Deux types de festivals, et ils ne veulent pas la même chose",
         paragraphs: [
           "Les festivals de films IA dédiés, dont il existe maintenant plusieurs, sont là pour montrer ce que les outils savent faire et pour en débattre. Ils acceptent le format par définition, ils sont jugés par des gens qui savent ce que coûte un bon plan généré, et c'est là qu'un animé IA est comparé à ses pairs plutôt qu'à un long métrage de studio.",
-          "Les festivals d'animation généralistes, c'est une autre conversation. Certains excluent d'emblée les oeuvres assistées par IA, certains exigent une déclaration, la plupart n'ont pas tranché. Lisez le règlement avant de payer, et s'il ne mentionne pas l'IA, demandez. Soumettre une oeuvre non déclarée à un festival qui l'aurait refusée est la façon la plus sûre de transformer un choix technique en problème de réputation.",
+          "Les festivals d'animation généralistes, c'est une autre conversation. Certains excluent d'emblée les œuvres assistées par IA, certains exigent une déclaration, la plupart n'ont pas tranché. Lisez le règlement avant de payer, et s'il ne mentionne pas l'IA, demandez. Soumettre une œuvre non déclarée à un festival qui l'aurait refusée est la façon la plus sûre de transformer un choix technique en problème de réputation.",
         ],
         callouts: [
           "Un festival qui ne dit rien sur l'IA n'a pas dit oui. Demandez avant de payer les frais.",
@@ -1566,8 +1566,8 @@ const aiFilmFestivalsAnimation: Guide = {
       {
         heading: "Ce qu'un jury regarde",
         paragraphs: [
-          "Pas les outils. Chaque entrée d'un festival IA a utilisé des outils, et le jury a vu la signature de chaque modèle. Ce qui sépare les entrées, c'est s'il y a une histoire, si le monde appartient à un seul film, si les personnages tiennent, si le son a été fait ou balancé, et si ça a été monté. Autrement dit, exactement ce qui sépare un animé IA moche d'un animé IA qui ne l'est pas.",
-          "Dix-sept minutes silencieuses et cohérentes avec un personnage qui ne peut pas parler sont allées plus loin qu'une bobine plus bruyante ne l'aurait fait. La cohérence est rare dans cette catégorie et les jurys la remarquent.",
+          "Pas les outils. Chaque film inscrit à un festival IA a utilisé des outils, et le jury a vu la signature de chaque modèle. Ce qui sépare les films, c'est s'il y a une histoire, si le monde appartient à un seul film, si les personnages tiennent, si le son a été fabriqué ou plaqué dessus, et si ça a été monté. Autrement dit, exactement ce qui sépare un animé IA moche d'un animé IA qui ne l'est pas.",
+          "Dix-sept minutes calmes et cohérentes avec un personnage qui ne peut pas parler sont allées plus loin qu'une bobine plus bruyante ne l'aurait fait. La cohérence est rare dans cette catégorie et les jurys la remarquent.",
         ],
       },
       {
@@ -1583,7 +1583,7 @@ const aiFilmFestivalsAnimation: Guide = {
       {
         heading: "Ce que ça n'est pas",
         paragraphs: [
-          "Une sélection n'est pas une distribution et ce n'est pas un public. L'épisode 1 a passé les soixante-cinq mille vues sur YouTube, et une projection en festival assoit quelques centaines de personnes. Les festivals vous donnent la phrase, la fiche et la conversation. Les spectateurs, il faut encore les gagner.",
+          "Une sélection n'est pas une distribution et ce n'est pas un public. L'épisode 1 a dépassé les soixante-cinq mille vues sur YouTube, et une projection en festival réunit quelques centaines de personnes. Les festivals vous donnent la phrase, la fiche et la conversation. Les spectateurs, il faut encore les gagner.",
         ],
       },
     ],
@@ -1592,22 +1592,22 @@ const aiFilmFestivalsAnimation: Guide = {
     {
       question: "Quels festivals acceptent l'animation IA ?",
       answer:
-        "Les festivals de films IA dédiés l'acceptent par définition ; Lost Garden a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival. Les festivals d'animation généralistes varient : certains excluent les oeuvres assistées par IA, certains exigent une déclaration, beaucoup n'ont pas tranché. Si le règlement ne mentionne pas l'IA, demandez avant de payer.",
+        "Les festivals de films IA dédiés l'acceptent par définition ; Lost Garden a été sélectionné au Seoul International AI Film Festival et est arrivé en finale de l'AI London Festival. Les festivals d'animation généralistes varient : certains excluent les œuvres assistées par IA, certains exigent une déclaration, beaucoup n'ont pas tranché. Si le règlement ne mentionne pas l'IA, demandez avant de payer.",
     },
     {
-      question: "Que fait une sélection en festival pour un animé IA ?",
+      question: "Qu'apporte une sélection en festival à un animé IA ?",
       answer:
         "Elle donne au projet une référence vérifiable. Pour Lost Garden, elle a aidé à ouvrir une fiche TMDB, rendu possibles des échanges avec la presse, et donné à des inconnus une raison de prendre au sérieux un épisode de dix-sept minutes. Elle n'a pas amené de spectateurs par elle-même.",
     },
     {
       question: "Faut-il déclarer l'usage de l'IA en candidatant à un festival ?",
       answer:
-        "Toujours. Les festivals IA dédiés s'y attendent, les festivals généralistes peuvent l'exiger, et soumettre une oeuvre non déclarée à un festival qui l'aurait refusée transforme un choix technique en problème de réputation.",
+        "Toujours. Les festivals IA dédiés s'y attendent, les festivals généralistes peuvent l'exiger, et soumettre une œuvre non déclarée à un festival qui l'aurait refusée transforme un choix technique en problème de réputation.",
     },
     {
       question: "Que cherchent les jurys des festivals de films IA ?",
       answer:
-        "Pas les outils, que chaque entrée a utilisés. Une histoire, un monde qui appartient à un seul film, des personnages qui tiennent d'un plan à l'autre, un son fabriqué plutôt que balancé, et un vrai montage. La cohérence est rare dans la catégorie et c'est ce qui se remarque.",
+        "Pas les outils, que chaque film inscrit a utilisés. Une histoire, un monde qui appartient à un seul film, des personnages qui tiennent d'un plan à l'autre, un son fabriqué plutôt que plaqué dessus, et un vrai montage. La cohérence est rare dans la catégorie et c'est ce qui se remarque.",
     },
   ],
   related: [
@@ -1626,7 +1626,7 @@ const lostGardenStoryAndCharacters: Guide = {
       {
         paragraphs: [
           "Lost Garden est une série de dark fantasy qui se passe entièrement sous terre, dans un réseau d'immenses cavernes remplies de forêts bleues, de brume cyan, de champignons lumineux, de lys blancs, de racines géantes, de rivières dans le noir et de machines endormies sous la mousse. Il n'y a pas de ciel. Personne dans l'histoire n'en a jamais vu un.",
-          "C'est une histoire de mémoire, de transmission, de sacrifice et de la possibilité d'aimer encore dans un monde presque entièrement perdu. Elle est silencieuse, lente, et pas destinée aux très jeunes enfants, même s'il n'y a rien d'explicite dedans.",
+          "C'est une histoire de mémoire, de transmission, de sacrifice et de la possibilité d'aimer encore dans un monde presque entièrement perdu. Elle est calme, lente, et pas destinée aux très jeunes enfants, même s'il n'y a rien d'explicite dedans.",
         ],
       },
       {
@@ -1640,7 +1640,7 @@ const lostGardenStoryAndCharacters: Guide = {
         heading: "Rose, l'enfant",
         paragraphs: [
           "Rose est petite, calme et presque irréelle. Elle traverse les lieux en ruine avec une étrange sérénité, comme si elle entendait ce que le monde a oublié. Autour d'elle, les fleurs éclosent, les racines bougent, et la terre morte se souvient parfois de respirer. Elle est ce que l'histoire appelle une Enfant Source, liée à la renaissance d'un monde blessé.",
-          "La série fait attention à ce qu'elle n'est pas. Elle n'est pas une arme, pas un miracle à dépenser, pas un symbole. C'est une enfant, et elle doit être protégée pour cette seule raison.",
+          "La série est précise sur ce qu'elle n'est pas. Elle n'est pas une arme, pas un miracle à dépenser, pas un symbole. C'est une enfant, et elle doit être protégée pour cette seule raison.",
         ],
         callouts: [
           "L'un des personnages n'a pas de voix. L'autre n'en a pas besoin. L'essentiel de l'histoire se passe dans l'espace entre les deux.",
@@ -1663,7 +1663,7 @@ const lostGardenStoryAndCharacters: Guide = {
       {
         heading: "Ce que l'épisode 1 met en mouvement",
         paragraphs: [
-          "Le premier épisode suit Lanterne depuis l'autel où il se réveille, à travers la forêt bleue, jusqu'au premier frémissement de quelque chose d'ancien dans le noir, et jusqu'à l'enfant dans les lys dont il portait le visage. Il se termine sur un autre réveil, celui d'Aren, qui est le serment de Serrure qui arrive à échéance.",
+          "Le premier épisode suit Lanterne depuis l'autel où il se réveille, à travers la forêt bleue, jusqu'au premier frémissement de quelque chose d'ancien dans le noir, et jusqu'à l'enfant dans les lys dont il portait le visage. Il se termine sur un autre réveil, celui d'Aren, c'est-à-dire le serment de Serrure qui arrive à échéance.",
           "Il dure dix-sept minutes, en anglais avec des sous-titres en français, japonais et coréen, et il se regarde gratuitement sur YouTube et sur ce site. L'épisode 2 est en production.",
         ],
       },
@@ -1694,7 +1694,7 @@ const lostGardenStoryAndCharacters: Guide = {
     {
       question: "Comment se termine l'épisode 1 ?",
       answer:
-        "Par un réveil. Aren, le garçon aux cheveux rouges et blancs lié à Serrure, se réveille, ce qui est le serment du neuvième chevalier qui arrive à échéance. Ce que ça signifie pour Lanterne et Rose est le sujet de l'épisode 2, en production.",
+        "Par un réveil. Aren, le garçon aux cheveux rouges et blancs lié à Serrure, se réveille, c'est-à-dire le serment du neuvième chevalier qui arrive à échéance. Ce que ça signifie pour Lanterne et Rose est le sujet de l'épisode 2, en production.",
     },
   ],
   related: [
