@@ -8,7 +8,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import type { Dictionary } from "@/lib/i18n/types";
 import { localePath } from "@/lib/i18n/navigation";
-import { getArticleMedia } from "@/lib/article-media";
+import { getArticleMedia, ogCardPath } from "@/lib/article-media";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -72,6 +72,10 @@ export async function generateMetadata({
     path: localePath(locale, "/blog"),
     pathSuffix: "/blog",
     absoluteTitle: true,
+    ogImage: ogCardPath(locale, "/blog"),
+    ogImageWidth: 1200,
+    ogImageHeight: 630,
+    ogImageAlt: dict.media.alt[getArticleMedia("/blog")!.imageData.altKey],
   });
 }
 

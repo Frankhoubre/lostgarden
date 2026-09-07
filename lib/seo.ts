@@ -456,7 +456,7 @@ export function episodeVideoJsonLd({
   name: string;
   description: string;
 }) {
-  const image = absoluteUrl(SITE.ogImage);
+  const image = absoluteUrl(ARTICLE_IMAGES.heroBanner.src);
 
   return {
     "@context": "https://schema.org",

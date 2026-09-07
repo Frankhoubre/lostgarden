@@ -32,6 +32,10 @@ type ArticleMedia = {
 };
 
 export const ARTICLE_MEDIA: Partial<Record<IndexablePathSuffix, ArticleMedia>> = {
+  "/process": { image: "sleepingMachines", headlineKey: "process" },
+  "/vision": { image: "blueForest", headlineKey: "vision" },
+  "/episode-1": { image: "heroBanner", headlineKey: "episodeOnePublic" },
+  "/blog": { image: "rose", headlineKey: "blog" },
   "/best-ai-anime": { image: "rose", headlineKey: "bestAiAnime" },
   "/how-to-make-ai-anime": { image: "undergroundCavern", headlineKey: "howToMakeAiAnime" },
   "/ai-character-consistency": { image: "sol", headlineKey: "aiCharacterConsistency" },

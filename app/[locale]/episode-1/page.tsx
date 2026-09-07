@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
+import { getArticleMedia, ogCardPath } from "@/lib/article-media";
 import {
   breadcrumbJsonLd,
   buildPageMetadata,
@@ -32,6 +33,10 @@ export async function generateMetadata({
     path: localePath(locale, "/episode-1"),
     pathSuffix: "/episode-1",
     absoluteTitle: true,
+    ogImage: ogCardPath(locale, "/episode-1"),
+    ogImageWidth: 1200,
+    ogImageHeight: 630,
+    ogImageAlt: dict.media.alt[getArticleMedia("/episode-1")!.imageData.altKey],
   });
 }
 

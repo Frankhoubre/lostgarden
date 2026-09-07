@@ -61,6 +61,10 @@ async function stillBytes(src: string): Promise<Buffer> {
 
 function headlineFor(dict: Awaited<ReturnType<typeof getDictionary>>, key: string): string {
   if (key === "bestAiAnime") return dict.bestAiAnime.headline;
+  if (key === "process") return dict.process.headline;
+  if (key === "vision") return dict.vision.headline;
+  if (key === "episodeOnePublic") return dict.episodeOnePublic.headline;
+  if (key === "blog") return dict.blog.headline;
   const guides = dict.guides as unknown as Record<string, { headline?: string } | undefined>;
   return guides[key]?.headline ?? dict.common.siteName;
 }
