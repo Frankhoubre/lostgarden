@@ -186,9 +186,19 @@ Deux choses apprises en route :
 - tous les fichiers `.png` du site sauf le logo sont en réalité des JPEG. Ça n'empêche rien, les navigateurs devinent le format, mais c'est ce qui faisait échouer la génération de vignette tant que l'image était passée avec un type déclaré. À renommer un jour, avec les références
 - Twins Hinahima est un spécial TV unique de 24 minutes, pas une série. Les pages qui parlaient de « série » ont été corrigées
 
-## Pas fait, et pourquoi
+## Fait aussi, le 7 septembre 2026 : le rendu statique
 
-**Le rendu statique des pages.** Le build sort toutes les routes en dynamique parce que `app/layout.tsx` appelle `headers()` pour poser `lang` sur `<html>`. Tant que c'est le cas, les pages restent en `private, no-store` et le cookie du proxy ne change rien au cache, le retirer seul ne servirait à rien. La solution propre selon la doc Next embarquée est de descendre le layout racine dans `app/[locale]/`, ce qui impose le drapeau expérimental `globalNotFound` pour la page 404. L'alternative est de figer `lang="en"` dans le HTML brut et de le corriger côté client, ce qui dégrade l'accessibilité des pages japonaise et coréenne. Aucune des deux ne se fait à l'aveugle dans une passe de corrections sûres. C'est le prochain chantier technique, et il vaut la peine : c'est ce qui ramènerait le TTFB sous 100 ms et rendrait le cookie du proxy inoffensif.
+Le chantier laissé de côté est fait, en suivant la doc Next embarquée. Le layout racine est descendu dans `app/[locale]/`, donc `lang` vient du paramètre de route et plus de `headers()`. Résultat mesuré sur un build local :
+
+- toutes les pages de contenu sortent en statique au build (`○`), servies avec `x-nextjs-cache: HIT` et `Cache-Control: s-maxage=31536000`, au lieu de `private, no-store`
+- plus aucun `Set-Cookie` sur les réponses de page. Le cookie de langue reste posé sur les redirections de la racine et par le sélecteur de langue, là où il sert
+- TTFB local sous 5 ms, contre 240 à 900 ms auparavant. En production, c'est ce qui permet au bord Vercel de servir le HTML sans passer par une fonction
+- les 120 URL (30 chemins × 4 langues) répondent en 200 avec le bon `lang`
+
+Deux conséquences à connaître :
+
+- la 404 passe par le drapeau `experimental.globalNotFound` et un fichier `app/global-not-found.tsx` en anglais pour les chemins qui n'entrent dans aucune langue. Une route attrape-tout `app/[locale]/[...rest]` renvoie la 404 traduite avec un vrai statut 404. Sur cette 404 traduite, la balise `<html>` sort sans attribut `lang`, c'est le comportement de Next quand `notFound()` est levé sous un layout racine dynamique. Sans effet sur le référencement, une 404 n'est pas indexée
+- le drapeau est marqué expérimental dans la doc de cette version de Next. Il est documenté, il compile, il est testé ici, mais c'est un point à surveiller aux mises à jour de Next
 
 ## Dans quel ordre
 

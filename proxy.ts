@@ -69,14 +69,10 @@ export function proxy(request: NextRequest) {
       return response;
     }
 
-    const response = NextResponse.next();
-    response.headers.set("x-locale", pathnameLocale);
-    response.cookies.set(LOCALE_COOKIE, pathnameLocale, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: "lax",
-    });
-    return response;
+    // No cookie on the page response itself: a Set-Cookie makes the HTML
+    // uncacheable at the edge. The language choice is remembered on the
+    // redirects below and by the language switcher.
+    return NextResponse.next();
   }
 
   const locale = detectLocale(request);

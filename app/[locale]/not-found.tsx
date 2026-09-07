@@ -1,12 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { getLocaleFromHeaders } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { localePath } from "@/lib/i18n/navigation";
 
-export default async function NotFound() {
-  const locale = await getLocaleFromHeaders();
-  const dict = await getDictionary(locale);
+/** Rendered inside the locale layout, so the provider already knows the language. */
+export default function NotFound() {
+  const { locale, dict } = useLocale();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center">
