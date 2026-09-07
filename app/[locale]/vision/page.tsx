@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { VisionArticle } from "@/components/vision/VisionArticle";
 import { ArticleHero } from "@/components/blog/ArticleHero";
-import { getArticleMedia, ogCardPath } from "@/lib/article-media";
+import { articleOgMetadata, getArticleMedia } from "@/lib/article-media";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -28,7 +28,6 @@ export async function generateMetadata({
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
-  const media = getArticleMedia(SLUG);
 
   return buildPageMetadata({
     locale,
@@ -38,14 +37,7 @@ export async function generateMetadata({
     pathSuffix: "/vision",
     absoluteTitle: true,
     ogType: "article",
-    ...(media
-      ? {
-          ogImage: ogCardPath(locale, SLUG),
-          ogImageWidth: 1200,
-          ogImageHeight: 630,
-          ogImageAlt: dict.media.alt[media.imageData.altKey],
-        }
-      : {}),
+    ...articleOgMetadata(locale, SLUG, dict),
   });
 }
 

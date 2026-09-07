@@ -268,6 +268,11 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         creator: { "@id": CREATOR_ID },
         episode: episodeJsonLd(locale, dict),
       },
+      episodeVideoNode({
+        locale,
+        name: dict.meta.episodeOnePublic.title,
+        description: dict.meta.episodeOnePublic.description,
+      }),
     ],
   };
 }
@@ -447,7 +452,8 @@ export function faqPageJsonLd(
   };
 }
 
-export function episodeVideoJsonLd({
+/** The Episode One VideoObject, without @context, for embedding in a graph. */
+function episodeVideoNode({
   locale,
   name,
   description,
@@ -459,7 +465,6 @@ export function episodeVideoJsonLd({
   const image = absoluteUrl(ARTICLE_IMAGES.heroBanner.src);
 
   return {
-    "@context": "https://schema.org",
     "@type": "VideoObject",
     "@id": EPISODE_ONE_VIDEO_ID,
     name,
@@ -480,6 +485,14 @@ export function episodeVideoJsonLd({
       "Lost Garden",
     ],
   };
+}
+
+export function episodeVideoJsonLd(args: {
+  locale: Locale;
+  name: string;
+  description: string;
+}) {
+  return { "@context": "https://schema.org", ...episodeVideoNode(args) };
 }
 
 export function getSitemapEntries(): Array<{

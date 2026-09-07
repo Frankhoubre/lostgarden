@@ -197,8 +197,19 @@ Le chantier laissé de côté est fait, en suivant la doc Next embarquée. Le la
 
 Deux conséquences à connaître :
 
-- la 404 passe par le drapeau `experimental.globalNotFound` et un fichier `app/global-not-found.tsx` en anglais pour les chemins qui n'entrent dans aucune langue. Une route attrape-tout `app/[locale]/[...rest]` renvoie la 404 traduite avec un vrai statut 404. Sur cette 404 traduite, la balise `<html>` sort sans attribut `lang`, c'est le comportement de Next quand `notFound()` est levé sous un layout racine dynamique. Sans effet sur le référencement, une 404 n'est pas indexée
+- la 404 passe par le drapeau `experimental.globalNotFound` et un fichier `app/global-not-found.tsx` en anglais pour les chemins qui n'entrent dans aucune langue. Une route attrape-tout `app/[locale]/[...rest]` renvoie un vrai statut 404 pour les URL inconnues sous une langue. Le recul connu, confirmé par la relecture de code : sur ces 404, Next sert sa coquille d'erreur nue (`<html id="__next_error__">`, sans `lang` ni feuille de style) et la page traduite n'apparaît qu'après hydratation. C'est le comportement de Next quand `notFound()` est levé sous un layout racine dynamique, un groupe de route intermédiaire n'y change rien, testé. Sans effet sur le référencement, le statut 404 est correct et une 404 n'est pas indexée, mais un visiteur sans JavaScript voit une page vide. C'est le prix du rendu statique, et il est accepté
 - le drapeau est marqué expérimental dans la doc de cette version de Next. Il est documenté, il compile, il est testé ici, mais c'est un point à surveiller aux mises à jour de Next
+
+## Relecture de code avant la pull request, le 7 septembre 2026
+
+Une relecture du diff complet a été faite avant d'ouvrir la pull request. Corrigé à la suite :
+
+- les vingt pages de guide, identiques au nom près, sont remplacées par une seule route `app/[locale]/[guide]/page.tsx` alimentée par la table `GUIDES` de `lib/article-media.ts`. Ajouter un guide, c'est écrire son contenu et une ligne de table
+- le titre de la vignette Open Graph est résolu par une fonction typée par page, plus par une chaîne de caractères qui pouvait se tromper en silence
+- la route `/og` ne met plus en cache un échec de chargement de police, et renvoie une redirection vers l'image brute si la police japonaise ou coréenne manque ou si la lecture du fichier échoue. Google Fonts renvoie tantôt du TTF tantôt du WOFF selon le User-Agent, les deux sont acceptés
+- le noeud `VideoObject` de l'épisode est présent dans le graphe de la page d'accueil, plus seulement référencé par identifiant
+- `.env.local.example` documente l'hôte en www, sinon copier le fichier rétablissait l'ancien hôte
+- une table de vidéos en doublon a été supprimée
 
 ## Dans quel ordre
 

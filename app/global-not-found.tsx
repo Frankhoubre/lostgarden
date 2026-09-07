@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Oswald } from "next/font/google";
 import "./globals.css";
 
@@ -21,9 +22,9 @@ export default function GlobalNotFound() {
         <main className="flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center">
           <p className="text-sm tracking-[0.2em] text-magic">404</p>
           <h1 className="mt-3 text-3xl text-lily">This page does not exist.</h1>
-          <a href="/en" className="btn-primary mt-10">
+          <Link href="/en" className="btn-primary mt-10">
             Back to Lost Garden
-          </a>
+          </Link>
         </main>
       </body>
     </html>

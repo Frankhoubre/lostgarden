@@ -1,8 +1,11 @@
+import type { GuideSlug } from "@/lib/guide-article";
+import type { Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/types";
 import type { IndexablePathSuffix } from "@/lib/seo";
 
 /**
  * Stills from the episode and the press kit, all 16:9, used as the hero
- * image of an article, its Open Graph image and its entry in the sitemap.
+ * image of an article, its Open Graph card and its entry in the sitemap.
  * Alt text lives in the dictionary under `media.alt`, keyed by `altKey`.
  */
 export const ARTICLE_IMAGES = {
@@ -23,40 +26,76 @@ export const ARTICLE_IMAGES = {
 export type ArticleImageKey = keyof typeof ARTICLE_IMAGES;
 export type ArticleImage = (typeof ARTICLE_IMAGES)[ArticleImageKey];
 
+/** Size of the generated Open Graph card served by `app/og/route.tsx`. */
+export const OG_CARD_SIZE = { width: 1200, height: 630 } as const;
+
+/** Dictionary keys that exist under both `meta` and `guides`: one per guide page. */
+export type GuideDictKey = Extract<keyof Dictionary["guides"], keyof Dictionary["meta"]>;
+
+/** Per-guide routing data: dictionary key and publication date, one entry per slug. */
+export const GUIDES: Record<GuideSlug, { key: GuideDictKey; published: string }> = {
+  "/how-to-make-ai-anime": { key: "howToMakeAiAnime", published: "2026-09-04" },
+  "/ai-character-consistency": { key: "aiCharacterConsistency", published: "2026-09-04" },
+  "/is-ai-anime-real-anime": { key: "isAiAnimeRealAnime", published: "2026-09-04" },
+  "/ai-anime-vs-traditional-animation": { key: "aiAnimeVsTraditional", published: "2026-09-04" },
+  "/ai-manga": { key: "aiManga", published: "2026-09-05" },
+  "/ai-anime-generator": { key: "aiAnimeGenerator", published: "2026-09-05" },
+  "/ai-anime-voice-and-sound": { key: "aiAnimeVoiceAndSound", published: "2026-09-05" },
+  "/how-to-tell-if-anime-is-ai": { key: "howToTellIfAnimeIsAi", published: "2026-09-05" },
+  "/making-of-episode-1": { key: "makingOfEpisodeOne", published: "2026-09-05" },
+  "/can-one-person-make-an-anime": { key: "canOnePersonMakeAnAnime", published: "2026-09-05" },
+  "/ai-anime-storyboard": { key: "aiAnimeStoryboard", published: "2026-09-05" },
+  "/ai-anime-backgrounds": { key: "aiAnimeBackgrounds", published: "2026-09-05" },
+  "/ai-anime-script": { key: "aiAnimeScript", published: "2026-09-05" },
+  "/ai-anime-copyright": { key: "aiAnimeCopyright", published: "2026-09-05" },
+  "/history-of-ai-anime": { key: "historyOfAiAnime", published: "2026-09-05" },
+  "/anime-style-prompts": { key: "animeStylePrompts", published: "2026-09-05" },
+  "/editing-ai-anime": { key: "editingAiAnime", published: "2026-09-05" },
+  "/why-ai-anime-looks-bad": { key: "whyAiAnimeLooksBad", published: "2026-09-05" },
+  "/ai-film-festivals-animation": { key: "aiFilmFestivalsAnimation", published: "2026-09-05" },
+  "/lost-garden-story-and-characters": { key: "lostGardenStoryAndCharacters", published: "2026-09-05" },
+};
+
+export function isGuideSlug(value: string): value is GuideSlug {
+  return Object.prototype.hasOwnProperty.call(GUIDES, value);
+}
+
 type ArticleMedia = {
   image: ArticleImageKey;
-  /** Dictionary key under `guides` (or `bestAiAnime`) holding the headline used on the OG card. */
-  headlineKey: string;
+  /** Headline printed on the Open Graph card, in the page's language. */
+  headline: (dict: Dictionary) => string;
   /** Embed the Episode One player after the article body. */
   episode?: boolean;
 };
 
+const guideHeadline = (key: GuideDictKey) => (dict: Dictionary) => dict.guides[key].headline;
+
 export const ARTICLE_MEDIA: Partial<Record<IndexablePathSuffix, ArticleMedia>> = {
-  "/process": { image: "sleepingMachines", headlineKey: "process" },
-  "/vision": { image: "blueForest", headlineKey: "vision" },
-  "/episode-1": { image: "heroBanner", headlineKey: "episodeOnePublic" },
-  "/blog": { image: "rose", headlineKey: "blog" },
-  "/best-ai-anime": { image: "rose", headlineKey: "bestAiAnime" },
-  "/how-to-make-ai-anime": { image: "undergroundCavern", headlineKey: "howToMakeAiAnime" },
-  "/ai-character-consistency": { image: "sol", headlineKey: "aiCharacterConsistency" },
-  "/is-ai-anime-real-anime": { image: "tavernKnights", headlineKey: "isAiAnimeRealAnime" },
-  "/ai-anime-vs-traditional-animation": { image: "forestReference", headlineKey: "aiAnimeVsTraditional" },
-  "/ai-manga": { image: "serrure", headlineKey: "aiManga" },
-  "/ai-anime-generator": { image: "blueForest", headlineKey: "aiAnimeGenerator" },
-  "/ai-anime-voice-and-sound": { image: "sleepingMachines", headlineKey: "aiAnimeVoiceAndSound", episode: true },
-  "/how-to-tell-if-anime-is-ai": { image: "pelerins", headlineKey: "howToTellIfAnimeIsAi" },
-  "/making-of-episode-1": { image: "heroBanner", headlineKey: "makingOfEpisodeOne", episode: true },
-  "/can-one-person-make-an-anime": { image: "heroCavern", headlineKey: "canOnePersonMakeAnAnime", episode: true },
-  "/ai-anime-storyboard": { image: "tavernKnights", headlineKey: "aiAnimeStoryboard" },
-  "/ai-anime-backgrounds": { image: "undergroundCavern", headlineKey: "aiAnimeBackgrounds" },
-  "/ai-anime-script": { image: "roseCapsule", headlineKey: "aiAnimeScript" },
-  "/ai-anime-copyright": { image: "serrure", headlineKey: "aiAnimeCopyright" },
-  "/history-of-ai-anime": { image: "heroBanner", headlineKey: "historyOfAiAnime" },
-  "/anime-style-prompts": { image: "forestReference", headlineKey: "animeStylePrompts" },
-  "/editing-ai-anime": { image: "pelerins", headlineKey: "editingAiAnime", episode: true },
-  "/why-ai-anime-looks-bad": { image: "sleepingMachines", headlineKey: "whyAiAnimeLooksBad" },
-  "/ai-film-festivals-animation": { image: "tavernKnights", headlineKey: "aiFilmFestivalsAnimation" },
-  "/lost-garden-story-and-characters": { image: "rose", headlineKey: "lostGardenStoryAndCharacters", episode: true },
+  "/process": { image: "sleepingMachines", headline: (d) => d.process.headline },
+  "/vision": { image: "blueForest", headline: (d) => d.vision.headline },
+  "/episode-1": { image: "heroBanner", headline: (d) => d.episodeOnePublic.headline },
+  "/blog": { image: "rose", headline: (d) => d.blog.headline },
+  "/best-ai-anime": { image: "rose", headline: (d) => d.bestAiAnime.headline },
+  "/how-to-make-ai-anime": { image: "undergroundCavern", headline: guideHeadline("howToMakeAiAnime") },
+  "/ai-character-consistency": { image: "sol", headline: guideHeadline("aiCharacterConsistency") },
+  "/is-ai-anime-real-anime": { image: "tavernKnights", headline: guideHeadline("isAiAnimeRealAnime") },
+  "/ai-anime-vs-traditional-animation": { image: "forestReference", headline: guideHeadline("aiAnimeVsTraditional") },
+  "/ai-manga": { image: "serrure", headline: guideHeadline("aiManga") },
+  "/ai-anime-generator": { image: "blueForest", headline: guideHeadline("aiAnimeGenerator") },
+  "/ai-anime-voice-and-sound": { image: "sleepingMachines", headline: guideHeadline("aiAnimeVoiceAndSound"), episode: true },
+  "/how-to-tell-if-anime-is-ai": { image: "pelerins", headline: guideHeadline("howToTellIfAnimeIsAi") },
+  "/making-of-episode-1": { image: "heroBanner", headline: guideHeadline("makingOfEpisodeOne"), episode: true },
+  "/can-one-person-make-an-anime": { image: "heroCavern", headline: guideHeadline("canOnePersonMakeAnAnime"), episode: true },
+  "/ai-anime-storyboard": { image: "tavernKnights", headline: guideHeadline("aiAnimeStoryboard") },
+  "/ai-anime-backgrounds": { image: "undergroundCavern", headline: guideHeadline("aiAnimeBackgrounds") },
+  "/ai-anime-script": { image: "roseCapsule", headline: guideHeadline("aiAnimeScript") },
+  "/ai-anime-copyright": { image: "serrure", headline: guideHeadline("aiAnimeCopyright") },
+  "/history-of-ai-anime": { image: "heroBanner", headline: guideHeadline("historyOfAiAnime") },
+  "/anime-style-prompts": { image: "forestReference", headline: guideHeadline("animeStylePrompts") },
+  "/editing-ai-anime": { image: "pelerins", headline: guideHeadline("editingAiAnime"), episode: true },
+  "/why-ai-anime-looks-bad": { image: "sleepingMachines", headline: guideHeadline("whyAiAnimeLooksBad") },
+  "/ai-film-festivals-animation": { image: "tavernKnights", headline: guideHeadline("aiFilmFestivalsAnimation") },
+  "/lost-garden-story-and-characters": { image: "rose", headline: guideHeadline("lostGardenStoryAndCharacters"), episode: true },
 };
 
 export function getArticleMedia(slug: IndexablePathSuffix) {
@@ -65,19 +104,19 @@ export function getArticleMedia(slug: IndexablePathSuffix) {
   return { ...media, imageData: ARTICLE_IMAGES[media.image] };
 }
 
-/** Locale-independent path of the generated Open Graph card for an article. */
-export function ogCardPath(locale: string, slug: IndexablePathSuffix): string {
+/** Path of the generated Open Graph card for an article, in one language. */
+export function ogCardPath(locale: Locale, slug: IndexablePathSuffix): string {
   return `/og?locale=${locale}&path=${encodeURIComponent(slug)}`;
 }
 
-/**
- * Official uploads only, verified through YouTube's oEmbed endpoint against
- * the uploading channel. Entries without an official embeddable video get a
- * link instead of a player.
- */
-export const RANKING_VIDEOS: Record<string, { youtubeId: string; channel: string }> = {
-  "Lost Garden": { youtubeId: "eZ_JlaLDJ-8", channel: "LostGarden Anime" },
-  "Twins Hinahima": { youtubeId: "CjUa9RladYQ", channel: "ツインズひなひま" },
-  "The Dog & the Boy": { youtubeId: "J9DpusAZV_0", channel: "Netflix Japan" },
-  "Anime Rock, Paper, Scissors": { youtubeId: "GVT3WUa-48Y", channel: "Corridor Digital" },
-};
+/** Open Graph image fields for `buildPageMetadata`, empty when the page has no media. */
+export function articleOgMetadata(locale: Locale, slug: IndexablePathSuffix, dict: Dictionary) {
+  const media = getArticleMedia(slug);
+  if (!media) return {};
+  return {
+    ogImage: ogCardPath(locale, slug),
+    ogImageWidth: OG_CARD_SIZE.width,
+    ogImageHeight: OG_CARD_SIZE.height,
+    ogImageAlt: dict.media.alt[media.imageData.altKey],
+  };
+}
