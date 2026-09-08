@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
@@ -7,6 +8,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import type { Dictionary } from "@/lib/i18n/types";
 import { localePath } from "@/lib/i18n/navigation";
+import { articleOgMetadata, getArticleMedia } from "@/lib/article-media";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -15,19 +17,7 @@ import {
   webPageJsonLd,
 } from "@/lib/seo";
 
-/** Editorial pages listed on the blog index, newest intent first. */
-const ARTICLES = [
-  { path: "/best-ai-anime", meta: "bestAiAnime" },
-  { path: "/how-to-make-ai-anime", meta: "howToMakeAiAnime" },
-  { path: "/ai-character-consistency", meta: "aiCharacterConsistency" },
-  { path: "/is-ai-anime-real-anime", meta: "isAiAnimeRealAnime" },
-  {
-    path: "/ai-anime-vs-traditional-animation",
-    meta: "aiAnimeVsTraditional",
-  },
-  { path: "/process", meta: "process" },
-  { path: "/vision", meta: "vision" },
-] as const;
+import { ARTICLES } from "@/lib/articles";
 
 type BlogPageProps = { params: Promise<{ locale: string }> };
 
@@ -54,6 +44,7 @@ export async function generateMetadata({
     path: localePath(locale, "/blog"),
     pathSuffix: "/blog",
     absoluteTitle: true,
+    ...articleOgMetadata(locale, "/blog", dict),
   });
 }
 
@@ -98,20 +89,42 @@ export default async function BlogPage({ params }: BlogPageProps) {
         <p className="font-display text-lg text-cyan-pale/90 sm:text-xl">
           {dict.blog.lead}
         </p>
-        <ul className="space-y-8">
-          {entries.map((entry) => (
-            <li key={entry.path}>
-              <h2 className="anime-heading font-display text-xl text-lily sm:text-2xl">
-                <Link
-                  href={localePath(locale, entry.path)}
-                  className="underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm"
-                >
-                  {entry.title}
-                </Link>
-              </h2>
-              <p className="mt-2 text-ivory/80">{entry.description}</p>
-            </li>
-          ))}
+        <ul className="space-y-10">
+          {entries.map((entry) => {
+            const media = getArticleMedia(entry.path);
+            return (
+              <li key={entry.path} className="grid gap-4 sm:grid-cols-[14rem_1fr] sm:gap-6">
+                {media ? (
+                  <Link
+                    href={localePath(locale, entry.path)}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    className="trailer-frame block overflow-hidden rounded-xl"
+                  >
+                    <Image
+                      src={media.imageData.src}
+                      alt=""
+                      width={media.imageData.width}
+                      height={media.imageData.height}
+                      sizes="(max-width: 640px) 100vw, 14rem"
+                      className="h-auto w-full"
+                    />
+                  </Link>
+                ) : null}
+                <div>
+                  <h2 className="anime-heading font-display text-xl text-lily sm:text-2xl">
+                    <Link
+                      href={localePath(locale, entry.path)}
+                      className="underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm"
+                    >
+                      {entry.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-2 text-ivory/80">{entry.description}</p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </LegalPageShell>
     </>

@@ -5,7 +5,6 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo";
-import { notFound } from "next/navigation";
 
 type ExperienceLayoutProps = {
   children: ReactNode;

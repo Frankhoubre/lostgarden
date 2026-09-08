@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
+import { articleOgMetadata } from "@/lib/article-media";
 import {
   breadcrumbJsonLd,
   buildPageMetadata,
@@ -32,6 +33,7 @@ export async function generateMetadata({
     path: localePath(locale, "/episode-1"),
     pathSuffix: "/episode-1",
     absoluteTitle: true,
+    ...articleOgMetadata(locale, "/episode-1", dict),
   });
 }
 
@@ -62,6 +64,7 @@ export default async function EpisodeOnePage({ params }: EpisodeOnePageProps) {
       <JsonLd
         data={episodeVideoJsonLd({
           locale,
+          dict,
           name: dict.meta.episodeOnePublic.title,
           description: dict.meta.episodeOnePublic.description,
         })}

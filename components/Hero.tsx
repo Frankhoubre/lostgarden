@@ -32,7 +32,7 @@ export function Hero() {
         transition={{ duration: 2.2, ease: EASE_OUT_EXPO }}
       >
         <Image
-          src="/images/hero-banner.png"
+          src="/images/hero-banner.jpg"
           alt=""
           fill
           priority

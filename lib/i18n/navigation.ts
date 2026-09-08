@@ -1,4 +1,4 @@
-import { isLocale, type Locale } from "./config";
+import { isLocale, LOCALE_COOKIE, type Locale } from "./config";
 
 export function localePath(locale: Locale, path = "/"): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -22,4 +22,10 @@ export function stripLocalePrefix(pathname: string): string {
 export function replaceLocaleInPath(pathname: string, locale: Locale): string {
   const rest = stripLocalePrefix(pathname);
   return localePath(locale, rest === "" ? "/" : rest);
+}
+
+/** Persist the visitor's explicit language choice, one year, whole site. */
+export function setLocaleCookie(locale: Locale): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }

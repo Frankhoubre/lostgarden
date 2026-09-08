@@ -19,8 +19,8 @@ export const KNIGHT_VISUALS: Partial<Record<KnightNumber, KnightVisual>> = {
 };
 
 export const KNIGHT_IMAGES: Partial<Record<KnightNumber, string>> = {
-  12: "/images/sol.png",
-  9: "/images/serrure.png",
+  12: "/images/sol.jpg",
+  9: "/images/serrure.jpg",
 };
 
 export const KNIGHT_IMAGE_FOCUS: Partial<Record<KnightNumber, string>> = {

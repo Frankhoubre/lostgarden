@@ -61,7 +61,7 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
         </section>
 
         <Suspense fallback={null}>
-          <ExperienceJoinedNotice user={user} />
+          <ExperienceJoinedNotice />
         </Suspense>
 
         <section className="mt-14">

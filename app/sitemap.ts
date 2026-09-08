@@ -8,5 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: entry.changeFrequency,
     priority: entry.priority,
     alternates: entry.alternates,
+    images: entry.images,
   }));
 }

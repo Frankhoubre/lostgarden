@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   COOKIE_CONSENT_KEY,
   type CookieConsent,
@@ -9,33 +9,46 @@ import {
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { localePath } from "@/lib/i18n/navigation";
 
-function readConsent(): CookieConsent | null {
-  if (typeof window === "undefined") return null;
+/**
+ * Consent lives in localStorage. It is exposed through an external store so
+ * the banner can render from it directly: no state set inside an effect, and
+ * the server snapshot keeps the banner hidden until hydration.
+ */
+type ConsentState = CookieConsent | "none" | "unknown";
+
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function readConsent(): ConsentState {
   const value = localStorage.getItem(COOKIE_CONSENT_KEY);
   if (value === "accepted" || value === "rejected") return value;
-  return null;
+  return "none";
+}
+
+function serverConsent(): ConsentState {
+  return "unknown";
 }
 
 function storeConsent(value: CookieConsent) {
   localStorage.setItem(COOKIE_CONSENT_KEY, value);
+  for (const listener of listeners) listener();
 }
 
 export function CookieBanner() {
   const { locale, dict } = useLocale();
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!readConsent()) {
-      setVisible(true);
-    }
-  }, []);
+  const consent = useSyncExternalStore(subscribe, readConsent, serverConsent);
 
   function dismiss(choice: CookieConsent) {
     storeConsent(choice);
-    setVisible(false);
   }
 
-  if (!visible) return null;
+  if (consent !== "none") return null;
 
   return (
     <div

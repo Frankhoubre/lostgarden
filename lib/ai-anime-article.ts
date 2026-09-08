@@ -17,6 +17,8 @@ export type RankedAnime = {
   aiRoleLabel: string;
   aiRole: string;
   links?: readonly ArticleLink[];
+  /** Official upload only, verified against the uploading channel. */
+  youtubeId?: string;
 };
 
 export type AiAnimeArticle = {

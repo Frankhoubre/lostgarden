@@ -1,26 +1,34 @@
 import type { Metadata } from "next";
-import { EPISODE_ONE } from "@/lib/episode";
+import { EPISODE_ONE, EPISODE_ONE_CHAPTER_STARTS, EPISODE_ONE_RUNTIME_SECONDS } from "@/lib/episode";
 import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { CREATOR_WIKIDATA, DATABASE_LINKS, SOCIAL_LINKS } from "@/lib/social";
+import { ARTICLE_IMAGES, ARTICLE_MEDIA } from "@/lib/article-media";
+import { TRANSCRIPT_PUBLISHED } from "@/lib/transcripts";
 import type { Dictionary } from "@/lib/i18n/types";
 
+/**
+ * Canonical origin. Vercel serves the site on the `www` host and
+ * 307-redirects the bare domain to it, so every canonical, hreflang,
+ * sitemap and JSON-LD URL must be built on `www` as well. A canonical or
+ * hreflang target that redirects is not treated as canonical by Google.
+ */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lostgarden.world";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lostgarden.world";
 
 export const SITE = {
   name: "Lost Garden",
   url: SITE_URL,
-  ogImage: "/images/og-image.png",
+  ogImage: "/images/og-image.jpg",
   ogImageWidth: 1200,
   ogImageHeight: 630,
   email: LEGAL_PUBLISHER.email,
   creator: LEGAL_PUBLISHER.name,
 } as const;
 
-/** Locale-neutral path segment, e.g. `/process` or `/`. */
-export const INDEXABLE_PATH_SUFFIXES = [
+/** Every locale-neutral path segment the site can serve, e.g. `/process` or `/`. */
+const ALL_PATH_SUFFIXES = [
   "/",
   "/vision",
   "/process",
@@ -30,13 +38,38 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/ai-character-consistency",
   "/is-ai-anime-real-anime",
   "/ai-anime-vs-traditional-animation",
+  "/ai-manga",
+  "/ai-anime-generator",
+  "/ai-anime-voice-and-sound",
+  "/how-to-tell-if-anime-is-ai",
+  "/making-of-episode-1",
+  "/can-one-person-make-an-anime",
+  "/ai-anime-storyboard",
+  "/ai-anime-backgrounds",
+  "/ai-anime-script",
+  "/ai-anime-copyright",
+  "/history-of-ai-anime",
+  "/anime-style-prompts",
+  "/editing-ai-anime",
+  "/why-ai-anime-looks-bad",
+  "/ai-film-festivals-animation",
+  "/lost-garden-story-and-characters",
   "/press",
   "/episode-1",
+  "/episode-1-transcript",
   "/legal-notice",
   "/privacy-policy",
 ] as const;
 
-export type IndexablePathSuffix = (typeof INDEXABLE_PATH_SUFFIXES)[number];
+export type IndexablePathSuffix = (typeof ALL_PATH_SUFFIXES)[number];
+
+/**
+ * Paths that are published right now. The transcript page joins the list
+ * only once every language has its subtitles imported.
+ */
+export const INDEXABLE_PATH_SUFFIXES: readonly IndexablePathSuffix[] = ALL_PATH_SUFFIXES.filter(
+  (path) => path !== "/episode-1-transcript" || TRANSCRIPT_PUBLISHED,
+);
 
 type SitemapFrequency =
   | "always"
@@ -47,23 +80,45 @@ type SitemapFrequency =
   | "yearly"
   | "never";
 
+/**
+ * `lastModified` is the date the page content last changed, per page.
+ * Bump it when you edit that page's copy. A single shared build date on
+ * every entry teaches Google to ignore the field entirely.
+ */
 const SITEMAP_HINTS: Record<
   IndexablePathSuffix,
-  { changeFrequency: SitemapFrequency; priority: number }
+  { changeFrequency: SitemapFrequency; priority: number; lastModified: string }
 > = {
-  "/": { changeFrequency: "weekly", priority: 1 },
-  "/episode-1": { changeFrequency: "weekly", priority: 0.9 },
-  "/press": { changeFrequency: "monthly", priority: 0.8 },
-  "/vision": { changeFrequency: "monthly", priority: 0.7 },
-  "/process": { changeFrequency: "monthly", priority: 0.7 },
-  "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/blog": { changeFrequency: "weekly", priority: 0.7 },
-  "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7 },
-  "/is-ai-anime-real-anime": { changeFrequency: "monthly", priority: 0.8 },
-  "/ai-anime-vs-traditional-animation": { changeFrequency: "monthly", priority: 0.7 },
-  "/legal-notice": { changeFrequency: "yearly", priority: 0.2 },
-  "/privacy-policy": { changeFrequency: "yearly", priority: 0.2 },
+  "/": { changeFrequency: "weekly", priority: 1, lastModified: "2026-09-04" },
+  "/episode-1": { changeFrequency: "weekly", priority: 0.9, lastModified: "2026-06-03" },
+  "/episode-1-transcript": { changeFrequency: "yearly", priority: 0.6, lastModified: "2026-09-07" },
+  "/press": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-06-08" },
+  "/vision": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/process": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/best-ai-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/blog": { changeFrequency: "weekly", priority: 0.7, lastModified: "2026-09-05" },
+  "/how-to-make-ai-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/ai-character-consistency": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/is-ai-anime-real-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-04" },
+  "/ai-anime-vs-traditional-animation": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
+  "/ai-manga": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/ai-anime-generator": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/ai-anime-voice-and-sound": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/how-to-tell-if-anime-is-ai": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/making-of-episode-1": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/can-one-person-make-an-anime": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/ai-anime-storyboard": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/ai-anime-backgrounds": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/ai-anime-script": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/ai-anime-copyright": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/history-of-ai-anime": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/anime-style-prompts": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/editing-ai-anime": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/why-ai-anime-looks-bad": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/ai-film-festivals-animation": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-05" },
+  "/lost-garden-story-and-characters": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-09-05" },
+  "/legal-notice": { changeFrequency: "yearly", priority: 0.2, lastModified: "2026-06-03" },
+  "/privacy-policy": { changeFrequency: "yearly", priority: 0.2, lastModified: "2026-06-03" },
 };
 
 type BuildPageMetadataOptions = {
@@ -127,6 +182,9 @@ export function buildPageMetadata({
     alternates: {
       canonical,
       ...(hreflang ? { languages: hreflang } : {}),
+      types: {
+        "application/rss+xml": absoluteUrl(localePath(locale, "/feed.xml")),
+      },
     },
     openGraph: {
       title,
@@ -203,12 +261,9 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         },
         email: SITE.email,
         sameAs: Object.values(SOCIAL_LINKS),
-        founder: {
-          "@type": "Person",
-          name: SITE.creator,
-          sameAs: [CREATOR_WIKIDATA],
-        },
+        founder: { "@id": CREATOR_ID },
       },
+      creatorJsonLd(),
       {
         "@type": "TVSeries",
         "@id": `${SITE.url}/#series`,
@@ -224,13 +279,50 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
           ...Object.values(SOCIAL_LINKS),
           ...Object.values(DATABASE_LINKS),
         ],
-        creator: {
-          "@type": "Person",
-          name: SITE.creator,
-          sameAs: [CREATOR_WIKIDATA],
-        },
+        creator: { "@id": CREATOR_ID },
+        episode: episodeJsonLd(locale, dict),
       },
+      episodeVideoNode({
+        locale,
+        name: dict.meta.episodeOnePublic.title,
+        description: dict.meta.episodeOnePublic.description,
+        dict,
+      }),
     ],
+  };
+}
+
+const CREATOR_ID = `${SITE_URL}/#creator`;
+const EPISODE_ONE_ID = `${SITE_URL}/#episode-1`;
+const EPISODE_ONE_VIDEO_ID = `${SITE_URL}/#episode-1-video`;
+
+/** Single Person node shared by Organization.founder and TVSeries.creator. */
+function creatorJsonLd() {
+  return {
+    "@type": "Person",
+    "@id": CREATOR_ID,
+    name: SITE.creator,
+    url: SITE.url,
+    sameAs: [CREATOR_WIKIDATA],
+  };
+}
+
+/**
+ * Episode node embedded in the TVSeries graph so the series entity leads
+ * straight to the watchable content, in the visitor's language.
+ */
+function episodeJsonLd(locale: Locale, dict: Dictionary) {
+  return {
+    "@type": "TVEpisode",
+    "@id": EPISODE_ONE_ID,
+    name: dict.meta.episodeOnePublic.title,
+    episodeNumber: 1,
+    url: absoluteUrl(localePath(locale, "/episode-1")),
+    datePublished: EPISODE_ONE.publishedAt,
+    duration: EPISODE_ONE.duration,
+    inLanguage: schemaLanguages[locale],
+    partOfSeries: { "@id": `${SITE_URL}/#series` },
+    video: { "@id": EPISODE_ONE_VIDEO_ID },
   };
 }
 
@@ -287,6 +379,7 @@ export function articlePageJsonLd({
   datePublished,
   dateModified,
   keywords = DEFAULT_ARTICLE_KEYWORDS,
+  image = SITE.ogImage,
 }: {
   locale: Locale;
   headline: string;
@@ -295,6 +388,8 @@ export function articlePageJsonLd({
   datePublished?: string;
   dateModified?: string;
   keywords?: readonly string[];
+  /** Site-relative path of the article's lead still. */
+  image?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -302,7 +397,7 @@ export function articlePageJsonLd({
     headline,
     description,
     url: absoluteUrl(path),
-    image: absoluteUrl(SITE.ogImage),
+    image: absoluteUrl(image),
     author: {
       "@type": "Person",
       name: SITE.creator,
@@ -372,31 +467,51 @@ export function faqPageJsonLd(
   };
 }
 
-export function episodeVideoJsonLd({
+/**
+ * Key moments of the episode as Clip nodes, one per chapter, when the
+ * chapter start times are known. Google shows them under the video result.
+ */
+function episodeClips(locale: Locale, dict: Dictionary | undefined) {
+  const titles = dict?.experience.timeline.map((chapter) => chapter.title) ?? [];
+  if (!EPISODE_ONE_CHAPTER_STARTS.length || EPISODE_ONE_CHAPTER_STARTS.length !== titles.length) return {};
+  const episodeUrl = absoluteUrl(localePath(locale, "/episode-1"));
+  return {
+    hasPart: EPISODE_ONE_CHAPTER_STARTS.map((start, index) => ({
+      "@type": "Clip",
+      name: titles[index],
+      startOffset: start,
+      endOffset: EPISODE_ONE_CHAPTER_STARTS[index + 1] ?? EPISODE_ONE_RUNTIME_SECONDS,
+      url: `${episodeUrl}?t=${start}`,
+    })),
+  };
+}
+
+/** The Episode One VideoObject, without @context, for embedding in a graph. */
+function episodeVideoNode({
   locale,
   name,
   description,
+  dict,
 }: {
   locale: Locale;
   name: string;
   description: string;
+  dict?: Dictionary;
 }) {
-  const image = absoluteUrl(SITE.ogImage);
+  const image = absoluteUrl(ARTICLE_IMAGES.heroBanner.src);
 
   return {
-    "@context": "https://schema.org",
     "@type": "VideoObject",
+    "@id": EPISODE_ONE_VIDEO_ID,
     name,
     description,
     thumbnailUrl: image,
     uploadDate: EPISODE_ONE.publishedAt,
+    duration: EPISODE_ONE.duration,
     contentUrl: EPISODE_ONE.watchUrl,
     embedUrl: EPISODE_ONE.embedUrl,
     inLanguage: schemaLanguages[locale],
-    creator: {
-      "@type": "Person",
-      name: SITE.creator,
-    },
+    creator: creatorJsonLd(),
     partOfSeries: { "@id": `${SITE.url}/#series` },
     keywords: [
       "AI anime",
@@ -405,7 +520,17 @@ export function episodeVideoJsonLd({
       "dark fantasy anime",
       "Lost Garden",
     ],
+    ...episodeClips(locale, dict),
   };
+}
+
+export function episodeVideoJsonLd(args: {
+  locale: Locale;
+  name: string;
+  description: string;
+  dict?: Dictionary;
+}) {
+  return { "@context": "https://schema.org", ...episodeVideoNode(args) };
 }
 
 export function getSitemapEntries(): Array<{
@@ -414,25 +539,29 @@ export function getSitemapEntries(): Array<{
   changeFrequency: SitemapFrequency;
   priority: number;
   alternates: { languages: Record<string, string> };
+  images?: string[];
 }> {
-  const lastModified = new Date();
   const entries: Array<{
     url: string;
     lastModified: Date;
     changeFrequency: SitemapFrequency;
     priority: number;
     alternates: { languages: Record<string, string> };
+    images?: string[];
   }> = [];
 
   for (const pathSuffix of INDEXABLE_PATH_SUFFIXES) {
     const hints = SITEMAP_HINTS[pathSuffix];
+    const media = ARTICLE_MEDIA[pathSuffix];
+    const images = media ? [absoluteUrl(ARTICLE_IMAGES[media.image].src)] : undefined;
     for (const locale of locales) {
       entries.push({
         url: absoluteUrl(localePath(locale, pathSuffix)),
-        lastModified,
+        lastModified: new Date(hints.lastModified),
         changeFrequency: hints.changeFrequency,
         priority: hints.priority,
         alternates: { languages: localeHreflangAlternates(pathSuffix) },
+        ...(images ? { images } : {}),
       });
     }
   }

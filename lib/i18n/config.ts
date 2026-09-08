@@ -23,12 +23,3 @@ export const openGraphLocales: Record<Locale, string> = {
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }
-
-export async function getLocaleFromHeaders(): Promise<Locale> {
-  const { headers } = await import("next/headers");
-  const headerLocale = (await headers()).get("x-locale");
-  if (headerLocale && isLocale(headerLocale)) {
-    return headerLocale;
-  }
-  return defaultLocale;
-}

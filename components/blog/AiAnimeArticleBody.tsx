@@ -3,6 +3,9 @@ import type { AiAnimeArticle, ArticleLink } from "@/lib/ai-anime-article";
 import type { Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { VisionBlock } from "@/components/vision/VisionArticle";
+import { ArticleHero } from "@/components/blog/ArticleHero";
+import { LiteYouTube } from "@/components/blog/LiteYouTube";
+import type { ArticleImage } from "@/lib/article-media";
 
 const linkClass =
   "font-body text-cyan-pale/90 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm";
@@ -36,15 +39,20 @@ type AiAnimeArticleBodyProps = {
   article: AiAnimeArticle;
   locale: Locale;
   siteName: string;
+  hero?: { image: ArticleImage; alt: string };
+  playLabel: string;
 };
 
 export function AiAnimeArticleBody({
   article,
   locale,
   siteName,
+  hero,
+  playLabel,
 }: AiAnimeArticleBodyProps) {
   return (
     <>
+      {hero ? <ArticleHero image={hero.image} alt={hero.alt} /> : null}
       <p className="font-display text-lg text-cyan-pale/90 sm:text-xl">
         {siteName}
       </p>
@@ -105,6 +113,14 @@ export function AiAnimeArticleBody({
               <p className="mt-1 font-body text-xs uppercase tracking-wider text-ivory/45 sm:text-sm">
                 {entry.meta}
               </p>
+              {entry.youtubeId ? (
+                <LiteYouTube
+                  youtubeId={entry.youtubeId}
+                  title={entry.title}
+                  playLabel={playLabel}
+                  className="mt-4"
+                />
+              ) : null}
               <p className="mt-3 font-display text-base font-medium text-cyan-pale/95 sm:text-lg">
                 {entry.verdict}
               </p>

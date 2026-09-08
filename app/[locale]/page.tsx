@@ -3,6 +3,7 @@ import { CharactersSection } from "@/components/CharactersSection";
 import { DiscoverSection } from "@/components/DiscoverSection";
 import { KnightsSection } from "@/components/KnightsSection";
 import { Hero } from "@/components/Hero";
+import { HowItsMadeSection } from "@/components/HowItsMadeSection";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -35,6 +36,7 @@ export default async function Home({ params }: HomePageProps) {
 
       <main id="main">
         <Hero />
+        <HowItsMadeSection locale={locale} dict={dict} />
         <CharactersSection />
         <KnightsSection />
         <DiscoverSection />

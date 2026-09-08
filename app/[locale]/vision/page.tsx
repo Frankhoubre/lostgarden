@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { VisionArticle } from "@/components/vision/VisionArticle";
+import { ArticleHero } from "@/components/blog/ArticleHero";
+import { articleOgMetadata, getArticleMedia } from "@/lib/article-media";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -12,6 +14,8 @@ import {
   breadcrumbJsonLd,
   buildPageMetadata,
 } from "@/lib/seo";
+
+const SLUG = "/vision" as const;
 
 type VisionPageProps = {
   params: Promise<{ locale: string }>;
@@ -33,6 +37,7 @@ export async function generateMetadata({
     pathSuffix: "/vision",
     absoluteTitle: true,
     ogType: "article",
+    ...articleOgMetadata(locale, SLUG, dict),
   });
 }
 
@@ -42,6 +47,7 @@ export default async function VisionPage({ params }: VisionPageProps) {
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
   const article = getVisionArticle(locale);
+  const media = getArticleMedia(SLUG);
   const homePath = localePath(locale, "/");
   const visionPath = localePath(locale, "/vision");
 
@@ -59,9 +65,13 @@ export default async function VisionPage({ params }: VisionPageProps) {
           headline: dict.vision.headline,
           description: dict.meta.vision.description,
           path: visionPath,
+          ...(media ? { image: media.imageData.src } : {}),
         })}
       />
       <LegalPageShell title={dict.vision.headline}>
+        {media ? (
+          <ArticleHero image={media.imageData} alt={dict.media.alt[media.imageData.altKey]} />
+        ) : null}
         <VisionArticle article={article} siteName={dict.common.siteName} />
       </LegalPageShell>
     </>

@@ -29,6 +29,7 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     {
       rank: 1,
       title: "Lost Garden",
+      youtubeId: "eZ_JlaLDJ-8",
       meta: "2026年 · インディー · 制作 Frank Houbre · 第1話 17分",
       verdict: "このリストで最も完成度が高く、しかも単独制作のエピソード。",
       paragraphs: [
@@ -48,6 +49,7 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     {
       rank: 2,
       title: "Twins Hinahima（ツインズひなひま）",
+      youtubeId: "CjUa9RladYQ",
       meta: "2025年 · 日本 · フロンティアワークス、KaKa Creation · テレビ放送",
       verdict:
         "約95%のカットに生成AIを使い、日本のテレビで放送された最初のアニメ。",
@@ -77,6 +79,7 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     {
       rank: 4,
       title: "The Dog & the Boy（犬と少年）",
+      youtubeId: "J9DpusAZV_0",
       meta: "2023年 · 日本 · Netflix Anime Creators Base、WIT STUDIO、rinna · 3分",
       verdict: "議論の火をつけた短編。",
       paragraphs: [
@@ -91,6 +94,7 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     {
       rank: 5,
       title: "Anime Rock, Paper, Scissors",
+      youtubeId: "GVT3WUa-48Y",
       meta: "2023年 · アメリカ · Corridor Digital · 7分",
       verdict: "AI動画という言葉を知る前に、多くの人が見てしまった作品。",
       paragraphs: [
