@@ -45,3 +45,7 @@ next-env.d.ts
 
 # standalone Phaser prototype (not part of the Next.js site)
 /game/
+
+# Subtitle exports are inputs; the generated transcripts are committed instead
+subtitles/*.srt
+subtitles/*.vtt

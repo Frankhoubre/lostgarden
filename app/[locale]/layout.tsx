@@ -5,9 +5,10 @@ import type { ReactNode } from "react";
 import { CookieBanner } from "@/components/legal/CookieBanner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { LocaleProvider } from "@/components/providers/LocaleProvider";
-import { isLocale, locales, type Locale } from "@/lib/i18n/config";
+import { defaultLocale, isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { SITE } from "@/lib/seo";
+import { localePath } from "@/lib/i18n/navigation";
+import { absoluteUrl, SITE } from "@/lib/seo";
 import "../globals.css";
 
 /**
@@ -35,22 +36,38 @@ const body = Zen_Kaku_Gothic_New({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: {
-    default: SITE.name,
-    template: `%s | ${SITE.name}`,
-  },
-  applicationName: SITE.name,
-  authors: [{ name: SITE.creator, url: SITE.url }],
-  creator: SITE.creator,
-  publisher: SITE.name,
-  category: "entertainment",
-  formatDetection: {
-    telephone: false,
-    address: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  const locale = isLocale(localeParam) ? localeParam : defaultLocale;
+
+  return {
+    metadataBase: new URL(SITE.url),
+    title: {
+      default: SITE.name,
+      template: `%s | ${SITE.name}`,
+    },
+    applicationName: SITE.name,
+    authors: [{ name: SITE.creator, url: SITE.url }],
+    creator: SITE.creator,
+    publisher: SITE.name,
+    category: "entertainment",
+    formatDetection: {
+      telephone: false,
+      address: false,
+    },
+    // The RSS link is emitted by buildPageMetadata on every page: a page's
+    // `alternates` replaces the layout's, so it cannot live here.
+    alternates: {
+      types: {
+        "application/rss+xml": absoluteUrl(localePath(locale, "/feed.xml")),
+      },
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#020817",

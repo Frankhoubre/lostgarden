@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { EPISODE_ONE } from "@/lib/episode";
+import { EPISODE_ONE, EPISODE_ONE_CHAPTER_STARTS, EPISODE_ONE_RUNTIME_SECONDS } from "@/lib/episode";
 import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
 import { CREATOR_WIKIDATA, DATABASE_LINKS, SOCIAL_LINKS } from "@/lib/social";
 import { ARTICLE_IMAGES, ARTICLE_MEDIA } from "@/lib/article-media";
+import { TRANSCRIPT_PUBLISHED } from "@/lib/transcripts";
 import type { Dictionary } from "@/lib/i18n/types";
 
 /**
@@ -19,15 +20,15 @@ export const SITE_URL =
 export const SITE = {
   name: "Lost Garden",
   url: SITE_URL,
-  ogImage: "/images/og-image.png",
+  ogImage: "/images/og-image.jpg",
   ogImageWidth: 1200,
   ogImageHeight: 630,
   email: LEGAL_PUBLISHER.email,
   creator: LEGAL_PUBLISHER.name,
 } as const;
 
-/** Locale-neutral path segment, e.g. `/process` or `/`. */
-export const INDEXABLE_PATH_SUFFIXES = [
+/** Every locale-neutral path segment the site can serve, e.g. `/process` or `/`. */
+const ALL_PATH_SUFFIXES = [
   "/",
   "/vision",
   "/process",
@@ -55,11 +56,20 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/lost-garden-story-and-characters",
   "/press",
   "/episode-1",
+  "/episode-1-transcript",
   "/legal-notice",
   "/privacy-policy",
 ] as const;
 
-export type IndexablePathSuffix = (typeof INDEXABLE_PATH_SUFFIXES)[number];
+export type IndexablePathSuffix = (typeof ALL_PATH_SUFFIXES)[number];
+
+/**
+ * Paths that are published right now. The transcript page joins the list
+ * only once every language has its subtitles imported.
+ */
+export const INDEXABLE_PATH_SUFFIXES: readonly IndexablePathSuffix[] = ALL_PATH_SUFFIXES.filter(
+  (path) => path !== "/episode-1-transcript" || TRANSCRIPT_PUBLISHED,
+);
 
 type SitemapFrequency =
   | "always"
@@ -81,6 +91,7 @@ const SITEMAP_HINTS: Record<
 > = {
   "/": { changeFrequency: "weekly", priority: 1, lastModified: "2026-09-04" },
   "/episode-1": { changeFrequency: "weekly", priority: 0.9, lastModified: "2026-06-03" },
+  "/episode-1-transcript": { changeFrequency: "yearly", priority: 0.6, lastModified: "2026-09-07" },
   "/press": { changeFrequency: "monthly", priority: 0.8, lastModified: "2026-06-08" },
   "/vision": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
   "/process": { changeFrequency: "monthly", priority: 0.7, lastModified: "2026-09-04" },
@@ -171,6 +182,9 @@ export function buildPageMetadata({
     alternates: {
       canonical,
       ...(hreflang ? { languages: hreflang } : {}),
+      types: {
+        "application/rss+xml": absoluteUrl(localePath(locale, "/feed.xml")),
+      },
     },
     openGraph: {
       title,
@@ -272,6 +286,7 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         locale,
         name: dict.meta.episodeOnePublic.title,
         description: dict.meta.episodeOnePublic.description,
+        dict,
       }),
     ],
   };
@@ -452,15 +467,36 @@ export function faqPageJsonLd(
   };
 }
 
+/**
+ * Key moments of the episode as Clip nodes, one per chapter, when the
+ * chapter start times are known. Google shows them under the video result.
+ */
+function episodeClips(locale: Locale, dict: Dictionary | undefined) {
+  const titles = dict?.experience.timeline.map((chapter) => chapter.title) ?? [];
+  if (!EPISODE_ONE_CHAPTER_STARTS.length || EPISODE_ONE_CHAPTER_STARTS.length !== titles.length) return {};
+  const episodeUrl = absoluteUrl(localePath(locale, "/episode-1"));
+  return {
+    hasPart: EPISODE_ONE_CHAPTER_STARTS.map((start, index) => ({
+      "@type": "Clip",
+      name: titles[index],
+      startOffset: start,
+      endOffset: EPISODE_ONE_CHAPTER_STARTS[index + 1] ?? EPISODE_ONE_RUNTIME_SECONDS,
+      url: `${episodeUrl}?t=${start}`,
+    })),
+  };
+}
+
 /** The Episode One VideoObject, without @context, for embedding in a graph. */
 function episodeVideoNode({
   locale,
   name,
   description,
+  dict,
 }: {
   locale: Locale;
   name: string;
   description: string;
+  dict?: Dictionary;
 }) {
   const image = absoluteUrl(ARTICLE_IMAGES.heroBanner.src);
 
@@ -484,6 +520,7 @@ function episodeVideoNode({
       "dark fantasy anime",
       "Lost Garden",
     ],
+    ...episodeClips(locale, dict),
   };
 }
 
@@ -491,6 +528,7 @@ export function episodeVideoJsonLd(args: {
   locale: Locale;
   name: string;
   description: string;
+  dict?: Dictionary;
 }) {
   return { "@context": "https://schema.org", ...episodeVideoNode(args) };
 }

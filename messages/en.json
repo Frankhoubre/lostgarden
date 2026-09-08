@@ -121,6 +121,10 @@
     "lostGardenStoryAndCharacters": {
       "title": "Lost Garden: Story, World and Characters",
       "description": "A hollow knight, a child who makes flowers grow, thirteen armours bound by an oath, and a world with no sky. What Lost Garden is about and who is in it, without spoiling the ending."
+    },
+    "episodeOneTranscript": {
+      "title": "Lost Garden Episode 1 Transcript",
+      "description": "Full dialogue transcript of Lost Garden Episode One, with timestamps that open the scene on YouTube. English audio, subtitles in French, Japanese and Korean."
     }
   },
   "episodeOne": {
@@ -715,5 +719,20 @@
       "tavernKnights": "Serrure and Lanterne in an underground tavern, Lost Garden",
       "roseCapsule": "Rose inside a luminous capsule, Lost Garden"
     }
+  },
+  "transcript": {
+    "headline": "Episode One, transcript",
+    "lead": "Every spoken line of the episode, in order, with the time it happens. Click a time to open that moment on YouTube. Lanterne has no voice, so his part of the story is in the sound, not here.",
+    "watchAt": "Open at",
+    "breadcrumb": "Transcript"
+  },
+  "homeArticles": {
+    "title": "How it is made",
+    "subtitle": "Production notes, guides and the story behind a seventeen minute episode made by one person.",
+    "all": "All articles"
+  },
+  "feed": {
+    "title": "Lost Garden, articles",
+    "description": "New guides and production notes from Lost Garden, an independent AI-assisted anime."
   }
 }

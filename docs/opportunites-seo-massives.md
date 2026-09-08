@@ -211,6 +211,14 @@ Une relecture du diff complet a été faite avant d'ouvrir la pull request. Corr
 - `.env.local.example` documente l'hôte en www, sinon copier le fichier rétablissait l'ancien hôte
 - une table de vidéos en doublon a été supprimée
 
+## Cinq actions de plus, le 7 septembre 2026
+
+1. **Transcription de l'épisode 1.** Toute la mécanique est en place : page `/episode-1-transcript` dans les quatre langues, avec un horodatage cliquable par paragraphe qui ouvre le passage sur YouTube, balisage `VideoObject` avec la propriété `transcript`, script `scripts/import-subtitles.mjs` qui convertit des `.srt` ou `.vtt` en modules TypeScript. Il manque les fichiers : YouTube bloque leur récupération automatisée. Déposer `en`, `fr`, `ja`, `ko` dans `subtitles/`, lancer le script, commiter. La page n'est publiée, et listée dans le sitemap, que lorsque les quatre langues sont présentes, pour que le hreflang ne pointe jamais vers un 404
+2. **Flux RSS**, un par langue, `/{langue}/feed.xml`, 23 entrées, annoncé dans le `<head>` de chaque page. Prérendu au build
+3. **Section « Comment c'est fait » sur l'accueil**, quatre articles avec image entre l'épisode et les personnages, et un lien vers l'index. L'accueil mène maintenant directement aux pages qui doivent se positionner
+4. **Chapitres de l'épisode dans le balisage vidéo.** Les noms existent déjà dans le dictionnaire (`experience.timeline`). Il manque les temps de début : remplir `EPISODE_ONE_CHAPTER_STARTS` dans `lib/episode.ts` avec les cinq valeurs en secondes, dans l'ordre. Tant que la liste est vide, aucun `Clip` n'est émis
+5. **Images renommées.** Les quinze JPEG qui portaient une extension `.png` s'appellent maintenant `.jpg`, et toutes les références suivent. Le logo, un vrai PNG, ne change pas
+
 ## Dans quel ordre
 
 1. Choisir le domaine canonique et aligner `SITE_URL`, puis resoumettre le sitemap. Rien d'autre ne compte tant que ce n'est pas fait

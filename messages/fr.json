@@ -121,6 +121,10 @@
     "lostGardenStoryAndCharacters": {
       "title": "Lost Garden : l'histoire, le monde et les personnages",
       "description": "Un chevalier creux, une enfant qui fait pousser les fleurs, treize armures liées par un serment, et un monde sans ciel. De quoi parle Lost Garden et qui s'y trouve, sans dévoiler la fin."
+    },
+    "episodeOneTranscript": {
+      "title": "Transcription de l'épisode 1 de Lost Garden",
+      "description": "La transcription complète des dialogues de l'épisode 1 de Lost Garden, avec des horodatages qui ouvrent la scène sur YouTube. Audio anglais, sous-titres en français, japonais et coréen."
     }
   },
   "episodeOne": {
@@ -717,5 +721,20 @@
       "tavernKnights": "Serrure et Lanterne dans une taverne souterraine, Lost Garden",
       "roseCapsule": "Rose dans une capsule lumineuse, Lost Garden"
     }
+  },
+  "transcript": {
+    "headline": "Épisode 1, transcription",
+    "lead": "Chaque réplique de l'épisode, dans l'ordre, avec le moment où elle arrive. Cliquez sur un temps pour ouvrir ce passage sur YouTube. Lanterne n'a pas de voix, sa part de l'histoire est dans le son, pas ici.",
+    "watchAt": "Ouvrir à",
+    "breadcrumb": "Transcription"
+  },
+  "homeArticles": {
+    "title": "Comment c'est fait",
+    "subtitle": "Notes de production, guides et l'histoire derrière un épisode de dix-sept minutes fait par une seule personne.",
+    "all": "Tous les articles"
+  },
+  "feed": {
+    "title": "Lost Garden, articles",
+    "description": "Nouveaux guides et notes de production de Lost Garden, un animé indépendant assisté par IA."
   }
 }

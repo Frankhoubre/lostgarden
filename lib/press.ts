@@ -23,9 +23,9 @@ export const PRESS_KIT = {
   pressKitZipUrl: "/press/lost-garden-press-kit.zip",
   pressAssetsBaseUrl: "/press",
   contactEmail: "lostgarden.world@gmail.com",
-  heroImageUrl: "/press/forest-machines.png",
-  ogImageUrl: "/press/forest-machines.png",
-  portraitImageUrl: "/press/frank-houbre-portrait.png",
+  heroImageUrl: "/press/forest-machines.jpg",
+  ogImageUrl: "/press/forest-machines.jpg",
+  portraitImageUrl: "/press/frank-houbre-portrait.jpg",
   logoImageUrl: "/press/lost-garden-logo.png",
 } as const;
 
@@ -64,7 +64,7 @@ export const PRESS_ASSET_FILES: Record<PressAssetId, PressAssetFile> = {
     href: `${PRESS_KIT.pressAssetsBaseUrl}/lost-garden-hd-images.zip`,
   },
   portrait: {
-    filename: "frank-houbre-portrait.png",
+    filename: "frank-houbre-portrait.jpg",
     href: PRESS_KIT.portraitImageUrl,
   },
   logo: {
@@ -96,32 +96,32 @@ export function pressAssetFilename(asset: PressAssetFile, locale: Locale): strin
 
 export const PRESS_GALLERY_IMAGES = [
   {
-    src: "/press/forest-machines.png",
+    src: "/press/forest-machines.jpg",
     altKey: "forestMachines" as const,
     width: 1024,
     height: 576,
   },
   {
-    src: "/press/lanterne-portrait.png",
+    src: "/press/lanterne-portrait.jpg",
     altKey: "lanterne" as const,
     width: 1024,
     height: 576,
   },
   {
-    src: "/press/rose-capsule.png",
+    src: "/press/rose-capsule.jpg",
     altKey: "roseCapsule" as const,
     width: 1024,
     height: 576,
   },
   {
-    src: "/press/tavern-knights.png",
+    src: "/press/tavern-knights.jpg",
     altKey: "tavern" as const,
     width: 1024,
     height: 576,
   },
 ] as const;
 
-export const PRESS_EPISODE_STILL = "/press/rose-capsule.png";
+export const PRESS_EPISODE_STILL = "/press/rose-capsule.jpg";
 
 export const PRESS_SECTION_IDS = {
   story: "story",

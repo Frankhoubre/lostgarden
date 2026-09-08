@@ -9,18 +9,18 @@ import type { IndexablePathSuffix } from "@/lib/seo";
  * Alt text lives in the dictionary under `media.alt`, keyed by `altKey`.
  */
 export const ARTICLE_IMAGES = {
-  sol: { src: "/images/sol.png", width: 1024, height: 576, altKey: "sol" },
-  rose: { src: "/images/rose.png", width: 1024, height: 576, altKey: "rose" },
-  serrure: { src: "/images/serrure.png", width: 1024, height: 576, altKey: "serrure" },
-  blueForest: { src: "/images/blue-forest.png", width: 1024, height: 576, altKey: "blueForest" },
-  forestReference: { src: "/images/forest-reference.png", width: 1024, height: 576, altKey: "forestReference" },
-  heroBanner: { src: "/images/hero-banner.png", width: 1024, height: 576, altKey: "heroBanner" },
+  sol: { src: "/images/sol.jpg", width: 1024, height: 576, altKey: "sol" },
+  rose: { src: "/images/rose.jpg", width: 1024, height: 576, altKey: "rose" },
+  serrure: { src: "/images/serrure.jpg", width: 1024, height: 576, altKey: "serrure" },
+  blueForest: { src: "/images/blue-forest.jpg", width: 1024, height: 576, altKey: "blueForest" },
+  forestReference: { src: "/images/forest-reference.jpg", width: 1024, height: 576, altKey: "forestReference" },
+  heroBanner: { src: "/images/hero-banner.jpg", width: 1024, height: 576, altKey: "heroBanner" },
   heroCavern: { src: "/images/hero-cavern.jpg", width: 1024, height: 576, altKey: "heroCavern" },
-  pelerins: { src: "/images/pelerins.png", width: 1024, height: 576, altKey: "pelerins" },
-  sleepingMachines: { src: "/images/sleeping-machines.png", width: 1024, height: 576, altKey: "sleepingMachines" },
-  undergroundCavern: { src: "/images/underground-cavern.png", width: 1024, height: 576, altKey: "undergroundCavern" },
-  tavernKnights: { src: "/press/tavern-knights.png", width: 1024, height: 576, altKey: "tavernKnights" },
-  roseCapsule: { src: "/press/rose-capsule.png", width: 1024, height: 576, altKey: "roseCapsule" },
+  pelerins: { src: "/images/pelerins.jpg", width: 1024, height: 576, altKey: "pelerins" },
+  sleepingMachines: { src: "/images/sleeping-machines.jpg", width: 1024, height: 576, altKey: "sleepingMachines" },
+  undergroundCavern: { src: "/images/underground-cavern.jpg", width: 1024, height: 576, altKey: "undergroundCavern" },
+  tavernKnights: { src: "/press/tavern-knights.jpg", width: 1024, height: 576, altKey: "tavernKnights" },
+  roseCapsule: { src: "/press/rose-capsule.jpg", width: 1024, height: 576, altKey: "roseCapsule" },
 } as const;
 
 export type ArticleImageKey = keyof typeof ARTICLE_IMAGES;
@@ -74,6 +74,7 @@ export const ARTICLE_MEDIA: Partial<Record<IndexablePathSuffix, ArticleMedia>> =
   "/process": { image: "sleepingMachines", headline: (d) => d.process.headline },
   "/vision": { image: "blueForest", headline: (d) => d.vision.headline },
   "/episode-1": { image: "heroBanner", headline: (d) => d.episodeOnePublic.headline },
+  "/episode-1-transcript": { image: "roseCapsule", headline: (d) => d.transcript.headline },
   "/blog": { image: "rose", headline: (d) => d.blog.headline },
   "/best-ai-anime": { image: "rose", headline: (d) => d.bestAiAnime.headline },
   "/how-to-make-ai-anime": { image: "undergroundCavern", headline: guideHeadline("howToMakeAiAnime") },

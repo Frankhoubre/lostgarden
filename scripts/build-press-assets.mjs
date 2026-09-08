@@ -17,10 +17,10 @@ const EPISODE = {
 };
 
 const HD_STILLS = [
-  "forest-machines.png",
-  "lanterne-portrait.png",
-  "rose-capsule.png",
-  "tavern-knights.png",
+  "forest-machines.jpg",
+  "lanterne-portrait.jpg",
+  "rose-capsule.jpg",
+  "tavern-knights.jpg",
 ];
 
 function readJson(relPath) {
@@ -152,7 +152,7 @@ function buildZips() {
     "lost-garden-episode-links.txt",
     "lost-garden-audience-comments.txt",
     "lost-garden-logo.png",
-    "frank-houbre-portrait.png",
+    "frank-houbre-portrait.jpg",
     ...HD_STILLS,
   ]);
 }

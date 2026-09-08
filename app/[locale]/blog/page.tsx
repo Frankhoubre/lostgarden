@@ -17,35 +17,7 @@ import {
   webPageJsonLd,
 } from "@/lib/seo";
 
-/** Editorial pages listed on the blog index, newest intent first. */
-const ARTICLES = [
-  { path: "/making-of-episode-1", meta: "makingOfEpisodeOne" },
-  { path: "/best-ai-anime", meta: "bestAiAnime" },
-  { path: "/how-to-make-ai-anime", meta: "howToMakeAiAnime" },
-  { path: "/ai-anime-generator", meta: "aiAnimeGenerator" },
-  { path: "/can-one-person-make-an-anime", meta: "canOnePersonMakeAnAnime" },
-  { path: "/ai-manga", meta: "aiManga" },
-  { path: "/ai-anime-voice-and-sound", meta: "aiAnimeVoiceAndSound" },
-  { path: "/how-to-tell-if-anime-is-ai", meta: "howToTellIfAnimeIsAi" },
-  { path: "/lost-garden-story-and-characters", meta: "lostGardenStoryAndCharacters" },
-  { path: "/history-of-ai-anime", meta: "historyOfAiAnime" },
-  { path: "/why-ai-anime-looks-bad", meta: "whyAiAnimeLooksBad" },
-  { path: "/anime-style-prompts", meta: "animeStylePrompts" },
-  { path: "/ai-anime-script", meta: "aiAnimeScript" },
-  { path: "/ai-anime-storyboard", meta: "aiAnimeStoryboard" },
-  { path: "/ai-anime-backgrounds", meta: "aiAnimeBackgrounds" },
-  { path: "/editing-ai-anime", meta: "editingAiAnime" },
-  { path: "/ai-anime-copyright", meta: "aiAnimeCopyright" },
-  { path: "/ai-film-festivals-animation", meta: "aiFilmFestivalsAnimation" },
-  { path: "/ai-character-consistency", meta: "aiCharacterConsistency" },
-  { path: "/is-ai-anime-real-anime", meta: "isAiAnimeRealAnime" },
-  {
-    path: "/ai-anime-vs-traditional-animation",
-    meta: "aiAnimeVsTraditional",
-  },
-  { path: "/process", meta: "process" },
-  { path: "/vision", meta: "vision" },
-] as const;
+import { ARTICLES } from "@/lib/articles";
 
 type BlogPageProps = { params: Promise<{ locale: string }> };
 

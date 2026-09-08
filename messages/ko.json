@@ -121,6 +121,10 @@
     "lostGardenStoryAndCharacters": {
       "title": "Lost Garden: 이야기, 세계, 캐릭터",
       "description": "속이 빈 기사, 꽃을 피우는 아이, 맹세에 묶인 열세 벌의 갑옷, 하늘 없는 세계. Lost Garden이 무엇에 관한 이야기이고 누가 등장하는지, 결말은 밝히지 않고."
+    },
+    "episodeOneTranscript": {
+      "title": "Lost Garden 1화 전체 대본",
+      "description": "Lost Garden 1화의 모든 대사를 YouTube에서 해당 장면을 여는 타임스탬프와 함께. 영어 음성, 프랑스어·일본어·한국어 자막."
     }
   },
   "episodeOne": {
@@ -715,5 +719,20 @@
       "tavernKnights": "지하 선술집의 Serrure와 Lanterne, Lost Garden",
       "roseCapsule": "빛나는 캡슐 안의 Rose, Lost Garden"
     }
+  },
+  "transcript": {
+    "headline": "1화, 대본",
+    "lead": "에피소드의 모든 대사를 순서대로, 나오는 시각과 함께. 시각을 누르면 YouTube에서 그 장면이 열립니다. Lanterne에게는 목소리가 없어서 그의 이야기는 여기가 아니라 소리 속에 있습니다.",
+    "watchAt": "여기서 재생",
+    "breadcrumb": "대본"
+  },
+  "homeArticles": {
+    "title": "어떻게 만들었나",
+    "subtitle": "제작 노트, 가이드, 그리고 한 사람이 만든 17분짜리 에피소드 뒤의 이야기.",
+    "all": "모든 아티클"
+  },
+  "feed": {
+    "title": "Lost Garden 아티클",
+    "description": "독립 AI 보조 애니메이션 Lost Garden의 새 가이드와 제작 노트."
   }
 }

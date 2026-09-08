@@ -64,6 +64,7 @@ export default async function EpisodeOnePage({ params }: EpisodeOnePageProps) {
       <JsonLd
         data={episodeVideoJsonLd({
           locale,
+          dict,
           name: dict.meta.episodeOnePublic.title,
           description: dict.meta.episodeOnePublic.description,
         })}

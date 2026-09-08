@@ -121,6 +121,10 @@
     "lostGardenStoryAndCharacters": {
       "title": "Lost Garden。物語、世界、登場人物",
       "description": "空っぽの騎士、花を咲かせる子ども、誓いに縛られた13の鎧、空のない世界。Lost Gardenが何の物語で誰が登場するのか、結末は伏せて。"
+    },
+    "episodeOneTranscript": {
+      "title": "Lost Garden 第1話 全文書き起こし",
+      "description": "Lost Garden第1話の台詞を、YouTubeでその場面を開けるタイムスタンプ付きで全文書き起こし。英語音声、フランス語・日本語・韓国語字幕。"
     }
   },
   "episodeOne": {
@@ -715,5 +719,20 @@
       "tavernKnights": "地下酒場のSerrureとLanterne、Lost Garden",
       "roseCapsule": "光るカプセルの中のRose、Lost Garden"
     }
+  },
+  "transcript": {
+    "headline": "第1話、書き起こし",
+    "lead": "エピソードの台詞を順番に、話される時刻とともに。時刻を押すとYouTubeでその場面が開きます。Lanterneには声がなく、彼の物語は音の中にあって、ここにはありません。",
+    "watchAt": "ここから再生",
+    "breadcrumb": "書き起こし"
+  },
+  "homeArticles": {
+    "title": "どう作られているか",
+    "subtitle": "制作ノート、ガイド、そして1人で作った17分のエピソードの裏側。",
+    "all": "記事一覧"
+  },
+  "feed": {
+    "title": "Lost Garden 記事",
+    "description": "独立系AI支援アニメLost Gardenの新しいガイドと制作ノート。"
   }
 }
