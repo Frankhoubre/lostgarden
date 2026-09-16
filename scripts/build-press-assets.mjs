@@ -9,12 +9,15 @@ const PRESS_DIR = path.join(ROOT, "public/press");
 const LOGO_SRC = path.join(ROOT, "public/images/logo-lost-garden.png");
 
 const EPISODE = {
-  youtube: "https://youtu.be/eZ_JlaLDJ-8",
+  youtubeOne: "https://youtu.be/eZ_JlaLDJ-8",
+  youtubeTwo: "https://youtu.be/z-YRrutXaFE",
   tiktok: "https://www.tiktok.com/@frankhoubre/video/7647885636711501088",
   site: "https://lostgarden.world",
   press: "https://lostgarden.world/fr/press",
   contact: "lostgarden.world@gmail.com",
 };
+
+const UPDATED = "September 2026";
 
 const HD_STILLS = [
   "forest-machines.png",
@@ -43,11 +46,14 @@ function copyLogo() {
 }
 
 function buildEpisodeLinks() {
-  const content = `Lost Garden — Episode & project links
-Updated: June 2026
+  const content = `Lost Garden · Episode & project links
+Updated: ${UPDATED}
 
-Episode One (YouTube)
-${EPISODE.youtube}
+Episode Two, The King Beneath the Vault (YouTube)
+${EPISODE.youtubeTwo}
+
+Episode One, The Awakening of the Lantern Knight (YouTube)
+${EPISODE.youtubeOne}
 
 Episode One (TikTok)
 ${EPISODE.tiktok}
@@ -78,7 +84,7 @@ ${pr.dateline}
 
 ${pr.paragraphs.join("\n\n")}
 
-${pr.quotes.map((quote) => `"${quote}"\n— Frank Houbre`).join("\n\n")}
+${pr.quotes.map((quote) => `"${quote}"\n· Frank Houbre`).join("\n\n")}
 
 ---
 Press kit: ${EPISODE.press}
@@ -89,23 +95,29 @@ Contact: ${EPISODE.contact}
 
 function buildSummary() {
   const fr = readJson("messages/fr.json").press;
-  const content = `Lost Garden — Résumé court du projet
-June 2026
+  const content = `Lost Garden · Résumé court du projet
+${UPDATED}
 
 Lost Garden est une série animée dark fantasy indépendante créée par Frank Houbre, produite en solo avec un workflow assisté par IA.
 
 Points clés
-• Format : épisode 1 complet, ~17 minutes
+• Format : 2 épisodes complets, environ 38 minutes au total
+• Épisode 1, The Awakening of the Lantern Knight : 29 mai 2026, ~17 minutes
+• Épisode 2, The King Beneath the Vault : 15 septembre 2026, ~21 minutes
 • Production : 1 créateur, écriture, direction artistique et montage par Frank Houbre
 • Genre : dark fantasy, monde souterrain
 • Angle : studio d'une seule personne, animation indépendante assistée par IA
-• Réception : 65 000+ vues, 9 000+ likes TikTok, 430+ commentaires publics en quelques jours
+• Réception de l'épisode 1 : 65 000+ vues, 9 000+ likes TikTok, 430+ commentaires publics en quelques jours
 
 Synopsis (épisode 1)
-${fr.episode.paragraphs.join("\n\n")}
+${fr.episode.one.paragraphs.join("\n\n")}
+
+Synopsis (épisode 2)
+${fr.episode.two.paragraphs.join("\n\n")}
 
 Liens
-YouTube: ${EPISODE.youtube}
+Épisode 2 (YouTube): ${EPISODE.youtubeTwo}
+Épisode 1 (YouTube): ${EPISODE.youtubeOne}
 TikTok: ${EPISODE.tiktok}
 Press kit: ${EPISODE.press}
 Contact: ${EPISODE.contact}
@@ -116,8 +128,8 @@ Contact: ${EPISODE.contact}
 function buildAudienceComments() {
   const comments = readJson("messages/fr.json").press.audience.comments;
   const lines = comments.map((text, index) => `${index + 1}. "${text}"\n`);
-  const content = `Lost Garden — Sélection de commentaires publics (TikTok)
-Source: @frankhoubre · June 2026
+  const content = `Lost Garden · Sélection de commentaires publics (TikTok)
+Source: @frankhoubre · juin 2026
 Positive audience reactions, curated for press use.
 
 ${lines.join("\n")}

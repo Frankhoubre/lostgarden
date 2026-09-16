@@ -4,15 +4,15 @@ Dossiers de soumission prêts à coller. Chaque section reprend les champs réel
 
 Je ne peux pas créer les comptes ni envoyer les formulaires à ta place : ce sont des inscriptions et des publications en ton nom. Tout le reste est fait ici, il te reste le copier-coller et le bouton d'envoi.
 
-## État des lieux, vérifié le 4 septembre 2026
+## État des lieux, vérifié le 4 septembre 2026, épisode 2 ajouté le 16 septembre 2026
 
 Trois fiches existent déjà, une est soumise, et deux bases refusent le projet par principe. Rien ne sert de recréer ce qui est là, ni d'insister là où c'est fermé.
 
 | Base | État | Identifiant | Ce qu'il reste à faire |
 |---|---|---|---|
-| IMDb | Existe, bien remplie | `tt43459291` | Ajouter les genres manquants |
-| TMDB | Existe | `325287` | Synopsis anglais, liens externes |
-| Wikidata | Existe | `Q140266760` | Ajouter les identifiants croisés |
+| IMDb | Existe, bien remplie | `tt43459291` | Ajouter les genres manquants, ajouter l'épisode 2 |
+| TMDB | Existe | `325287` | Synopsis anglais, liens externes, ajouter l'épisode 2 |
+| Wikidata | Existe | `Q140266760` | Ajouter les identifiants croisés, ajouter l'épisode 2 |
 | Anime News Network | Soumise le 4 septembre 2026 | | En attente de validation |
 | AniList | Inéligible | | Ne pas soumettre |
 | MyAnimeList | Inéligible | | Ne pas soumettre |
@@ -55,11 +55,12 @@ Puisque les deux bases communautaires sont fermées, le poids se reporte sur ce 
 
 - Titre principal : `Lost Garden`
 - Titre de l'épisode 1 : `The Awakening of the Lantern Knight`
+- Titre de l'épisode 2 : `The King Beneath the Vault`
 - Protagoniste : `Lanterne`, le 12e Chevalier. Second rôle : `Rose`
 - Type : ONA (Original Net Animation)
-- Format : série, 1 épisode diffusé, épisode 2 en production
-- Durée : 17 min
-- Première diffusion : 29 mai 2026
+- Format : série, 2 épisodes diffusés
+- Durée : 17 min pour l'épisode 1, 21 min pour l'épisode 2
+- Première diffusion : 29 mai 2026. Épisode 2 : 15 septembre 2026
 - Pays : France
 - Studio / production : indépendant, Frank Houbre (studio d'une personne)
 - Source : original
@@ -68,6 +69,7 @@ Puisque les deux bases communautaires sont fermées, le poids se reporte sur ce 
 - Classification : tous publics à partir de 12 ans, pas de contenu explicite
 - Site officiel : `https://lostgarden.world`
 - Épisode 1 : `https://youtu.be/eZ_JlaLDJ-8`
+- Épisode 2 : `https://youtu.be/z-YRrutXaFE`
 - Chaîne officielle : `https://www.youtube.com/@lostgardenanime`
 - Kit presse : `https://lostgarden.world/en/press`
 - Notes de production : `https://lostgarden.world/en/process`
@@ -94,13 +96,15 @@ Synopsis long, pour les champs de description :
 
 Note pour les modérateurs, à mettre dans le champ sources ou commentaires :
 
-> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube on 29 May 2026, 17 minutes, over 65,000 views. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode link: https://youtu.be/eZ_JlaLDJ-8. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
+> Independent production by Frank Houbre (France). Episode 1 released publicly on YouTube on 29 May 2026, 17 minutes, over 65,000 views. Episode 2, The King Beneath the Vault, released on 15 September 2026, 21 minutes. Official site with production notes, press kit and press release: https://lostgarden.world/en/press. Direct episode links: https://youtu.be/eZ_JlaLDJ-8 and https://youtu.be/z-YRrutXaFE. Production is AI-assisted under human direction, not automatic generation; the pipeline is documented at https://lostgarden.world/en/process.
 
 ## IMDb, déjà en ligne
 
 Fiche existante : `https://www.imdb.com/title/tt43459291/`. Série TV, 2026, 17 min, 1 saison, 1 épisode, 3 photos, date de sortie au 29 mai 2026, pays France, langue anglais, site officiel lié. Les crédits sont complets et tous à ton nom : réalisation, scénario, production, musique originale, image, montage.
 
-Le seul manque visible est le genre. La fiche ne porte que `Animation`. Ajoute `Fantasy`, `Adventure` et `Drama` via « Suggest an edit ». C'est ce qui la fait apparaître dans les listes de genre et dans les recommandations.
+L'épisode 2, sorti le 15 septembre 2026, n'est pas encore dans la fiche : ajoute-le via « Add episode », titre `The King Beneath the Vault`, 21 min, saison 1 épisode 2.
+
+L'autre manque visible est le genre. La fiche ne porte que `Animation`. Ajoute `Fantasy`, `Adventure` et `Drama` via « Suggest an edit ». C'est ce qui la fait apparaître dans les listes de genre et dans les recommandations.
 
 ## Anime News Network, soumise le 4 septembre 2026
 

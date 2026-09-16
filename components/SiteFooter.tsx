@@ -56,6 +56,7 @@ export function SiteFooter() {
     },
     { label: dict.footer.process, href: localePath(locale, "/process") },
     { label: dict.footer.vision, href: localePath(locale, "/vision") },
+    { label: dict.footer.episodeTwo, href: localePath(locale, "/episode-2") },
     { label: dict.footer.episodeOne, href: localePath(locale, "/episode-1") },
     { label: dict.footer.press, href: localePath(locale, "/press") },
   ];

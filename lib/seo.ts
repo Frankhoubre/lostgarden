@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { EPISODE_ONE } from "@/lib/episode";
+import {
+  EPISODES,
+  LATEST_EPISODE,
+  SERIES_PUBLISHED_AT,
+  type Episode,
+} from "@/lib/episode";
 import { defaultLocale, locales, openGraphLocales, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
@@ -32,6 +37,7 @@ export const INDEXABLE_PATH_SUFFIXES = [
   "/ai-anime-vs-traditional-animation",
   "/press",
   "/episode-1",
+  "/episode-2",
   "/legal-notice",
   "/privacy-policy",
 ] as const;
@@ -52,6 +58,7 @@ const SITEMAP_HINTS: Record<
   { changeFrequency: SitemapFrequency; priority: number }
 > = {
   "/": { changeFrequency: "weekly", priority: 1 },
+  "/episode-2": { changeFrequency: "weekly", priority: 0.9 },
   "/episode-1": { changeFrequency: "weekly", priority: 0.9 },
   "/press": { changeFrequency: "monthly", priority: 0.8 },
   "/vision": { changeFrequency: "monthly", priority: 0.7 },
@@ -218,8 +225,8 @@ export function homePageJsonLd(locale: Locale, dict: Dictionary) {
         image,
         genre: ["Animation", "Dark Fantasy", "Anime"],
         inLanguage: schemaLanguages[locale],
-        numberOfEpisodes: 1,
-        datePublished: EPISODE_ONE.publishedAt,
+        numberOfEpisodes: EPISODES.length,
+        datePublished: SERIES_PUBLISHED_AT,
         sameAs: [
           ...Object.values(SOCIAL_LINKS),
           ...Object.values(DATABASE_LINKS),
@@ -376,10 +383,12 @@ export function episodeVideoJsonLd({
   locale,
   name,
   description,
+  episode = LATEST_EPISODE,
 }: {
   locale: Locale;
   name: string;
   description: string;
+  episode?: Episode;
 }) {
   const image = absoluteUrl(SITE.ogImage);
 
@@ -389,9 +398,9 @@ export function episodeVideoJsonLd({
     name,
     description,
     thumbnailUrl: image,
-    uploadDate: EPISODE_ONE.publishedAt,
-    contentUrl: EPISODE_ONE.watchUrl,
-    embedUrl: EPISODE_ONE.embedUrl,
+    uploadDate: episode.publishedAt,
+    contentUrl: episode.watchUrl,
+    embedUrl: episode.embedUrl,
     inLanguage: schemaLanguages[locale],
     creator: {
       "@type": "Person",

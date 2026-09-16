@@ -15,6 +15,10 @@ export function ProcessRelatedLinks({ locale, dict }: ProcessRelatedLinksProps) 
       label: dict.process.links.bestAiAnime,
     },
     { href: localePath(locale, "/vision"), label: dict.process.links.vision },
+    {
+      href: localePath(locale, "/episode-2"),
+      label: dict.process.links.episodeTwo,
+    },
     { href: localePath(locale, "/episode-1"), label: dict.process.links.episode },
     { href: localePath(locale, "/press"), label: dict.process.links.press },
   ] as const;

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { User } from "firebase/auth";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { EPISODE_ONE } from "@/lib/episode";
+import { LATEST_EPISODE } from "@/lib/episode";
 import { localePath } from "@/lib/i18n/navigation";
 
 const JOINED_STORAGE_KEY = "lostgarden-joined-notice";
@@ -47,7 +47,7 @@ export function ExperienceJoinedNotice({ user: _user }: ExperienceJoinedNoticePr
       aria-live="polite"
     >
       <p className="anime-label episode-release-badge inline-block rounded-md border border-magic/40 bg-abyss/60 px-3 py-1.5 font-display text-xs tracking-[0.16em] text-lily">
-        {dict.episodeOne.badge}
+        {dict.episode.latestBadge}
       </p>
       <p className="anime-label mt-3 font-display text-xs tracking-[0.2em] text-magic">
         {postSignup.title}
@@ -65,12 +65,12 @@ export function ExperienceJoinedNotice({ user: _user }: ExperienceJoinedNoticePr
       </div>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <a
-          href={EPISODE_ONE.watchUrl}
+          href={LATEST_EPISODE.watchUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-primary min-h-11 text-center"
         >
-          {dict.episodeOne.openOnYouTube}
+          {dict.episode.openOnYouTube}
         </a>
         <button type="button" onClick={dismiss} className="btn-secondary min-h-11">
           {dict.common.gotIt}

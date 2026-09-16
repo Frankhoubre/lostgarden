@@ -8,6 +8,10 @@ import { EpisodeWatchBlock } from "@/components/EpisodeWatchBlock";
 import { EpisodeTimeline } from "@/components/EpisodeTimeline";
 import { ExperienceJoinedNotice } from "@/components/experience/ExperienceJoinedNotice";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import {
+  episodeCopy,
+  EPISODES_NEWEST_FIRST,
+} from "@/lib/episode";
 import { formatMessage } from "@/lib/i18n/format";
 import { localePath } from "@/lib/i18n/navigation";
 
@@ -54,10 +58,19 @@ export function ExperienceContent({ user }: ExperienceContentProps) {
           <p className="mt-3 font-body text-sm font-medium leading-relaxed text-ivory/85">
             {dict.experience.watchLead}
           </p>
-          <EpisodeWatchBlock
-            className="mt-6"
-            title={dict.trailer.embedTitle}
-          />
+          <div className="mt-8 space-y-12">
+            {EPISODES_NEWEST_FIRST.map((episode) => (
+              <div key={episode.number}>
+                <h3 className="anime-heading font-display text-lg text-lily sm:text-xl">
+                  {episodeCopy(dict, episode).label}
+                  <span className="ml-2 font-body text-sm font-medium text-ivory/60">
+                    {episodeCopy(dict, episode).title}
+                  </span>
+                </h3>
+                <EpisodeWatchBlock className="mt-4" episode={episode} />
+              </div>
+            ))}
+          </div>
         </section>
 
         <Suspense fallback={null}>
