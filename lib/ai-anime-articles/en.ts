@@ -29,17 +29,18 @@ export const aiAnimeArticleEn: AiAnimeArticle = {
     {
       rank: 1,
       title: "Lost Garden",
-      meta: "2026 · independent · created by Frank Houbre · Episode One, 17 minutes",
+      meta: "2026 · independent · created by Frank Houbre · two episodes, about 38 minutes",
       verdict: "The most complete single author episode on this list.",
       paragraphs: [
         "Lanterne wakes on an altar under the earth with no memory and a lantern where his face should be. Rose is a child he decides to protect without knowing why. Around them is a buried world of blue forests, cyan mist, and thirteen hollow knights bound by an old oath.",
-        "Episode One runs about seventeen minutes and it holds together, which is the part that is hard. The characters are recognisable across scenes, the underground world obeys its own bible, and the story continues into a second episode rather than stopping at a mood piece.",
+        "Episode One runs about seventeen minutes and it holds together, which is the part that is hard. The characters are recognisable across scenes, the underground world obeys its own bible, and the story kept going: Episode Two, The King Beneath the Vault, came out in September 2026 and runs about twenty-one minutes.",
         "It is made by one person. Frank Houbre writes the screenplay, directs the shots, and cuts the episode. AI generates images and animation inside that direction, and a generated shot that breaks the world gets thrown away like any bad take. That is the difference between an AI assisted anime and a prompt reel.",
       ],
       aiRoleLabel: "What the AI does",
       aiRole:
         "Image generation, animated shots, and part of the sound exploration. The screenplay, the storyboard intent, the selection of takes, and the final edit are human.",
       links: [
+        { label: "Watch Episode Two", href: "/episode-2" },
         { label: "Watch Episode One", href: "/episode-1" },
         { label: "Full production notes", href: "/process" },
         { label: "Produced with Imaginode", href: "https://imaginode.ai" },
@@ -216,6 +217,7 @@ export const aiAnimeArticleEn: AiAnimeArticle = {
     { label: "How to make an AI anime, step by step", href: "/how-to-make-ai-anime" },
     { label: "Keeping a character consistent across shots", href: "/ai-character-consistency" },
     { label: "How Lost Garden is made, in detail", href: "/process" },
+    { label: "Watch Episode Two", href: "/episode-2" },
     { label: "Watch Episode One", href: "/episode-1" },
     { label: "The creator vision behind the series", href: "/vision" },
     { label: "Press and media kit", href: "/press" },

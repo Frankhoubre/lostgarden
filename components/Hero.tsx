@@ -107,15 +107,11 @@ export function Hero() {
             className="anime-label episode-release-badge rounded-md border-2 border-magic/45 bg-cavern/75 px-4 py-2 font-display text-sm tracking-[0.14em] text-lily shadow-[0_0_28px_rgba(56,189,248,0.2)]"
             variants={fadeUp}
           >
-            {dict.episodeOne.badge}
+            {dict.episode.latestBadge}
           </motion.p>
 
           <motion.div className="mt-6 w-full sm:mt-8" variants={fadeUp}>
-            <EpisodeWatchBlock
-              id="trailer"
-              compact
-              title={dict.trailer.embedTitle}
-            />
+            <EpisodeWatchBlock id="trailer" compact />
           </motion.div>
 
           <motion.p

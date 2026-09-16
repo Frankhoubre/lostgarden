@@ -1,4 +1,4 @@
-import { EPISODE_ONE } from "@/lib/episode";
+import { EPISODE_ONE, EPISODE_TWO, LATEST_EPISODE } from "@/lib/episode";
 import type { Locale } from "@/lib/i18n/config";
 
 /** Edit these URLs when assets are ready in /public/press */
@@ -14,8 +14,9 @@ export const PRESS_TIKTOK = {
 } as const;
 
 export const PRESS_KIT = {
-  episodeUrl: EPISODE_ONE.watchUrl,
-  episodeEmbedUrl: EPISODE_ONE.embedUrl,
+  episodeOneUrl: EPISODE_ONE.watchUrl,
+  episodeTwoUrl: EPISODE_TWO.watchUrl,
+  latestEpisodeEmbedUrl: LATEST_EPISODE.embedUrl,
   tiktokUrl: PRESS_TIKTOK.watchUrl,
   tiktokEmbedUrl: PRESS_TIKTOK.embedUrl,
   pressReleaseUrl: "/press/lost-garden-press-release.fr.txt",

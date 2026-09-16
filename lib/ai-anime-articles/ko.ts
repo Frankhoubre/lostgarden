@@ -29,17 +29,18 @@ export const aiAnimeArticleKo: AiAnimeArticle = {
     {
       rank: 1,
       title: "Lost Garden",
-      meta: "2026년 · 독립 제작 · 제작 Frank Houbre · 1화 17분",
+      meta: "2026년 · 독립 제작 · 제작 Frank Houbre · 에피소드 2편, 약 38분",
       verdict: "이 목록에서 가장 완성도 높은, 그리고 1인 제작인 에피소드.",
       paragraphs: [
         "Lanterne는 지하 제단에서 깨어납니다. 기억은 없고, 얼굴이 있어야 할 자리에는 등불이 있습니다. Rose는 이유도 모른 채 그가 지키기로 한 아이입니다. 두 사람 주위에는 푸른 숲과 청록빛 안개, 그리고 오래된 맹세에 묶인 열세 명의 텅 빈 기사가 있는 묻힌 세계가 펼쳐집니다.",
-        "1화는 약 17분이고, 끝까지 무너지지 않습니다. 바로 그 부분이 어렵습니다. 캐릭터는 장면이 바뀌어도 알아볼 수 있고, 지하 세계는 자기 설정집을 따르며, 이야기는 분위기만 남기고 끝나는 대신 2화로 이어집니다.",
+        "1화는 약 17분이고, 끝까지 무너지지 않습니다. 바로 그 부분이 어렵습니다. 캐릭터는 장면이 바뀌어도 알아볼 수 있고, 지하 세계는 자기 설정집을 따르며, 이야기는 실제로 이어졌습니다. 2화 The King Beneath the Vault는 2026년 9월에 공개되었고 약 21분입니다.",
         "이걸 만드는 사람은 한 명입니다. Frank Houbre가 각본을 쓰고, 컷을 연출하고, 에피소드를 편집합니다. AI는 그 연출 안에서 이미지와 애니메이션을 생성하고, 세계관을 깨는 생성 컷은 잘못 찍은 테이크처럼 버려집니다. 그것이 AI 보조 애니메이션과 프롬프트 모음 영상의 차이입니다.",
       ],
       aiRoleLabel: "AI가 하는 일",
       aiRole:
         "이미지 생성, 애니메이션 컷, 그리고 사운드 탐색의 일부. 각본, 스토리보드의 의도, 테이크 선택, 최종 편집은 사람이 합니다.",
       links: [
+        { label: "2화 보기", href: "/episode-2" },
         { label: "1화 보기", href: "/episode-1" },
         { label: "제작 노트 전문", href: "/process" },
         { label: "Imaginode로 제작", href: "https://imaginode.ai" },
@@ -215,6 +216,7 @@ export const aiAnimeArticleKo: AiAnimeArticle = {
     { label: "AI로 애니메이션 만드는 법, 단계별로", href: "/how-to-make-ai-anime" },
     { label: "컷을 넘어 캐릭터를 유지하는 법", href: "/ai-character-consistency" },
     { label: "Lost Garden 제작 방식 자세히 보기", href: "/process" },
+    { label: "2화 보기", href: "/episode-2" },
     { label: "1화 보기", href: "/episode-1" },
     { label: "작품을 만든 작가의 비전", href: "/vision" },
     { label: "프레스 및 미디어 킷", href: "/press" },

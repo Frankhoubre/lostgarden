@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - 詩的ダークファンタジーアニメ",
-      "description": "Frank Houbreによる詩的ダークファンタジーアニメ。空洞の騎士、謎の子供、地下の世界。第1話配信中。"
+      "description": "Frank Houbreによる詩的ダークファンタジーアニメ。空洞の騎士、謎の子供、地下の世界。第2話配信中。"
     },
     "experience": {
-      "title": "第1話 · 会員エリア",
-      "description": "Lost Garden第1話を視聴し、ロア、制作ノート、地下世界の断片を探索。"
+      "title": "エピソード · 会員エリア",
+      "description": "Lost Gardenの第1話と第2話を視聴し、ロア、制作ノート、地下世界の断片を探索。"
     },
     "vision": {
       "title": "ビジョン | Lost Garden",
@@ -14,7 +14,7 @@
     },
     "process": {
       "title": "AIアニメ制作プロセス | Lost Garden",
-      "description": "Lost Garden第1話の制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
+      "description": "Lost Gardenの制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
     },
     "bestAiAnime": {
       "title": "AIで作られたアニメ・ベスト6（2026年版）",
@@ -50,6 +50,10 @@
       "title": "Lost Garden 第1話 | AI支援ダークファンタジーアニメ",
       "description": "Frank HoubreのオリジナルAI支援アニメLost Garden第1話を視聴。空洞の騎士Lanterne、Rose、地下の世界。"
     },
+    "episodeTwoPublic": {
+      "title": "Lost Garden 第2話 | AI支援ダークファンタジーアニメ",
+      "description": "Lost Garden第2話 The King Beneath the Vault を視聴。損傷したLanterneと、さらに深い地底へ続く道。"
+    },
     "legalNotice": {
       "title": "法的通知 | Lost Garden",
       "description": "Lost Gardenウェブサイトの法的情報。"
@@ -59,12 +63,18 @@
       "description": "Lost Gardenにおけるデータ収集、Cookie、Firebase認証、GDPR上の権利について。"
     }
   },
-  "episodeOne": {
-    "premiereDate": "6月2日",
-    "premiereDateFull": "2026年6月2日",
-    "badge": "第1話 · 配信中",
+  "episode": {
+    "latestBadge": "第2話 · 配信中",
     "youtubeEngagement": "YouTubeで高評価・コメント・共有をお願いします, プロジェクトの大きな支えになります。",
-    "openOnYouTube": "YouTubeで見る"
+    "openOnYouTube": "YouTubeで見る",
+    "one": {
+      "label": "第1話",
+      "title": "The Awakening of the Lantern Knight"
+    },
+    "two": {
+      "label": "第2話",
+      "title": "The King Beneath the Vault"
+    }
   },
   "common": {
     "siteName": "Lost Garden",
@@ -104,9 +114,6 @@
   },
   "hero": {
     "tagline": "地の底で目覚めるものがある。空洞の騎士。霧の中の子供。記憶する森。",
-    "releaseLine": "第1話は配信中です。",
-    "signupLine": "下で視聴, YouTubeで高評価・コメント・共有をお願いします。とても力になります。",
-    "cta": "第1話を見る",
     "characters": "キャラクター",
     "footerLine": "すべての守護者が守るために生まれたわけではない。",
     "scrollLabel": "スクロールして探索",
@@ -173,19 +180,14 @@
       }
     }
   },
-  "trailer": {
-    "embedTitle": "Lost Garden · 第1話",
-    "headline": "第1話",
-    "subline": "第1話が公開されました。YouTubeで高評価・コメント・共有を, すべてが力になります。"
-  },
   "discover": {
     "title": "旅人に参加する",
-    "subtitle": "第1話は誰でも視聴できます。無料アカウントで会員エリアへ：ロア、ノート、地下世界の断片。",
+    "subtitle": "第2話は誰でも視聴できます。無料アカウントで会員エリアへ：ロア、ノート、地下世界の断片。",
     "pitchAria": "アカウント作成で得られるもの",
     "pitch": [
       {
-        "title": "第1話オンライン",
-        "body": "第1話をここまたは会員エリアで視聴。YouTubeでの高評価・コメント・共有をお忘れなく。"
+        "title": "第1話と第2話を公開中",
+        "body": "第1話と第2話をここまたは会員エリアで視聴。YouTubeでの高評価・コメント・共有をお忘れなく。"
       },
       {
         "title": "ロアと制作裏話",
@@ -193,8 +195,8 @@
       }
     ],
     "loggedInTitle": "ログイン済み",
-    "welcomeBack": "第1話は会員エリアでお待ちしています。YouTubeでの高評価・コメント・共有をお願いします。",
-    "watchEpisode": "第1話を見る",
+    "welcomeBack": "第2話は会員エリアでお待ちしています。YouTubeでの高評価・コメント・共有をお願いします。",
+    "watchEpisode": "第2話を見る",
     "watchOnLanding": "このページで見る"
   },
   "auth": {
@@ -239,18 +241,33 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "ようこそ、{name}",
-    "memberWelcome": "第1話は配信中です。下で視聴し、YouTubeで高評価・コメント・共有を, 大きな支えになります。",
-    "watchTitle": "第1話",
-    "watchLead": "地の底の最初の光。YouTubeでの応援ありがとうございます。",
+    "memberWelcome": "第2話は配信中です。下で視聴し、YouTubeで高評価・コメント・共有を, 大きな支えになります。",
+    "watchTitle": "エピソード",
+    "watchLead": "上が第2話、その下が第1話です。YouTubeでの応援ありがとうございます。",
     "backToGate": "門へ戻る",
-    "notesTitle": "第1話：ノート",
+    "notesTitle": "制作ノート",
     "notesLead": "制作日記の断片。洞窟が開くにつれ、さらに追加されます。",
     "timeline": [
-      { "title": "誓い", "line": "誰も聞かない場所で語られた言葉。" },
-      { "title": "覚醒", "line": "顔のない金属が目を開く。" },
-      { "title": "青い森", "line": "太陽の届かなかった道を照らすキノコ。" },
-      { "title": "闇の眼", "line": "巨人が目覚めていることを思い出す。" },
-      { "title": "百合の子", "line": "白い花びらが霧の中で彼女を見つける。" }
+      {
+        "title": "誓い",
+        "line": "誰も聞かない場所で語られた言葉。"
+      },
+      {
+        "title": "覚醒",
+        "line": "顔のない金属が目を開く。"
+      },
+      {
+        "title": "青い森",
+        "line": "太陽の届かなかった道を照らすキノコ。"
+      },
+      {
+        "title": "闇の眼",
+        "line": "巨人が目覚めていることを思い出す。"
+      },
+      {
+        "title": "百合の子",
+        "line": "白い花びらが霧の中で彼女を見つける。"
+      }
     ],
     "previews": [
       {
@@ -268,7 +285,7 @@
     ],
     "postSignup": {
       "title": "会員エリアへようこそ",
-      "lead": "第1話は上で視聴できます。ご参加ありがとうございます。",
+      "lead": "第2話は上で視聴でき、続けて第1話もご覧いただけます。ご参加ありがとうございます。",
       "supportHeading": "YouTubeでエピソードを応援",
       "supportBody": "高評価・コメント・共有が、プロジェクトの認知と継続に大きく役立ちます。"
     }
@@ -287,6 +304,7 @@
     "process": "制作プロセス",
     "press": "プレス",
     "episodeOne": "第1話",
+    "episodeTwo": "第2話",
     "legalNotice": "法的通知",
     "privacy": "プライバシー",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
@@ -297,7 +315,15 @@
     "headline": "AIで作られたアニメ・ベスト6",
     "breadcrumbHome": "ホーム",
     "breadcrumbCurrent": "AIアニメ ベスト6",
-    "keywords": ["AIアニメ", "AI 生成 アニメ", "AIで作られたアニメ", "生成AI アニメ", "AIアニメ おすすめ", "Lost Garden", "ツインズひなひま"]
+    "keywords": [
+      "AIアニメ",
+      "AI 生成 アニメ",
+      "AIで作られたアニメ",
+      "生成AI アニメ",
+      "AIアニメ おすすめ",
+      "Lost Garden",
+      "ツインズひなひま"
+    ]
   },
   "blog": {
     "headline": "記事一覧",
@@ -310,19 +336,46 @@
     "relatedHeading": "続けて読む",
     "howToMakeAiAnime": {
       "headline": "AIでアニメを作る手順",
-      "keywords": ["AIアニメ 作り方", "AI アニメ 制作", "AIアニメ パイプライン", "生成AI アニメ 作り方", "AIアニメ チュートリアル", "Lost Garden"]
+      "keywords": [
+        "AIアニメ 作り方",
+        "AI アニメ 制作",
+        "AIアニメ パイプライン",
+        "生成AI アニメ 作り方",
+        "AIアニメ チュートリアル",
+        "Lost Garden"
+      ]
     },
     "aiCharacterConsistency": {
       "headline": "カットをまたいでキャラクターを保つ方法",
-      "keywords": ["AI キャラクター 一貫性", "AI 同じキャラクター", "キャラクター リファレンス AI", "AIアニメ 一貫性", "Lost Garden"]
+      "keywords": [
+        "AI キャラクター 一貫性",
+        "AI 同じキャラクター",
+        "キャラクター リファレンス AI",
+        "AIアニメ 一貫性",
+        "Lost Garden"
+      ]
     },
     "isAiAnimeRealAnime": {
       "headline": "AIで作られたアニメは本当のアニメか",
-      "keywords": ["AIアニメ 本当のアニメ", "アニメの定義", "AIアニメ 議論", "生成AI アニメ 是非", "ツインズひなひま", "Lost Garden"]
+      "keywords": [
+        "AIアニメ 本当のアニメ",
+        "アニメの定義",
+        "AIアニメ 議論",
+        "生成AI アニメ 是非",
+        "ツインズひなひま",
+        "Lost Garden"
+      ]
     },
     "aiAnimeVsTraditional": {
       "headline": "AIアニメと従来のアニメーションの違い",
-      "keywords": ["AIアニメ 従来 比較", "AI アニメーター 代替", "AIアニメ 費用", "AIアニメ 手描き 違い", "AIアニメ 制作工程", "Lost Garden"]
+      "keywords": [
+        "AIアニメ 従来 比較",
+        "AI アニメーター 代替",
+        "AIアニメ 費用",
+        "AIアニメ 手描き 違い",
+        "AIアニメ 制作工程",
+        "Lost Garden"
+      ]
     }
   },
   "cookies": {
@@ -351,6 +404,7 @@
     "links": {
       "vision": "クリエイタービジョン（全文）",
       "episode": "第1話を見る（公開）",
+      "episodeTwo": "第2話を見る（公開）",
       "press": "プレス・メディアキット",
       "bestAiAnime": "AIで作られたアニメ・ベスト6"
     }
@@ -377,13 +431,25 @@
       "title": "Lost Garden",
       "subtitle": "ワンパーソンスタジオが手がける、インディー・ダークファンタジー・アニメーションシリーズ。",
       "badge": "PRESS KIT · インディー・アニメーションシリーズ",
-      "lead": "Frank Houbreが構想・演出・制作を担った、17分の完成エピソード。AI支援の制作ワークフローにより実現。",
+      "lead": "Frank Houbreが構想・演出・制作を担った、約38分の完成エピソード2本。AI支援の制作ワークフローにより実現。",
       "emotional": "忘れ去られた地下世界で、声を持たない騎士が目を覚ます。ただ一つの確信だけが彼を導く。Roseを見つけること。",
       "stats": [
-        { "value": "17分", "label": "アニメーション" },
-        { "value": "65,000+", "label": "公開数日での再生" },
-        { "value": "9,000+", "label": "いいね" },
-        { "value": "ソロ", "label": "制作" }
+        {
+          "value": "2エピソード",
+          "label": "アニメーション38分"
+        },
+        {
+          "value": "65,000+",
+          "label": "公開数日での再生"
+        },
+        {
+          "value": "9,000+",
+          "label": "いいね"
+        },
+        {
+          "value": "ソロ",
+          "label": "制作"
+        }
       ],
       "ctaWatch": "エピソードを視聴",
       "ctaDownload": "プレスキットをダウンロード",
@@ -415,33 +481,72 @@
     "keyFacts": {
       "title": "基本データ",
       "items": [
-        { "highlight": "17分", "label": "完成エピソード" },
-        { "highlight": "1名", "label": "主担当クリエイター" },
-        { "highlight": "65,000+", "label": "公開数日での再生数" },
-        { "highlight": "9,000+", "label": "TikTokいいね" },
-        { "highlight": "430+", "label": "コメント" },
-        { "highlight": "60時間+", "label": "制作時間" },
-        { "highlight": "オリジナル", "label": "世界観・キャラクター・脚本" },
-        { "highlight": "ソロ", "label": "脚本・美術監督・編集・制作" },
-        { "highlight": "AI支援", "label": "人間が監督する制作パイプライン" }
+        {
+          "highlight": "38分",
+          "label": "完成エピソード2本"
+        },
+        {
+          "highlight": "1名",
+          "label": "主担当クリエイター"
+        },
+        {
+          "highlight": "65,000+",
+          "label": "公開数日での再生数"
+        },
+        {
+          "highlight": "9,000+",
+          "label": "TikTokいいね"
+        },
+        {
+          "highlight": "430+",
+          "label": "コメント"
+        },
+        {
+          "highlight": "60時間+",
+          "label": "制作時間"
+        },
+        {
+          "highlight": "オリジナル",
+          "label": "世界観・キャラクター・脚本"
+        },
+        {
+          "highlight": "ソロ",
+          "label": "脚本・美術監督・編集・制作"
+        },
+        {
+          "highlight": "AI支援",
+          "label": "人間が監督する制作パイプライン"
+        }
       ]
     },
     "episode": {
-      "title": "第1話 · The Awakening of the Lantern Knight",
-      "paragraphs": [
-        "Lost Garden第1話は、静かな騎士ランタンヌが、青い森、古代の遺跡、忘れられた機械、幻影のような存在が交差する広大な地下世界で、たった一人で目を覚ます物語から始まります。",
-        "彼は語らない。自分が何者になったのか、まだ理解していない。しかし光るメダリオンが、自身の存在と結びついているように思える謎の少女Roseへと彼を導いていきます。",
-        "このエピソードは、記憶、継承、犠牲、ほぼ失われた世界の中でなお愛し続ける可能性を軸にした、ダークファンタジーシリーズの基盤を築きます。"
-      ],
-      "cta": "全編を視聴"
+      "title": "エピソード",
+      "cta": "エピソード全編を視聴",
+      "one": {
+        "title": "第1話 · The Awakening of the Lantern Knight",
+        "paragraphs": [
+          "Lost Garden第1話は、静かな騎士ランタンヌが、青い森、古代の遺跡、忘れられた機械、幻影のような存在が交差する広大な地下世界で、たった一人で目を覚ます物語から始まります。",
+          "彼は語らない。自分が何者になったのか、まだ理解していない。しかし光るメダリオンが、自身の存在と結びついているように思える謎の少女Roseへと彼を導いていきます。",
+          "このエピソードは、記憶、継承、犠牲、ほぼ失われた世界の中でなお愛し続ける可能性を軸にした、ダークファンタジーシリーズの基盤を築きます。"
+        ]
+      },
+      "two": {
+        "title": "第2話 · The King Beneath the Vault",
+        "paragraphs": [
+          "第2話は The Awakening of the Lantern Knight の直後から始まります。地の底、忘れられた巨大な洞窟の底で、LanterneとSerrureは進む道を探し続けています。",
+          "しかし異変が起きています。Lanterneがひどく損傷していることにSerrureは気づきます。騎士たちが甲冑と古い機構と忘れられた目的でできた空洞の存在であるこの世界では、彼を修復することは傷の手当てとはまったく違います。",
+          "二人の騎士は、Lanterneを元に戻せる誰か、あるいは何かを求めて、埋もれた世界のさらに深くへと向かいます。果てしない石の穹隉の下では、Lost Gardenのもう一つの領域が待っています。独自の住人、独自の掟、そして独自の王とともに。"
+        ]
+      }
     },
     "watch": {
       "title": "エピソードを視聴",
-      "lead": "全編はオンラインで公開されています。ジャーナリスト、プログラマー、フェスティバル関係者、パートナーの方は、取材や追加素材のご依頼の前に、自由にご視聴いただけます。",
-      "youtubeLabel": "YouTube",
+      "lead": "2つのエピソードはオンラインで公開されています。ジャーナリスト、プログラマー、フェスティバル関係者、パートナーの方は、取材や追加素材のご依頼の前に、自由にご視聴いただけます。",
+      "youtubeLabel": "YouTube · 第2話",
       "tiktokLabel": "TikTok",
       "cta": "エピソードを視聴",
-      "openYoutube": "YouTubeで視聴",
+      "openEpisodeTwo": "YouTubeで第2話を視聴",
+      "openEpisodeOne": "YouTubeで第1話を視聴",
       "openTiktok": "TikTokで視聴"
     },
     "audience": {
@@ -449,9 +554,18 @@
       "intro": "6月初旬の公開以降、Lost Gardenは単なるAI実験の枠をすぐに超えました。反響は世界観の質、音楽的な雰囲気、ビジュアルの一貫性、そして一人制作の完成エピソードという驚きに集中しました。",
       "source": "TikTokの公開コメント · 2026年6月",
       "stats": [
-        { "value": "65,000+", "label": "公開数日での再生数" },
-        { "value": "9,000+", "label": "いいね" },
-        { "value": "430+", "label": "コメント" }
+        {
+          "value": "65,000+",
+          "label": "公開数日での再生数"
+        },
+        {
+          "value": "9,000+",
+          "label": "いいね"
+        },
+        {
+          "value": "430+",
+          "label": "コメント"
+        }
       ],
       "cta": "TikTokで見る",
       "comments": [
@@ -493,13 +607,41 @@
       "intro": "Lost Gardenを紹介するジャーナリスト、メディア、フェスティバル、プログラマー、パートナー向けに、以下の素材を提供しています。",
       "download": "ダウンロード",
       "items": [
-        { "id": "pressRelease", "title": "プレスリリース", "description": "ダウンロード・配布可能なPDF版プレスリリース。" },
-        { "id": "images", "title": "HD画像", "description": "記事・掲載用に選定したエピソードのスチル画像。" },
-        { "id": "portrait", "title": "Frank Houbreポートレート", "description": "プレス掲載用の公式クリエイター写真。" },
-        { "id": "logo", "title": "Lost Gardenロゴ", "description": "高解像度の公式プロジェクトロゴ。" },
-        { "id": "comments", "title": "視聴者の反響", "description": "公開時の公開コメントから厳選した反応。" },
-        { "id": "episodeLinks", "title": "配信リンク", "description": "エピソード視聴可能な各プラットフォームへの直接アクセス。" },
-        { "id": "summary", "title": "短い概要", "description": "編集部、フェスティバル、パートナー向けの簡潔なプロジェクト紹介。" }
+        {
+          "id": "pressRelease",
+          "title": "プレスリリース",
+          "description": "ダウンロード・配布可能なPDF版プレスリリース。"
+        },
+        {
+          "id": "images",
+          "title": "HD画像",
+          "description": "記事・掲載用に選定したエピソードのスチル画像。"
+        },
+        {
+          "id": "portrait",
+          "title": "Frank Houbreポートレート",
+          "description": "プレス掲載用の公式クリエイター写真。"
+        },
+        {
+          "id": "logo",
+          "title": "Lost Gardenロゴ",
+          "description": "高解像度の公式プロジェクトロゴ。"
+        },
+        {
+          "id": "comments",
+          "title": "視聴者の反響",
+          "description": "公開時の公開コメントから厳選した反応。"
+        },
+        {
+          "id": "episodeLinks",
+          "title": "配信リンク",
+          "description": "エピソード視聴可能な各プラットフォームへの直接アクセス。"
+        },
+        {
+          "id": "summary",
+          "title": "短い概要",
+          "description": "編集部、フェスティバル、パートナー向けの簡潔なプロジェクト紹介。"
+        }
       ]
     },
     "gallery": {
@@ -563,10 +705,21 @@
     "breadcrumbHome": "ホーム",
     "breadcrumbEpisode": "第1話",
     "lead": "AI支援ダークファンタジーアニメLost Gardenの第1話。ここまたはYouTubeで視聴。",
-    "watchTitle": "第1話",
     "relatedHeading": "制作について",
     "processLink": "制作方法（AIプロセス）",
     "visionLink": "クリエイタービジョン",
-    "pressLink": "プレス・メディアキット"
+    "pressLink": "プレス・メディアキット",
+    "otherEpisodeLink": "第2話：The King Beneath the Vault"
+  },
+  "episodeTwoPublic": {
+    "headline": "第2話",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbEpisode": "第2話",
+    "lead": "AI支援ダークファンタジーアニメLost Gardenの第2話。ここまたはYouTubeで視聴。",
+    "relatedHeading": "制作について",
+    "processLink": "制作方法（AIプロセス）",
+    "visionLink": "クリエイタービジョン",
+    "pressLink": "プレス・メディアキット",
+    "otherEpisodeLink": "第1話：物語の始まり"
   }
 }

@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Lost Garden - Poetic Dark Fantasy Anime",
-      "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Episode One is out now."
+      "description": "Poetic dark fantasy anime by Frank Houbre. A hollow knight, a mysterious child, and a world beneath the earth. Episode Two is out now."
     },
     "experience": {
-      "title": "Episode One · members",
-      "description": "Watch Lost Garden Episode One and explore lore, production notes, and fragments from beneath the earth."
+      "title": "Episodes · members",
+      "description": "Watch Lost Garden Episode One and Episode Two, and explore lore, production notes, and fragments from beneath the earth."
     },
     "vision": {
       "title": "Vision | Lost Garden",
@@ -14,7 +14,7 @@
     },
     "process": {
       "title": "AI Anime Process | Lost Garden",
-      "description": "How Lost Garden Episode One is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime by Frank Houbre."
+      "description": "How Lost Garden is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime."
     },
     "bestAiAnime": {
       "title": "Best AI Anime: 6 Series Actually Made With AI (2026)",
@@ -50,6 +50,10 @@
       "title": "Lost Garden Episode 1 | AI-Assisted Dark Fantasy Anime",
       "description": "Watch Episode One of Lost Garden, an original AI-assisted anime by Frank Houbre. Hollow knight Lanterne, Rose, and a world beneath the earth."
     },
+    "episodeTwoPublic": {
+      "title": "Lost Garden Episode 2 | AI-assisted dark fantasy anime",
+      "description": "Watch Episode Two of Lost Garden, The King Beneath the Vault. Lanterne is damaged, and the way to repair him leads deeper beneath the earth."
+    },
     "legalNotice": {
       "title": "Legal Notice | Lost Garden",
       "description": "Legal information for the Lost Garden website."
@@ -59,12 +63,18 @@
       "description": "How Lost Garden collects and uses your data, cookies, Firebase auth, and your GDPR rights."
     }
   },
-  "episodeOne": {
-    "premiereDate": "2 June",
-    "premiereDateFull": "2 June 2026",
-    "badge": "Episode One · out now",
+  "episode": {
+    "latestBadge": "Episode 2 · out now",
     "youtubeEngagement": "Like, comment and share on YouTube, it helps the project enormously.",
-    "openOnYouTube": "Watch on YouTube"
+    "openOnYouTube": "Watch on YouTube",
+    "one": {
+      "label": "Episode 1",
+      "title": "The Awakening of the Lantern Knight"
+    },
+    "two": {
+      "label": "Episode 2",
+      "title": "The King Beneath the Vault"
+    }
   },
   "common": {
     "siteName": "Lost Garden",
@@ -104,9 +114,6 @@
   },
   "hero": {
     "tagline": "Some things wake beneath the earth. A hollow knight. A child in the mist. A forest that remembers.",
-    "releaseLine": "Episode One is out now.",
-    "signupLine": "Watch below, like, comment and share on YouTube. It helps more than you know.",
-    "cta": "Watch Episode One",
     "characters": "Characters",
     "footerLine": "Not every guardian was meant to protect.",
     "scrollLabel": "Scroll to explore",
@@ -173,19 +180,14 @@
       }
     }
   },
-  "trailer": {
-    "embedTitle": "Lost Garden · Episode One",
-    "headline": "Episode One",
-    "subline": "The first episode is live. Like, comment and share on YouTube, every bit helps."
-  },
   "discover": {
     "title": "Join the travelers",
-    "subtitle": "Episode One is available for everyone. Create a free account for the members area: lore, notes, and fragments from beneath the earth.",
+    "subtitle": "Episode Two is available for everyone. Create a free account for the members area: lore, notes, and fragments from beneath the earth.",
     "pitchAria": "What you get when you create an account",
     "pitch": [
       {
-        "title": "Episode One online",
-        "body": "Watch the first episode here or in the members area. Remember to like, comment and share on YouTube."
+        "title": "Both episodes online",
+        "body": "Watch Episode One and Episode Two here or in the members area. Remember to like, comment and share on YouTube."
       },
       {
         "title": "Lore and behind the scenes",
@@ -193,8 +195,8 @@
       }
     ],
     "loggedInTitle": "You are signed in",
-    "welcomeBack": "Episode One is waiting in the members area. Do not forget to like, comment and share on YouTube.",
-    "watchEpisode": "Watch Episode One",
+    "welcomeBack": "Episode Two is waiting in the members area. Do not forget to like, comment and share on YouTube.",
+    "watchEpisode": "Watch Episode Two",
     "watchOnLanding": "Watch on this page"
   },
   "auth": {
@@ -239,18 +241,33 @@
   "experience": {
     "seriesLabel": "Lost Garden: First Light",
     "welcome": "Welcome, {name}",
-    "memberWelcome": "Episode One is live. Watch below, then like, comment and share on YouTube, it helps enormously.",
-    "watchTitle": "Episode One",
-    "watchLead": "The first light beneath the earth. Thank you for supporting the project on YouTube.",
+    "memberWelcome": "Episode Two is live. Watch it below, then like, comment and share on YouTube, it helps enormously.",
+    "watchTitle": "The episodes",
+    "watchLead": "Episode Two first, Episode One right below it. Thank you for supporting the project on YouTube.",
     "backToGate": "Back to the gate",
-    "notesTitle": "Episode One: notes",
+    "notesTitle": "Production notes",
     "notesLead": "Production diary fragments. More will appear as the caverns open.",
     "timeline": [
-      { "title": "The Oath", "line": "Words spoken where no one listens." },
-      { "title": "The Awakening", "line": "Metal opens its eyes without a face." },
-      { "title": "The Blue Forest", "line": "Mushrooms lit paths no sun ever touched." },
-      { "title": "The Eye in the Dark", "line": "A giant remembers it is awake." },
-      { "title": "The Child in the Lilies", "line": "White petals find her in the mist." }
+      {
+        "title": "The Oath",
+        "line": "Words spoken where no one listens."
+      },
+      {
+        "title": "The Awakening",
+        "line": "Metal opens its eyes without a face."
+      },
+      {
+        "title": "The Blue Forest",
+        "line": "Mushrooms lit paths no sun ever touched."
+      },
+      {
+        "title": "The Eye in the Dark",
+        "line": "A giant remembers it is awake."
+      },
+      {
+        "title": "The Child in the Lilies",
+        "line": "White petals find her in the mist."
+      }
     ],
     "previews": [
       {
@@ -268,7 +285,7 @@
     ],
     "postSignup": {
       "title": "Welcome to the members area",
-      "lead": "Episode One is available just above. Thank you for being here.",
+      "lead": "Episode Two is available just above, with Episode One right after it. Thank you for being here.",
       "supportHeading": "Support the episode on YouTube",
       "supportBody": "Like, comment and share the video, it helps the project reach more travelers beneath the earth."
     }
@@ -287,6 +304,7 @@
     "process": "AI process",
     "press": "Press",
     "episodeOne": "Episode 1",
+    "episodeTwo": "Episode 2",
     "legalNotice": "Legal notice",
     "privacy": "Privacy",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
@@ -297,7 +315,16 @@
     "headline": "Best AI anime: 6 series actually made with AI",
     "breadcrumbHome": "Home",
     "breadcrumbCurrent": "Best AI anime",
-    "keywords": ["AI anime", "best AI anime", "anime made with AI", "AI generated anime", "AI animation", "Lost Garden", "Twins Hinahima", "Anipops"]
+    "keywords": [
+      "AI anime",
+      "best AI anime",
+      "anime made with AI",
+      "AI generated anime",
+      "AI animation",
+      "Lost Garden",
+      "Twins Hinahima",
+      "Anipops"
+    ]
   },
   "blog": {
     "headline": "Articles",
@@ -310,19 +337,47 @@
     "relatedHeading": "Keep reading",
     "howToMakeAiAnime": {
       "headline": "How to make an AI anime, step by step",
-      "keywords": ["how to make an AI anime", "make anime with AI", "AI anime pipeline", "AI animation workflow", "AI anime tutorial", "Lost Garden"]
+      "keywords": [
+        "how to make an AI anime",
+        "make anime with AI",
+        "AI anime pipeline",
+        "AI animation workflow",
+        "AI anime tutorial",
+        "Lost Garden"
+      ]
     },
     "aiCharacterConsistency": {
       "headline": "Keeping a character consistent across shots",
-      "keywords": ["AI character consistency", "consistent character AI", "character reference AI video", "AI anime consistency", "Lost Garden"]
+      "keywords": [
+        "AI character consistency",
+        "consistent character AI",
+        "character reference AI video",
+        "AI anime consistency",
+        "Lost Garden"
+      ]
     },
     "isAiAnimeRealAnime": {
       "headline": "Is AI anime really anime?",
-      "keywords": ["is AI anime real anime", "what counts as anime", "AI anime definition", "AI anime debate", "anime vs AI animation", "Twins Hinahima", "Lost Garden"]
+      "keywords": [
+        "is AI anime real anime",
+        "what counts as anime",
+        "AI anime definition",
+        "AI anime debate",
+        "anime vs AI animation",
+        "Twins Hinahima",
+        "Lost Garden"
+      ]
     },
     "aiAnimeVsTraditional": {
       "headline": "AI anime vs traditional animation",
-      "keywords": ["AI anime vs traditional animation", "AI animation vs hand drawn", "will AI replace animators", "AI animation cost", "AI animation pipeline", "Lost Garden"]
+      "keywords": [
+        "AI anime vs traditional animation",
+        "AI animation vs hand drawn",
+        "will AI replace animators",
+        "AI animation cost",
+        "AI animation pipeline",
+        "Lost Garden"
+      ]
     }
   },
   "cookies": {
@@ -351,6 +406,7 @@
     "links": {
       "vision": "Creator vision (full essay)",
       "episode": "Watch Episode One (public)",
+      "episodeTwo": "Watch Episode Two (public)",
       "press": "Press & media kit",
       "bestAiAnime": "Best AI anime: the ranked list"
     }
@@ -363,7 +419,7 @@
     "nav": {
       "story": "Story Angle",
       "facts": "Key Facts",
-      "episode": "Episode",
+      "episode": "Episodes",
       "watch": "Watch",
       "audience": "Reception",
       "release": "Press Release",
@@ -377,15 +433,27 @@
       "title": "Lost Garden",
       "subtitle": "An independent animated dark fantasy series from a one-person studio.",
       "badge": "PRESS KIT · INDEPENDENT ANIMATED SERIES",
-      "lead": "A complete 17-minute episode, conceived, directed, and produced by Frank Houbre through an AI-assisted creative workflow.",
+      "lead": "Two complete episodes, about 38 minutes of animation, conceived, directed, and produced by Frank Houbre through an AI-assisted creative workflow.",
       "emotional": "In a forgotten underground world, a voiceless knight awakens with one certainty: he must find Rose.",
       "stats": [
-        { "value": "17 min", "label": "of animation" },
-        { "value": "65,000+", "label": "views in days" },
-        { "value": "9,000+", "label": "likes" },
-        { "value": "Solo", "label": "production" }
+        {
+          "value": "2 episodes",
+          "label": "38 min of animation"
+        },
+        {
+          "value": "65,000+",
+          "label": "views in days"
+        },
+        {
+          "value": "9,000+",
+          "label": "likes"
+        },
+        {
+          "value": "Solo",
+          "label": "production"
+        }
       ],
-      "ctaWatch": "Watch the Episode",
+      "ctaWatch": "Watch the Episodes",
       "ctaDownload": "Download Press Kit",
       "ctaContact": "Press Contact"
     },
@@ -415,33 +483,72 @@
     "keyFacts": {
       "title": "Key Facts",
       "items": [
-        { "highlight": "17 min", "label": "Complete episode" },
-        { "highlight": "1", "label": "Lead creator" },
-        { "highlight": "65,000+", "label": "Views in days" },
-        { "highlight": "9,000+", "label": "TikTok likes" },
-        { "highlight": "430+", "label": "Comments" },
-        { "highlight": "60+", "label": "Hours of production" },
-        { "highlight": "Original", "label": "World, characters, and screenplay" },
-        { "highlight": "Solo", "label": "Writing, art direction, editing, and production" },
-        { "highlight": "AI-assisted", "label": "Human-supervised creative pipeline" }
+        {
+          "highlight": "38 min",
+          "label": "Two complete episodes"
+        },
+        {
+          "highlight": "1",
+          "label": "Lead creator"
+        },
+        {
+          "highlight": "65,000+",
+          "label": "Views in days"
+        },
+        {
+          "highlight": "9,000+",
+          "label": "TikTok likes"
+        },
+        {
+          "highlight": "430+",
+          "label": "Comments"
+        },
+        {
+          "highlight": "60+",
+          "label": "Hours of production"
+        },
+        {
+          "highlight": "Original",
+          "label": "World, characters, and screenplay"
+        },
+        {
+          "highlight": "Solo",
+          "label": "Writing, art direction, editing, and production"
+        },
+        {
+          "highlight": "AI-assisted",
+          "label": "Human-supervised creative pipeline"
+        }
       ]
     },
     "episode": {
-      "title": "Episode 1 · The Awakening of the Lantern Knight",
-      "paragraphs": [
-        "The first episode of Lost Garden follows Lanterne, a silent knight who wakes alone in a vast underground realm crossed by blue forests, ancient ruins, forgotten machines, and ghostly presences.",
-        "He does not speak. He does not yet understand what he has become. But a luminous medallion guides him toward Rose, a mysterious child whose memory seems tied to his own existence.",
-        "The episode lays the foundations of a dark fantasy series centered on memory, transmission, sacrifice, and the possibility of continuing to love in a world almost entirely lost."
-      ],
-      "cta": "Watch the Full Episode"
+      "title": "The episodes",
+      "cta": "Watch the Full Episodes",
+      "one": {
+        "title": "Episode 1 · The Awakening of the Lantern Knight",
+        "paragraphs": [
+          "The first episode of Lost Garden follows Lanterne, a silent knight who wakes alone in a vast underground realm crossed by blue forests, ancient ruins, forgotten machines, and ghostly presences.",
+          "He does not speak. He does not yet understand what he has become. But a luminous medallion guides him toward Rose, a mysterious child whose memory seems tied to his own existence.",
+          "The episode lays the foundations of a dark fantasy series centered on memory, transmission, sacrifice, and the possibility of continuing to love in a world almost entirely lost."
+        ]
+      },
+      "two": {
+        "title": "Episode 2 · The King Beneath the Vault",
+        "paragraphs": [
+          "Episode Two begins exactly where The Awakening of the Lantern Knight ended. Far beneath the earth, at the bottom of an immense forgotten cavern, Lanterne and Serrure are still looking for a way forward.",
+          "Something is wrong. Serrure realises that Lanterne has been badly damaged, and in a world where the knights are hollow beings of armour, ancient mechanisms, and forgotten purpose, repairing him is nothing like treating a wound.",
+          "The two knights travel deeper into the buried world in search of someone, or something, able to put Lanterne back together. Under the endless stone vaults, another part of the Lost Garden is waiting for them, with its own inhabitants, its own rules, and its own king."
+        ]
+      }
     },
     "watch": {
-      "title": "Watch the Episode",
-      "lead": "The full episode is available online. Journalists, programmers, festivals, and partners may watch it freely before requesting an interview, visuals, or further information.",
-      "youtubeLabel": "YouTube",
+      "title": "Watch the Episodes",
+      "lead": "Both episodes are available online. Journalists, programmers, festivals, and partners may watch them freely before requesting an interview, visuals, or further information.",
+      "youtubeLabel": "YouTube · Episode 2",
       "tiktokLabel": "TikTok",
-      "cta": "Watch the Episode",
-      "openYoutube": "Watch on YouTube",
+      "cta": "Watch the Episodes",
+      "openEpisodeTwo": "Watch Episode 2 on YouTube",
+      "openEpisodeOne": "Watch Episode 1 on YouTube",
       "openTiktok": "Watch on TikTok"
     },
     "audience": {
@@ -449,9 +556,18 @@
       "intro": "Released in early June, Lost Garden quickly moved beyond the frame of a simple AI experiment. Reactions focused on the quality of the world, the musical atmosphere, visual coherence, and the surprise of discovering a complete solo-produced episode.",
       "source": "Public comments from TikTok · June 2026",
       "stats": [
-        { "value": "65,000+", "label": "views in days" },
-        { "value": "9,000+", "label": "likes" },
-        { "value": "430+", "label": "comments" }
+        {
+          "value": "65,000+",
+          "label": "views in days"
+        },
+        {
+          "value": "9,000+",
+          "label": "likes"
+        },
+        {
+          "value": "430+",
+          "label": "comments"
+        }
       ],
       "cta": "Watch on TikTok",
       "comments": [
@@ -493,13 +609,41 @@
       "intro": "The materials below are provided for journalists, media outlets, festivals, programmers, and partners presenting Lost Garden.",
       "download": "Download",
       "items": [
-        { "id": "pressRelease", "title": "Press Release", "description": "PDF version of the release, ready to download or share." },
-        { "id": "images", "title": "HD Images", "description": "A selection of stills from the episode for articles and publications." },
-        { "id": "portrait", "title": "Frank Houbre Portrait", "description": "Official creator photo for press use." },
-        { "id": "logo", "title": "Lost Garden Logo", "description": "Official project logo in high resolution." },
-        { "id": "comments", "title": "Audience Reactions", "description": "A curated selection of public comments around the episode release." },
-        { "id": "episodeLinks", "title": "Distribution Links", "description": "Direct access to platforms where the episode is available." },
-        { "id": "summary", "title": "Short Summary", "description": "A concise project overview for editors, festivals, and partners." }
+        {
+          "id": "pressRelease",
+          "title": "Press Release",
+          "description": "PDF version of the release, ready to download or share."
+        },
+        {
+          "id": "images",
+          "title": "HD Images",
+          "description": "A selection of stills from the episode for articles and publications."
+        },
+        {
+          "id": "portrait",
+          "title": "Frank Houbre Portrait",
+          "description": "Official creator photo for press use."
+        },
+        {
+          "id": "logo",
+          "title": "Lost Garden Logo",
+          "description": "Official project logo in high resolution."
+        },
+        {
+          "id": "comments",
+          "title": "Audience Reactions",
+          "description": "A curated selection of public comments around the episode release."
+        },
+        {
+          "id": "episodeLinks",
+          "title": "Distribution Links",
+          "description": "Direct access to platforms where the episode is available."
+        },
+        {
+          "id": "summary",
+          "title": "Short Summary",
+          "description": "A concise project overview for editors, festivals, and partners."
+        }
       ]
     },
     "gallery": {
@@ -563,10 +707,21 @@
     "breadcrumbHome": "Home",
     "breadcrumbEpisode": "Episode 1",
     "lead": "The first episode of Lost Garden, an AI-assisted dark fantasy anime. Watch here or on YouTube.",
-    "watchTitle": "Episode One",
     "relatedHeading": "About the production",
     "processLink": "How it was made (AI process)",
     "visionLink": "Creator vision",
-    "pressLink": "Press & media kit"
+    "pressLink": "Press & media kit",
+    "otherEpisodeLink": "Episode 2: The King Beneath the Vault"
+  },
+  "episodeTwoPublic": {
+    "headline": "Episode 2",
+    "breadcrumbHome": "Home",
+    "breadcrumbEpisode": "Episode 2",
+    "lead": "The second episode of Lost Garden, AI-assisted dark fantasy anime. Watch it here or on YouTube.",
+    "relatedHeading": "About the production",
+    "processLink": "How it is made (AI process)",
+    "visionLink": "Creator vision",
+    "pressLink": "Press & media kit",
+    "otherEpisodeLink": "Episode 1: where the story begins"
   }
 }

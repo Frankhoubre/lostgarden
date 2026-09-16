@@ -212,11 +212,18 @@ export function PressKit({ locale, dict }: PressKitProps) {
               <h2 className="anime-heading font-display text-2xl text-lily sm:text-3xl md:text-4xl">
                 {p.episode.title}
               </h2>
-              <div className="mt-6 space-y-4 font-body text-base leading-relaxed text-ivory/88 sm:text-lg">
-                {p.episode.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-                ))}
-              </div>
+              {[p.episode.two, p.episode.one].map((entry) => (
+                <div key={entry.title} className="mt-8">
+                  <h3 className="anime-heading font-display text-lg text-lily sm:text-xl">
+                    {entry.title}
+                  </h3>
+                  <div className="mt-4 space-y-4 font-body text-base leading-relaxed text-ivory/88 sm:text-lg">
+                    {entry.paragraphs.map((paragraph) => (
+                      <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
               <div className="mt-8">
                 <a href={`#${PRESS_SECTION_IDS.watch}`} className="btn-primary">
                   {p.episode.cta}
@@ -249,7 +256,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               </p>
               <div className="trailer-frame relative aspect-video w-full overflow-hidden rounded-2xl">
                 <iframe
-                  src={`${PRESS_KIT.episodeEmbedUrl}?rel=0`}
+                  src={`${PRESS_KIT.latestEpisodeEmbedUrl}?rel=0`}
                   title={`${p.watch.title} · YouTube`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -258,12 +265,20 @@ export function PressKit({ locale, dict }: PressKitProps) {
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
-                  href={PRESS_KIT.episodeUrl}
+                  href={PRESS_KIT.episodeTwoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-primary text-[0.75rem]"
                 >
-                  {p.watch.openYoutube}
+                  {p.watch.openEpisodeTwo}
+                </a>
+                <a
+                  href={PRESS_KIT.episodeOneUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary text-[0.75rem]"
+                >
+                  {p.watch.openEpisodeOne}
                 </a>
               </div>
             </div>

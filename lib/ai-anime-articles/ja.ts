@@ -29,17 +29,18 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     {
       rank: 1,
       title: "Lost Garden",
-      meta: "2026年 · インディー · 制作 Frank Houbre · 第1話 17分",
+      meta: "2026年 · インディー · 制作 Frank Houbre · 2エピソード 約38分",
       verdict: "このリストで最も完成度が高く、しかも単独制作のエピソード。",
       paragraphs: [
         "Lanterneは地下の祭壇で目を覚まします。記憶はなく、顔があるはずの場所にはランタンがあります。Roseは、理由もわからないまま彼が守ると決めた子どもです。二人の周りには、青い森と青緑の霧、そして古い誓いに縛られた13人の空洞の騎士がいる、埋もれた世界が広がっています。",
-        "第1話は約17分あり、そして最後まで崩れません。そこが一番難しいところです。キャラクターはシーンをまたいでも見分けがつき、地下世界は独自の設定資料に従い、物語は雰囲気だけで終わらず第2話へ続きます。",
+        "第1話は約17分あり、そして最後まで崩れません。そこが一番難しいところです。キャラクターはシーンをまたいでも見分けがつき、地下世界は独自の設定資料に従い、物語は雰囲気だけで終わりません。第2話 The King Beneath the Vault は2026年9月に公開され、約21分あります。",
         "これを作っているのは1人です。Frank Houbreが脚本を書き、カットを演出し、エピソードを編集します。AIはその演出の内側で画とアニメーションを生成し、世界観を壊した生成カットは、出来の悪いテイクと同じように捨てられます。それがAI支援のアニメと、プロンプトを並べただけの映像との違いです。",
       ],
       aiRoleLabel: "AIが担当していること",
       aiRole:
         "画像生成、アニメーションカット、そして音の探索の一部。脚本、絵コンテの意図、テイクの取捨選択、最終編集は人間が行います。",
       links: [
+        { label: "第2話を見る", href: "/episode-2" },
         { label: "第1話を見る", href: "/episode-1" },
         { label: "制作ノート全文", href: "/process" },
         { label: "Imaginodeで制作", href: "https://imaginode.ai" },
@@ -216,6 +217,7 @@ export const aiAnimeArticleJa: AiAnimeArticle = {
     { label: "AIでアニメを作る手順", href: "/how-to-make-ai-anime" },
     { label: "カットをまたいでキャラクターを保つ方法", href: "/ai-character-consistency" },
     { label: "Lost Gardenの作り方を詳しく", href: "/process" },
+    { label: "第2話を見る", href: "/episode-2" },
     { label: "第1話を見る", href: "/episode-1" },
     { label: "作品の背景にある作家のビジョン", href: "/vision" },
     { label: "プレス・メディアキット", href: "/press" },
