@@ -399,6 +399,7 @@ export function episodeVideoJsonLd({
     description,
     thumbnailUrl: image,
     uploadDate: episode.publishedAt,
+    duration: `PT${episode.durationMinutes}M`,
     contentUrl: episode.watchUrl,
     embedUrl: episode.embedUrl,
     inLanguage: schemaLanguages[locale],

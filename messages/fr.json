@@ -76,6 +76,15 @@
       "title": "The King Beneath the Vault"
     }
   },
+  "episodes": {
+    "title": "Les épisodes",
+    "subtitle": "Deux épisodes en ligne, un troisième en production.",
+    "statusOut": "Disponible",
+    "statusProduction": "En production",
+    "episodePage": "Page de l'épisode",
+    "upcomingLabel": "Épisode {number}",
+    "upcomingLine": "L'épisode 3 est en cours d'écriture et de production. Créez un compte gratuit ou suivez la chaîne YouTube pour être prévenu en premier."
+  },
   "common": {
     "siteName": "Lost Garden",
     "skipToContent": "Aller au contenu",
@@ -97,7 +106,7 @@
     "ariaLabel": "Sections de la page",
     "characters": "Personnages",
     "knights": "Chevaliers",
-    "trailer": "Épisode 1",
+    "episodes": "Épisodes",
     "watchShort": "Vidéo",
     "join": "Inscription",
     "joinShort": "Compte",
@@ -538,7 +547,8 @@
           "Quelque chose ne va pas. Serrure comprend que Lanterne est gravement endommagé, et dans un monde où les chevaliers sont des êtres creux faits d'armure, de mécanismes anciens et de desseins oubliés, le réparer n'a rien à voir avec soigner une blessure.",
           "Les deux chevaliers descendent plus profondément dans le monde enfoui, à la recherche de quelqu'un, ou de quelque chose, capable de remettre Lanterne debout. Sous les voûtes de pierre sans fin, une autre part du Jardin Oublié les attend, avec ses habitants, ses règles et son roi."
         ]
-      }
+      },
+      "upcoming": "L'épisode 3 est en cours de production."
     },
     "watch": {
       "title": "Voir les épisodes",

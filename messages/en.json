@@ -76,6 +76,15 @@
       "title": "The King Beneath the Vault"
     }
   },
+  "episodes": {
+    "title": "The episodes",
+    "subtitle": "Two episodes online, a third in production.",
+    "statusOut": "Out now",
+    "statusProduction": "In production",
+    "episodePage": "Episode page",
+    "upcomingLabel": "Episode {number}",
+    "upcomingLine": "Episode 3 is being written and produced right now. Create a free account or follow the YouTube channel to hear about it first."
+  },
   "common": {
     "siteName": "Lost Garden",
     "skipToContent": "Skip to content",
@@ -97,7 +106,7 @@
     "ariaLabel": "Page sections",
     "characters": "Characters",
     "knights": "Knights",
-    "trailer": "Episode One",
+    "episodes": "Episodes",
     "watchShort": "Watch",
     "join": "Sign up",
     "joinShort": "Join",
@@ -539,7 +548,8 @@
           "Something is wrong. Serrure realises that Lanterne has been badly damaged, and in a world where the knights are hollow beings of armour, ancient mechanisms, and forgotten purpose, repairing him is nothing like treating a wound.",
           "The two knights travel deeper into the buried world in search of someone, or something, able to put Lanterne back together. Under the endless stone vaults, another part of the Lost Garden is waiting for them, with its own inhabitants, its own rules, and its own king."
         ]
-      }
+      },
+      "upcoming": "Episode 3 is in production."
     },
     "watch": {
       "title": "Watch the Episodes",

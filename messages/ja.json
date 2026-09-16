@@ -76,6 +76,15 @@
       "title": "The King Beneath the Vault"
     }
   },
+  "episodes": {
+    "title": "エピソード",
+    "subtitle": "2話公開中、第3話は制作中です。",
+    "statusOut": "配信中",
+    "statusProduction": "制作中",
+    "episodePage": "エピソードのページ",
+    "upcomingLabel": "第{number}話",
+    "upcomingLine": "第3話は現在、執筆と制作が進行中です。無料アカウントの作成かYouTubeのフォローで、公開をいち早くお知らせします。"
+  },
   "common": {
     "siteName": "Lost Garden",
     "skipToContent": "コンテンツへスキップ",
@@ -97,7 +106,7 @@
     "ariaLabel": "ページセクション",
     "characters": "キャラクター",
     "knights": "騎士",
-    "trailer": "第1話",
+    "episodes": "エピソード",
     "watchShort": "視聴",
     "join": "登録",
     "joinShort": "登録",
@@ -537,7 +546,8 @@
           "しかし異変が起きています。Lanterneがひどく損傷していることにSerrureは気づきます。騎士たちが甲冑と古い機構と忘れられた目的でできた空洞の存在であるこの世界では、彼を修復することは傷の手当てとはまったく違います。",
           "二人の騎士は、Lanterneを元に戻せる誰か、あるいは何かを求めて、埋もれた世界のさらに深くへと向かいます。果てしない石の穹隉の下では、Lost Gardenのもう一つの領域が待っています。独自の住人、独自の掟、そして独自の王とともに。"
         ]
-      }
+      },
+      "upcoming": "第3話は制作中です。"
     },
     "watch": {
       "title": "エピソードを視聴",

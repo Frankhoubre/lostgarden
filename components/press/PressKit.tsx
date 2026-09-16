@@ -224,7 +224,10 @@ export function PressKit({ locale, dict }: PressKitProps) {
                   </div>
                 </div>
               ))}
-              <div className="mt-8">
+              <p className="anime-label mt-8 font-display text-xs tracking-[0.16em] text-cyan-pale/75">
+                {p.episode.upcoming}
+              </p>
+              <div className="mt-6">
                 <a href={`#${PRESS_SECTION_IDS.watch}`} className="btn-primary">
                   {p.episode.cta}
                 </a>

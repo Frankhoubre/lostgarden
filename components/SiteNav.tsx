@@ -22,7 +22,7 @@ export function SiteNav() {
   const navLinks: NavLinkItem[] = [
     { label: nav.characters, href: "#characters" },
     { label: nav.knights, href: "#knights" },
-    { label: nav.trailer, href: "#trailer" },
+    { label: nav.episodes, href: "#episodes" },
     { label: nav.join, href: "#discover" },
     { label: nav.experience, href: localePath(locale, "/experience") },
   ];

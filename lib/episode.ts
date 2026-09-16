@@ -11,6 +11,8 @@ export type Episode = {
   readonly embedUrl: string;
   /** Actual YouTube upload date, matching IMDb, TMDB and Wikidata. */
   readonly publishedAt: string;
+  /** Runtime rounded to the minute, as listed on IMDb and in the press kit. */
+  readonly durationMinutes: number;
 };
 
 export const EPISODE_ONE: Episode = {
@@ -20,6 +22,7 @@ export const EPISODE_ONE: Episode = {
   watchUrl: "https://youtu.be/eZ_JlaLDJ-8",
   embedUrl: "https://www.youtube.com/embed/eZ_JlaLDJ-8",
   publishedAt: "2026-05-29",
+  durationMinutes: 17,
 };
 
 export const EPISODE_TWO: Episode = {
@@ -29,6 +32,7 @@ export const EPISODE_TWO: Episode = {
   watchUrl: "https://youtu.be/z-YRrutXaFE",
   embedUrl: "https://www.youtube.com/embed/z-YRrutXaFE",
   publishedAt: "2026-09-15",
+  durationMinutes: 21,
 };
 
 /** Oldest first. Add new episodes at the end. */
@@ -38,6 +42,9 @@ export const EPISODES: readonly Episode[] = [EPISODE_ONE, EPISODE_TWO];
 export const EPISODES_NEWEST_FIRST: readonly Episode[] = [...EPISODES].reverse();
 
 export const LATEST_EPISODE: Episode = EPISODES[EPISODES.length - 1];
+
+/** Written and produced, not released yet. Bump when it goes live. */
+export const UPCOMING_EPISODE_NUMBER = 3;
 
 /** First publication of the series, used for TVSeries structured data. */
 export const SERIES_PUBLISHED_AT = EPISODE_ONE.publishedAt;

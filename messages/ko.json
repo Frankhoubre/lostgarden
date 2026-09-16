@@ -76,6 +76,15 @@
       "title": "The King Beneath the Vault"
     }
   },
+  "episodes": {
+    "title": "에피소드",
+    "subtitle": "두 편 공개 중, 3화는 제작 중입니다.",
+    "statusOut": "공개 중",
+    "statusProduction": "제작 중",
+    "episodePage": "에피소드 페이지",
+    "upcomingLabel": "{number}화",
+    "upcomingLine": "3화는 현재 집필과 제작이 진행 중입니다. 무료 계정을 만들거나 YouTube 채널을 팔로우하면 공개 소식을 가장 먼저 받아보실 수 있습니다."
+  },
   "common": {
     "siteName": "Lost Garden",
     "skipToContent": "본문으로 건너뛰기",
@@ -97,7 +106,7 @@
     "ariaLabel": "페이지 섹션",
     "characters": "캐릭터",
     "knights": "기사",
-    "trailer": "1화",
+    "episodes": "에피소드",
     "watchShort": "시청",
     "join": "가입",
     "joinShort": "가입",
@@ -536,7 +545,8 @@
           "그런데 무언가 잘못되었습니다. Serrure는 Lanterne가 심하게 손상되었음을 알아차립니다. 기사들이 갑옷과 오래된 기계 장치, 잊힘진 목적으로 이루어진 공허한 존재인 이 세계에서, 그를 고치는 일은 상처를 치료하는 것과는 전혀 다릅니다.",
           "두 기사는 Lanterne를 다시 일으켜 세울 수 있는 누군가, 혹은 무언가를 찾아 묻힌 세계의 더 깊은 곳으로 내려갑니다. 끝없이 이어지는 돌 궁륭 아래에는 Lost Garden의 또 다른 영역이 기다리고 있습니다. 고유한 주민과 고유한 규칙, 그리고 고유한 왕과 함께."
         ]
-      }
+      },
+      "upcoming": "3화는 제작 중입니다."
     },
     "watch": {
       "title": "에피소드 시청",
