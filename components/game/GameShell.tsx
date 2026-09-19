@@ -12,6 +12,7 @@ type Playable = {
   setInput: (name: InputName, down: boolean) => void;
   releaseAll: () => void;
   toggleMute: () => boolean;
+  pointer?: (x: number, y: number) => void;
   muted: boolean;
 };
 
@@ -39,7 +40,7 @@ const KEY_MAP: Record<string, InputName> = {
   KeyQ: "left",
   ArrowRight: "right",
   KeyD: "right",
-  ArrowUp: "jump",
+  ArrowUp: "up",
   KeyW: "jump",
   KeyZ: "jump",
   Space: "jump",
@@ -80,8 +81,8 @@ export function GameShell() {
       } catch {
         /* font fallback is fine */
       }
-      const fullEngine = new URLSearchParams(window.location.search).get("engine") === "full";
-      if (fullEngine) {
+      const engine = new URLSearchParams(window.location.search).get("engine");
+      if (engine === "full") {
         const { Game: GameCtor } = await import("@/lib/game/engine");
         if (disposed) return;
         game = new GameCtor(canvas, {
@@ -89,12 +90,19 @@ export function GameShell() {
           font: `${pixelFont.style.fontFamily}, monospace`,
           onScreenChange: setScreen,
         });
-      } else {
+      } else if (engine === "mockup") {
         const { Mockup } = await import("@/lib/game/mockup");
         const mock = new Mockup(canvas);
         await mock.load();
         if (disposed) return;
         game = mock;
+        setScreen("play");
+      } else {
+        const { Game: Oath } = await import("@/lib/game/game");
+        const oath = new Oath(canvas);
+        await oath.load();
+        if (disposed) return;
+        game = oath;
         setScreen("play");
       }
       if (!game) return;
@@ -137,9 +145,14 @@ export function GameShell() {
     gameRef.current?.setInput(name, down);
   }, []);
 
-  const tapCanvas = useCallback(() => {
+  const tapCanvas = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     const game = gameRef.current;
     if (!game) return;
+    if (game.pointer) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      game.pointer(((event.clientX - rect.left) / rect.width) * VIEW_W, ((event.clientY - rect.top) / rect.height) * VIEW_H);
+      return;
+    }
     game.setInput("any", true);
     window.setTimeout(() => game.setInput("any", false), 50);
   }, []);
@@ -148,6 +161,13 @@ export function GameShell() {
     const game = gameRef.current;
     if (!game) return;
     setMuted(game.toggleMute());
+  }, []);
+
+  const pauseGame = useCallback(() => {
+    const game = gameRef.current;
+    if (!game) return;
+    game.setInput("pause", true);
+    window.setTimeout(() => game.setInput("pause", false), 30);
   }, []);
 
   const fullscreen = useCallback(() => {
@@ -188,6 +208,9 @@ export function GameShell() {
         </button>
         <button type="button" className="game-tool" onClick={fullscreen}>
           {copy.fullscreen}
+        </button>
+        <button type="button" className="game-tool" onClick={pauseGame}>
+          {copy.options}
         </button>
       </div>
 

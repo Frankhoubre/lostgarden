@@ -153,6 +153,8 @@ export class GameAudio {
   private step = 0;
   private nextStepTime = 0;
   private timer: number | null = null;
+  private musicOn = true;
+  private sfxOn = true;
   muted = false;
 
   /** Must be called from a user gesture. */
@@ -171,7 +173,7 @@ export class GameAudio {
     this.master.gain.value = this.muted ? 0 : 0.5;
     this.master.connect(this.ctx.destination);
     this.musicGain = this.ctx.createGain();
-    this.musicGain.gain.value = 0.35;
+    this.musicGain.gain.value = this.musicOn ? 0.35 : 0;
     this.musicGain.connect(this.master);
 
     const len = this.ctx.sampleRate * 0.5;
@@ -180,6 +182,15 @@ export class GameAudio {
     for (let i = 0; i < len; i += 1) data[i] = Math.random() * 2 - 1;
 
     if (this.songName) this.playSong(this.songName);
+  }
+
+  setMusicOn(on: boolean) {
+    this.musicOn = on;
+    if (this.musicGain && this.ctx) this.musicGain.gain.setTargetAtTime(on ? 0.35 : 0, this.ctx.currentTime, 0.02);
+  }
+
+  setSfxOn(on: boolean) {
+    this.sfxOn = on;
   }
 
   setMuted(muted: boolean) {
@@ -285,7 +296,7 @@ export class GameAudio {
   /* ---- sound effects ---- */
 
   sfx(name: string) {
-    if (!this.ctx) return;
+    if (!this.ctx || !this.sfxOn) return;
     const t = this.ctx.currentTime;
     switch (name) {
       case "jump":

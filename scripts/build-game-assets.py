@@ -722,3 +722,43 @@ def build_generated_extra():
 
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_extra()
+
+
+def build_generated_lore2():
+    """The Pack, the Sleepers, ash moths, cave jellyfish, and the props of the big map."""
+    meta = {}
+    wolf = slice_equal(GEN / "wolf1.png", 6)
+    wolfdie = slice_equal(GEN / "wolfdie1.png", 4)
+    ref = max(wolf[:4], key=lambda f: f.height)
+    scale = 50 / ref.height
+    pal = palette_from(Image.open(GEN / "wolf1.png"), 20)
+    scale_die = 52 / max(f.height for f in wolfdie[:2])
+    meta["wolf"] = {"run": build_strip("run", wolf, scale, 96, 64, pal, prefix="wolf"), "die": build_strip("die", wolfdie, scale_die, 96, 64, pal, prefix="wolf"), "cell": {"w": 96, "h": 64}}
+    dorm = slice_equal(GEN / "dormant1.png", 6)
+    dorm2 = slice_equal(GEN / "dormant2.png", 4)
+    ref = max(dorm[2:], key=lambda f: f.height)
+    scale = 126 / ref.height
+    pal = palette_from(Image.open(GEN / "dormant1.png"), 24)
+    meta["dormant"] = {"walk": build_strip("walk", dorm, scale, 88, 140, pal, prefix="dormant"), "act": build_strip("act", dorm2, scale, 88, 140, pal, prefix="dormant"), "cell": {"w": 88, "h": 140}}
+    moth = slice_equal(GEN / "moth1.png", 4)
+    meta["moth"] = {"n": strip_from_frames("moth", moth, 26, 44, 34, 16), "cell": {"w": 44, "h": 34}}
+    jelly = slice_equal(GEN / "jelly1.png", 3)
+    meta["jelly"] = {"n": strip_from_frames("jelly", jelly, 66, 96, 76, 16, prefix="fx"), "cell": {"w": 96, "h": 76}}
+    mp = components(GEN / "machineprop1.png", min_size=20000)
+    mp = max(mp, key=lambda p: p.width * p.height)
+    px = to_pixel(mp, 300 / mp.width, 28)
+    px.save(OUT / "prop-machine.png", optimize=True)
+    meta["machine"] = {"w": px.width, "h": px.height}
+    props = components(GEN / "props2.png", min_size=3000)
+    names = ["stone", "lantern", "cocoons"]
+    heights = {"stone": 58, "lantern": 100, "cocoons": 112}
+    for name, part in zip(names, props[:3]):
+        px = to_pixel(part, heights[name] / part.height, 24)
+        px.save(OUT / f"prop-{name}.png", optimize=True)
+        meta[name] = {"w": px.width, "h": px.height}
+    (OUT / "lore2-assets.json").write_text(json.dumps(meta))
+    print("lore2", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_lore2()

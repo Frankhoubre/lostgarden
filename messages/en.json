@@ -734,7 +734,7 @@
     "breadcrumbHome": "Home",
     "breadcrumbGame": "Game",
     "headline": "The Lantern's Oath",
-    "lead": "A retro platformer set beneath the earth. Lanterne, twelfth of the thirteen knights, walks toward Rose. Two hits and the armour falls. Committed jumps, thrown light, treasure chests, and three bosses from the series.",
+    "lead": "A retro platformer under the earth, in the Lost Garden universe. Lanterne, twelfth of the thirteen knights, crosses one big map in eight zones: the blue forest, the ledges, the roots, the deep path, Serrure's tavern, the graveyard of machines. Dodge roll, charged glimmer, a light to hide, and the Machine at the end.",
     "start": "Tap to play",
     "controlsTitle": "Controls",
     "controls": [
@@ -745,6 +745,7 @@
       "X, K or Enter: throw the glimmer (crouched or Down: throw low)",
       "Hold X after a throw, then release: charged glimmer, 3 damage, pierces",
       "C, L or Shift: dodge roll, invulnerable while rolling",
+      "Esc or P: pause and options (music, effects, language)",
       "M: sound"
     ],
     "touchHint": "On a phone, use the on-screen buttons.",
@@ -753,12 +754,12 @@
     "unmute": "Sound on",
     "loreTitle": "What you will meet",
     "lore": [
-      "The road of episode 1: the blue mushroom forest, the one-eyed machine over the ledges, the pilgrims' gong, the roots of the Source Tree, Serrure's tavern, then the Machine's arena and the gate.",
-      "Dodge roll (C or Shift) through an attack, variable jump height, coyote time and jump buffering: the controls answer like a modern game. At Serrure's, press Down with three lilies to gain a heart.",
-      "Reptilians rear up before clawing: jump back. Four glimmers and they fall. Glowing beetles crawl along the ground: throw low or stomp them. One in three leaves a light that mends the armour.",
-      "The one-eyed machine hovers, curls up, then slams down: climb a ledge, drop back and hit it while it lies stunned. The moss trembles before a root breaks through: never stand on it.",
-      "The masked pilgrims strike their gong and Serrure welcomes you under his roof: the armour is mended and the checkpoint is yours. The Machine stomps and fires a beam; at half health it calls the beetles. Twenty-eight glimmers bring it down.",
-      "Three hits and the armour sinks into the moss. It gets up at the last checkpoint. Six pale lilies are hidden along the road. Lanterne never speaks."
+      "One big map, eight zones in a row: the Waking, the Ledges, the Descent of the Roots, the Pilgrims' Gong, the Deep Path, Serrure's Tavern, the Graveyard of Machines, the Arena.",
+      "The Pack: wolf-shaped masses of ash that sleep by the deep paths and throw themselves at any light. Crouched, your lantern hides: you can slip past. A charged glimmer on a sleeping beast hits twice as hard.",
+      "The Sleepers: cocooned in the roots. A blow or a lingering light wakes them; they are slow but tough. Ash moths fly to your lantern. Glowing beetles crawl the ground: throw low or stomp them.",
+      "The Scaled Ones watch from the shadows and vanish when approached: they are not enemies. The polite jellyfish of the pit serve as platforms. The roots of the Source Tree break through the moss after a tremor.",
+      "The pilgrims' gong and Serrure's tavern mend the armour and serve as checkpoints. At Serrure's, three lilies are worth a heart. The Machine, at the end of the graveyard, stomps, fires a beam and calls the beetles at half health.",
+      "Esc opens the in-game options: music, sound effects, language (French or English), controls. Three hits and the armour sinks into the moss. Lanterne never speaks."
     ],
     "credits": "An original game for the anime Lost Garden by Frank Houbre. No download, no account, plays in the browser.",
     "gate": {
@@ -768,6 +769,7 @@
       "loading": "The lantern is lighting…",
       "hint": "The game is free, nothing to download. Your account keeps your place among the travellers.",
       "welcome": "Welcome, {name}. The blue mushroom forest is waiting."
-    }
+    },
+    "options": "Options"
   }
 }

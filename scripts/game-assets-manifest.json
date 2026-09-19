@@ -36,6 +36,14 @@
     "eyedie1.png": "hf_20260919_142119_daa77987-1415-4940-8b66-3cff20f07445.png",
     "crouch1.png": "hf_20260919_152836_bf603a5a-7030-430d-aa35-98b22af03330.png",
     "roll1.png": "hf_20260919_152836_35f7efb5-c385-4b58-a2ec-1e326b578099.png",
-    "charge1.png": "hf_20260919_152836_2d84b684-bb64-40ea-9087-eff58fe78988.png"
+    "charge1.png": "hf_20260919_152836_2d84b684-bb64-40ea-9087-eff58fe78988.png",
+    "wolf1.png": "hf_20260919_155755_9873c1af-4cdf-438d-b47d-22f07df97503.png",
+    "wolfdie1.png": "hf_20260919_155755_9dd909e4-81bd-40e5-983a-6d9a7d4a96d0.png",
+    "dormant1.png": "hf_20260919_155755_68ea7a44-4ab3-4d3d-9381-c318f1117bea.png",
+    "dormant2.png": "hf_20260919_155755_16f46fba-0be9-48fa-9b10-26ba15e9922d.png",
+    "moth1.png": "hf_20260919_155755_ff0e83fc-eb1e-4a6c-978d-c521a5fd5f67.png",
+    "jelly1.png": "hf_20260919_155755_afc4d1f3-3de7-4bed-afee-30d05d98ee1e.png",
+    "machineprop1.png": "hf_20260919_155755_9a36f9f2-ccf5-43b7-af99-c77fb27c3f7b.png",
+    "props2.png": "hf_20260919_155755_ae477434-7267-4ac8-bc96-b8cc1bf576b4.png"
   }
 }
