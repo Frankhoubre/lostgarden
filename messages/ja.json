@@ -61,6 +61,10 @@
     "privacy": {
       "title": "プライバシーポリシー | Lost Garden",
       "description": "Lost Gardenにおけるデータ収集、Cookie、Firebase認証、GDPR上の権利について。"
+    },
+    "game": {
+      "title": "プレイ：ランタンの誓い | Lost Garden",
+      "description": "Lost Garden の世界を舞台にした無料のレトロブラウザゲーム。青いキノコの森、鎖の世界、傾いた城をランタンと駆け抜けろ。魔界村スタイル。"
     }
   },
   "episode": {
@@ -105,7 +109,8 @@
     "experienceShort": "会員",
     "home": "ホーム",
     "openMenu": "メニューを開く",
-    "closeMenu": "メニューを閉じる"
+    "closeMenu": "メニューを閉じる",
+    "game": "ゲーム"
   },
   "notFound": {
     "title": "ページが見つかりません",
@@ -309,7 +314,8 @@
     "privacy": "プライバシー",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
     "bestAiAnime": "AIアニメ ベスト6",
-    "blog": "記事一覧"
+    "blog": "記事一覧",
+    "game": "ゲーム"
   },
   "bestAiAnime": {
     "headline": "AIで作られたアニメ・ベスト6",
@@ -721,5 +727,32 @@
     "visionLink": "クリエイタービジョン",
     "pressLink": "プレス・メディアキット",
     "otherEpisodeLink": "第1話：物語の始まり"
+  },
+  "game": {
+    "breadcrumbHome": "ホーム",
+    "breadcrumbGame": "ゲーム",
+    "headline": "ランタンの誓い",
+    "lead": "地下を舞台にしたレトロなアクションゲーム。十三騎士の十二番目、ランタンがローズへ向かって歩く。二撃で鎧は砕ける。戻れないジャンプ、投げる光、宝箱、そしてシリーズに登場する三体のボス。",
+    "start": "タップしてプレイ",
+    "controlsTitle": "操作",
+    "controls": [
+      "矢印キーまたは A / D：移動",
+      "Z、W、Space、上：ジャンプ（空中では方向を変えられない）",
+      "X、K、Enter：武器を投げる",
+      "下：しゃがむ · 下＋ジャンプ：足場から降りる",
+      "P：ポーズ · M：サウンド"
+    ],
+    "touchHint": "スマホでは画面上のボタンを使ってください。",
+    "fullscreen": "フルスクリーン",
+    "mute": "サウンドを切る",
+    "unmute": "サウンドを入れる",
+    "loreTitle": "出会うもの",
+    "lore": [
+      "青い森の胞子、クラゲ、フードの苦行者。そして赤と黒、二つのオレンジの目を持つ「マシン」。",
+      "鎖の世界の白いトカゲ人、鎧の巨獣、錆びた鎖。デクロシュールの鎌に追われる。",
+      "傾いた城で目覚める空の鎧、ブルドンの炉、服を着たネズミ、そしてもう自分ではない暗黒の騎士。",
+      "セリュールとブルドンがチェックポイント。ランタンは決して喋らない。"
+    ],
+    "credits": "Frank Houbre のアニメ Lost Garden のオリジナルゲーム。ダウンロード不要、アカウント不要、ブラウザで遊べます。"
   }
 }

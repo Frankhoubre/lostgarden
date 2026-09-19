@@ -61,6 +61,10 @@
     "privacy": {
       "title": "Politique de confidentialité | Lost Garden",
       "description": "Comment Lost Garden collecte et utilise vos données, cookies, authentification Firebase et vos droits RGPD."
+    },
+    "game": {
+      "title": "Jouer : Le Serment de la Lanterne | Lost Garden",
+      "description": "Un jeu rétro gratuit dans l'univers de Lost Garden, jouable dans le navigateur : guide Lanterne à travers la forêt des champignons bleus, le monde des chaînes et le château penché, à la Ghouls'n Ghosts."
     }
   },
   "episode": {
@@ -105,7 +109,8 @@
     "experienceShort": "Membre",
     "home": "Accueil",
     "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "game": "Jeu"
   },
   "notFound": {
     "title": "Page introuvable",
@@ -309,7 +314,8 @@
     "privacy": "Confidentialité",
     "copyright": "© {year} Lost Garden, Frank Houbre. Tous droits réservés.",
     "bestAiAnime": "Top animés IA",
-    "blog": "Articles"
+    "blog": "Articles",
+    "game": "Jeu"
   },
   "bestAiAnime": {
     "headline": "Top 6 des animés créés par IA",
@@ -722,5 +728,32 @@
     "visionLink": "Vision du créateur",
     "pressLink": "Presse & media kit",
     "otherEpisodeLink": "Épisode 1 : là où tout commence"
+  },
+  "game": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbGame": "Jeu",
+    "headline": "Le Serment de la Lanterne",
+    "lead": "Un jeu de plateforme rétro sous la terre. Lanterne, douzième des treize chevaliers, marche vers Rose. Deux coups et l'armure tombe. Sauts engagés, lueurs lancées, coffres, et trois boss tirés de la série.",
+    "start": "Touche pour jouer",
+    "controlsTitle": "Commandes",
+    "controls": [
+      "Flèches ou Q / D : se déplacer",
+      "Z, W, Espace ou Haut : sauter (une fois en l'air, on ne revient pas)",
+      "X, K ou Entrée : lancer l'arme",
+      "Bas : s'accroupir · Bas + saut : descendre d'une plateforme",
+      "P : pause · M : son"
+    ],
+    "touchHint": "Sur téléphone, utilise les boutons à l'écran.",
+    "fullscreen": "Plein écran",
+    "mute": "Couper le son",
+    "unmute": "Activer le son",
+    "loreTitle": "Ce que tu vas croiser",
+    "lore": [
+      "Des spores, des méduses et des pénitents encapuchonnés dans la forêt bleue, puis la Machine, rouge et noire, deux yeux orange.",
+      "Des reptiliens pâles, des colosses cuirassés et des chaînes rouillées dans le monde des chaînes, sous la faux du Décrocheur.",
+      "Des armures vides qui s'éveillent dans le château penché, la forge de Bourdon, ses souris habillées, et le Chevalier Sombre qui n'est plus lui-même.",
+      "Serrure et Bourdon marquent tes points de passage. Lanterne ne parle jamais."
+    ],
+    "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur."
   }
 }

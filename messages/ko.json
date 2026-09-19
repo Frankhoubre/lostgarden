@@ -61,6 +61,10 @@
     "privacy": {
       "title": "개인정보 처리방침 | Lost Garden",
       "description": "Lost Garden의 데이터 수집, 쿠키, Firebase 인증, GDPR 권리에 대해."
+    },
+    "game": {
+      "title": "플레이: 랜턴의 맹세 | Lost Garden",
+      "description": "Lost Garden 세계관의 무료 레트로 브라우저 게임. 푸른 버섯 숲, 사슬의 세계, 기울어진 성을 랜턴과 함께 달려라. 마계촌 스타일."
     }
   },
   "episode": {
@@ -105,7 +109,8 @@
     "experienceShort": "회원",
     "home": "홈",
     "openMenu": "메뉴 열기",
-    "closeMenu": "메뉴 닫기"
+    "closeMenu": "메뉴 닫기",
+    "game": "게임"
   },
   "notFound": {
     "title": "페이지를 찾을 수 없습니다",
@@ -309,7 +314,8 @@
     "privacy": "개인정보",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
     "bestAiAnime": "AI 애니 베스트 6",
-    "blog": "아티클"
+    "blog": "아티클",
+    "game": "게임"
   },
   "bestAiAnime": {
     "headline": "AI로 만든 애니메이션 베스트 6",
@@ -720,5 +726,32 @@
     "visionLink": "창작자 비전",
     "pressLink": "보도자료 & 미디어 키트",
     "otherEpisodeLink": "1화: 이야기의 시작"
+  },
+  "game": {
+    "breadcrumbHome": "홈",
+    "breadcrumbGame": "게임",
+    "headline": "랜턴의 맹세",
+    "lead": "땅속을 무대로 한 레트로 플랫포머. 열세 기사 중 열두 번째, 랜턴이 로즈를 향해 걷는다. 두 번 맞으면 갑옷이 떨어진다. 되돌릴 수 없는 점프, 던지는 빛, 보물 상자, 그리고 시리즈에 등장하는 세 보스.",
+    "start": "탭해서 플레이",
+    "controlsTitle": "조작",
+    "controls": [
+      "방향키 또는 A / D: 이동",
+      "Z, W, Space, 위: 점프 (공중에서는 방향을 바꿀 수 없음)",
+      "X, K, Enter: 무기 던지기",
+      "아래: 웅크리기 · 아래 + 점프: 발판 아래로 내려가기",
+      "P: 일시정지 · M: 소리"
+    ],
+    "touchHint": "휴대폰에서는 화면 버튼을 사용하세요.",
+    "fullscreen": "전체 화면",
+    "mute": "소리 끄기",
+    "unmute": "소리 켜기",
+    "loreTitle": "만나게 될 것들",
+    "lore": [
+      "푸른 숲의 포자, 해파리, 두건 쓴 고행자들. 그리고 빨강과 검정, 주황빛 두 눈의 '기계'.",
+      "사슬의 세계의 창백한 파충인, 갑옷 거수, 녹슨 사슬. 데크로슈르의 낫이 뒤쫓는다.",
+      "기울어진 성에서 깨어나는 빈 갑옷, 부르동의 대장간, 옷 입은 생쥐들, 그리고 더 이상 자신이 아닌 어둠의 기사.",
+      "세뤼르와 부르동이 체크포인트를 표시한다. 랜턴은 결코 말하지 않는다."
+    ],
+    "credits": "Frank Houbre의 애니메이션 Lost Garden을 위한 오리지널 게임. 다운로드도 계정도 필요 없이 브라우저에서 바로 플레이."
   }
 }

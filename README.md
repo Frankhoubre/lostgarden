@@ -20,6 +20,18 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Retro game
+
+`/[locale]/game` hosts **The Lantern's Oath**, a Ghouls'n Ghosts style platformer set in the Lost Garden universe. It is written from scratch in TypeScript on a 320x192 canvas (no game framework, no image or audio assets):
+
+- `lib/game/pixel.ts` and `lib/game/sprites.ts`: ASCII pixel art rasterised at runtime (Lanterne, Serrure, Bourdon, Barrik, Rose, enemies, bosses, tiles)
+- `lib/game/engine.ts`: game loop, tile physics, player state (two-hit armour, committed jumps, four throwable weapons), HUD, screens
+- `lib/game/actors.ts`: enemy and boss behaviours (the Machine, the Decrocheur, the Dark Knight)
+- `lib/game/levels.ts`: three stages built from 16-column segments
+- `lib/game/audio.ts`: chiptune music and sound effects synthesised with WebAudio
+- `lib/game/text.ts`: in-game text in the four site locales
+- `components/game/GameShell.tsx`: canvas host, keyboard and touch controls
+
 ## Environment variables
 
 See `.env.local.example` for required `NEXT_PUBLIC_FIREBASE_*` values.

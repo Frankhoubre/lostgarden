@@ -1741,3 +1741,127 @@ h3 {
   transform: translateY(-2px);
   border-color: rgba(125, 223, 255, 0.35);
 }
+
+/* ---------------------------------------------------------------- */
+/* Retro game (The Lantern's Oath)                                   */
+/* ---------------------------------------------------------------- */
+
+.game-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #020817;
+}
+
+.game-shell:fullscreen {
+  justify-content: center;
+  padding: 1rem;
+}
+
+.game-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 2px solid rgba(125, 223, 255, 0.25);
+  background: #020817;
+  box-shadow:
+    0 0 0 1px rgba(2, 8, 23, 1),
+    0 12px 40px rgba(2, 8, 23, 0.8),
+    0 0 48px rgba(56, 189, 248, 0.12);
+}
+
+.game-shell:fullscreen .game-frame {
+  max-height: calc(100vh - 8rem);
+  margin: 0 auto;
+  width: auto;
+  height: calc(100vh - 8rem);
+}
+
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  outline: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.game-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 8, 23, 0.85);
+}
+
+.game-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.game-tool {
+  border: 1px solid rgba(125, 223, 255, 0.3);
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.7rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan-pale);
+  background: rgba(6, 22, 47, 0.6);
+  transition: background 0.2s, color 0.2s;
+}
+
+.game-tool:hover,
+.game-tool:focus-visible {
+  background: rgba(37, 99, 235, 0.25);
+  color: var(--lily);
+  outline: none;
+}
+
+.game-touch {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.game-touch-hidden {
+  display: none;
+}
+
+.game-touch-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-touch-btn {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 999px;
+  border: 2px solid rgba(125, 223, 255, 0.35);
+  background: rgba(6, 22, 47, 0.8);
+  color: var(--cyan-pale);
+  font-size: 1.1rem;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-touch-btn:active {
+  background: rgba(56, 189, 248, 0.45);
+  color: var(--lily);
+}
+
+.game-touch-btn-wide {
+  width: 4rem;
+  height: 4rem;
+  font-size: 1.3rem;
+}

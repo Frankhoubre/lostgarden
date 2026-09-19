@@ -61,6 +61,10 @@
     "privacy": {
       "title": "Privacy Policy | Lost Garden",
       "description": "How Lost Garden collects and uses your data, cookies, Firebase auth, and your GDPR rights."
+    },
+    "game": {
+      "title": "Play: The Lantern's Oath | Lost Garden",
+      "description": "A free retro browser game in the Lost Garden universe: guide Lanterne through the blue mushroom forest, the world of chains and the leaning castle, Ghouls'n Ghosts style."
     }
   },
   "episode": {
@@ -105,7 +109,8 @@
     "experienceShort": "Members",
     "home": "Home",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "game": "Game"
   },
   "notFound": {
     "title": "Page not found",
@@ -309,7 +314,8 @@
     "privacy": "Privacy",
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
     "bestAiAnime": "Best AI anime",
-    "blog": "Articles"
+    "blog": "Articles",
+    "game": "Game"
   },
   "bestAiAnime": {
     "headline": "Best AI anime: 6 series actually made with AI",
@@ -723,5 +729,32 @@
     "visionLink": "Creator vision",
     "pressLink": "Press & media kit",
     "otherEpisodeLink": "Episode 1: where the story begins"
+  },
+  "game": {
+    "breadcrumbHome": "Home",
+    "breadcrumbGame": "Game",
+    "headline": "The Lantern's Oath",
+    "lead": "A retro platformer set beneath the earth. Lanterne, twelfth of the thirteen knights, walks toward Rose. Two hits and the armour falls. Committed jumps, thrown light, treasure chests, and three bosses from the series.",
+    "start": "Tap to play",
+    "controlsTitle": "Controls",
+    "controls": [
+      "Arrow keys or A / D: move",
+      "Z, W, Space or Up: jump (once you leap, you commit)",
+      "X, K or Enter: throw your weapon",
+      "Down: crouch · Down + jump: drop through a platform",
+      "P: pause · M: sound"
+    ],
+    "touchHint": "On a phone, use the on-screen buttons.",
+    "fullscreen": "Fullscreen",
+    "mute": "Sound off",
+    "unmute": "Sound on",
+    "loreTitle": "What you will meet",
+    "lore": [
+      "Spores, jellyfish and hooded penitents in the blue forest, then the Machine, red and black, two orange eyes.",
+      "Pale reptiles, armoured colossi and rusted chains in the world of chains, hunted by the Decrocheur and its scythe.",
+      "Empty armours that wake in the leaning castle, Bourdon's forge, dressed mice, and the Dark Knight who is no longer himself.",
+      "Serrure and Bourdon mark your checkpoints. Lanterne never speaks."
+    ],
+    "credits": "An original game for the anime Lost Garden by Frank Houbre. No download, no account, plays in the browser."
   }
 }
