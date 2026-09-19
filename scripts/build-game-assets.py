@@ -637,3 +637,64 @@ def build_generated_machine():
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_level()
     build_generated_machine()
+
+
+def palette_from(img: Image.Image, colors: int):
+    a = np.asarray(img.convert("RGBA"))
+    mask = a[..., 3] > 120
+    src = Image.fromarray(a[mask][:, :3].reshape(1, -1, 3), "RGB")
+    return src.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+
+
+def strip_from_frames(name: str, frames, target_h: float, cell_w: int, cell_h: int, colors: int, ref_frame=None, prefix="fx"):
+    ref_h = max(f.height for f in (ref_frame or frames))
+    scale = target_h / ref_h
+    pal = palette_from(frames[0], colors)
+    n = build_strip(name, frames, scale, cell_w, cell_h, pal, prefix=prefix)
+    return n
+
+
+def build_generated_lore():
+    meta = {}
+    # Beetle: 3 crawl + 1 burst, ~34px tall.
+    beetle = slice_equal(GEN / "beetle1.png", 4)
+    meta["beetle"] = {"n": strip_from_frames("beetle", beetle, 34, 56, 40, 20, ref_frame=beetle[:3]), "cell": {"w": 56, "h": 40}}
+    # Root: 4 frames, tallest ~110px.
+    root = slice_equal(GEN / "root1.png", 4)
+    meta["root"] = {"n": strip_from_frames("root", root, 110, 80, 116, 20), "cell": {"w": 80, "h": 116}}
+    # Eye machine: hover(3) + charge(1) + slam(1) + hurt(1), then die(4). ~120px tall.
+    eye = slice_equal(GEN / "eyeanim1.png", 6)
+    eyedie = slice_equal(GEN / "eyedie1.png", 4)
+    ref = max(eye[:3], key=lambda f: f.height)
+    scale = 120 / ref.height
+    pal = palette_from(Image.open(GEN / "eyemachine1.png"), 28)
+    meta["eye"] = {"n": build_strip("anim", eye, scale, 96, 132, pal, prefix="eye"), "die": build_strip("die", eyedie, scale, 96, 132, pal, prefix="eye"), "cell": {"w": 96, "h": 132}}
+    # Serrure: 3 frames, 99px (10% taller than Lanterne).
+    ser = slice_equal(GEN / "serrure1.png", 3)
+    meta["serrure"] = {"n": strip_from_frames("idle", ser, 99, 72, 104, 28, prefix="serrure"), "cell": {"w": 72, "h": 104}}
+    # Pilgrim: 3 frames, 96px.
+    pil = slice_equal(GEN / "pilgrim1.png", 3)
+    meta["pilgrim"] = {"n": strip_from_frames("idle", pil, 96, 72, 100, 16, prefix="pilgrim"), "cell": {"w": 72, "h": 100}}
+    # Props: gong, seal, tavern nook.
+    props = components(GEN / "props1.png", min_size=2000)
+    props.sort(key=lambda p: p.width * p.height)
+    # Sort back by x: components() already sorted by x; re-fetch order.
+    props = components(GEN / "props1.png", min_size=2000)
+    names = ["gong", "seal", "tavern"]
+    heights = {"gong": 120, "seal": 80, "tavern": 130}
+    for name, part in zip(names, props[:3]):
+        px = to_pixel(part, heights[name] / part.height, 28)
+        px.save(OUT / f"prop-{name}.png", optimize=True)
+        meta[name] = {"w": px.width, "h": px.height}
+    # Items: lily, light, medallion at ~22px.
+    items = components(GEN / "items1.png", min_size=300)
+    for name, part in zip(["lily", "light", "medallion"], items[:3]):
+        px = to_pixel(part, 22 / part.height, 16)
+        px.save(OUT / f"item-{name}.png", optimize=True)
+        meta[name] = {"w": px.width, "h": px.height}
+    (OUT / "lore-assets.json").write_text(json.dumps(meta))
+    print("lore", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_lore()

@@ -3,7 +3,7 @@
  * Lanterne, and the lighting / atmosphere stack. Everything is drawn on a
  * 480x288 canvas with nearest-neighbour scaling.
  */
-import { GameAudio } from "./audio";
+import { GameAudio, type SongName } from "./audio";
 import type { InputName } from "./engine";
 
 const VIEW_W = 480;
@@ -16,12 +16,15 @@ const JUMP_VY = -8.9;
 const ACCEL = 0.45;
 const AIR_ACCEL = 0.1;
 
-/** Level layout (world units). */
-const LEVEL_W = 3700;
-const ARENA_L = 2860;
+/** Level layout (world units), following the road of episode 1. */
+const LEVEL_W = 3900;
+const GONG_X = 1600;
+const TAVERN_X = 2330;
+const ARENA_L = 3060;
 const ARENA_R = ARENA_L + VIEW_W;
 const GATE_X = ARENA_R + 90;
 const BOSS_HP = 28;
+const EYE_HP = 7;
 
 type Light = { x: number; y: number; r: number; a: number; color?: string; parallax: number };
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; size: number; parallax: number };
@@ -48,9 +51,36 @@ type Platform = { x: number; y: number; w: number; kind: PlatformKind };
 type PlatformKind = "small" | "wide" | "log" | "ledge";
 type PlatformMeta = Record<PlatformKind, { w: number; h: number; top: number }> & { gate: { w: number; h: number } };
 type MachineMeta = { cell: { w: number; h: number }; walk: number; stomp: number; blast: number; die: number; idle: number };
-type Zone = { x: number; spawns: { dx: number; dir: 1 | -1 }[]; done: boolean };
+type SpawnKind = "reptile" | "beetle" | "eye";
+type Zone = { x: number; spawns: { kind: SpawnKind; dx: number; dir: 1 | -1 }[]; done: boolean };
 type BossState = "asleep" | "enter" | "idle" | "walk" | "stomp" | "blast" | "stagger" | "dying" | "dead";
-type Boss = { x: number; dir: 1 | -1; state: BossState; t: number; hp: number; flash: number; hits: number; vx: number; done: boolean };
+type Boss = { x: number; dir: 1 | -1; state: BossState; t: number; hp: number; flash: number; hits: number; vx: number; done: boolean; summoned: boolean };
+
+/** Glowing beetles: small crawlers that burst into light. */
+type Beetle = { x: number; dir: 1 | -1; t: number; state: "crawl" | "dead"; home: number; vx: number };
+/** The one-eyed tentacle machine: hovers, curls up, slams down, then lies stunned. */
+type EyeState = "hover" | "charge" | "slam" | "landed" | "rise" | "dying" | "dead";
+type Eye = { x: number; y: number; dir: 1 | -1; state: EyeState; t: number; hp: number; flash: number; home: number };
+/** Roots of the Source Tree, rising from the moss when something walks by. */
+type RootState = "dormant" | "warn" | "rise" | "up" | "recede";
+type Root = { x: number; state: RootState; t: number };
+type ItemKind = "lily" | "light";
+type Item = { x: number; y: number; vy: number; kind: ItemKind; t: number; dead: boolean; rest: number };
+type Checkpoint = { x: number; kind: "gong" | "tavern"; done: boolean; t: number };
+type Cell = { w: number; h: number };
+type LoreMeta = {
+  beetle: { n: number; cell: Cell };
+  root: { n: number; cell: Cell };
+  eye: { n: number; die: number; cell: Cell };
+  serrure: { n: number; cell: Cell };
+  pilgrim: { n: number; cell: Cell };
+  gong: Cell;
+  seal: Cell;
+  tavern: Cell;
+  lily: Cell;
+  light: Cell;
+  medallion: Cell;
+};
 
 const REPTILE_HP = 4;
 const PLAYER_HP = 3;
@@ -124,6 +154,29 @@ export class Mockup {
   private mBlast!: HTMLImageElement;
   private mDie!: HTMLImageElement;
   private mMeta!: MachineMeta;
+  private beetleSheet!: HTMLImageElement;
+  private rootSheet!: HTMLImageElement;
+  private eyeSheet!: HTMLImageElement;
+  private eyeDieSheet!: HTMLImageElement;
+  private serrureSheet!: HTMLImageElement;
+  private pilgrimSheet!: HTMLImageElement;
+  private gongImg!: HTMLImageElement;
+  private sealImg!: HTMLImageElement;
+  private tavernImg!: HTMLImageElement;
+  private lilyImg!: HTMLImageElement;
+  private lightImg!: HTMLImageElement;
+  private medallionImg!: HTMLImageElement;
+  private lore!: LoreMeta;
+  private beetles: Beetle[] = [];
+  private eyes: Eye[] = [];
+  private roots: Root[] = [];
+  private items: Item[] = [];
+  private checkpoints: Checkpoint[] = [];
+  private lilies = 0;
+  private lastHurt = "";
+  private lilyTotal = 0;
+  private caption: { title: string; lines: string[]; t: number } | null = null;
+  private song: SongName | null = null;
   private audio = new GameAudio();
   private platforms: Platform[] = [];
   private zones: Zone[] = [];
@@ -157,6 +210,7 @@ export class Mockup {
   private flare = 0;
   private throwT = 0;
   private throwCooldown = 0;
+  private throwLow = false;
   private hurtT = 0;
   private invuln = 0;
   private hp = PLAYER_HP;
@@ -216,6 +270,34 @@ export class Mockup {
       loadImage(asset("machine-die.png")),
       fetch(asset("machine-anim.json")).then((r) => r.json() as Promise<MachineMeta>),
     ]);
+    const [beetleSheet, rootSheet, eyeSheet, eyeDieSheet, serrureSheet, pilgrimSheet, gongImg, sealImg, tavernImg, lilyImg, lightImg, medallionImg, lore] = await Promise.all([
+      loadImage(asset("fx-beetle.png")),
+      loadImage(asset("fx-root.png")),
+      loadImage(asset("eye-anim.png")),
+      loadImage(asset("eye-die.png")),
+      loadImage(asset("serrure-idle.png")),
+      loadImage(asset("pilgrim-idle.png")),
+      loadImage(asset("prop-gong.png")),
+      loadImage(asset("prop-seal.png")),
+      loadImage(asset("prop-tavern.png")),
+      loadImage(asset("item-lily.png")),
+      loadImage(asset("item-light.png")),
+      loadImage(asset("item-medallion.png")),
+      fetch(asset("lore-assets.json")).then((r) => r.json() as Promise<LoreMeta>),
+    ]);
+    this.beetleSheet = beetleSheet;
+    this.rootSheet = rootSheet;
+    this.eyeSheet = eyeSheet;
+    this.eyeDieSheet = eyeDieSheet;
+    this.serrureSheet = serrureSheet;
+    this.pilgrimSheet = pilgrimSheet;
+    this.gongImg = gongImg;
+    this.sealImg = sealImg;
+    this.tavernImg = tavernImg;
+    this.lilyImg = lilyImg;
+    this.lightImg = lightImg;
+    this.medallionImg = medallionImg;
+    this.lore = lore;
     this.bg = bg;
     this.ground = ground;
     this.walkSheet = walk;
@@ -247,11 +329,22 @@ export class Mockup {
     this.feetY = this.groundY + this.meta.ground.top;
     this.buildLevel();
     this.resetLevel();
-    this.audio.playSong("forest");
+    this.music("forest");
     this.ready = true;
   }
 
-  /** The level: platforms to climb, three reptile packs, the Machine's arena and the gate. */
+  private music(name: SongName | null) {
+    if (this.song === name) return;
+    this.song = name;
+    if (name) this.audio.playSong(name);
+    else this.audio.stopSong();
+  }
+
+  /**
+   * The level follows episode 1: the blue forest and its pale reptiles, the
+   * one-eyed machine over the mushroom ledges, the pilgrims' gong, the roots
+   * of the Source Tree, Serrure's tavern, then the Machine's arena and the gate.
+   */
   private buildLevel() {
     const g = this.feetY;
     const P = (x: number, dy: number, kind: PlatformKind): Platform => ({ x, y: g - dy, w: this.pMeta[kind].w, kind });
@@ -261,19 +354,41 @@ export class Mockup {
       P(1010, 70, "log"),
       P(1180, 130, "small"),
       P(1330, 72, "ledge"),
-      P(1780, 66, "wide"),
-      P(1960, 124, "small"),
-      P(2120, 70, "log"),
-      P(2500, 64, "small"),
-      P(2620, 120, "ledge"),
+      P(1850, 70, "small"),
+      P(2070, 118, "small"),
+      P(2540, 64, "small"),
+      P(2700, 120, "ledge"),
+      P(2900, 70, "log"),
       P(ARENA_L + 60, 78, "small"),
       P(ARENA_R - 130, 78, "small"),
     ];
+    const R = (kind: SpawnKind, dx: number, dir: 1 | -1) => ({ kind, dx, dir });
     this.zones = [
-      { x: 620, spawns: [{ dx: 360, dir: -1 }, { dx: 520, dir: -1 }], done: false },
-      { x: 1400, spawns: [{ dx: 320, dir: -1 }, { dx: 470, dir: -1 }, { dx: -380, dir: 1 }], done: false },
-      { x: 2200, spawns: [{ dx: 300, dir: -1 }, { dx: 420, dir: -1 }, { dx: 560, dir: -1 }], done: false },
+      { x: 620, spawns: [R("reptile", 360, -1), R("reptile", 520, -1)], done: false },
+      { x: 960, spawns: [R("beetle", 200, -1), R("beetle", 320, 1), R("eye", 330, -1)], done: false },
+      { x: 1700, spawns: [R("beetle", 300, -1), R("beetle", 390, 1), R("beetle", 470, -1), R("reptile", 420, -1)], done: false },
+      { x: 2440, spawns: [R("beetle", 120, -1), R("beetle", 200, 1), R("reptile", 340, -1), R("eye", 420, -1), R("reptile", 560, -1)], done: false },
     ];
+    this.roots = [1760, 1990, 2200, 2680, 2840].map((x) => ({ x, state: "dormant" as RootState, t: 0 }));
+    this.checkpoints = [
+      { x: GONG_X - 40, kind: "gong", done: false, t: 0 },
+      { x: TAVERN_X - 70, kind: "tavern", done: false, t: 0 },
+    ];
+  }
+
+  private placeItems() {
+    const at = (x: number, y: number, kind: ItemKind): Item => ({ x, y, vy: 0, kind, t: 0, dead: false, rest: y });
+    const onPf = (x: number) => this.platforms.find((pf) => x >= pf.x && x <= pf.x + pf.w)?.y ?? this.feetY;
+    this.items = [
+      at(380, this.feetY, "lily"),
+      at(679, onPf(679), "lily"),
+      at(1219, onPf(1219), "lily"),
+      at(1370, onPf(1370), "lily"),
+      at(2109, onPf(2109), "lily"),
+      at(2739, onPf(2739), "lily"),
+      at(TAVERN_X + 44, this.feetY, "light"),
+    ];
+    this.lilyTotal = this.items.filter((it) => it.kind === "lily").length;
   }
 
   private resetLevel() {
@@ -285,16 +400,35 @@ export class Mockup {
     this.hp = PLAYER_HP;
     this.checkpoint = 120;
     this.reptiles = [];
+    this.beetles = [];
+    this.eyes = [];
     this.shots = [];
     this.bossShots = [];
-    this.boss = { x: ARENA_R - 150, dir: -1, state: "asleep", t: 0, hp: BOSS_HP, flash: 0, hits: 0, vx: 0, done: false };
+    this.boss = { x: ARENA_R - 150, dir: -1, state: "asleep", t: 0, hp: BOSS_HP, flash: 0, hits: 0, vx: 0, done: false, summoned: false };
     this.cameraLock = null;
     this.cameraX = 0;
     this.cleared = 0;
     this.gateOpen = false;
     this.deadT = 0;
     this.invuln = 60;
+    this.lilies = 0;
+    this.caption = null;
     for (const z of this.zones) z.done = false;
+    for (const r of this.roots) {
+      r.state = "dormant";
+      r.t = 0;
+    }
+    for (const c of this.checkpoints) {
+      c.done = false;
+      c.t = 0;
+    }
+    this.placeItems();
+  }
+
+  private spawn(kind: SpawnKind, x: number, dir: 1 | -1) {
+    if (kind === "reptile") this.spawnReptile(x, dir);
+    else if (kind === "beetle") this.beetles.push({ x, dir, t: Math.floor(Math.random() * 60), state: "crawl", home: x, vx: 0 });
+    else this.eyes.push({ x, y: this.feetY - 16, dir, state: "hover", t: 0, hp: EYE_HP, flash: 0, home: x });
   }
 
   private spawnReptile(x: number, dir: 1 | -1) {
@@ -360,6 +494,14 @@ export class Mockup {
       shots: this.shots.length,
       reptiles: this.reptiles.map((r) => ({ x: Math.round(r.x), state: r.state, hp: r.hp })),
       boss: this.boss ? { x: Math.round(this.boss.x), state: this.boss.state, hp: this.boss.hp } : null,
+      beetles: this.beetles.map((b) => ({ x: Math.round(b.x), state: b.state })),
+      eyes: this.eyes.map((e) => ({ x: Math.round(e.x), y: Math.round(e.y), state: e.state, hp: e.hp })),
+      roots: this.roots.map((r) => ({ x: r.x, state: r.state })),
+      items: this.items.length,
+      lilies: this.lilies,
+      checkpoints: this.checkpoints.map((c) => c.done),
+      caption: this.caption?.title ?? null,
+      lastHurt: this.lastHurt,
       cleared: this.cleared,
       gateOpen: this.gateOpen,
       checkpoint: this.checkpoint,
@@ -391,7 +533,7 @@ export class Mockup {
       this.tickParticlesOnly();
       if (this.cleared > 90 && (this.pressed.has("throw") || this.pressed.has("jump"))) {
         this.resetLevel();
-        this.audio.playSong("forest");
+        this.music("forest");
       }
       this.pressed.clear();
       return;
@@ -439,12 +581,15 @@ export class Mockup {
     if (this.pressed.has("throw") && this.throwCooldown <= 0 && !busy) {
       this.throwT = 1;
       this.throwCooldown = 26;
+      // Holding down when the button is pressed throws low, along the moss: that is how you reach the beetles.
+      this.throwLow = this.held.has("down");
     }
     if (this.throwT > 0) {
       this.throwT += 1;
       // Release the glimmer on the third frame of the throw.
       if (this.throwT === 9) {
-        this.shots.push({ x: this.px + this.dir * 22, y: this.py - 52, vx: this.dir * 5.2, life: 90, dead: false });
+        const low = this.throwLow;
+        this.shots.push({ x: this.px + this.dir * 22, y: this.py - (low ? 16 : 52), vx: this.dir * 5.2, life: 90, dead: false });
         this.flare = 30;
         this.audio.sfx("throw");
       }
@@ -455,10 +600,16 @@ export class Mockup {
     if (this.flare > 0) this.flare -= 1;
     this.tickShots();
     this.tickReptiles();
+    this.tickBeetles();
+    this.tickEyes();
+    this.tickRoots();
+    this.tickItems();
+    this.tickCheckpoints();
     this.tickZones();
     this.tickBoss();
     this.tickBossShots();
     this.tickGate();
+    if (this.caption && this.caption.t > 0) this.caption.t -= 1;
 
     this.vy = Math.min(MAX_FALL, this.vy + GRAVITY);
     const prevFeet = this.py;
@@ -563,8 +714,8 @@ export class Mockup {
     for (const z of this.zones) {
       if (z.done || this.px < z.x) continue;
       z.done = true;
-      this.checkpoint = z.x - 60;
-      for (const sp of z.spawns) this.spawnReptile(z.x + sp.dx, sp.dir);
+      this.checkpoint = Math.max(this.checkpoint, z.x - 60);
+      for (const sp of z.spawns) this.spawn(sp.kind, z.x + sp.dx, sp.dir);
     }
     // Entering the arena wakes the Machine.
     const b = this.boss;
@@ -575,7 +726,10 @@ export class Mockup {
       this.cameraLock = { l: ARENA_L, r: ARENA_R };
       this.checkpoint = ARENA_L + 40;
       this.reptiles = this.reptiles.filter((r) => r.state === "dead");
-      this.audio.playSong("boss");
+      this.beetles = [];
+      this.eyes = this.eyes.filter((e) => e.state === "dead");
+      this.caption = null;
+      this.music("boss");
       this.audio.sfx("boss");
       this.shake = 12;
     }
@@ -585,7 +739,7 @@ export class Mockup {
     if (!this.gateOpen || this.cleared > 0) return;
     if (Math.abs(this.px - GATE_X) < 26 && this.onGround) {
       this.cleared = 1;
-      this.audio.stopSong();
+      this.music(null);
       this.audio.sfx("clear");
       this.burst(GATE_X, this.feetY - 70, 40, "#bff4ff", 2.5);
     }
@@ -603,11 +757,18 @@ export class Mockup {
     this.px = this.checkpoint;
     this.py = this.feetY;
     this.cameraX = Math.max(0, this.px - VIEW_W / 2);
-    // Living reptiles of the current stretch come back to their posts.
+    // Living creatures of the current stretch come back to their posts.
     this.reptiles = this.reptiles.filter((r) => r.state === "dead");
+    this.beetles = [];
+    this.eyes = this.eyes.filter((e) => e.state === "dead");
+    this.caption = null;
+    for (const r of this.roots) {
+      r.state = "dormant";
+      r.t = 0;
+    }
     const zone = [...this.zones].reverse().find((z) => z.done);
-    if (zone && this.boss && this.boss.state === "asleep") {
-      for (const sp of zone.spawns) this.spawnReptile(zone.x + sp.dx, sp.dir);
+    if (zone && this.boss && this.boss.state === "asleep" && zone.x + 200 > this.checkpoint) {
+      for (const sp of zone.spawns) this.spawn(sp.kind, zone.x + sp.dx, sp.dir);
     }
     if (this.boss && this.boss.state !== "asleep" && this.boss.state !== "dead") {
       // Died to the Machine: it settles back at the far side, wounds kept.
@@ -618,9 +779,9 @@ export class Mockup {
       this.px = ARENA_L + 40;
       this.cameraLock = { l: ARENA_L, r: ARENA_R };
       this.cameraX = ARENA_L;
-      this.audio.playSong("boss");
+      this.music("boss");
     } else {
-      this.audio.playSong("forest");
+      this.music("forest");
     }
   }
 
@@ -640,6 +801,22 @@ export class Mockup {
         if (sh.x > x0 && sh.x < x1 && sh.y > this.feetY - 92 && sh.y < this.feetY) {
           sh.dead = true;
           this.hitReptile(r, sh.vx > 0 ? 1 : -1);
+          this.burst(sh.x, sh.y, 14, "#fff1a8", 2.2);
+        }
+      }
+      for (const be of this.beetles) {
+        if (be.state !== "crawl" || sh.dead) continue;
+        if (Math.abs(sh.x - be.x) < 22 && sh.y > this.feetY - 44 && sh.y < this.feetY + 2) {
+          sh.dead = true;
+          this.killBeetle(be);
+        }
+      }
+      for (const e of this.eyes) {
+        if (sh.dead || e.state === "dead" || e.state === "dying") continue;
+        const ch = this.lore.eye.cell.h;
+        if (Math.abs(sh.x - e.x) < 36 && sh.y > e.y - ch + 10 && sh.y < e.y) {
+          sh.dead = true;
+          this.hitEye(e);
           this.burst(sh.x, sh.y, 14, "#fff1a8", 2.2);
         }
       }
@@ -665,12 +842,21 @@ export class Mockup {
     b.hits += 1;
     this.hitStop = 2;
     this.audio.sfx("bossHit");
+    if (!b.summoned && b.hp <= BOSS_HP / 2) {
+      // Wounded, the Machine shakes the moss: beetles come crawling out of it.
+      b.summoned = true;
+      this.spawn("beetle", ARENA_L + 40, 1);
+      this.spawn("beetle", ARENA_R - 40, -1);
+      this.puffAt(ARENA_L + 40, this.feetY, 8, "#8fe3ff", 1.6);
+      this.puffAt(ARENA_R - 40, this.feetY, 8, "#8fe3ff", 1.6);
+    }
     if (b.hp <= 0) {
       b.state = "dying";
       b.t = 0;
       b.vx = 0;
       this.bossShots = [];
-      this.audio.stopSong();
+      this.beetles = [];
+      this.music(null);
       this.audio.sfx("boss");
       this.shake = 14;
       return;
@@ -736,7 +922,7 @@ export class Mockup {
           this.audio.sfx("boss");
           this.puffAt(front, this.feetY, 18, "#8fa9b8", 2.6);
           // Claw impact in front, then two shockwave shards racing along the ground.
-          if (Math.abs(this.px - front) < 60 && this.py > this.feetY - 30) this.hurtPlayer(b.x);
+          if (Math.abs(this.px - front) < 60 && this.py > this.feetY - 30) this.hurtPlayer(b.x, "stomp");
           this.bossShots.push({ x: front, y: this.feetY - 10, vx: b.dir * 3.6, vy: 0, w: 14, h: 10, life: 140, dead: false, kind: "shard" });
           this.bossShots.push({ x: b.x - b.dir * 60, y: this.feetY - 10, vx: -b.dir * 3.2, vy: 0, w: 14, h: 10, life: 140, dead: false, kind: "shard" });
         }
@@ -783,7 +969,7 @@ export class Mockup {
           this.gateOpen = true;
           this.cameraLock = null;
           this.audio.sfx("clear");
-          this.audio.playSong("lullaby");
+          this.music("lullaby");
           this.burst(b.x, this.feetY - 80, 60, "#fff1a8", 4);
           this.shake = 16;
         }
@@ -809,7 +995,7 @@ export class Mockup {
       if (s.kind === "shard" && s.y > this.feetY - 10) s.y = this.feetY - 10;
       if (s.kind === "bolt" && s.y > this.feetY - 24) s.vy = 0;
       s.life -= 1;
-      if (s.life <= 0 || s.x < ARENA_L - 40 || s.x > ARENA_R + 40) s.dead = true;
+      if (s.life <= 0 || s.x < this.cameraX - 60 || s.x > this.cameraX + VIEW_W + 60) s.dead = true;
       if (this.time % 3 === 0) {
         this.particles.push({ x: s.x, y: s.y + (Math.random() - 0.5) * s.h, vx: -s.vx * 0.1, vy: (Math.random() - 0.5) * 0.4, life: 12, max: 12, color: s.kind === "bolt" ? "#ffd27a" : "#9fb0bd", size: s.kind === "bolt" ? 2 : 1, parallax: 1 });
       }
@@ -818,7 +1004,7 @@ export class Mockup {
       const px1 = this.px + 8;
       const py0 = this.py - 84;
       if (!s.dead && s.x + s.w / 2 > px0 && s.x - s.w / 2 < px1 && s.y + s.h / 2 > py0 && s.y - s.h / 2 < this.py) {
-        this.hurtPlayer(s.x);
+        this.hurtPlayer(s.x, s.kind);
         s.dead = true;
       }
     }
@@ -857,9 +1043,10 @@ export class Mockup {
     }
   }
 
-  private hurtPlayer(from: number) {
+  private hurtPlayer(from: number, source = "?") {
     if (this.invuln > 0 || this.deadT > 0) return;
     this.hp -= 1;
+    this.lastHurt = `${source}@${Math.round(from)}`;
     this.hurtT = 26;
     this.invuln = 70;
     this.throwT = 0;
@@ -902,10 +1089,10 @@ export class Mockup {
             r.t = 0;
             r.hitDone = false;
             r.vx = 0;
-          } else if (Math.abs(dist(r)) > 320 || this.deadT > 0) {
+          } else if (Math.abs(dist(r)) > 320 || Math.abs(r.x - r.home) > 300 || this.deadT > 0) {
+            // Lost the scent, or strayed too far from its post: back to prowling.
             r.state = "prowl";
             r.t = 0;
-            r.home = r.x;
           }
           break;
         }
@@ -917,7 +1104,7 @@ export class Mockup {
             r.hitDone = true;
             const reach = r.x + r.dir * 44;
             if (Math.abs(this.px - reach) < 30 && Math.abs(this.px - r.x) < 70 && this.py > this.feetY - 40) {
-              this.hurtPlayer(r.x);
+              this.hurtPlayer(r.x, "reptile");
             }
             this.audio.sfx("throw");
           }
@@ -944,9 +1131,274 @@ export class Mockup {
       }
       r.x += r.vx;
       if (r.x < 30) r.x = 30;
+      // Nothing hunts under Serrure's roof.
+      if (r.state !== "dead" && r.home < TAVERN_X && r.x > TAVERN_X - 180) {
+        r.x = TAVERN_X - 180;
+        if (r.state === "chase") {
+          r.state = "prowl";
+          r.t = 0;
+          r.dir = -1;
+        }
+      }
     }
     // Bodies fade away after a while.
     this.reptiles = this.reptiles.filter((r) => !(r.state === "dead" && r.t > 420));
+  }
+
+
+  /* ---------------- episode 1 creatures ---------------- */
+
+  private playerBoxHits(x0: number, x1: number, y0: number, y1: number): boolean {
+    // Player box: 16 wide, 84 tall above the feet.
+    return this.px + 8 > x0 && this.px - 8 < x1 && this.py > y0 && this.py - 84 < y1;
+  }
+
+  private killBeetle(be: Beetle) {
+    be.state = "dead";
+    be.t = 0;
+    be.vx = 0;
+    this.hitStop = 2;
+    this.audio.sfx("die");
+    this.burst(be.x, this.feetY - 16, 18, "#8fe3ff", 2.4);
+    this.burst(be.x, this.feetY - 16, 6, "#ffffff", 1.4);
+    // Its light lingers: one beetle in three leaves a glimmer that mends the armour.
+    if (Math.random() < 0.34 && this.hp < PLAYER_HP) this.items.push({ x: be.x, y: this.feetY - 20, vy: -2.6, kind: "light", t: 0, dead: false, rest: this.feetY });
+  }
+
+  private tickBeetles() {
+    for (const be of this.beetles) {
+      be.t += 1;
+      if (be.state === "dead") continue;
+      const lock = this.cameraLock;
+      const minX = lock ? lock.l + 20 : 30;
+      const maxX = lock ? lock.r - 20 : LEVEL_W - 30;
+      if (be.t % 150 === 0) be.dir = Math.random() < 0.5 ? -1 : 1;
+      if (Math.abs(be.x - be.home) > 130) be.dir = be.x > be.home ? -1 : 1;
+      if (be.x < minX) be.dir = 1;
+      if (be.x > maxX) be.dir = -1;
+      // They creep, then scurry when the lantern comes close.
+      const near = Math.abs(this.px - be.x) < 90 && this.deadT === 0;
+      if (near && be.t % 90 < 45) be.dir = this.px > be.x ? 1 : -1;
+      be.vx = be.dir * (near ? 1.0 : 0.6);
+      be.x += be.vx;
+      // Stomp: land on its shell and bounce off.
+      if (this.vy > 0 && this.invuln === 0 && Math.abs(this.px - be.x) < 20 && this.py > this.feetY - 36 && this.py < this.feetY - 6) {
+        this.killBeetle(be);
+        this.vy = -5.6;
+        this.onGround = false;
+        this.puffAt(be.x, this.feetY - 20, 4, "#bff4ff", 1.2);
+        continue;
+      }
+      if (this.playerBoxHits(be.x - 14, be.x + 14, this.feetY - 28, this.feetY)) this.hurtPlayer(be.x, "beetle");
+    }
+    this.beetles = this.beetles.filter((be) => !(be.state === "dead" && be.t > 16));
+  }
+
+  private hitEye(e: Eye) {
+    e.hp -= 1;
+    e.flash = 6;
+    this.hitStop = 2;
+    this.shake = 4;
+    if (e.hp <= 0) {
+      e.state = "dying";
+      e.t = 0;
+      this.audio.sfx("die");
+      this.burst(e.x, e.y - 70, 26, "#ffd27a", 2.8);
+      return;
+    }
+    this.audio.sfx("enemy");
+    if (e.state === "landed") e.t = Math.min(e.t, 30);
+  }
+
+  private tickEyes() {
+    const ch = this.lore.eye.cell.h;
+    for (const e of this.eyes) {
+      e.t += 1;
+      if (e.flash > 0) e.flash -= 1;
+      const dist = this.px - e.x;
+      const hoverY = this.feetY - 16 + Math.sin(e.t / 22) * 6;
+      switch (e.state) {
+        case "hover": {
+          e.dir = dist > 0 ? 1 : -1;
+          // Drifts after the lantern, on its leash.
+          const target = Math.max(e.home - 160, Math.min(e.home + 160, this.px));
+          e.x += Math.max(-0.7, Math.min(0.7, (target - e.x) * 0.02));
+          e.y += (hoverY - e.y) * 0.1;
+          if (e.t > 80 && Math.abs(dist) < 46 && this.deadT === 0) {
+            e.state = "charge";
+            e.t = 0;
+            this.audio.sfx("timer");
+          }
+          break;
+        }
+        case "charge": {
+          // Curls up and shivers for most of a second: that is the tell.
+          e.y += (this.feetY - 56 - e.y) * 0.1;
+          e.x += Math.sin(e.t * 1.7) * 0.8;
+          if (e.t > 44) {
+            e.state = "slam";
+            e.t = 0;
+          }
+          break;
+        }
+        case "slam": {
+          e.y += 9;
+          if (e.y >= this.feetY) {
+            e.y = this.feetY;
+            e.state = "landed";
+            e.t = 0;
+            this.shake = 10;
+            this.audio.sfx("boss");
+            this.puffAt(e.x, this.feetY, 16, "#8fa9b8", 2.4);
+            if (Math.abs(dist) < 40 && this.py > this.feetY - 30) this.hurtPlayer(e.x, "slam");
+            this.bossShots.push({ x: e.x + 30, y: this.feetY - 10, vx: 3.2, vy: 0, w: 14, h: 10, life: 70, dead: false, kind: "shard" });
+            this.bossShots.push({ x: e.x - 30, y: this.feetY - 10, vx: -3.2, vy: 0, w: 14, h: 10, life: 70, dead: false, kind: "shard" });
+          }
+          break;
+        }
+        case "landed": {
+          // Stunned on the moss: hit it now. Its claws still cut.
+          if (e.t > 4 && this.playerBoxHits(e.x - 30, e.x + 30, this.feetY - 60, this.feetY)) this.hurtPlayer(e.x, "claws");
+          if (e.t > 62) {
+            e.state = "rise";
+            e.t = 0;
+          }
+          break;
+        }
+        case "rise": {
+          e.y -= 3;
+          if (e.y <= hoverY) {
+            e.state = "hover";
+            e.t = 20;
+          }
+          break;
+        }
+        case "dying": {
+          e.y = Math.min(this.feetY, e.y + 3);
+          if (e.t % 8 === 0) {
+            this.burst(e.x + (Math.random() - 0.5) * 60, e.y - 20 - Math.random() * (ch - 40), 8, Math.random() < 0.5 ? "#ffd27a" : "#ff5a2a", 2.2);
+            this.audio.sfx("enemy");
+          }
+          if (e.t > 48) {
+            e.state = "dead";
+            e.t = 0;
+            e.y = this.feetY;
+            this.shake = 6;
+            this.burst(e.x, this.feetY - 30, 24, "#9fb0bd", 2.6);
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    this.eyes = this.eyes.filter((e) => !(e.state === "dead" && e.t > 420));
+  }
+
+  private tickRoots() {
+    for (const r of this.roots) {
+      r.t += 1;
+      switch (r.state) {
+        case "dormant":
+          if (r.t > 70 && Math.abs(this.px - r.x) < 150 && this.deadT === 0) {
+            r.state = "warn";
+            r.t = 0;
+          }
+          break;
+        case "warn":
+          // The moss trembles for a moment before the root breaks through.
+          if (r.t % 4 === 0) this.puffAt(r.x, this.feetY, 1, "#6f95a3", 0.9);
+          if (r.t > 40) {
+            r.state = "rise";
+            r.t = 0;
+            this.audio.sfx("armor");
+            this.puffAt(r.x, this.feetY, 10, "#6f95a3", 1.8);
+          }
+          break;
+        case "rise":
+          if (r.t > 4 && this.playerBoxHits(r.x - 20, r.x + 20, this.feetY - 70, this.feetY)) this.hurtPlayer(r.x, "root");
+          if (r.t > 9) {
+            r.state = "up";
+            r.t = 0;
+          }
+          break;
+        case "up":
+          if (this.playerBoxHits(r.x - 22, r.x + 22, this.feetY - 92, this.feetY)) this.hurtPlayer(r.x, "root");
+          if (r.t > 50) {
+            r.state = "recede";
+            r.t = 0;
+          }
+          break;
+        case "recede":
+          if (r.t > 16) {
+            r.state = "dormant";
+            r.t = 0;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  private tickItems() {
+    for (const it of this.items) {
+      it.t += 1;
+      if (it.y < it.rest || it.vy !== 0) {
+        it.vy = Math.min(4, it.vy + 0.25);
+        it.y += it.vy;
+        if (it.y >= it.rest) {
+          it.y = it.rest;
+          it.vy = 0;
+        }
+      }
+      if (this.deadT > 0) continue;
+      if (Math.abs(this.px - it.x) < 14 && it.y > this.py - 90 && it.y - 22 < this.py + 2) {
+        it.dead = true;
+        if (it.kind === "lily") {
+          this.lilies += 1;
+          this.audio.sfx("item");
+          this.burst(it.x, it.y - 10, 10, "#ffffff", 1.6);
+        } else {
+          this.hp = Math.min(PLAYER_HP, this.hp + 1);
+          this.flare = 40;
+          this.audio.sfx("chest");
+          this.burst(it.x, it.y - 10, 16, "#fff1a8", 2);
+        }
+      }
+    }
+    this.items = this.items.filter((it) => !it.dead);
+  }
+
+  private tickCheckpoints() {
+    for (const c of this.checkpoints) {
+      if (c.done) {
+        c.t += 1;
+        continue;
+      }
+      if (this.px < c.x) continue;
+      c.done = true;
+      c.t = 0;
+      this.checkpoint = c.x;
+      this.hp = PLAYER_HP;
+      this.flare = 50;
+      if (c.kind === "gong") {
+        this.audio.sfx("bell");
+        this.shake = 4;
+        this.burst(GONG_X, this.feetY - 60, 24, "#8fe3ff", 2.2);
+        this.caption = { title: "LES PELERINS", lines: ["Le gong résonne dans l'abîme.", "L'armure se souvient d'elle-même."], t: 260 };
+      } else {
+        this.audio.sfx("checkpoint");
+        this.burst(TAVERN_X - 20, this.feetY - 60, 16, "#ffd27a", 1.8);
+        this.caption = { title: "SERRURE", lines: ["Oh ! Encore un chevalier !", "Suis la lumière bleue de ton pendentif,", "et tu trouveras Rose."], t: 420 };
+      }
+    }
+    // The tavern has its own hush; the forest takes over again on the way out.
+    const tavern = this.checkpoints[1];
+    if (this.boss && this.boss.state === "asleep" && this.deadT === 0) {
+      const inside = tavern.done && this.px > TAVERN_X - 120 && this.px < TAVERN_X + 150;
+      this.music(inside ? "lullaby" : "forest");
+    }
   }
 
   private reptileAttackFrame(t: number): number {
@@ -1017,13 +1469,19 @@ export class Mockup {
     this.drawTiled(this.ground, 1, this.groundY, cam);
     this.collectBackgroundLights(cam);
     this.drawGate(cam);
+    this.drawProps(cam);
     this.drawPlatforms(cam);
 
     this.drawParticles(cam, (p) => p.parallax < 1);
     for (const r of this.reptiles) if (r.state === "dead") this.drawReptile(r, cam);
+    for (const e of this.eyes) if (e.state === "dead") this.drawEye(e, cam);
     if (this.boss && (this.boss.state === "dead" || this.boss.state === "dying")) this.drawBoss(this.boss, cam);
+    this.drawItems(cam);
+    for (const be of this.beetles) this.drawBeetle(be, cam);
     this.drawPlayer(cam);
     for (const r of this.reptiles) if (r.state !== "dead") this.drawReptile(r, cam);
+    for (const e of this.eyes) if (e.state !== "dead") this.drawEye(e, cam);
+    for (const r of this.roots) this.drawRoot(r, cam);
     if (this.boss && this.boss.state !== "dead" && this.boss.state !== "dying" && this.boss.state !== "asleep") this.drawBoss(this.boss, cam);
     this.drawShots(cam);
     this.drawBossShots(cam);
@@ -1068,6 +1526,26 @@ export class Mockup {
         ctx.fillRect(x - 9, y - 5, 24, 24);
       }
     }
+    // Lilies gathered along the road.
+    const li = this.lore.lily;
+    ctx.drawImage(this.lilyImg, VIEW_W - 12 - li.w - 30, 6);
+    this.text(`${this.lilies}/${this.lilyTotal}`, VIEW_W - 10, 12, "#d8d2c2", 8, "right");
+    // Dialogue or caption box.
+    if (this.caption && this.caption.t > 0 && this.deadT === 0) {
+      const cap = this.caption;
+      const fade = Math.min(1, cap.t / 20, (cap.t > 400 ? 420 - cap.t : 20) / 20);
+      const h = 18 + cap.lines.length * 11;
+      const y = VIEW_H - h - 30;
+      ctx.globalAlpha = Math.max(0, fade);
+      ctx.fillStyle = "rgba(2, 6, 18, 0.82)";
+      ctx.fillRect(24, y, VIEW_W - 48, h);
+      ctx.fillStyle = "#3a5c7a";
+      ctx.fillRect(24, y, VIEW_W - 48, 1);
+      ctx.fillRect(24, y + h - 1, VIEW_W - 48, 1);
+      this.text(cap.title, 34, y + 6, "#8fe3ff", 7, "left");
+      cap.lines.forEach((line, i) => this.text(line, 34, y + 17 + i * 11, "#eef1f5", 7, "left"));
+      ctx.globalAlpha = 1;
+    }
     // Boss bar.
     const b = this.boss;
     if (b && b.state !== "asleep" && b.state !== "dead" && b.state !== "enter") {
@@ -1097,6 +1575,10 @@ export class Mockup {
         this.text("EPREUVE FRANCHIE", VIEW_W / 2, 96, "#8fe3ff", 16, "center");
         this.text("La forêt des champignons bleus", VIEW_W / 2, 124, "#d8d2c2", 8, "center");
         this.text("Le médaillon brûle de bleu. Rose est plus proche.", VIEW_W / 2, 142, "#d8d2c2", 7, "center");
+        const md = this.lore.medallion;
+        this.ctx.drawImage(this.medallionImg, VIEW_W / 2 - md.w - 30, 160);
+        this.ctx.drawImage(this.lilyImg, VIEW_W / 2 + 14, 160);
+        this.text(`${this.lilies}/${this.lilyTotal}`, VIEW_W / 2 + 36, 166, "#d8d2c2", 8, "left");
         if (this.cleared > 90 && Math.floor(this.time / 30) % 2 === 0) this.text("X pour rejouer", VIEW_W / 2, 190, "#ffb347", 8, "center");
       }
     }
@@ -1252,6 +1734,171 @@ export class Mockup {
       ctx.fillRect(flip ? 0 : x, y, cw, ch);
     }
     ctx.restore();
+  }
+
+  private drawProps(cam: number) {
+    const ctx = this.ctx;
+    const L = this.lore;
+    const g = this.feetY;
+    const gong = this.checkpoints[0];
+    const tavern = this.checkpoints[1];
+    // The pilgrims' gong and its blue seal.
+    if (GONG_X - cam > -200 && GONG_X - cam < VIEW_W + 200) {
+      const rung = gong.done && gong.t < 40;
+      const sealX = Math.round(GONG_X - 60 - L.seal.w / 2 - cam);
+      ctx.drawImage(this.sealImg, sealX, Math.round(g - L.seal.h + 6));
+      const sealA = gong.done ? 0.42 : 0.16;
+      const pulse = 0.85 + 0.15 * Math.sin(this.time / 12);
+      this.lights.push({ x: GONG_X - 60 - cam, y: g - 58, r: (gong.done ? 70 : 34) * pulse, a: 1, color: `rgba(90, 190, 255, ${sealA})`, parallax: 1 });
+      const gx = Math.round(GONG_X - L.gong.w / 2 - cam) + (rung ? Math.round(Math.sin(gong.t * 1.5) * 2) : 0);
+      ctx.drawImage(this.gongImg, gx, Math.round(g - L.gong.h + 4));
+      if (rung) this.lights.push({ x: GONG_X - cam, y: g - 70, r: 90 * (1 - gong.t / 40), a: 1, color: "rgba(143, 227, 255, 0.4)", parallax: 1 });
+      // Two hooded pilgrims, one with the mallet.
+      const pc = L.pilgrim.cell;
+      const sway = (k: number) => Math.floor((this.time / 40 + k) % 2);
+      const striker = rung ? 2 : sway(0);
+      ctx.drawImage(this.pilgrimSheet, striker * pc.w, 0, pc.w, pc.h, Math.round(GONG_X - 108 - pc.w / 2 - cam), Math.round(g - pc.h + 4), pc.w, pc.h);
+      ctx.save();
+      const p2x = Math.round(GONG_X + 74 - pc.w / 2 - cam);
+      ctx.translate(p2x + pc.w, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(this.pilgrimSheet, sway(1) * pc.w, 0, pc.w, pc.h, 0, Math.round(g - pc.h + 4), pc.w, pc.h);
+      ctx.restore();
+      // Their masks catch the light.
+      this.lights.push({ x: GONG_X - 108 - cam, y: g - 88, r: 16, a: 0.5, color: "rgba(220, 235, 255, 0.1)", parallax: 1 });
+      this.lights.push({ x: GONG_X + 74 - cam, y: g - 88, r: 16, a: 0.5, color: "rgba(220, 235, 255, 0.1)", parallax: 1 });
+    }
+    // Serrure's tavern, dug into the roots.
+    if (TAVERN_X - cam > -200 && TAVERN_X - cam < VIEW_W + 200) {
+      ctx.drawImage(this.tavernImg, Math.round(TAVERN_X - L.tavern.w / 2 - cam), Math.round(g - L.tavern.h + 8));
+      const flick = 0.9 + 0.1 * Math.sin(this.time / 5);
+      this.lights.push({ x: TAVERN_X + 6 - cam, y: g - 46, r: 64 * flick, a: 1, color: "rgba(255, 190, 110, 0.3)", parallax: 1 });
+      this.lights.push({ x: TAVERN_X - 60 - cam, y: g - 100, r: 30, a: 0.6, color: "rgba(90, 190, 255, 0.12)", parallax: 1 });
+      const sc = L.serrure.cell;
+      const waving = tavern.done && tavern.t < 140;
+      const frame = waving ? (Math.floor(tavern.t / 12) % 2 === 0 ? 2 : 1) : Math.floor(this.time / 45) % 2;
+      ctx.drawImage(this.serrureSheet, frame * sc.w, 0, sc.w, sc.h, Math.round(TAVERN_X - 44 - sc.w / 2 - cam), Math.round(g - sc.h + 4), sc.w, sc.h);
+    }
+  }
+
+  private drawItems(cam: number) {
+    const ctx = this.ctx;
+    for (const it of this.items) {
+      const meta = it.kind === "lily" ? this.lore.lily : this.lore.light;
+      const img = it.kind === "lily" ? this.lilyImg : this.lightImg;
+      const bob = Math.round(Math.sin(this.time / 18 + it.x) * 2);
+      const x = Math.round(it.x - meta.w / 2 - cam);
+      const y = Math.round(it.y - meta.h - 3) + bob;
+      if (x + meta.w < 0 || x > VIEW_W) continue;
+      ctx.drawImage(img, x, y);
+      const warm = it.kind === "light";
+      this.lights.push({ x: it.x - cam, y: y + meta.h / 2, r: warm ? 40 : 26, a: 0.9, color: warm ? "rgba(255, 210, 120, 0.3)" : "rgba(220, 240, 255, 0.16)", parallax: 1 });
+    }
+  }
+
+  private drawBeetle(be: Beetle, cam: number) {
+    const ctx = this.ctx;
+    const { w: cw, h: ch } = this.lore.beetle.cell;
+    const frame = be.state === "dead" ? 3 : Math.floor(be.t / 7) % 3;
+    const flip = be.dir > 0; // crawls left on the sheet
+    const x = Math.round(be.x - cw / 2 - cam);
+    const y = Math.round(this.feetY - ch + 6);
+    if (x + cw < 0 || x > VIEW_W) return;
+    const glow = be.state === "dead" ? 1.6 - be.t / 14 : 0.8 + 0.2 * Math.sin(this.time / 9 + be.home);
+    this.lights.push({ x: be.x - cam, y: this.feetY - 16, r: 34 * Math.max(0.2, glow), a: 0.9, color: `rgba(120, 220, 255, ${0.18 * Math.max(0, glow)})`, parallax: 1 });
+    ctx.save();
+    if (be.state === "dead") ctx.globalAlpha = Math.max(0, 1 - be.t / 16);
+    if (flip) {
+      ctx.translate(x + cw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(this.beetleSheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
+    } else {
+      ctx.drawImage(this.beetleSheet, frame * cw, 0, cw, ch, x, y, cw, ch);
+    }
+    ctx.restore();
+  }
+
+  private drawEye(e: Eye, cam: number) {
+    const ctx = this.ctx;
+    const { w: cw, h: ch } = this.lore.eye.cell;
+    let sheet = this.eyeSheet;
+    let frame = 0;
+    let alpha = 1;
+    switch (e.state) {
+      case "hover":
+      case "rise":
+        frame = Math.floor(e.t / 8) % 3;
+        break;
+      case "charge":
+      case "slam":
+        frame = 3;
+        break;
+      case "landed":
+        frame = e.flash > 0 ? 5 : 4;
+        break;
+      case "dying":
+        sheet = this.eyeDieSheet;
+        frame = Math.min(this.lore.eye.die - 1, Math.floor(e.t / 12));
+        break;
+      case "dead":
+        sheet = this.eyeDieSheet;
+        frame = this.lore.eye.die - 1;
+        if (e.t > 300) alpha = Math.max(0, 1 - (e.t - 300) / 120);
+        break;
+      default:
+        break;
+    }
+    const flip = e.dir > 0; // the eye looks left on the sheet
+    const x = Math.round(e.x - cw / 2 - cam);
+    const y = Math.round(e.y - ch);
+    if (x + cw < -20 || x > VIEW_W + 20) return;
+    if (e.state !== "dead") {
+      // The eye burns; it swells while it charges.
+      const charge = e.state === "charge" ? e.t / 44 : 0;
+      const eyeY = e.y - ch + 30;
+      ctx.fillStyle = "rgba(2, 6, 18, 0.35)";
+      ctx.beginPath();
+      ctx.ellipse(e.x - cam, this.feetY + 1, 30, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.lights.push({ x: e.x - cam + e.dir * 14, y: eyeY, r: 40 + charge * 40, a: 1, color: `rgba(255, ${charge > 0 ? 120 : 200}, ${charge > 0 ? 60 : 150}, ${0.25 + charge * 0.35})`, parallax: 1 });
+    }
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (flip) {
+      ctx.translate(x + cw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
+    } else {
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
+    }
+    if (e.flash > 0 && e.flash % 2 === 0) {
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.fillRect(flip ? 0 : x, y, cw, ch);
+    }
+    ctx.restore();
+    if (e.state !== "dead" && e.state !== "dying" && e.hp < EYE_HP) {
+      const bx = Math.round(e.x - cam) - 16;
+      const by = Math.round(e.y - ch) - 8;
+      ctx.fillStyle = "rgba(2, 6, 18, 0.8)";
+      ctx.fillRect(bx - 1, by - 1, 34, 4);
+      ctx.fillStyle = "#ff7a2a";
+      ctx.fillRect(bx, by, Math.round((32 * e.hp) / EYE_HP), 2);
+    }
+  }
+
+  private drawRoot(r: Root, cam: number) {
+    const ctx = this.ctx;
+    const { w: cw, h: ch } = this.lore.root.cell;
+    let frame = 0;
+    if (r.state === "rise") frame = 1;
+    else if (r.state === "up") frame = 2;
+    else if (r.state === "recede") frame = 3;
+    const jitter = r.state === "warn" ? Math.round(Math.sin(r.t * 2.5) * 1.5) : 0;
+    const x = Math.round(r.x - cw / 2 - cam) + jitter;
+    if (x + cw < 0 || x > VIEW_W) return;
+    ctx.drawImage(this.rootSheet, frame * cw, 0, cw, ch, x, Math.round(this.feetY - ch + 6), cw, ch);
+    if (r.state === "up" || r.state === "rise") this.lights.push({ x: r.x - cam, y: this.feetY - 70, r: 36, a: 0.6, color: "rgba(90, 190, 255, 0.1)", parallax: 1 });
   }
 
   private drawShots(cam: number) {

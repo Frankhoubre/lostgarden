@@ -742,6 +742,7 @@
       "Z, W, Space or Up: jump",
       "Down + jump: drop through a platform",
       "X, K or Enter: throw the glimmer",
+      "Down + X: throw low, along the moss",
       "M: sound"
     ],
     "touchHint": "On a phone, use the on-screen buttons.",
@@ -750,11 +751,20 @@
     "unmute": "Sound on",
     "loreTitle": "What you will meet",
     "lore": [
-      "A full stage in the blue mushroom forest: platforms, three packs of pale reptilians, and the Machine at the end of the road.",
-      "Reptilians rear up before clawing: jump back. Four glimmers and they fall.",
-      "The Machine stomps (shards race along the ground, jump them) and fires a beam from its eyes (duck behind a platform or jump). Twenty-eight glimmers bring it down.",
-      "Three hits and the armour sinks into the moss. It gets up at the last checkpoint. Lanterne never speaks."
+      "The road of episode 1: the blue mushroom forest, the one-eyed machine over the ledges, the pilgrims' gong, the roots of the Source Tree, Serrure's tavern, then the Machine's arena and the gate.",
+      "Reptilians rear up before clawing: jump back. Four glimmers and they fall. Glowing beetles crawl along the ground: throw low or stomp them. One in three leaves a light that mends the armour.",
+      "The one-eyed machine hovers, curls up, then slams down: climb a ledge, drop back and hit it while it lies stunned. The moss trembles before a root breaks through: never stand on it.",
+      "The masked pilgrims strike their gong and Serrure welcomes you under his roof: the armour is mended and the checkpoint is yours. The Machine stomps and fires a beam; at half health it calls the beetles. Twenty-eight glimmers bring it down.",
+      "Three hits and the armour sinks into the moss. It gets up at the last checkpoint. Six pale lilies are hidden along the road. Lanterne never speaks."
     ],
-    "credits": "An original game for the anime Lost Garden by Frank Houbre. No download, no account, plays in the browser."
+    "credits": "An original game for the anime Lost Garden by Frank Houbre. No download, no account, plays in the browser.",
+    "gate": {
+      "eyebrow": "Lost Garden · Episode 1",
+      "title": "The Lantern's Oath",
+      "lead": "Lanterne sleeps in the moss. Sign in with your Lost Garden account to wake him: the same account opens the member area, the episodes and the making-of.",
+      "loading": "The lantern is lighting…",
+      "hint": "The game is free, nothing to download. Your account keeps your place among the travellers.",
+      "welcome": "Welcome, {name}. The blue mushroom forest is waiting."
+    }
   }
 }
