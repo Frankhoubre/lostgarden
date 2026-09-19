@@ -12,7 +12,7 @@ from collections import deque
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter
 
 SRC = Path(sys.argv[1] if len(sys.argv) > 1 else "/home/user/lost-garden")
 OUT = Path(__file__).resolve().parent.parent / "public" / "game"
@@ -38,16 +38,48 @@ def quantize(img: Image.Image, colors: int) -> Image.Image:
     return q.convert("RGB")
 
 
+BAYER = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], dtype=float) / 16.0 - 0.5
+
+
+def ordered_quantize(img: Image.Image, colors: int, strength: float) -> Image.Image:
+    """Median-cut palette plus a Bayer 4x4 ordered dither: the classic 16-bit texture."""
+    rgb = img.convert("RGB")
+    pal_img = rgb.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    pal = np.array(pal_img.getpalette()[: colors * 3]).reshape(-1, 3).astype(float)
+    a = np.asarray(rgb).astype(float)
+    h, w, _ = a.shape
+    tile = np.tile(BAYER, (h // 4 + 1, w // 4 + 1))[:h, :w]
+    a = a + tile[..., None] * strength
+    flat = a.reshape(-1, 3)
+    out = np.empty(flat.shape[0], dtype=np.int64)
+    step = 65536
+    for i in range(0, flat.shape[0], step):
+        chunk = flat[i : i + step]
+        d = ((chunk[:, None, :] - pal[None, :, :]) ** 2).sum(axis=2)
+        out[i : i + step] = d.argmin(axis=1)
+    return Image.fromarray(pal[out].reshape(h, w, 3).astype(np.uint8), "RGB")
+
+
+def clean_pixel_art(img: Image.Image, colors: int) -> Image.Image:
+    rgb = img.convert("RGB")
+    rgb = ImageEnhance.Contrast(rgb).enhance(1.1)
+    rgb = ImageEnhance.Color(rgb).enhance(1.15)
+    rgb = rgb.filter(ImageFilter.UnsharpMask(radius=1, percent=120, threshold=1))
+    return ordered_quantize(rgb, colors, 5)
+
+
 def build_forest_background():
     frame = Image.open(SRC / "08_Storyboard/EP1/prod/EP1_05m15s.jpg").convert("RGB")
     # Remove Lanterne (centre bottom) and the machine (centre back) with clone patches.
     feather_patch(frame, (520, 330, 690, 520), (720, 330, 890, 520), feather=22)
     feather_patch(frame, (500, 130, 830, 300), (860, 130, 1190, 300), feather=26)
     feather_patch(frame, (560, 300, 720, 350), (900, 300, 1060, 350), feather=14)
+    # Denoise the JPEG before shrinking, then shrink with area averaging.
+    frame = frame.filter(ImageFilter.MedianFilter(3))
     scale = VIEW_H / frame.height
     w = int(round(frame.width * scale))
     small = frame.resize((w, VIEW_H), Image.LANCZOS)
-    bg = quantize(small, 72)
+    bg = clean_pixel_art(small, 64)
     bg.save(OUT / "bg-forest.png", optimize=True)
 
     # Near ground strip (parallax 1) with a feathered top edge so it melts into the far layer.
@@ -165,6 +197,7 @@ def pixelize_sprite(rgba: Image.Image, height: int, colors: int, outline=(11, 11
     rgb = np.clip(rgb, 0, 255).astype(np.uint8)
     hard = (p[..., 3] > 110).astype(np.uint8)
     rgb_img = Image.fromarray(rgb, "RGB")
+    rgb_img = ImageEnhance.Contrast(rgb_img).enhance(1.1)
     q = rgb_img.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGB")
     out = np.zeros((height + 2, w + 2, 4), dtype=np.uint8)
     out[1:-1, 1:-1, :3] = np.asarray(q)
@@ -200,7 +233,7 @@ def build_lanterne():
     meta = {}
     for name, (x0, x1) in zip(names, views[:3]):
         view = keyed.crop((x0, 0, x1, sheet.height))
-        spr = pixelize_sprite(view, 76, 40)
+        spr = pixelize_sprite(view, 76, 28)
         spr.save(OUT / f"lanterne-{name}.png", optimize=True)
         meta[name] = {"w": spr.width, "h": spr.height}
         print(name, spr.size)

@@ -59,6 +59,7 @@ export class Mockup {
   private trunkR!: HTMLImageElement;
   private meta!: BgMeta;
   private lightCanvas: HTMLCanvasElement;
+  private fxCanvas: HTMLCanvasElement;
   private ready = false;
 
   // Player
@@ -88,6 +89,9 @@ export class Mockup {
     this.lightCanvas = document.createElement("canvas");
     this.lightCanvas.width = VIEW_W;
     this.lightCanvas.height = VIEW_H;
+    this.fxCanvas = document.createElement("canvas");
+    this.fxCanvas.width = VIEW_W;
+    this.fxCanvas.height = VIEW_H;
     (canvas as HTMLCanvasElement & { lostGardenMockup?: Mockup }).lostGardenMockup = this;
   }
 
@@ -295,13 +299,20 @@ export class Mockup {
     const cam = Math.round(this.cameraX);
 
     this.drawTiled(this.bg, 0.45, 0, cam);
-    // Depth haze between the far layer and the near ground.
-    const haze = ctx.createLinearGradient(0, this.meta.groundTop - 60, 0, this.meta.groundTop + 30);
-    haze.addColorStop(0, "rgba(40, 110, 190, 0)");
-    haze.addColorStop(1, "rgba(40, 110, 190, 0.28)");
-    ctx.fillStyle = haze;
-    ctx.fillRect(0, this.meta.groundTop - 60, VIEW_W, 90);
-    this.drawLightShafts(cam);
+    // Depth haze and light shafts, posterised so they sit on the pixel grid.
+    const fx = this.fxCanvas.getContext("2d");
+    if (fx) {
+      fx.globalCompositeOperation = "source-over";
+      fx.clearRect(0, 0, VIEW_W, VIEW_H);
+      const haze = fx.createLinearGradient(0, this.meta.groundTop - 70, 0, this.meta.groundTop + 30);
+      haze.addColorStop(0, "rgba(60, 140, 220, 0)");
+      haze.addColorStop(1, "rgba(60, 140, 220, 0.3)");
+      fx.fillStyle = haze;
+      fx.fillRect(0, this.meta.groundTop - 70, VIEW_W, 100);
+      this.drawLightShafts(fx, cam);
+      this.ditherAlpha(this.fxCanvas, 6, false);
+      ctx.drawImage(this.fxCanvas, 0, 0);
+    }
     this.drawTiled(this.ground, 1, this.meta.groundTop, cam);
     this.collectBackgroundLights(cam);
 
@@ -311,8 +322,14 @@ export class Mockup {
 
     this.renderLighting(0.5);
     this.drawForeground(cam);
-    this.drawFog(cam);
-    this.drawVignette();
+    if (fx) {
+      fx.globalCompositeOperation = "source-over";
+      fx.clearRect(0, 0, VIEW_W, VIEW_H);
+      this.drawFog(fx, cam);
+      this.drawVignette(fx);
+      this.ditherAlpha(this.fxCanvas, 8, false);
+      ctx.drawImage(this.fxCanvas, 0, 0);
+    }
   }
 
   /** Draws an image tiled horizontally with mirrored repeats, at a parallax factor. */
@@ -355,17 +372,35 @@ export class Mockup {
     }
   }
 
-  private drawLightShafts(cam: number) {
-    const ctx = this.ctx;
+  /** Posterise a canvas's alpha into a few levels with a Bayer 4x4 ordered dither. */
+  private ditherAlpha(canvas: HTMLCanvasElement, levels: number, dither = true) {
+    const c = canvas.getContext("2d");
+    if (!c) return;
+    const img = c.getImageData(0, 0, canvas.width, canvas.height);
+    const d = img.data;
+    const w = canvas.width;
+    const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    for (let i = 0, p = 0; i < d.length; i += 4, p += 1) {
+      const a = d[i + 3];
+      if (a === 0) continue;
+      const x = p % w;
+      const y = (p - x) / w;
+      const t = dither ? (bayer[(y & 3) * 4 + (x & 3)] + 0.5) / 16 : 0.5;
+      const q = Math.floor((a / 255) * levels + t) / levels;
+      d[i + 3] = Math.max(0, Math.min(255, Math.round(q * 255)));
+    }
+    c.putImageData(img, 0, 0);
+  }
+
+  private drawLightShafts(ctx: CanvasRenderingContext2D, cam: number) {
     ctx.save();
-    ctx.globalCompositeOperation = "lighter";
     for (let i = 0; i < 6; i += 1) {
       const x = ((i * 137 - cam * 0.3 + this.time * 0.05) % (VIEW_W + 200)) - 100;
-      const a = 0.08 + 0.04 * Math.sin(this.time / 90 + i);
+      const a = 0.16 + 0.06 * Math.sin(this.time / 90 + i);
       const g = ctx.createLinearGradient(x, 0, x + 60, VIEW_H);
-      g.addColorStop(0, `rgba(140, 200, 255, ${a})`);
-      g.addColorStop(0.7, `rgba(140, 200, 255, ${a * 0.4})`);
-      g.addColorStop(1, "rgba(140, 200, 255, 0)");
+      g.addColorStop(0, `rgba(150, 210, 255, ${a})`);
+      g.addColorStop(0.7, `rgba(150, 210, 255, ${a * 0.4})`);
+      g.addColorStop(1, "rgba(150, 210, 255, 0)");
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.moveTo(x, 0);
@@ -484,17 +519,25 @@ export class Mockup {
       lc.fillStyle = rg;
       lc.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
     }
+    this.ditherAlpha(this.lightCanvas, 12, false);
     const ctx = this.ctx;
     ctx.drawImage(this.lightCanvas, 0, 0);
-    ctx.globalCompositeOperation = "lighter";
+    // Coloured glow, additive, posterised the same way.
+    const fx = this.fxCanvas.getContext("2d");
+    if (!fx) return;
+    fx.globalCompositeOperation = "source-over";
+    fx.clearRect(0, 0, VIEW_W, VIEW_H);
     for (const l of this.lights) {
       if (!l.color || l.x < -l.r || l.x > VIEW_W + l.r) continue;
-      const rg = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r * 0.85);
+      const rg = fx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r * 0.85);
       rg.addColorStop(0, l.color);
       rg.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = rg;
-      ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+      fx.fillStyle = rg;
+      fx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
     }
+    this.ditherAlpha(this.fxCanvas, 6, false);
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(this.fxCanvas, 0, 0);
     ctx.globalCompositeOperation = "source-over";
   }
 
@@ -502,21 +545,23 @@ export class Mockup {
     const ctx = this.ctx;
     const fg = cam * 1.5;
     // Painted trunks from the frame, spaced out along the road.
-    const period = 760;
+    const period = 1040;
+    ctx.globalAlpha = 0.88;
     for (let i = -1; i < 3; i += 1) {
       const idx = Math.floor(fg / period) + i;
       const base = idx * period - (fg % period);
-      const jitter = rnd(idx + 900) * 120;
+      const jitter = rnd(idx + 900) * 160;
       ctx.drawImage(this.trunkL, Math.round(base + jitter), 0);
-      ctx.drawImage(this.trunkR, Math.round(base + jitter + 420 + rnd(idx + 901) * 120), 0);
+      ctx.drawImage(this.trunkR, Math.round(base + jitter + 560 + rnd(idx + 901) * 160), 0);
     }
+    ctx.globalAlpha = 1;
     // Canopy silhouettes along the top, rim-lit by the blue haze.
     const canopy = cam * 1.25;
     for (let i = -1; i < 8; i += 1) {
       const idx = Math.floor(canopy / 120) + i;
       const x = idx * 120 - (canopy % 120) + rnd(idx + 700) * 40;
-      const rx = 50 + rnd(idx + 701) * 40;
-      const ry = 18 + rnd(idx + 702) * 22;
+      const rx = 40 + rnd(idx + 701) * 50;
+      const ry = 10 + rnd(idx + 702) * 20;
       ctx.fillStyle = "#020a17";
       ctx.beginPath();
       ctx.ellipse(x, -6 + Math.sin(this.time / 90 + idx) * 2, rx, ry, 0, 0, Math.PI);
@@ -545,25 +590,33 @@ export class Mockup {
     }
   }
 
-  private drawFog(cam: number) {
-    const ctx = this.ctx;
+  private drawFog(ctx: CanvasRenderingContext2D, cam: number) {
+    // Elliptical fog puffs drifting along the ground, no hard edges.
     for (let i = 0; i < 3; i += 1) {
-      const y = VIEW_H - 26 - i * 16 + Math.sin(this.time / 80 + i) * 3;
-      const g = ctx.createLinearGradient(0, y - 16, 0, y + 16);
-      const a = 0.07 + 0.04 * Math.sin(this.time / 60 + i * 2);
-      g.addColorStop(0, "rgba(120, 180, 240, 0)");
-      g.addColorStop(0.5, `rgba(120, 180, 240, ${a})`);
-      g.addColorStop(1, "rgba(120, 180, 240, 0)");
-      ctx.fillStyle = g;
-      const shift = (cam * (0.9 + i * 0.2) + this.time * (0.2 + i * 0.05)) % 220;
-      for (let x = -220 - shift; x < VIEW_W + 220; x += 220) {
-        ctx.fillRect(x, y - 16, 150 + rnd(i * 3 + Math.floor((x + shift) / 220)) * 90, 32);
+      const y = VIEW_H - 22 - i * 14 + Math.sin(this.time / 80 + i) * 3;
+      const a = 0.14 + 0.06 * Math.sin(this.time / 60 + i * 2);
+      const period = 200 + i * 40;
+      const shift = (cam * (0.9 + i * 0.2) + this.time * (0.25 + i * 0.05)) % period;
+      for (let x = -period - shift; x < VIEW_W + period; x += period) {
+        const k = Math.floor((x + shift) / period);
+        const rx = 90 + rnd(i * 3 + k) * 60;
+        const ry = 14 + rnd(i * 5 + k) * 8;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, rx);
+        g.addColorStop(0, `rgba(120, 180, 240, ${a})`);
+        g.addColorStop(0.6, `rgba(120, 180, 240, ${a * 0.5})`);
+        g.addColorStop(1, "rgba(120, 180, 240, 0)");
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(1, ry / rx);
+        ctx.translate(-x, -y);
+        ctx.fillStyle = g;
+        ctx.fillRect(x - rx, y - rx, rx * 2, rx * 2);
+        ctx.restore();
       }
     }
   }
 
-  private drawVignette() {
-    const ctx = this.ctx;
+  private drawVignette(ctx: CanvasRenderingContext2D) {
     const g = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.45, VIEW_W / 2, VIEW_H / 2, VIEW_W * 0.75);
     g.addColorStop(0, "rgba(2, 6, 18, 0)");
     g.addColorStop(1, "rgba(2, 6, 18, 0.55)");
