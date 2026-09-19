@@ -12,10 +12,23 @@ import type { ReferenceAsset, WebtoonPanel } from "./types";
  */
 export const REFERENCE_LIBRARY: ReferenceAsset[] = [
   {
-    id: "char.lanterne",
+    id: "char.lanterne.webtoon",
     kind: "character",
     subject: "lanterne",
     priority: 1,
+    name: "Lanterne, webtoon model sheet",
+    image: "/webtoon/references/lanterne-webtoon-sheet.png",
+    must_keep:
+      "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons with a simple scroll motif. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
+    description:
+      "Turnaround (front, three-quarter, side, back) redrawn in the webtoon style of the strip: flat colour shapes, one cel shadow, clean ink lines. Derived from the production model sheet with GPT Image 2.5 Sunburst; the anime sheet stays attached after it as the design authority.",
+    tags: ["lanterne", "knight", "armour", "protagonist", "model_sheet", "webtoon"],
+  },
+  {
+    id: "char.lanterne",
+    kind: "character",
+    subject: "lanterne",
+    priority: 2,
     name: "Lanterne, model sheet",
     image: "/webtoon/references/lanterne-sheet.png",
     must_keep:
@@ -28,7 +41,7 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     id: "char.lanterne.still",
     kind: "character",
     subject: "lanterne",
-    priority: 2,
+    priority: 3,
     name: "Lanterne, episode still",
     image: "/images/sol.png",
     must_keep:
@@ -37,10 +50,23 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     tags: ["lanterne", "still"],
   },
   {
-    id: "char.rose",
+    id: "char.rose.webtoon",
     kind: "character",
     subject: "rose",
     priority: 1,
+    name: "Rose, webtoon model sheet",
+    image: "/webtoon/references/rose-webtoon-sheet.png",
+    must_keep:
+      "Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette.",
+    description:
+      "Turnaround (front, three-quarter, side, back) plus three expressions (calm, gentle smile, eyes closed) in the webtoon style of the strip. Built from the two episode stills with GPT Image 2.5 Sunburst, since the production repo has no model sheet for Rose yet; the stills stay attached after it.",
+    tags: ["rose", "child", "girl", "model_sheet", "webtoon"],
+  },
+  {
+    id: "char.rose",
+    kind: "character",
+    subject: "rose",
+    priority: 2,
     name: "Rose, episode still (face)",
     image: "/images/rose.png",
     must_keep:
@@ -53,13 +79,33 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     id: "char.rose.full",
     kind: "character",
     subject: "rose",
-    priority: 2,
+    priority: 3,
     name: "Rose, episode still (full body)",
     image: "/images/hero-banner.png",
     must_keep:
       "Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.",
     description: "No model sheet exists for Rose yet (lost-garden/09_Fiches_modeles has none): the two episode stills are the canon reference.",
     tags: ["rose", "full_body", "still"],
+  },
+  {
+    id: "style.webtoon.white",
+    kind: "style",
+    name: "Style anchor, white world",
+    image: "/webtoon/references/style-white.jpg",
+    must_keep:
+      "Rendering only: large flat colour shapes, one hard cel shadow per element, clean ink lines, blown-out white background, no texture. Copy the flatness, the line weight and the colour treatment, never the content.",
+    description: "An approved panel of the strip (v4 pass, Rose close-up) attached to every white-world panel so the rendering stays identical from one panel to the next.",
+    tags: ["style", "anchor", "white"],
+  },
+  {
+    id: "style.webtoon.blue",
+    kind: "style",
+    name: "Style anchor, blue sanctuary",
+    image: "/webtoon/references/style-blue.jpg",
+    must_keep:
+      "Rendering only: a few big flat blue and black shapes, beams as flat translucent triangles, glow as flat halos, clean silhouettes, no texture. Copy the flatness and the colour treatment, never the content.",
+    description: "An approved panel of the strip (v4 pass, sanctuary extreme wide) attached to every sanctuary panel so the dark panels keep the same simplicity.",
+    tags: ["style", "anchor", "blue"],
   },
   {
     id: "loc.white-lily-field",
@@ -225,6 +271,8 @@ export function resolveReferences(input: {
   objects: string[];
   source_frames: string[];
   explicit?: string[];
+  /** Style anchor id: an approved panel attached after the character sheets. */
+  style?: string;
 }): ReferenceAsset[] {
   const picked = new Map<string, ReferenceAsset>();
   const add = (asset: ReferenceAsset | undefined) => {
@@ -237,8 +285,10 @@ export function resolveReferences(input: {
     const sheets = REFERENCE_LIBRARY.filter(
       (asset) => asset.kind === "character" && asset.subject === character,
     ).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
-    for (const sheet of sheets) add(sheet);
+    // Two sheets per character at most: the webtoon sheet and the canon behind it.
+    for (const sheet of sheets.slice(0, 2)) add(sheet);
   }
+  if (input.style) add(byId.get(input.style));
   add(byId.get(`loc.${input.location}`));
   for (const object of input.objects) add(byId.get(`obj.${object}`));
 

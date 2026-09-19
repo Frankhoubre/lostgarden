@@ -2,27 +2,34 @@ import type { PanelIntent } from "../adaptation";
 import type { WebtoonBeat } from "../types";
 
 /**
- * ADAPTATION PLAN · episode 1, 0:00-0:30 · eleven shots become ten panels.
+ * ADAPTATION PLAN · episode 1, 0:00-0:30 · eleven shots become fifteen panels:
+ * ten direct panels, one per shot of the film, plus five bridges that add no
+ * action (a detail, a counter-shot, a breath, a fall).
  *
  * Decisions, shot by shot:
  *  s01 → p01  kept as the opening image; the white above his helmet is the
  *             first breath of the strip.
+ *      → p01b bridge: petals on empty white, the wind keeps falling.
  *  s02 → p02  the lily insert stays: it is the only warm colour and it
  *             prepares the field.
  *  s03 → p03  the rack focus becomes the scroll itself: sharp lilies (p02),
  *             then the wide field on a tall panel; distance = height.
+ *      → p03b reframe: the back of his helmet, the field ahead, her speck.
  *  s04 → p04  Rose's silent close-up, kept: she looks first, speaks later.
- *  s05 → p05  the hem and bare feet: a small low insert, one beat of ground.
+ *  s05 → p05  the hem and her feet: a small low insert, one beat of ground.
  *  s06 → p06  the hill: a tall panel whose upper half is empty white sky.
- *  s07 → p07  the line. Waist-up, so it is not a copy of p04.
- *  s08 → gap  two seconds of black become the longest gap of the strip and
- *             the page turns black: no panel, only the fall.
+ *  s07 → p06b reframe: the flower in her hair, a petal lifting.
+ *      → p07  the line. Waist-up, so it is not a copy of p04.
+ *  s08 → p07b bridge: two seconds of black become a tall dark panel with one
+ *             faint glow below; the page turns black in the gap before it.
  *  s09 → p08  the sanctuary, tallest panel: beams at the top, altar at the
  *             bottom, the eye travels down the way the light does.
  *  s10 → p09  the larva on the root, first living thing, small panel.
+ *      → p09b reframe: his gauntlet on the stone, one mushroom.
  *  s11 → p10  the rose window over the sabatons: the segment ends on
  *             expectation, the awakening starts after 0:30.
- * Nothing is added. Every panel maps to a shot of the film.
+ * Nothing is invented. Every panel maps to a shot of the film, the bridges
+ * only look at that same shot from closer or from behind.
  */
 export const EP1_OPENING_BEATS: WebtoonBeat[] = [
   {
@@ -72,6 +79,12 @@ export const EP1_OPENING_PALETTES: Record<string, string> = {
   "altar-sanctuary": "blue_sanctuary",
 };
 
+/** One approved panel per palette, attached after the character sheets to lock the rendering. */
+export const EP1_OPENING_STYLE_ANCHORS: Record<string, string> = {
+  white_memory: "style.webtoon.white",
+  blue_sanctuary: "style.webtoon.blue",
+};
+
 const FIND_ME = {
   en: "Find me.",
   fr: "Trouve-moi.",
@@ -108,6 +121,33 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     prompt_notes: [
       "The whole image is white and pale grey with faint bloom; the darkest values are the eye holes of the helmet and the black of the chest plate, softened by the light.",
       "Keep the two dark oval eye holes small and calm, no glow.",
+    ],
+  },
+  {
+    id: "p01b",
+    beat: "b1",
+    shots: ["s01"],
+    fidelity: "bridge",
+    narrative_role: "breath",
+    purpose:
+      "A breath of white between the knight and the lilies: a few petals crossing an empty panel carry the wind of the previous case downward. Nothing happens here, the page only keeps falling.",
+    description:
+      "Two or three small white lily petals drifting across a plain, empty, overexposed white. Nothing else: no ground, no horizon, no figure.",
+    characters: [],
+    location: "white-lily-field",
+    action: "Petals drift down and to the right.",
+    emotion: "weightless, suspended",
+    shot_type: "void",
+    camera_angle: "eye_level",
+    composition:
+      "Nearly empty 3:2 strip; one petal sharp just left of centre, two smaller softer ones toward the upper right; the rest is flat white.",
+    aspect_ratio: "3:2",
+    panel_height: 420,
+    transition_type: "continuous",
+    bleed: true,
+    exclude_references: ["loc.white-lily-field"],
+    prompt_notes: [
+      "Almost nothing drawn: the panel is ninety percent flat white. The petals are simple curved shapes with one ink line and one flat pale grey shadow each.",
     ],
   },
   {
@@ -167,6 +207,33 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
   },
   {
+    id: "p03b",
+    beat: "b2",
+    shots: ["s03"],
+    fidelity: "reframe",
+    narrative_role: "transition",
+    purpose:
+      "The counter-shot the film implies: from behind Lanterne's helmet, the field ahead out of focus, so the eye travels toward Rose before her close-up. Same moment as the wide shot, new framing.",
+    description:
+      "Close on the back of Lanterne's lantern helmet and his pauldrons, seen strictly from behind, slightly off centre; ahead of him, out of focus, the pale field of lilies under a white sky, with a faint pink and grey-green speck far away on the rise: Rose.",
+    characters: ["lanterne"],
+    location: "white-lily-field",
+    action: "He does not move. Petals pass him.",
+    emotion: "attention, held breath",
+    shot_type: "close_up",
+    camera_angle: "over_the_shoulder",
+    composition:
+      "16:9 strip. The helmet occupies the left third, cut by the top edge, the ring on top visible; the right two thirds are the soft white field; Rose's speck on the right third line, slightly above centre.",
+    aspect_ratio: "16:9",
+    transition_type: "continuous",
+    bleed: false,
+    exclude_references: ["loc.white-lily-field"],
+    prompt_notes: [
+      "Lanterne is seen strictly from behind: the back of the cylinder helmet, the ring on top, the pauldrons and the cream scarf; no eye holes visible.",
+      "The field is one flat pale shape; Rose is a two-tone speck, pink head and grey-green cloak, tiny.",
+    ],
+  },
+  {
     id: "p04",
     beat: "b3",
     shots: ["s04"],
@@ -199,7 +266,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     fidelity: "direct",
     narrative_role: "detail",
     purpose:
-      "A beat of ground: the hem of her dress and her bare feet in the lilies. It says she is really standing there, small and unprotected, before the hill shows how far.",
+      "A beat of ground: the hem of her dress and her small shoes in the lilies. It says she is really standing there, small and unprotected, before the hill shows how far.",
     description:
       "Low insert among the lilies: the lace hem of Rose's cream dress and her small feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.",
     characters: ["rose"],
@@ -245,6 +312,33 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
   },
   {
+    id: "p06b",
+    beat: "b3",
+    shots: ["s07"],
+    fidelity: "reframe",
+    narrative_role: "detail",
+    purpose:
+      "A detail before the only line: the white flower in her hair and a petal lifting from it. It slows the page so that Find me lands alone in the next case.",
+    description:
+      "Extreme close-up on the side of Rose's head: the white flower tucked in her pink hair above her left temple, strands of pink hair moving in the wind, one petal lifting away from the flower. Plain white sky behind.",
+    characters: ["rose"],
+    location: "white-lily-field",
+    action: "The wind lifts her hair and one petal.",
+    emotion: "tender, fragile",
+    shot_type: "extreme_close_up",
+    camera_angle: "eye_level",
+    composition:
+      "16:9. The flower slightly right of centre, pink hair filling the left half, empty white on the right where the petal drifts away.",
+    aspect_ratio: "16:9",
+    transition_type: "beat",
+    bleed: false,
+    exclude_references: ["char.rose", "loc.white-lily-field"],
+    prompt_notes: [
+      "Only hair, flower and white in frame: no eye, no face features.",
+      "The flower is a simple five-petal white shape with a pale yellow centre, drawn with a few ink lines; the hair is two flat pinks and a few line strokes.",
+    ],
+  },
+  {
     id: "p07",
     beat: "b3",
     shots: ["s07"],
@@ -277,6 +371,35 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
     prompt_notes: [
       "The upper left quarter of the image is plain, empty white sky with nothing drawn in it: no box, no rectangle, no frame, no bubble, no outline. Lettering is added afterwards on top of the finished art.",
+      "Her arms hang relaxed at her sides under the cloak; no hands raised, no hands clasped, no gesture. As in the film, only her face and the wind move.",
+    ],
+  },
+  {
+    id: "p07b",
+    beat: "b4",
+    shots: ["s08"],
+    fidelity: "bridge",
+    narrative_role: "transition",
+    purpose:
+      "The two seconds of black become a tall, almost empty panel: the eye falls with the page, and a first cold glow at the bottom announces the sanctuary without showing anything of it.",
+    description:
+      "Near-total darkness. A tall black panel; at the very bottom, a faint cold cyan haze, like light seen from far above through mist. Nothing else is drawn.",
+    characters: [],
+    location: "altar-sanctuary",
+    action: "Nothing moves. The dark deepens.",
+    emotion: "vertigo, silence",
+    shot_type: "void",
+    camera_angle: "eye_level",
+    composition:
+      "9:16. Ninety percent flat black; a soft cyan haze in the bottom fifth, brighter toward the centre bottom, with no shapes inside it.",
+    aspect_ratio: "9:16",
+    panel_height: 1100,
+    transition_type: "fall",
+    spacing_before: 1100,
+    bleed: true,
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "This is a transition panel: a black field with one soft glow at the bottom. No mushrooms, no altar, no roots, no figure, no stars, no texture, no gradient banding.",
     ],
   },
   {
@@ -297,8 +420,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     camera_angle: "eye_level",
     composition:
       "Vertical 9:16. Beams of light enter from the top edge and widen downward; roots in silhouette across the upper left; the altar small, low, right of centre, in the brightest pool of light; mushrooms in the lower corners. The darkest values at the edges, the light at the centre bottom.",
-    transition_type: "fall",
-    spacing_before: 1400,
+    transition_type: "breath",
     bleed: true,
     sfx: [
       { text: { en: "vmmmmm", fr: "vmmmmm", ja: "ヴウウウ", ko: "브으으음" }, anchor: { x: 24, y: 12 }, rotate: -90, size: 60, style: "rumble" },
@@ -340,6 +462,32 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     prompt_notes: [
       "The root is one dark flat shape, the larva a simple pale segmented shape with one highlight, the altar and knight behind are simplified flat silhouettes in two blue tones.",
       "The larva is white-blue, translucent, about the length of a forearm, with soft rounded segments and no face detail; it is gentle, not monstrous.",
+    ],
+  },
+  {
+    id: "p09b",
+    beat: "b5",
+    shots: ["s10"],
+    fidelity: "reframe",
+    narrative_role: "detail",
+    purpose:
+      "A slow travel along the body before the sabatons: his steel gauntlet resting on the stone, one mushroom glowing beside it. It stretches the stillness the film holds with its camera move; nothing new happens.",
+    description:
+      "Detail of Lanterne's steel gauntlet over a black glove resting on the carved stone lid of the altar, palm down, fingers slightly apart; beside the hand, one small blue glowing mushroom; cold blue light from above, thin mist.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "The hand does not move. The mushroom glows.",
+    emotion: "stillness, waiting",
+    shot_type: "detail",
+    camera_angle: "high",
+    composition:
+      "16:9. The gauntlet crosses the lower half from the left, the mushroom lower right, the stone a flat dark blue plane, black at the top edge.",
+    aspect_ratio: "16:9",
+    transition_type: "continuous",
+    bleed: false,
+    exclude_references: ["char.lanterne.still", "loc.altar-sanctuary"],
+    prompt_notes: [
+      "Gauntlet, glove, stone and one mushroom only: a handful of flat shapes in two blues, a steel grey and black. No face, no body beyond the wrist and a hint of the beige cape edge.",
     ],
   },
   {

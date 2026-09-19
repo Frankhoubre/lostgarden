@@ -86,7 +86,7 @@ export function buildGenerationPrompt(input: PromptInput): {
         references
           .map((r, i) => `image ${i + 1} is ${r.name} (${ROLE_LABEL[r.kind]})`)
           .join("; ") +
-        ". Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.",
+        ". Source frames give framing, light and palette; character sheets give the design; a style reference gives the rendering only: match its flatness, line weight and colour treatment exactly, and take nothing of its content. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.",
     );
   }
   if (notes.length) lines.push("NOTES: " + notes.join(" "));

@@ -21,6 +21,11 @@ LOCALE = "fr"
 
 BEAT_FR = {"b1": "Le blanc", "b2": "Les lys", "b3": "Trouve-moi", "b4": "Le noir", "b5": "Le sanctuaire"}
 PURPOSE_FR = {
+    "p01b": "Case pont : trois pétales sur du blanc, rien d'autre. Le vent de la case précédente continue de tomber avec la page.",
+    "p03b": "Contre-champ que le film sous-entend : le dos du heaume, le champ flou devant, la tache rose au loin. Même instant, nouveau cadrage.",
+    "p06b": "Un détail avant la seule réplique : la fleur dans ses cheveux et un pétale qui s'envole. La page ralentit pour que « Trouve-moi » arrive seul.",
+    "p07b": "Les deux secondes de noir deviennent une case haute presque vide : l'œil tombe avec la page, une première lueur froide annonce le sanctuaire sans rien montrer.",
+    "p09b": "Un travelling le long du corps avant les sabatons : le gantelet posé sur la pierre, un champignon qui luit à côté. Rien de nouveau ne se passe, le temps s'étire.",
     "p01": "Lanterne seul dans le blanc. Ouvrir sur lui, pas sur le monde : le blanc devient son état, pas un lieu.",
     "p02": "Les lys de près : la seule couleur chaude de la séquence, et la fleur dont le champ sera fait.",
     "p03": "Le film fait le point du flou vers les deux silhouettes ; ici c'est le défilement qui le fait. La distance entre eux est une distance que le pouce doit parcourir.",

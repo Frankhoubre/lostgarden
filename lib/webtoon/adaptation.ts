@@ -85,6 +85,8 @@ export type AdaptationInput = {
   intents: PanelIntent[];
   /** Location id → bible palette key. */
   palettes: Record<string, string>;
+  /** Bible palette key → style anchor reference id (an approved panel). */
+  style_anchors?: Record<string, string>;
   images?: Record<string, PanelImage>;
   bible?: StyleBible;
   generated_at?: string;
@@ -150,12 +152,14 @@ export function adaptScript(input: AdaptationInput): WebtoonScript {
     const background: PanelBackground = beat.background;
 
     const excluded = new Set(intent.exclude_references ?? []);
+    const palette = input.palettes[intent.location] ?? "";
     const references = resolveReferences({
       characters: intent.characters,
       location: intent.location,
       objects: intent.objects ?? [],
       source_frames: span.frames,
       explicit: intent.references,
+      style: input.style_anchors?.[palette],
     }).filter((r) => !excluded.has(r.id));
     for (const r of references) used.set(r.id, r);
 
@@ -197,7 +201,7 @@ export function adaptScript(input: AdaptationInput): WebtoonScript {
       panel: base,
       references,
       bible,
-      palette: input.palettes[intent.location] ?? "",
+      palette,
       notes: intent.prompt_notes,
       extraNegative: intent.negative,
     });

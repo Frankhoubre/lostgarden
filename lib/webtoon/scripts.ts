@@ -5,6 +5,7 @@ import {
   EP1_OPENING_BEATS,
   EP1_OPENING_INTENTS,
   EP1_OPENING_PALETTES,
+  EP1_OPENING_STYLE_ANCHORS,
 } from "./sources/ep1-opening.plan";
 import type { WebtoonScript } from "./types";
 
@@ -35,6 +36,7 @@ const builders: Record<string, () => WebtoonScript> = {
       beats: EP1_OPENING_BEATS,
       intents: EP1_OPENING_INTENTS,
       palettes: EP1_OPENING_PALETTES,
+      style_anchors: EP1_OPENING_STYLE_ANCHORS,
       images: EP1_OPENING_IMAGES,
       generated_at: "2026-09-19T00:00:00.000Z",
     }),
