@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GameShell } from "@/components/game/GameShell";
+import { GameGate } from "@/components/game/GameGate";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SiteFooter } from "@/components/SiteFooter";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -85,7 +85,7 @@ export default async function GamePage({ params }: GamePageProps) {
         </p>
 
         <section className="mt-8" aria-label={copy.headline}>
-          <GameShell />
+          <GameGate />
         </section>
 
         <div className="mt-10 grid gap-8 sm:grid-cols-2">

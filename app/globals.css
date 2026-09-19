@@ -1865,3 +1865,260 @@ h3 {
   height: 4rem;
   font-size: 1.3rem;
 }
+
+/* Game login gate: a pixel-art scene on the left, the auth form on the right. */
+.game-gate {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 2px solid rgba(125, 223, 255, 0.25);
+  background: #020817;
+  box-shadow:
+    0 0 0 1px rgba(2, 8, 23, 1),
+    0 12px 40px rgba(2, 8, 23, 0.8),
+    0 0 48px rgba(56, 189, 248, 0.12);
+}
+
+.game-gate-scene {
+  position: relative;
+  container-type: size;
+  min-height: 560px;
+  overflow: hidden;
+  background: #041022;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.game-gate-scene > div,
+.game-gate-scene > span {
+  /* One game pixel: the scene height divided by the canvas height. */
+  --u: calc(100cqh / 288);
+  position: absolute;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.game-gate-bg {
+  inset: 0;
+  background-image: url("/game/bg-forest.png");
+  background-size: calc(512 * var(--u)) calc(288 * var(--u));
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
+  animation: game-gate-pan 90s linear infinite;
+}
+
+.game-gate-shafts {
+  inset: 0;
+  background:
+    linear-gradient(112deg, transparent 18%, rgba(150, 210, 255, 0.11) 21%, transparent 27%),
+    linear-gradient(112deg, transparent 48%, rgba(150, 210, 255, 0.08) 51%, transparent 58%),
+    linear-gradient(112deg, transparent 74%, rgba(150, 210, 255, 0.1) 77%, transparent 82%);
+  mix-blend-mode: screen;
+  animation: game-gate-breathe 7s ease-in-out infinite;
+}
+
+.game-gate-ground {
+  left: 0;
+  right: 0;
+  bottom: calc(-14 * var(--u));
+  height: calc(99 * var(--u));
+  background-image: url("/game/ground-forest.png");
+  background-size: calc(512 * var(--u)) calc(99 * var(--u));
+  background-repeat: repeat-x;
+  background-position: calc(-120 * var(--u)) 0;
+}
+
+.game-gate-lanterne {
+  left: calc(22% - 28 * var(--u));
+  bottom: calc(63 * var(--u));
+  width: calc(56 * var(--u));
+  height: calc(96 * var(--u));
+  background-image: url("/game/lanterne-idle.png");
+  background-size: calc(224 * var(--u)) calc(96 * var(--u));
+  animation: game-gate-idle 0.8s steps(4) infinite;
+  filter: drop-shadow(0 0 calc(6 * var(--u)) rgba(255, 190, 110, 0.35));
+}
+
+.game-gate-glow {
+  left: calc(22% - 110 * var(--u));
+  bottom: calc(31 * var(--u));
+  width: calc(220 * var(--u));
+  height: calc(220 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 200, 130, 0.6) 0%, rgba(255, 175, 95, 0.22) 38%, rgba(255, 150, 70, 0) 68%);
+  mix-blend-mode: screen;
+  animation: game-gate-flicker 2.6s ease-in-out infinite;
+}
+
+.game-gate-spore {
+  bottom: -4px;
+  border-radius: 1px;
+  background: #bff4ff;
+  box-shadow: 0 0 6px rgba(143, 227, 255, 0.9);
+  opacity: 0;
+  animation-name: game-gate-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.game-gate-fog {
+  left: -10%;
+  right: -10%;
+  bottom: 0;
+  height: calc(70 * var(--u));
+  background:
+    radial-gradient(ellipse 30% 55% at 20% 100%, rgba(120, 180, 240, 0.28), transparent 70%),
+    radial-gradient(ellipse 35% 60% at 62% 100%, rgba(120, 180, 240, 0.22), transparent 70%),
+    radial-gradient(ellipse 28% 50% at 92% 100%, rgba(120, 180, 240, 0.24), transparent 70%);
+  animation: game-gate-drift 14s ease-in-out infinite alternate;
+}
+
+.game-gate-vignette {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 45%, transparent 40%, rgba(2, 6, 18, 0.55) 100%),
+    linear-gradient(180deg, rgba(2, 6, 18, 0.35), transparent 30%);
+}
+
+.game-gate-caption {
+  left: 0;
+  right: 0;
+  top: 8%;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.game-gate-eyebrow {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cyan-pale);
+  text-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+}
+
+.game-gate-title {
+  margin-top: 0.9rem;
+  font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lily);
+  text-shadow:
+    0 2px 0 #041022,
+    0 0 18px rgba(143, 227, 255, 0.55),
+    0 0 40px rgba(56, 189, 248, 0.35);
+  text-wrap: balance;
+}
+
+.game-gate-title.font-display {
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+}
+
+.game-gate-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.75rem 1.5rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12), transparent 55%),
+    linear-gradient(180deg, #06162f, #020817);
+  border-left: 1px solid rgba(125, 223, 255, 0.15);
+}
+
+.game-gate-panel .auth-card {
+  max-width: none;
+}
+
+.game-gate-lead {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(232, 226, 194, 0.85);
+}
+
+.game-gate-hint,
+.game-gate-status {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(232, 226, 194, 0.55);
+  text-align: center;
+}
+
+.game-gate-status {
+  font-size: 0.9rem;
+  color: var(--cyan-pale);
+  animation: game-gate-breathe 2s ease-in-out infinite;
+}
+
+.game-welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@keyframes game-gate-pan {
+  from { background-position-x: 0; }
+  to { background-position-x: calc(-1024 * var(--u)); }
+}
+
+@keyframes game-gate-idle {
+  from { background-position-x: 0; }
+  to { background-position-x: calc(-224 * var(--u)); }
+}
+
+@keyframes game-gate-flicker {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.06); }
+  70% { opacity: 0.9; transform: scale(0.98); }
+}
+
+@keyframes game-gate-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+@keyframes game-gate-drift {
+  from { transform: translateX(-3%); }
+  to { transform: translateX(3%); }
+}
+
+@keyframes game-gate-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(calc(-300 * var(--u))); opacity: 0; }
+}
+
+@media (max-width: 767px) {
+  .game-gate {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .game-gate-scene {
+    min-height: 0;
+    height: 330px;
+  }
+  .game-gate-panel {
+    border-left: 0;
+    border-top: 1px solid rgba(125, 223, 255, 0.15);
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-gate-bg,
+  .game-gate-shafts,
+  .game-gate-glow,
+  .game-gate-spore,
+  .game-gate-fog,
+  .game-gate-status {
+    animation: none;
+  }
+}
