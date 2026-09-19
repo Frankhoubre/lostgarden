@@ -21,22 +21,22 @@ export type StyleBible = {
 };
 
 export const STYLE_BIBLE: StyleBible = {
-  id: "lost-garden-webtoon-v3",
+  id: "lost-garden-webtoon-v4",
   base:
-    "Lost Garden, an original dark fantasy anime by Frank Houbre, redrawn as a Korean webtoon (manhwa) panel. Keep the identity of the series: the same characters and designs, the poetic dark fantasy mood, the deep blue and cyan palette, the strong readable silhouettes. Draw it like a webtoon artist inks and colours a weekly episode: bold flat colour fills (large flat shapes of colour), hard-edged cel shading with only one shadow tone and one highlight tone per surface, clean confident ink outlines of varied weight around characters and props, simplified backgrounds built from a few big flat shapes and soft gradients, mist and light as simple flat or gradient shapes, very few small details, plenty of empty space. It must look hand-drawn and coloured digitally, graphic and readable at phone size.",
+    "Lost Garden, an original dark fantasy anime by Frank Houbre, redrawn as a Korean webtoon (manhwa) panel in a deliberately simple, flat, graphic style. Keep the identity of the series: the same character designs, the poetic dark fantasy mood, the deep blue and cyan palette, the strong readable silhouettes. Rendering rules, strict: every element is built from large flat colour shapes, three to five tones per element at most (base colour, one hard cel shadow, one small highlight); clean digital ink outlines of varied weight on characters and props; backgrounds are simplified into a few big flat shapes and silhouettes with at most one soft gradient, drawn with far less detail than the characters; light, mist and glow are flat translucent shapes; small repeated details are suggested by a handful of simple marks, never drawn one by one; lots of empty space. The result looks like a weekly webtoon page coloured with bucket fills, not like a painting and not like a film frame.",
   rendering: [
     "Single illustration, one scene only, no collage, no split screen, no page layout, no multiple panels.",
-    "Flat webtoon rendering: no painterly brushwork, no photographic lighting, no fine texture, no film grain, no micro-detail, no realistic materials; surfaces are flat colour with one hard shadow.",
-    "Line art is visible and clean, like digital inking; colours stay inside the lines; backgrounds are simpler and softer than the characters.",
-    "The reference images give the character designs, the framing and the palette only; do not copy their rendering, their detail level or their lighting, redraw them flat.",
+    "Flat and simple: no painterly brushwork, no photographic lighting, no texture, no film grain, no micro-detail, no realistic materials, no volumetric light, no dense foliage or ornament. If a surface would need a gradient, use a flat tone instead.",
+    "Draw at most a third of the detail visible in the reference frames: the reference images give the character designs, the framing and the palette only; ignore their rendering, their density and their lighting completely and redraw everything flat and simplified.",
+    "Line art is visible and clean, like digital inking; colours stay inside the lines; backgrounds are simpler, flatter and softer than the characters.",
     "Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom.",
     "The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.",
   ],
   palettes: {
     white_memory:
-      "Overexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.",
+      "Overexposed white world of a memory: a flat blown-out white sky with no clouds drawn, pale washed-out colours, almost monochrome, a few simple white petal shapes drifting, no sun visible; the lily field is a flat pale shape with a handful of simple lily silhouettes, never a carpet of individually drawn flowers.",
     blue_sanctuary:
-      "Deep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.",
+      "Deep underground stone sanctuary drawn in a few flat shapes: near black silhouettes of stone and roots, two or three flat tones of cold blue, light beams as flat translucent triangles, mist as a flat pale band, a few simple glowing mushroom shapes at the edges, no sky, no sunlight, no carved ornament drawn in detail.",
     blue_forest:
       "Underground blue forest: black tree trunks, cyan mist, glowing blue mushrooms, pale blue lilies, no sky, no sunlight.",
   },
@@ -47,6 +47,6 @@ export const STYLE_BIBLE: StyleBible = {
     "No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige.",
     "No extra characters, animals or creatures unless named in the prompt.",
     "No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
-    "No painterly or semi-realistic rendering, no dense detail, no complex textures, no volumetric rendering: flat colours and clean lines only.",
+    "No painterly or semi-realistic rendering, no dense detail, no complex textures, no volumetric rendering, no crowds of small elements drawn individually: flat colours and clean lines only.",
   ],
 };

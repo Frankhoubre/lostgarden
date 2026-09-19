@@ -2294,38 +2294,59 @@ h3 {
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
+}
+
+/* The tail is drawn twice: outlined under the bubble, then filled only on
+   top, so the oval's border disappears where the tail joins it. */
+.webtoon-tail-under {
+  z-index: 1;
   fill: #fff;
   stroke: var(--wt-ink);
-  stroke-width: 0.3;
+  stroke-width: 0.32;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
 
+.webtoon-tail-over {
+  z-index: 3;
+  fill: #fff;
+  stroke: none;
+}
+
 .webtoon-bubble {
   position: absolute;
+  z-index: 2;
   transform: translate(-50%, -50%);
-  max-width: 46cqw;
-  padding: 2.6cqw 3.6cqw;
-  border-radius: 999px;
+  min-width: 24cqw;
+  max-width: 48cqw;
+  padding: 3.6cqw 5.2cqw;
+  border-radius: 50%;
   background: #fff;
   color: var(--wt-ink);
-  border: 0.28cqw solid var(--wt-ink);
+  border: 0.3cqw solid var(--wt-ink);
   font-family: var(--font-bubble), "Nunito", var(--font-zen), sans-serif;
   font-weight: 800;
   font-size: 3.4cqw;
-  line-height: 1.22;
+  line-height: 1.25;
   text-align: center;
+  text-wrap: balance;
   letter-spacing: 0.01em;
-  box-shadow: 0 0.8cqw 2cqw rgba(11, 15, 26, 0.16);
+  box-shadow: 0.5cqw 0.7cqw 0 rgba(11, 15, 26, 0.14);
 }
 
 .webtoon-bubble-whisper {
-  border-style: dashed;
-  border-width: 0.24cqw;
+  border-color: #7b8190;
+  border-width: 0.22cqw;
   font-weight: 600;
   color: #3a3f4d;
-  background: rgba(255, 255, 255, 0.96);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  box-shadow: none;
+}
+
+.webtoon-lettering:has(.webtoon-bubble-whisper) .webtoon-tail-under {
+  stroke: #7b8190;
+  stroke-width: 0.24;
 }
 
 .webtoon-bubble-thought {
@@ -2347,6 +2368,7 @@ h3 {
   border-width: 0.2cqw;
   font-style: italic;
   font-weight: 600;
+  min-width: 0;
 }
 
 .webtoon-caption {

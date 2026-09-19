@@ -11,7 +11,6 @@ published next to the panels folder.
 """
 import html
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -45,19 +44,6 @@ def tc(seconds):
     return f"{int(seconds // 60)}:{seconds % 60:04.1f}"
 
 
-def tail_path(a, b):
-    dx, dy = b["x"] - a["x"], b["y"] - a["y"]
-    length = math.hypot(dx, dy) or 1
-    nx, ny = -dy / length, dx / length
-    base, bow = 3.6, 1.6
-    b1 = (a["x"] + nx * base, a["y"] + ny * base)
-    b2 = (a["x"] - nx * base, a["y"] - ny * base)
-    tip = (a["x"] + dx * 0.9, a["y"] + dy * 0.9)
-    c1 = (a["x"] + dx * 0.5 + nx * (base * 0.6 + bow), a["y"] + dy * 0.5 + ny * (base * 0.6 + bow))
-    c2 = (a["x"] + dx * 0.5 - nx * (base * 0.6 - bow), a["y"] + dy * 0.5 - ny * (base * 0.6 - bow))
-    return f"M {b1[0]:.2f} {b1[1]:.2f} Q {c1[0]:.2f} {c1[1]:.2f} {tip[0]:.2f} {tip[1]:.2f} Q {c2[0]:.2f} {c2[1]:.2f} {b2[0]:.2f} {b2[1]:.2f} Z"
-
-
 def render(slug, out_path):
     data = json.loads((ROOT / "public" / "webtoon" / slug / "webtoon.json").read_text())
     pct = lambda px: f"{px / W * 100:.3f}%"
@@ -84,9 +70,15 @@ def render(slug, out_path):
         )
         for line in p["dialogue"]:
             a = line["anchor"]
-            if line.get("tail") and line["style"] != "off":
-                r.append(f'<svg class="tail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="{tail_path(a, line["tail"])}"></path></svg>')
-            r.append(f'<div class="bubble bubble-{line["style"]}" style="left:{a["x"]}%;top:{a["y"]}%"><span class="sr">{html.escape(line["speaker"])} : </span>{html.escape(t(line["text"]))}</div>')
+            tail = line.get("tail") if line["style"] != "off" else None
+            tail_attr = f' data-tail-x="{tail["x"]}" data-tail-y="{tail["y"]}"' if tail else ""
+            r.append(
+                f'<div class="lettering"{tail_attr}>'
+                f'<svg class="tail tail-under" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d=""></path></svg>'
+                f'<div class="bubble bubble-{line["style"]}" style="left:{a["x"]}%;top:{a["y"]}%"><span class="sr">{html.escape(line["speaker"])} : </span>{html.escape(t(line["text"]))}</div>'
+                f'<svg class="tail tail-over" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d=""></path></svg>'
+                "</div>"
+            )
         for box in p["caption"]:
             r.append(f'<div class="caption caption-{box["style"]}" style="left:{box["anchor"]["x"]}%;top:{box["anchor"]["y"]}%">{html.escape(t(box["text"]))}</div>')
         for fx in p["sfx"]:
@@ -140,12 +132,16 @@ h1{{font-family:Oswald,"Arial Narrow",sans-serif;font-weight:700;text-transform:
 .beat-mark::after{{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;transform:translate(-50%,-50%) rotate(45deg);background:rgba(185,243,255,.8)}}
 .beat-mark-light{{background:linear-gradient(to right,transparent,rgba(11,15,26,.35),transparent)}}
 .beat-mark-light::after{{background:rgba(11,15,26,.55)}}
-.tail{{position:absolute;inset:0;width:100%;height:100%;fill:#fff;stroke:var(--ink);stroke-width:.3;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}}
-.bubble{{position:absolute;transform:translate(-50%,-50%);max-width:46cqw;padding:2.6cqw 3.6cqw;border-radius:999px;background:#fff;color:var(--ink);border:.28cqw solid var(--ink);font-family:Nunito,"Zen Kaku Gothic New",sans-serif;font-weight:800;font-size:3.4cqw;line-height:1.22;text-align:center;letter-spacing:.01em;box-shadow:0 .8cqw 2cqw rgba(11,15,26,.16)}}
-.bubble-whisper{{border-style:dashed;border-width:.24cqw;font-weight:600;color:#3a3f4d;background:rgba(255,255,255,.96);letter-spacing:.06em}}
+.lettering{{position:absolute;inset:0;pointer-events:none}}
+.tail{{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}}
+.tail-under{{z-index:1;fill:#fff;stroke:var(--ink);stroke-width:.32;stroke-linejoin:round;vector-effect:non-scaling-stroke}}
+.tail-over{{z-index:3;fill:#fff;stroke:none}}
+.bubble{{position:absolute;z-index:2;transform:translate(-50%,-50%);min-width:24cqw;max-width:48cqw;padding:3.6cqw 5.2cqw;border-radius:50%;background:#fff;color:var(--ink);border:.3cqw solid var(--ink);font-family:Nunito,"Zen Kaku Gothic New",sans-serif;font-weight:800;font-size:3.4cqw;line-height:1.25;text-align:center;text-wrap:balance;letter-spacing:.01em;box-shadow:.5cqw .7cqw 0 rgba(11,15,26,.14)}}
+.bubble-whisper{{border-color:#7b8190;border-width:.22cqw;font-weight:600;color:#3a3f4d;letter-spacing:.08em;box-shadow:none}}
+.lettering:has(.bubble-whisper) .tail-under{{stroke:#7b8190;stroke-width:.24}}
 .bubble-thought{{border-style:dotted;border-width:.4cqw}}
-.bubble-shout{{border-radius:1.2cqw;font-family:Bangers,Oswald,sans-serif;font-weight:400;font-size:5cqw;letter-spacing:.08em}}
-.bubble-off{{border-radius:.8cqw;font-style:italic;font-weight:600}}
+.bubble-shout{{border-radius:1.2cqw;font-family:Bangers,Oswald,sans-serif;font-weight:400;font-size:5cqw;letter-spacing:.08em;transform:translate(-50%,-50%) rotate(-3deg)}}
+.bubble-off{{border-radius:.8cqw;border-width:.2cqw;font-style:italic;font-weight:600;min-width:0}}
 .caption{{position:absolute;max-width:60cqw;padding:1.6cqw 2.4cqw;background:rgba(2,8,23,.88);color:var(--ivory);font-family:Nunito,sans-serif;font-weight:600;font-size:2.8cqw;line-height:1.35;border-radius:.6cqw;pointer-events:none}}
 .sfx{{position:absolute;font-family:Bangers,Oswald,"Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#fff;white-space:nowrap;pointer-events:none;paint-order:stroke fill;-webkit-text-stroke:.9cqw var(--ink);text-shadow:.5cqw .6cqw 0 rgba(11,15,26,.35)}}
 .sfx-soft{{text-transform:lowercase;color:#eaf9ff;-webkit-text-stroke:.55cqw rgba(11,15,26,.8);opacity:.9;text-shadow:none}}
@@ -172,6 +168,31 @@ h2{{font-family:Oswald,"Arial Narrow",sans-serif;text-transform:uppercase;letter
 <h2>Pourquoi chaque case existe</h2>
 <p class="lead">Chaque case vient d'un plan du film. Le découpage est celui du moteur d'adaptation : mêmes plans, même ordre, une mise en scène pensée pour le défilement.</p>
 {"".join(notes)}
+<script>
+(function(){{
+  function tailPath(b,t,p){{
+    var dx=t.x-b.cx,dy=t.y-b.cy;if(!dx&&!dy)return null;
+    var k=1/Math.sqrt(Math.pow(dx/b.rx,2)+Math.pow(dy/b.ry,2));if(k>=0.98)return null;
+    var len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len,half=Math.min(p.w*0.032,b.rx*0.45);
+    var base={{x:b.cx+dx*k*0.82,y:b.cy+dy*k*0.82}},tip={{x:b.cx+dx*0.9,y:b.cy+dy*0.9}},bow=p.w*0.014;
+    var mid={{x:(base.x+tip.x)/2,y:(base.y+tip.y)/2}};
+    var q=function(x,y){{return (x/p.w*100).toFixed(2)+" "+(y/p.h*100).toFixed(2)}};
+    return "M "+q(base.x+nx*half,base.y+ny*half)+" Q "+q(mid.x+nx*(half*0.55+bow),mid.y+ny*(half*0.55+bow))+" "+q(tip.x,tip.y)+" Q "+q(mid.x-nx*(half*0.55-bow),mid.y-ny*(half*0.55-bow))+" "+q(base.x-nx*half,base.y-ny*half)+" Z";
+  }}
+  function measure(){{
+    document.querySelectorAll(".lettering[data-tail-x]").forEach(function(w){{
+      var panel=w.closest(".panel"),el=w.querySelector(".bubble");if(!panel||!el)return;
+      var pr=panel.getBoundingClientRect(),br=el.getBoundingClientRect();if(!pr.width||!br.width)return;
+      var d=tailPath({{cx:br.left-pr.left+br.width/2,cy:br.top-pr.top+br.height/2,rx:br.width/2,ry:br.height/2}},
+        {{x:parseFloat(w.dataset.tailX)/100*pr.width,y:parseFloat(w.dataset.tailY)/100*pr.height}},{{w:pr.width,h:pr.height}});
+      w.querySelectorAll(".tail path").forEach(function(path){{path.setAttribute("d",d||"")}});
+    }});
+  }}
+  measure();window.addEventListener("resize",measure);window.addEventListener("load",measure);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measure);
+  if(window.ResizeObserver){{var ro=new ResizeObserver(measure);document.querySelectorAll(".panel").forEach(function(p){{ro.observe(p)}})}}
+}})();
+</script>
 <p class="foot">Adaptation produite par le moteur webtoon de lostgarden.world à partir du proxy de l'épisode, du scénario et des fiches personnages du dépôt de production. Images : GPT Image 2.5 Sunburst ({html.escape(model)}), fiches personnages jointes en premier sur chaque case.</p>
 </div>
 """

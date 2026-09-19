@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedText } from "@/lib/webtoon/text";
-import type { Caption, Dialogue, Sfx } from "@/lib/webtoon/types";
+import type { Anchor, Caption, Dialogue, Sfx } from "@/lib/webtoon/types";
 
 /**
  * Lettering layer: bubbles, captions and SFX are HTML on top of the art, so
@@ -17,27 +18,96 @@ type LetteringProps = {
   locale: Locale;
 };
 
-function Tail({ from, to }: { from: { x: number; y: number }; to: { x: number; y: number } }) {
-  // A webtoon tail: a short curved wedge. Its base sits under the bubble, the
-  // tip stops a little short of the speaker, and the two sides bow the same
-  // way so the tail reads as one brush stroke rather than a triangle.
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const length = Math.hypot(dx, dy) || 1;
+/**
+ * Tail geometry, computed from the bubble's real box: it starts just inside
+ * the oval's edge, along the direction of the speaker, and stops a little
+ * short of the target. Coordinates are percent of the panel. `null` when the
+ * target sits inside the bubble.
+ */
+export function tailPath(
+  bubble: { cx: number; cy: number; rx: number; ry: number },
+  target: { x: number; y: number },
+  panel: { w: number; h: number },
+): string | null {
+  const dx = target.x - bubble.cx;
+  const dy = target.y - bubble.cy;
+  if (!dx && !dy) return null;
+  const t = 1 / Math.sqrt((dx / bubble.rx) ** 2 + (dy / bubble.ry) ** 2);
+  if (t >= 0.98) return null;
+  const length = Math.hypot(dx, dy);
   const nx = -dy / length;
   const ny = dx / length;
-  const base = 3.6;
-  const b1 = { x: from.x + nx * base, y: from.y + ny * base };
-  const b2 = { x: from.x - nx * base, y: from.y - ny * base };
-  const tip = { x: from.x + dx * 0.9, y: from.y + dy * 0.9 };
-  const bow = 1.6;
-  const c1 = { x: from.x + dx * 0.5 + nx * (base * 0.6 + bow), y: from.y + dy * 0.5 + ny * (base * 0.6 + bow) };
-  const c2 = { x: from.x + dx * 0.5 - nx * (base * 0.6 - bow), y: from.y + dy * 0.5 - ny * (base * 0.6 - bow) };
-  const d = `M ${b1.x} ${b1.y} Q ${c1.x} ${c1.y} ${tip.x} ${tip.y} Q ${c2.x} ${c2.y} ${b2.x} ${b2.y} Z`;
+  const half = Math.min(panel.w * 0.032, bubble.rx * 0.45);
+  const base = { x: bubble.cx + dx * t * 0.82, y: bubble.cy + dy * t * 0.82 };
+  const tip = { x: bubble.cx + dx * 0.9, y: bubble.cy + dy * 0.9 };
+  const bow = panel.w * 0.014;
+  const mid = { x: (base.x + tip.x) / 2, y: (base.y + tip.y) / 2 };
+  const p = (x: number, y: number) => `${((x / panel.w) * 100).toFixed(2)} ${((y / panel.h) * 100).toFixed(2)}`;
+  const b1 = p(base.x + nx * half, base.y + ny * half);
+  const b2 = p(base.x - nx * half, base.y - ny * half);
+  const c1 = p(mid.x + nx * (half * 0.55 + bow), mid.y + ny * (half * 0.55 + bow));
+  const c2 = p(mid.x - nx * (half * 0.55 - bow), mid.y - ny * (half * 0.55 - bow));
+  return `M ${b1} Q ${c1} ${p(tip.x, tip.y)} Q ${c2} ${b2} Z`;
+}
+
+function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [tail, setTail] = useState<string | null>(null);
+  const target: Anchor | undefined = line.style === "off" ? undefined : line.tail;
+
+  useEffect(() => {
+    const el = ref.current;
+    const panel = el?.closest<HTMLElement>(".webtoon-panel");
+    if (!el || !panel || !target) return;
+    const measure = () => {
+      const pr = panel.getBoundingClientRect();
+      const br = el.getBoundingClientRect();
+      if (!pr.width || !br.width) return;
+      setTail(
+        tailPath(
+          {
+            cx: br.left - pr.left + br.width / 2,
+            cy: br.top - pr.top + br.height / 2,
+            rx: br.width / 2,
+            ry: br.height / 2,
+          },
+          { x: (target.x / 100) * pr.width, y: (target.y / 100) * pr.height },
+          { w: pr.width, h: pr.height },
+        ),
+      );
+    };
+    const frame = window.requestAnimationFrame(measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    observer.observe(panel);
+    document.fonts?.ready.then(measure).catch(() => undefined);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [target, locale, line.text, line.style]);
+
   return (
-    <svg className="webtoon-tail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d={d} />
-    </svg>
+    <div className="webtoon-lettering">
+      {tail ? (
+        <svg className="webtoon-tail webtoon-tail-under" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path d={tail} />
+        </svg>
+      ) : null}
+      <div
+        ref={ref}
+        className={`webtoon-bubble webtoon-bubble-${line.style}`}
+        style={{ left: `${line.anchor.x}%`, top: `${line.anchor.y}%` }}
+      >
+        <span className="sr-only">{line.speaker}: </span>
+        {localizedText(line.text, locale)}
+      </div>
+      {tail ? (
+        <svg className="webtoon-tail webtoon-tail-over" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path d={tail} />
+        </svg>
+      ) : null}
+    </div>
   );
 }
 
@@ -45,18 +115,7 @@ export function PanelLettering({ dialogue, caption, sfx, locale }: LetteringProp
   return (
     <>
       {dialogue.map((line, index) => (
-        <div key={`d${index}`} className="webtoon-lettering">
-          {line.tail && line.style !== "off" ? (
-            <Tail from={line.anchor} to={line.tail} />
-          ) : null}
-          <div
-            className={`webtoon-bubble webtoon-bubble-${line.style}`}
-            style={{ left: `${line.anchor.x}%`, top: `${line.anchor.y}%` }}
-          >
-            <span className="sr-only">{line.speaker}: </span>
-            {localizedText(line.text, locale)}
-          </div>
-        </div>
+        <Bubble key={`d${index}`} line={line} locale={locale} />
       ))}
       {caption.map((box, index) => (
         <div

@@ -132,6 +132,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     bleed: false,
     exclude_references: ["loc.white-lily-field"],
     prompt_notes: [
+      "Three or four big simple lily shapes with a few ink lines and one flat shadow each; the rest is empty white. No stamens drawn one by one beyond the main flower.",
       "The orange of the stamens is the one saturated colour; keep everything else white, ivory and pale green.",
     ],
   },
@@ -160,6 +161,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
     exclude_references: ["char.lanterne.still"],
     prompt_notes: [
+      "The field is one flat pale shape with a few simple lily silhouettes in the foreground; the sky is empty white. The two figures are the only detailed elements.",
       "Both characters are tiny; their silhouettes must still read: the lantern helmet and the pauldrons for him, the round pink head and the cloak for her.",
       "Rose is seen from the front, facing him; Lanterne from behind at three quarters.",
     ],
@@ -238,6 +240,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     bleed: true,
     exclude_references: ["loc.white-lily-field", "char.lanterne.still"],
     prompt_notes: [
+      "The hill is one flat pale rounded shape; a handful of simple lily silhouettes at the bottom edge; the sky is empty flat white.",
       "The figures are minuscule; the hill and the white are the subject.",
     ],
   },
@@ -303,6 +306,8 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
     exclude_references: ["loc.altar-sanctuary", "char.lanterne.still"],
     prompt_notes: [
+      "Radical simplicity, poster-like: the whole image is made of about fifteen big flat shapes. One black root silhouette at the upper left, one flat dark-blue wall tone, one mid-blue tone for the lit area, three or four flat translucent beam triangles, a flat pale mist band, the altar as one small simple block, and at most four glowing mushrooms drawn as simple caps with a soft flat halo.",
+      "No pillars, no arches, no stalactites drawn individually, no rocks, no floor tiles, no cracks, no ornament, no reflections, no texture anywhere. Big empty areas of flat blue-black.",
       "The lying knight is a tiny pale shape on the altar, arms along the body, helmet toward the left.",
       "Blue-black darkness everywhere except the beams, the mushrooms and the pool of light at the altar.",
     ],
@@ -333,6 +338,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
     exclude_references: ["char.lanterne.still"],
     prompt_notes: [
+      "The root is one dark flat shape, the larva a simple pale segmented shape with one highlight, the altar and knight behind are simplified flat silhouettes in two blue tones.",
       "The larva is white-blue, translucent, about the length of a forearm, with soft rounded segments and no face detail; it is gentle, not monstrous.",
     ],
   },
@@ -362,6 +368,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     ],
     exclude_references: ["char.lanterne.still"],
     prompt_notes: [
+      "The rose window is a simple flat cyan disc with a few clean tracery lines, the stalactites a few triangles, the altar and sabatons flat dark shapes against the light. No ornament drawn in detail.",
       "Only the sabatons and the lower legs of the knight are visible, dark against the glowing window; the rest of the body is hidden by perspective.",
     ],
   },
