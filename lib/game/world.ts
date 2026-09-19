@@ -52,6 +52,8 @@ export type World = {
   tavern: { x: number; y: number };
   arena: { l: number; r: number; y: number };
   gate: { x: number; y: number };
+  /** The chase: where the colossal machine wakes, where the run ends, its floor. */
+  chase: { x: number; end: number; y: number };
   hints: { x: number; y: number; id: string }[];
 };
 
@@ -146,6 +148,7 @@ export function buildWorld(): World {
   at("wolf", 84, f14, 1);
   at("lily", 80, ledge(79, 14, 3, 3));
   at("beetle", 88, f14, -1);
+  at("eye", 86, f14, -1);
   ledge(90, 14, 2, 2);
   ground(92, 106, 18);
   const f18 = floorY(18);
@@ -185,7 +188,7 @@ export function buildWorld(): World {
   ground(180, 192, 8);
   at("wolf", 188, f8, -1, { range: 300 });
   at("wolf", 190, f8, -1, { range: 300 });
-  at("wolf", 192, f8, 1, { range: 300 });
+  at("wolf", 191, f8, 1, { range: 300 });
   ground(192, 200, 5);
   const f5 = floorY(5);
   at("root", 195, f5);
@@ -211,36 +214,35 @@ export function buildWorld(): World {
   const tavern = { x: 241 * TILE, y: f7 };
   at("light", 245, f7);
 
-  /* ---- Z7 Le Cimetiere des Machines (250-300): the sleeping ones, and the one that watches. ---- */
-  ground(250, 262, 7);
-  at("machineProp", 257, f7);
-  at("beetle", 253, f7, 1);
-  at("beetle", 259, f7, -1);
-  at("eye", 260, f7, -1);
-  ledge(260, 7, 2, 2);
-  ground(262, 272, 10);
-  const f10 = floorY(10);
-  at("root", 265, f10);
-  at("moth", 266, f10 - 90, -1);
-  at("moth", 268, f10 - 140, 1);
-  at("root", 269, f10);
-  ledge(270, 10, 2, 2);
-  ground(272, 286, 12);
-  hint(273, f12, "sleeper2");
-  at("dormant", 278, f12, -1);
-  at("machineProp", 283, f12);
-  at("lily", 281, ledge(280, 12, 3, 3));
-  ground(286, 300, 12);
-  at("eye", 292, f12, -1);
-  at("wolf", 296, f12, -1);
-  at("wolf", 298, f12, 1);
+  /* ---- Z7 Le Cimetiere des Machines (250-300): the sleeping ones, and the one that wakes. Run. ---- */
+  ground(250, 253, 9);
+  ground(253, 256, 11);
+  ground(256, 300, 13);
+  const f13 = floorY(13);
+  hint(254, floorY(11), "sleeper2");
+  at("machineProp", 258, f13);
+  at("beetle", 262, f13, -1);
+  // The run: low walls to hop, gaps to clear, roots that break through, moths in the way.
+  block(266, MAP_H - 14, 1, 1);
+  ground(270, 272, 10);
+  at("root", 275, f13);
+  block(278, MAP_H - 15, 1, 2);
+  at("moth", 281, f13 - 100, -1);
+  ground(283, 286, 10);
+  at("lily", 288, ledge(287, 13, 3, 2));
+  at("root", 290, f13);
+  block(293, MAP_H - 14, 1, 1);
+  at("moth", 295, f13 - 120, 1);
+  ground(296, 298, 10);
+  const chase = { x: 260 * TILE, end: 300 * TILE, y: f13 };
 
-  /* ---- Z8 L'Arene et la porte (300-332) ---- */
-  ground(300, 332, 12);
-  ledge(304, 12, 3, 2);
-  ledge(313, 12, 3, 2);
-  const arena = { l: 302 * TILE, r: 317 * TILE, y: f12 };
-  const gate = { x: 326 * TILE, y: f12 };
+  /* ---- Z8 L'Arene et la porte (300-332): four tiles down, where the colossus cannot follow. ---- */
+  ground(300, 332, 9);
+  const f9b = floorY(9);
+  ledge(304, 9, 3, 2);
+  ledge(313, 9, 3, 2);
+  const arena = { l: 302 * TILE, r: 317 * TILE, y: f9b };
+  const gate = { x: 326 * TILE, y: f9b };
 
   const zones: Zone[] = [
     { id: "eveil", x0: 0, x1: 38, dark: 0, cave: false },
@@ -253,5 +255,90 @@ export function buildWorld(): World {
     { id: "arene", x0: 300, x1: 332, dark: 0.1, cave: false },
   ];
 
-  return { grid, spawns, zones, start: { x: 4 * TILE, y: f6 }, gong, tavern, arena, gate, hints };
+  return { grid, spawns, zones, start: { x: 4 * TILE, y: f6 }, gong, tavern, arena, gate, chase, hints };
+}
+
+/** Walkable tops: cells with something under them and air where they stand. */
+function surfaces(grid: Uint8Array): Set<number> {
+  const out = new Set<number>();
+  for (let ty = 1; ty < MAP_H; ty += 1) {
+    for (let tx = 0; tx < MAP_W; tx += 1) {
+      if (tileAt(grid, tx, ty) !== EMPTY) continue;
+      const below = tileAt(grid, tx, ty + 1);
+      if (below === EMPTY) continue;
+      // Room to stand: one more empty tile above (crouch height), else it is a crawl space.
+      out.add(ty * MAP_W + tx);
+    }
+  }
+  return out;
+}
+
+/**
+ * Checks the map for things a player could not do: spots nothing can reach with a
+ * three-tile jump, spawns floating in the air or buried in rock, ledges too high.
+ */
+export function worldLint(w: World): string[] {
+  const problems: string[] = [];
+  const grid = w.grid;
+  const surf = surfaces(grid);
+  const key = (tx: number, ty: number) => ty * MAP_W + tx;
+  // Reachability from the start, with a jump of 3 tiles up and 4 across, and falls of any depth.
+  const start = key(Math.floor(w.start.x / TILE), Math.floor(w.start.y / TILE) - 1);
+  const seen = new Set<number>();
+  const queue: number[] = [];
+  if (surf.has(start)) {
+    seen.add(start);
+    queue.push(start);
+  } else {
+    problems.push("start is not on a walkable surface");
+  }
+  while (queue.length) {
+    const k = queue.shift() as number;
+    const tx = k % MAP_W;
+    const ty = (k - tx) / MAP_W;
+    for (let dx = -4; dx <= 4; dx += 1) {
+      for (let dy = -3; dy <= MAP_H; dy += 1) {
+        const nx = tx + dx;
+        const ny = ty + dy;
+        if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+        const nk = key(nx, ny);
+        if (!surf.has(nk) || seen.has(nk)) continue;
+        // A wall between the two, at head height, blocks a straight hop.
+        const step = dx > 0 ? 1 : -1;
+        let blocked = false;
+        for (let x = tx + step; x !== nx; x += step) {
+          if (tileAt(grid, x, Math.min(ty, ny)) === SOLID && tileAt(grid, x, Math.min(ty, ny) - 1) === SOLID) blocked = true;
+        }
+        if (blocked && dy >= 0) continue;
+        seen.add(nk);
+        queue.push(nk);
+      }
+    }
+  }
+  const check = (label: string, x: number, y: number, mustReach = true) => {
+    const tx = Math.floor(x / TILE);
+    const ty = Math.floor(y / TILE) - 1;
+    if (tileAt(grid, tx, ty) !== EMPTY) problems.push(`${label} at tile ${tx},${ty} is inside rock`);
+    else if (tileAt(grid, tx, ty + 1) === EMPTY) problems.push(`${label} at tile ${tx},${ty} floats in the air`);
+    else if (mustReach && !seen.has(key(tx, ty))) problems.push(`${label} at tile ${tx},${ty} cannot be reached from the start`);
+  };
+  for (const sp of w.spawns) {
+    if (sp.kind === "moth" || sp.kind === "jelly" || sp.kind === "cocoons" || sp.kind === "eye") continue;
+    check(sp.kind, sp.x, sp.y, sp.kind === "lily" || sp.kind === "light");
+  }
+  check("gong", w.gong.x, w.gong.y);
+  check("tavern", w.tavern.x, w.tavern.y);
+  check("gate", w.gate.x, w.gate.y);
+  check("arena", w.arena.l + 60, w.arena.y);
+  for (const h of w.hints) check(`hint ${h.id}`, h.x, h.y);
+  // Every ledge must be within a jump of some surface below it.
+  for (let ty = 0; ty < MAP_H; ty += 1) {
+    for (let tx = 0; tx < MAP_W; tx += 1) {
+      if (tileAt(grid, tx, ty) !== ONEWAY) continue;
+      let ok = false;
+      for (let dy = 1; dy <= 3 && !ok; dy += 1) for (let dx = -3; dx <= 3; dx += 1) if (surf.has(key(tx + dx, ty + dy - 1))) ok = true;
+      if (!ok) problems.push(`ledge at tile ${tx},${ty} is more than three tiles above any surface`);
+    }
+  }
+  return problems;
 }

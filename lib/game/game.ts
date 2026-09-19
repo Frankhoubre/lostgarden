@@ -7,7 +7,7 @@
 import { GameAudio, type SongName } from "./audio";
 import type { InputName } from "./engine";
 import { STRINGS, type GameStrings, type HintId, type Lang } from "./strings";
-import { buildWorld, EMPTY, MAP_H, MAP_W, ONEWAY, SOLID, TILE, tileAt, type Spawn, type World, type Zone } from "./world";
+import { buildWorld, EMPTY, MAP_H, MAP_W, ONEWAY, SOLID, TILE, tileAt, worldLint, type Spawn, type World, type Zone } from "./world";
 
 const VIEW_W = 480;
 const VIEW_H = 288;
@@ -87,6 +87,9 @@ type ItemKind = "lily" | "light";
 type Item = { x: number; y: number; vy: number; kind: ItemKind; t: number; dead: boolean; rest: number };
 type Prop = { kind: "stone" | "lantern" | "cocoons" | "machineProp"; x: number; y: number };
 type Hint = { x: number; y: number; id: HintId };
+type Claw = { x: number; t: number; phase: "warn" | "drop" | "hold" | "lift" };
+type Giant = { x: number; y: number; t: number; state: "asleep" | "wake" | "run" | "halt" | "gone"; speed: number; slowT: number; clawT: number; claw: Claw | null };
+type GiantMeta = { giant: { n: number; cell: Cell }; claw: Cell };
 type BossState = "asleep" | "enter" | "idle" | "walk" | "stomp" | "blast" | "stagger" | "dying" | "dead";
 type Boss = { x: number; dir: 1 | -1; state: BossState; t: number; hp: number; flash: number; hits: number; vx: number; summoned: boolean };
 type MenuPage = "pause" | "controls";
@@ -201,6 +204,10 @@ export class Game {
   private lanternImg!: HTMLImageElement;
   private cocoonsImg!: HTMLImageElement;
   private lore2!: Lore2Meta;
+  private giantSheet!: HTMLImageElement;
+  private clawImg!: HTMLImageElement;
+  private giantMeta!: GiantMeta;
+  private giant: Giant | null = null;
 
   private lightCanvas: HTMLCanvasElement;
   private fxCanvas: HTMLCanvasElement;
@@ -362,6 +369,10 @@ export class Game {
       img("item-medallion.png"),
       json<LoreMeta>("lore-assets.json"),
     ]);
+    const [giantSheet, clawImg, giantMeta] = await Promise.all([img("giant-walk.png"), img("prop-claw.png"), json<GiantMeta>("giant-assets.json")]);
+    this.giantSheet = giantSheet;
+    this.clawImg = clawImg;
+    this.giantMeta = giantMeta;
     const [wolfRun, wolfDie, dormantWalk, dormantAct, mothSheet, jellySheet, machinePropImg, stoneImg, lanternImg, cocoonsImg, lore2] = await Promise.all([
       img("wolf-run.png"),
       img("wolf-die.png"),
@@ -383,6 +394,7 @@ export class Game {
     });
     this.world = buildWorld();
     this.grid = this.world.grid;
+    this.audio.setTrackBase(asset("music"));
     this.audio.setMusicOn(this.settings.music);
     this.audio.setSfxOn(this.settings.sfx);
     this.resetLevel();
@@ -426,6 +438,7 @@ export class Game {
     this.cameraLock = null;
     this.zoneId = "";
     this.boss = { x: w.arena.r - 150, dir: -1, state: "asleep", t: 0, hp: BOSS_HP, flash: 0, hits: 0, vx: 0, summoned: false };
+    this.giant = { x: w.chase.x - 440, y: w.chase.y, t: 0, state: "asleep", speed: 2.9, slowT: 0, clawT: 0, claw: null };
     this.beetles = [];
     this.wolves = [];
     this.dormants = [];
@@ -620,8 +633,82 @@ export class Game {
     if (this.boss) this.boss.hp = 1;
   }
 
+  /** Back to the very start, menu closed: the playtest's clean slate. */
+  debugReset() {
+    this.menu = null;
+    this.resetLevel();
+  }
+
+  debugGiant() {
+    return this.giant ? { x: Math.round(this.giant.x), state: this.giant.state, claw: this.giant.claw?.phase ?? null } : null;
+  }
+
   debugGive(lilies: number) {
     this.lilies += lilies;
+  }
+
+  /** Map problems the playtest suite reports (unreachable spots, buried spawns, ledges too high). */
+  debugLint(): string[] {
+    return worldLint(this.world);
+  }
+
+  /** A standing spot inside each zone, for the playtest tour. */
+  debugZones(): { id: string; x: number; y: number }[] {
+    return this.world.zones.map((z) => {
+      const tx = Math.floor((z.x0 + z.x1) / 2);
+      let x = tx;
+      let y: number | null = null;
+      for (let k = 0; k < 40 && y === null; k += 1) {
+        x = tx + (k % 2 === 0 ? k / 2 : -(k + 1) / 2);
+        for (let ty = 1; ty < MAP_H; ty += 1) {
+          if (tileAt(this.grid, x, ty) === EMPTY && tileAt(this.grid, x, ty - 1) === EMPTY && tileAt(this.grid, x, ty - 2) === EMPTY && tileAt(this.grid, x, ty + 1) === SOLID) {
+            y = (ty + 1) * TILE;
+            break;
+          }
+        }
+      }
+      return { id: z.id, x: x * TILE + TILE / 2, y: y ?? this.world.start.y };
+    });
+  }
+
+  /** True when Lanterne's box overlaps rock: the bug the fuzz test hunts. */
+  debugStuck(): boolean {
+    const h = this.boxH();
+    for (let y = this.py - h + 2; y < this.py - 1; y += 8) {
+      if (this.solidAt(this.px - HALF_W + 2, y) || this.solidAt(this.px + HALF_W - 2, y)) return true;
+    }
+    return Number.isNaN(this.px) || Number.isNaN(this.py) || this.px < 0 || this.px > MAP_W * TILE || this.py < 0 || this.py > MAP_H * TILE + 1;
+  }
+
+  /** The sprite sheets and their cells, so the playtest can look for frames cut at a cell edge. */
+  debugSheets(): { name: string; img: HTMLImageElement; cw: number; ch: number }[] {
+    const L = this.lore;
+    const L2 = this.lore2;
+    return [
+      { name: "lanterne-walk", img: this.walkSheet, cw: this.anim.cell.w, ch: this.anim.cell.h },
+      { name: "lanterne-jump", img: this.jumpSheet, cw: this.anim.cell.w, ch: this.anim.cell.h },
+      { name: "lanterne-idle", img: this.idleSheet, cw: this.anim.cell.w, ch: this.anim.cell.h },
+      { name: "lanterne-throw", img: this.throwSheet, cw: this.anim.throwCellW, ch: this.anim.cell.h },
+      { name: "lanterne-hurt", img: this.hurtSheet, cw: this.anim.cell.w, ch: this.anim.cell.h },
+      { name: "lanterne-crouch", img: this.crouchSheet, cw: this.extra.crouch.cell.w, ch: this.extra.crouch.cell.h },
+      { name: "lanterne-roll", img: this.rollSheet, cw: this.extra.roll.cell.w, ch: this.extra.roll.cell.h },
+      { name: "lanterne-charge", img: this.chargeSheet, cw: this.extra.charge.cell.w, ch: this.extra.charge.cell.h },
+      { name: "wolf-run", img: this.wolfRun, cw: L2.wolf.cell.w, ch: L2.wolf.cell.h },
+      { name: "wolf-die", img: this.wolfDie, cw: L2.wolf.cell.w, ch: L2.wolf.cell.h },
+      { name: "dormant-walk", img: this.dormantWalk, cw: L2.dormant.cell.w, ch: L2.dormant.cell.h },
+      { name: "dormant-act", img: this.dormantAct, cw: L2.dormant.cell.w, ch: L2.dormant.cell.h },
+      { name: "fx-moth", img: this.mothSheet, cw: L2.moth.cell.w, ch: L2.moth.cell.h },
+      { name: "fx-jelly", img: this.jellySheet, cw: L2.jelly.cell.w, ch: L2.jelly.cell.h },
+      { name: "fx-beetle", img: this.beetleSheet, cw: L.beetle.cell.w, ch: L.beetle.cell.h },
+      { name: "fx-root", img: this.rootSheet, cw: L.root.cell.w, ch: L.root.cell.h },
+      { name: "eye-anim", img: this.eyeSheet, cw: L.eye.cell.w, ch: L.eye.cell.h },
+      { name: "eye-die", img: this.eyeDieSheet, cw: L.eye.cell.w, ch: L.eye.cell.h },
+      { name: "machine-walk", img: this.mWalk, cw: this.mMeta.cell.w, ch: this.mMeta.cell.h },
+      { name: "machine-stomp", img: this.mStomp, cw: this.mMeta.cell.w, ch: this.mMeta.cell.h },
+      { name: "machine-blast", img: this.mBlast, cw: this.mMeta.cell.w, ch: this.mMeta.cell.h },
+      { name: "machine-die", img: this.mDie, cw: this.mMeta.cell.w, ch: this.mMeta.cell.h },
+      { name: "giant-walk", img: this.giantSheet, cw: this.giantMeta.giant.cell.w, ch: this.giantMeta.giant.cell.h },
+    ];
   }
 
   /* ---------------- tiles ---------------- */
@@ -660,9 +747,9 @@ export class Game {
     this.camY = Math.max(0, Math.min(MAP_H * TILE - VIEW_H, this.camY));
   }
 
-  /** The player box: 16 wide, 84 tall above the feet, half that when crouched or rolling. */
+  /** The player box: 16 wide, 84 tall above the feet, half that when crouched, rolling, or under a ceiling too low to stand. */
   private boxH(): number {
-    return this.crouching || this.rollT > 0 ? 44 : 84;
+    return this.crouching || this.rollT > 0 || !this.canStand() ? 44 : 84;
   }
 
   private playerBoxHits(x0: number, x1: number, y0: number, y1: number): boolean {
@@ -848,6 +935,7 @@ export class Game {
     this.tickZones();
     this.tickBoss();
     this.tickBossShots();
+    this.tickGiant();
     this.tickGate();
 
     this.movePlayer();
@@ -866,8 +954,9 @@ export class Game {
 
     // Camera: leads the player, eases, locked in the arena.
     const lock = this.cameraLock;
-    const targetX = lock ? lock.l : this.px - VIEW_W / 2 + this.dir * 40;
-    const targetY = lock ? this.world.arena.y - 214 : this.py - 176;
+    const running = this.giant !== null && (this.giant.state === "run" || this.giant.state === "wake");
+    const targetX = lock ? lock.l : this.px - VIEW_W / 2 + this.dir * (running ? 70 : 40);
+    const targetY = lock ? this.world.arena.y - 214 : this.py - (running ? 214 : 176);
     this.camX += (targetX - this.camX) * 0.08;
     this.camY += (targetY - this.camY) * 0.1;
     this.clampCamera();
@@ -996,8 +1085,20 @@ export class Game {
       this.zoneId = z.id;
       this.zoneCardT = 170;
       if (!(this.boss && this.boss.state !== "asleep" && this.boss.state !== "dead")) {
-        this.music(z.id === "taverne" ? "lullaby" : z.id === "racines" || z.id === "chemin" ? "chains" : "forest");
+        this.music(z.id === "taverne" ? "lullaby" : z.id === "racines" ? "cave" : z.id === "chemin" ? "chains" : z.id === "cimetiere" || z.id === "arene" ? "graveyard" : "forest");
       }
+    }
+    const g = this.giant;
+    const chase = this.world.chase;
+    if (g && g.state === "asleep" && this.px > chase.x && Math.abs(this.py - chase.y) < 60) {
+      g.state = "wake";
+      g.t = 0;
+      g.x = chase.x - 440;
+      this.checkpoint = { x: chase.x - 60, y: chase.y };
+      this.caption = { title: this.S.chase.title, lines: this.S.chase.lines, t: 240 };
+      this.music("chains");
+      this.audio.sfx("boss");
+      this.shake = 18;
     }
     const b = this.boss;
     const arena = this.world.arena;
@@ -1085,6 +1186,12 @@ export class Game {
     this.px = this.checkpoint.x;
     this.py = this.checkpoint.y;
     this.respawnAround(this.px, 900);
+    if (this.giant && this.giant.state !== "gone") {
+      this.giant.state = "asleep";
+      this.giant.x = this.world.chase.x - 440;
+      this.giant.claw = null;
+      this.giant.slowT = 0;
+    }
     const b = this.boss;
     const arena = this.world.arena;
     if (b && b.state !== "asleep" && b.state !== "dead") {
@@ -1243,7 +1350,7 @@ export class Game {
       const b = this.boss;
       const fy = this.world.arena.y;
       if (b && !sh.dead && (b.state === "idle" || b.state === "walk" || b.state === "stomp" || b.state === "blast" || b.state === "stagger")) {
-        if (sh.x > b.x - 70 && sh.x < b.x + 70 && sh.y > fy - 165 && sh.y < fy && land(b)) {
+        if (sh.x > b.x - 98 && sh.x < b.x + 98 && sh.y > fy - 231 && sh.y < fy && land(b)) {
           this.hitBoss(b, sh.power);
           this.burst(sh.x, sh.y, 16, "#fff1a8", 2.4);
         }
@@ -1858,7 +1965,7 @@ export class Game {
     b.flash = 6;
     b.hits += dmg;
     this.hitStop = dmg > 1 ? 5 : 2;
-    this.pop(b.x + (Math.random() - 0.5) * 40, fy - 130, String(dmg), dmg > 1 ? "#ffffff" : "#fff1a8");
+    this.pop(b.x + (Math.random() - 0.5) * 40, fy - 180, String(dmg), dmg > 1 ? "#ffffff" : "#fff1a8");
     this.audio.sfx("bossHit");
     if (!b.summoned && b.hp <= BOSS_HP / 2) {
       b.summoned = true;
@@ -1895,11 +2002,11 @@ export class Game {
     b.t += 1;
     if (b.flash > 0) b.flash -= 1;
     const dist = this.px - b.x;
-    const front = b.x + b.dir * 84;
+    const front = b.x + b.dir * 118;
     switch (b.state) {
       case "enter": {
         b.vx = -1.1;
-        if (b.x < arena.r - 150) {
+        if (b.x < arena.r - 170) {
           b.state = "idle";
           b.t = 0;
           b.vx = 0;
@@ -1940,9 +2047,9 @@ export class Game {
           this.shake = 14;
           this.audio.sfx("boss");
           this.puffAt(front, fy, 18, "#8fa9b8", 2.6);
-          if (Math.abs(this.px - front) < 60 && this.py > fy - 30) this.hurtPlayer(b.x, "stomp");
+          if (Math.abs(this.px - front) < 70 && this.py > fy - 30) this.hurtPlayer(b.x, "stomp");
           this.bossShots.push({ x: front, y: fy - 10, vx: b.dir * 3.6, vy: 0, w: 14, h: 10, life: 140, dead: false, kind: "shard", fy });
-          this.bossShots.push({ x: b.x - b.dir * 60, y: fy - 10, vx: -b.dir * 3.2, vy: 0, w: 14, h: 10, life: 140, dead: false, kind: "shard", fy });
+          this.bossShots.push({ x: b.x - b.dir * 84, y: fy - 10, vx: -b.dir * 3.2, vy: 0, w: 14, h: 10, life: 140, dead: false, kind: "shard", fy });
         }
         if (b.t > 70) {
           b.state = "idle";
@@ -1955,9 +2062,9 @@ export class Game {
         if (b.t === 44) {
           this.audio.sfx("throw");
           this.shake = 6;
-          const ey = fy - 118;
-          this.bossShots.push({ x: b.x + b.dir * 70, y: ey, vx: b.dir * 5.4, vy: 0.55, w: 36, h: 10, life: 120, dead: false, kind: "bolt", fy });
-          this.burst(b.x + b.dir * 70, ey, 14, "#ffd27a", 2.5);
+          const ey = fy - 165;
+          this.bossShots.push({ x: b.x + b.dir * 98, y: ey, vx: b.dir * 5.4, vy: 0.9, w: 36, h: 10, life: 120, dead: false, kind: "bolt", fy });
+          this.burst(b.x + b.dir * 98, ey, 14, "#ffd27a", 2.5);
         }
         if (b.t > 80) {
           b.state = "idle";
@@ -1996,7 +2103,162 @@ export class Game {
         break;
     }
     b.x += b.vx;
-    b.x = Math.max(arena.l + 90, Math.min(arena.r - 90, b.x));
+    b.x = Math.max(arena.l + 120, Math.min(arena.r - 120, b.x));
+  }
+
+  /* ---------------- the colossus ---------------- */
+
+  /** The chase: it runs after the light, its claws come down ahead of Lanterne, and it cannot follow into the arena. */
+  private tickGiant() {
+    const g = this.giant;
+    if (!g || g.state === "asleep" || g.state === "gone") return;
+    g.t += 1;
+    const chase = this.world.chase;
+    if (g.state === "wake") {
+      if (g.t % 6 === 0) this.puffAt(g.x + (Math.random() - 0.5) * 200, g.y, 6, "#8fa9b8", 2.2);
+      if (g.t > 60) {
+        g.state = "run";
+        g.t = 0;
+      }
+      return;
+    }
+    if (g.state === "halt") {
+      if (g.t % 30 === 0) {
+        this.shake = 6;
+        this.puffAt(g.x + 60, g.y, 8, "#8fa9b8", 2);
+      }
+      if (g.t > 150) {
+        g.state = "gone";
+        g.t = 0;
+      }
+      return;
+    }
+    // Running.
+    const dist = this.px - g.x;
+    let speed = dist > 380 ? 4.8 : dist < 190 ? 2.6 : 3.15;
+    if (g.slowT > 0) {
+      g.slowT -= 1;
+      speed = 1.4;
+    }
+    if (this.deadT > 0) speed = 0;
+    g.speed += (speed - g.speed) * 0.08;
+    g.x += g.speed;
+    if (g.t % 26 === 0 && g.speed > 0.5) {
+      this.shake = Math.max(this.shake, 4);
+      this.puffAt(g.x - 80 + Math.random() * 160, g.y, 6, "#8fa9b8", 1.8);
+      if (g.t % 52 === 0) this.audio.sfx("armor");
+    }
+    // Caught: a hit, thrown forward, and the colossus stumbles for a moment.
+    if (g.x + 110 > this.px && this.deadT === 0 && this.invuln === 0) {
+      this.hurtPlayer(g.x, "giant");
+      this.vx = 7;
+      this.vy = -4;
+      this.onGround = false;
+      g.slowT = 80;
+    }
+    // A claw comes down ahead of the light.
+    g.clawT += 1;
+    if (!g.claw && g.clawT > 95 && dist < 620) {
+      g.clawT = 0;
+      g.claw = { x: this.px + 150 + this.vx * 18, t: 0, phase: "warn" };
+      this.audio.sfx("timer");
+    }
+    const c = g.claw;
+    if (c) {
+      c.t += 1;
+      const floor = this.floorBelow(c.x, chase.y - 8, 6) ?? chase.y;
+      switch (c.phase) {
+        case "warn":
+          if (c.t % 3 === 0) this.particles.push({ x: c.x + (Math.random() - 0.5) * 50, y: floor - 200 - Math.random() * 60, vx: 0, vy: 2 + Math.random() * 2, life: 40, max: 40, color: "#ffb347", size: 1, parallax: 1 });
+          if (c.t > 34) {
+            c.phase = "drop";
+            c.t = 0;
+          }
+          break;
+        case "drop":
+          if (c.t > 7) {
+            c.phase = "hold";
+            c.t = 0;
+            this.shake = 14;
+            this.audio.sfx("boss");
+            this.puffAt(c.x, floor, 22, "#8fa9b8", 2.8);
+            if (Math.abs(this.px - c.x) < 40 && this.py > floor - 50 && this.py <= floor + 2) this.hurtPlayer(c.x, "claw");
+          }
+          break;
+        case "hold":
+          if (this.playerBoxHits(c.x - 28, c.x + 28, floor - 150, floor)) this.hurtPlayer(c.x, "claw");
+          if (c.t > 22) {
+            c.phase = "lift";
+            c.t = 0;
+          }
+          break;
+        case "lift":
+          if (c.t > 18) g.claw = null;
+          break;
+        default:
+          break;
+      }
+    }
+    // The run ends at the drop into the arena: the colossus halts at the edge.
+    if (g.x > chase.end - 200) {
+      g.x = chase.end - 200;
+      g.state = "halt";
+      g.t = 0;
+      g.claw = null;
+      this.shake = 12;
+    }
+  }
+
+  private drawGiant(cam: number, camY: number) {
+    const g = this.giant;
+    if (!g || g.state === "asleep") return;
+    const { w: cw, h: ch } = this.giantMeta.giant.cell;
+    const running = g.state === "run";
+    const frame = running ? Math.floor(g.t / 12) % this.giantMeta.giant.n : g.state === "halt" ? 1 : 0;
+    const sink = g.state === "gone" ? Math.min(ch + 20, g.t * 2) : 0;
+    const x = Math.round(g.x - cw / 2 - cam);
+    const y = Math.round(g.y - ch + 24 + sink - camY);
+    if (x + cw > -40 && x < VIEW_W + 40) {
+      const alpha = g.state === "gone" ? Math.max(0, 1 - g.t / 90) : 1;
+      this.ctx.globalAlpha = alpha;
+      this.ctx.fillStyle = "rgba(2, 6, 18, 0.45)";
+      this.ctx.beginPath();
+      this.ctx.ellipse(g.x - cam, g.y + 2 - camY, 110, 8, 0, 0, Math.PI * 2);
+      this.ctx.fill();
+      // Faces right: the sheet looks left, so flip.
+      this.drawSprite(this.giantSheet, frame, cw, ch, x, y, true);
+      this.ctx.globalAlpha = 1;
+      const eyeX = g.x - cam + 62;
+      const eyeY = g.y - ch + 24 + 58 + sink - camY;
+      this.lights.push({ x: eyeX, y: eyeY, r: 120, a: 1, color: `rgba(255, 140, 40, ${0.45 * alpha})`, parallax: 1 });
+      if (g.state === "wake" && g.t % 4 === 0) this.burst(eyeX + cam, eyeY + camY, 4, "#ff8a3a", 2);
+    }
+    const c = g.claw;
+    if (c) {
+      const floor = this.floorBelow(c.x, this.world.chase.y - 8, 6) ?? this.world.chase.y;
+      const { w: kw, h: kh } = this.giantMeta.claw;
+      const sx = Math.round(c.x - kw / 2 - cam);
+      const fy = floor - camY;
+      const up = fy - kh - 90;
+      let ky = up;
+      if (c.phase === "drop") ky = up + ((fy - kh + 8 - up) * c.t) / 7;
+      else if (c.phase === "hold") ky = fy - kh + 8;
+      else if (c.phase === "lift") ky = fy - kh + 8 - ((fy - kh + 8 - up) * c.t) / 18;
+      // The warning: a shadow that sharpens on the floor.
+      const k = c.phase === "warn" ? c.t / 34 : 1;
+      this.ctx.fillStyle = `rgba(2, 6, 18, ${0.25 + 0.35 * k})`;
+      this.ctx.beginPath();
+      this.ctx.ellipse(c.x - cam, fy + 1, 22 + 30 * (1 - k), 5, 0, 0, Math.PI * 2);
+      this.ctx.fill();
+      if (c.phase === "warn") {
+        this.lights.push({ x: c.x - cam, y: fy - 10, r: 50 + 30 * k, a: 1, color: `rgba(255, 140, 40, ${0.15 + 0.3 * k})`, parallax: 1 });
+        this.ctx.fillStyle = Math.floor(this.time / 4) % 2 === 0 ? "#ffb347" : "#ff5a2a";
+        this.ctx.fillRect(Math.round(c.x - cam) - 1, Math.round(fy) - 8 - Math.round(k * 20), 3, 8);
+      } else {
+        this.drawSprite(this.clawImg, 0, kw, kh, sx, Math.round(ky), false);
+        this.lights.push({ x: c.x - cam, y: Math.round(ky) + kh - 20, r: 60, a: 1, color: "rgba(255, 140, 40, 0.3)", parallax: 1 });
+      }
+    }
   }
 
   private bossStart(b: Boss, state: BossState) {
@@ -2052,6 +2314,7 @@ export class Game {
     this.drawItems(cam, camY);
     for (const be of this.beetles) this.drawBeetle(be, cam, camY);
     for (const w of this.watchers) this.drawWatcher(w, cam, camY);
+    this.drawGiant(cam, camY);
     this.drawGhosts(cam, camY);
     this.drawPlayer(cam, camY);
     for (const w of this.wolves) if (w.state !== "dead") this.drawWolf(w, cam, camY);
@@ -2550,17 +2813,17 @@ export class Game {
     }
     const flip = b.dir > 0;
     const x = Math.round(b.x - cw / 2 - cam);
-    const y = Math.round(fy - ch + 10 - camY);
+    const y = Math.round(fy - ch + 14 - camY);
     if (b.state !== "dead" && b.state !== "dying") {
       const charge = b.state === "blast" ? Math.min(1, b.t / 44) : 0;
-      this.lights.push({ x: b.x - cam + b.dir * 62, y: fy - 118 - camY, r: 44 + charge * 50, a: 1, color: `rgba(255, 160, 50, ${0.28 + charge * 0.4})`, parallax: 1 });
+      this.lights.push({ x: b.x - cam + b.dir * 87, y: fy - 165 - camY, r: 60 + charge * 70, a: 1, color: `rgba(255, 160, 50, ${0.28 + charge * 0.4})`, parallax: 1 });
     } else if (b.state === "dying") {
-      this.lights.push({ x: b.x - cam, y: fy - 90 - camY, r: 90, a: 1, color: `rgba(255, 120, 40, ${0.3 * (1 - b.t / 130)})`, parallax: 1 });
+      this.lights.push({ x: b.x - cam, y: fy - 120 - camY, r: 120, a: 1, color: `rgba(255, 120, 40, ${0.3 * (1 - b.t / 130)})`, parallax: 1 });
     }
     if (b.state !== "dead") {
       this.ctx.fillStyle = "rgba(2, 6, 18, 0.4)";
       this.ctx.beginPath();
-      this.ctx.ellipse(b.x - cam, fy + 2 - camY, 80, 6, 0, 0, Math.PI * 2);
+      this.ctx.ellipse(b.x - cam, fy + 2 - camY, 112, 7, 0, 0, Math.PI * 2);
       this.ctx.fill();
     }
     if (b.flash > 0 && b.flash % 2 === 0) this.drawFlashed(sheet, frame, cw, ch, x, y, flip, 0.7);

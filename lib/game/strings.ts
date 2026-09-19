@@ -10,6 +10,7 @@ export type GameStrings = {
   gong: { title: string; lines: string[] };
   serrure: { title: string; lines: string[]; trade: string[]; offer: string };
   wake: string;
+  chase: { title: string; lines: string[] };
   boss: string;
   clear: { title: string; sub: string; line: string; replay: string };
   death: string;
@@ -49,6 +50,7 @@ export const STRINGS: Record<Lang, GameStrings> = {
       offer: "BAS : 3 LYS = 1 COEUR",
     },
     wake: "La machine s'éveille dans la mousse.",
+    chase: { title: "LE COLOSSE S'EVEILLE", lines: ["Cours. Ne te retourne pas.", "Saute ce qui barre, evite ses griffes."] },
     boss: "LA MACHINE",
     clear: { title: "EPREUVE FRANCHIE", sub: "La forêt des champignons bleus", line: "Le médaillon brûle de bleu. Rose est plus proche.", replay: "X pour rejouer" },
     death: "L'armure retombe dans la mousse.",
@@ -94,6 +96,7 @@ export const STRINGS: Record<Lang, GameStrings> = {
       offer: "DOWN: 3 LILIES = 1 HEART",
     },
     wake: "The machine wakes in the moss.",
+    chase: { title: "THE COLOSSUS WAKES", lines: ["Run. Do not look back.", "Jump what blocks you, dodge its claws."] },
     boss: "THE MACHINE",
     clear: { title: "TRIAL PASSED", sub: "The blue mushroom forest", line: "The medallion burns blue. Rose is closer.", replay: "X to play again" },
     death: "The armour sinks back into the moss.",

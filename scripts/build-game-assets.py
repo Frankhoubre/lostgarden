@@ -459,7 +459,7 @@ def build_generated_lanterne():
     idle = slice_sheet(GEN / "idle1.png")
     print("frames:", len(walk), len(jump), len(idle))
     target_h = 90
-    cell_w, cell_h = 56, 96
+    cell_w, cell_h = 72, 96
     scale_walk = target_h / max(f.height for f in walk)
     scale_idle = target_h / max(f.height for f in idle)
     # The push-off frame of the jump is close to full height.
@@ -479,10 +479,10 @@ def build_generated_lanterne():
     hurt = slice_sheet(GEN / "hurt1.png")
     scale_throw = target_h / max(f.height for f in throw)
     scale_hurt = target_h / max(f.height for f in hurt)
-    n_throw = build_strip("throw", throw, scale_throw, 72, cell_h, palette_img)
+    n_throw = build_strip("throw", throw, scale_throw, 96, cell_h, palette_img)
     n_hurt = build_strip("hurt", hurt, scale_hurt, cell_w, cell_h, palette_img)
     print("throw/hurt frames:", n_throw, n_hurt)
-    meta = {"cell": {"w": cell_w, "h": cell_h}, "walk": n_walk, "jump": n_jump, "idle": n_idle, "throw": n_throw, "throwCellW": 72, "hurt": n_hurt}
+    meta = {"cell": {"w": cell_w, "h": cell_h}, "walk": n_walk, "jump": n_jump, "idle": n_idle, "throw": n_throw, "throwCellW": 96, "hurt": n_hurt}
     (OUT / "lanterne-anim.json").write_text(json.dumps(meta))
 
     # Foreground trunk.
@@ -609,9 +609,9 @@ def build_generated_machine():
     mask = ba[..., 3] > 120
     pal_src = Image.fromarray(ba[mask][:, :3].reshape(1, -1, 3), "RGB")
     palette_img = pal_src.quantize(colors=40, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
-    target_h = 176
+    target_h = 246
     scale = target_h / base.height
-    cell_w, cell_h = 250, 190
+    cell_w, cell_h = 400, 330
     meta = {"cell": {"w": cell_w, "h": cell_h}}
     sheets = {"walk": ("mwalk1.png", 4), "stomp": ("mstomp1.png", 4), "blast": ("mblast1.png", 3), "die": ("mdie1.png", 5)}
     for name, (src, n) in sheets.items():
@@ -668,7 +668,7 @@ def build_generated_lore():
     ref = max(eye[:3], key=lambda f: f.height)
     scale = 120 / ref.height
     pal = palette_from(Image.open(GEN / "eyemachine1.png"), 28)
-    meta["eye"] = {"n": build_strip("anim", eye, scale, 96, 132, pal, prefix="eye"), "die": build_strip("die", eyedie, scale, 96, 132, pal, prefix="eye"), "cell": {"w": 96, "h": 132}}
+    meta["eye"] = {"n": build_strip("anim", eye, scale, 176, 200, pal, prefix="eye"), "die": build_strip("die", eyedie, scale, 176, 200, pal, prefix="eye"), "cell": {"w": 176, "h": 200}}
     # Serrure: 3 frames, 99px (10% taller than Lanterne).
     ser = slice_equal(GEN / "serrure1.png", 3)
     meta["serrure"] = {"n": strip_from_frames("idle", ser, 99, 72, 104, 28, prefix="serrure"), "cell": {"w": 72, "h": 104}}
@@ -712,10 +712,10 @@ def build_generated_extra():
     s_roll = 90 / roll[-1].height
     # The charge frames hold an orb above the helmet; scale on the first, calm frame.
     s_charge = 92 / charge[0].height
-    n_crouch = build_strip("crouch", crouch, s_crouch, 64, 96, palette_img)
-    n_roll = build_strip("roll", roll, s_roll, 64, 96, palette_img)
+    n_crouch = build_strip("crouch", crouch, s_crouch, 88, 96, palette_img)
+    n_roll = build_strip("roll", roll, s_roll, 88, 96, palette_img)
     n_charge = build_strip("charge", charge, s_charge, 128, 112, palette_img)
-    meta = {"crouch": {"n": n_crouch, "cell": {"w": 64, "h": 96}}, "roll": {"n": n_roll, "cell": {"w": 64, "h": 96}}, "charge": {"n": n_charge, "cell": {"w": 128, "h": 112}}}
+    meta = {"crouch": {"n": n_crouch, "cell": {"w": 88, "h": 96}}, "roll": {"n": n_roll, "cell": {"w": 88, "h": 96}}, "charge": {"n": n_charge, "cell": {"w": 128, "h": 112}}}
     (OUT / "lanterne-extra.json").write_text(json.dumps(meta))
     print("extra:", meta)
 
@@ -739,7 +739,7 @@ def build_generated_lore2():
     ref = max(dorm[2:], key=lambda f: f.height)
     scale = 126 / ref.height
     pal = palette_from(Image.open(GEN / "dormant1.png"), 24)
-    meta["dormant"] = {"walk": build_strip("walk", dorm, scale, 88, 140, pal, prefix="dormant"), "act": build_strip("act", dorm2, scale, 88, 140, pal, prefix="dormant"), "cell": {"w": 88, "h": 140}}
+    meta["dormant"] = {"walk": build_strip("walk", dorm, scale, 128, 148, pal, prefix="dormant"), "act": build_strip("act", dorm2, scale, 128, 148, pal, prefix="dormant"), "cell": {"w": 128, "h": 148}}
     moth = slice_equal(GEN / "moth1.png", 4)
     meta["moth"] = {"n": strip_from_frames("moth", moth, 26, 44, 34, 16), "cell": {"w": 44, "h": 34}}
     jelly = slice_equal(GEN / "jelly1.png", 3)
@@ -762,3 +762,21 @@ def build_generated_lore2():
 
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_lore2()
+
+
+def build_generated_giant():
+    """The colossal walker of the chase and its slamming claw."""
+    giant = slice_equal(GEN / "giant1.png", 2)
+    pal = palette_from(Image.open(GEN / "giant1.png"), 28)
+    scale = 280 / max(f.height for f in giant)
+    n = build_strip("walk", giant, scale, 300, 290, pal, prefix="giant")
+    claw = max(components(GEN / "claw1.png", min_size=5000), key=lambda p: p.width * p.height)
+    px = to_pixel(claw, 200 / claw.height, 24)
+    px.save(OUT / "prop-claw.png", optimize=True)
+    meta = {"giant": {"n": n, "cell": {"w": 300, "h": 290}}, "claw": {"w": px.width, "h": px.height}}
+    (OUT / "giant-assets.json").write_text(json.dumps(meta))
+    print("giant", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_giant()

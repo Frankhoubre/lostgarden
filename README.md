@@ -28,7 +28,8 @@ Open [http://localhost:3000](http://localhost:3000).
 - `lib/game/world.ts`: the map of episode 1 as terrain profiles on a 332 by 44 tile grid: eight zones, cliffs, ledges, a pit, tunnels, and every spawn
 - `lib/game/strings.ts`: in-game text in French and English
 - `lib/game/mockup.ts`: the earlier flat stage, still reachable with `?engine=mockup`
-- `lib/game/audio.ts` and `lib/game/songs.ts`: WebAudio step sequencer and the chiptune renditions of the original soundtrack (Ash Lantern Prayer, The Knight's Lullaby, Clockwork Requiem, The Giant and the Knight), transcribed from the recordings
+- `lib/game/audio.ts`: plays the original recordings in `public/game/music/` per zone with cross-fades, synthesises the sound effects with WebAudio, and falls back to the chiptune renditions in `lib/game/songs.ts` when a recording cannot play
+- `scripts/playtest.mjs` (`npm run playtest`, against a running dev server): the automated playtest. Map lint (every spawn on a floor and reachable from the start, ledges within a jump), sprite frames cut at a cell edge, missing assets, jump height, roll, crouch, pause menu and language, a tour of every zone with black or flat frame detection, eight seconds of random inputs per zone hunting for a knight stuck in rock, checkpoints, the chase and the boss. Screenshots and `report.json` land in `playtest-report/`
 - `scripts/build-game-assets.py` and `scripts/game-assets-manifest.json`: slice the generated sources into the strips in `public/game/` (`--fetch` downloads the sources, `--generated` builds); `scripts/build-tiles.py` cuts the 32px autotile sheet from the painted ground
 - `components/game/GameGate.tsx`: the pixel-art login screen, then the game once signed in
 - `components/game/GameShell.tsx`: canvas host, keyboard and touch controls

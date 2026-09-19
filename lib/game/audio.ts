@@ -128,10 +128,12 @@ const SONG_LULLABY: Song = {
   hat: new Array(64).fill(0) as (0 | 1)[],
 };
 
-/** The original soundtrack, in its chiptune renditions; the older patterns stay as fallbacks. */
+/** Chiptune renditions of the soundtrack: the fallback when the recordings cannot play. */
 export const SONGS = {
   forest: ASH_LANTERN_PRAYER,
+  cave: GIANT_AND_KNIGHT,
   chains: GIANT_AND_KNIGHT,
+  graveyard: ASH_LANTERN_PRAYER,
   castle: SONG_CASTLE,
   boss: CLOCKWORK_REQUIEM,
   lullaby: KNIGHTS_LULLABY,
@@ -142,6 +144,16 @@ export const SONGS = {
 } as const;
 
 export type SongName = keyof typeof SONGS;
+
+/** The original recordings by Frank Houbre, one per mood; songs without a file fall back to the chiptune. */
+export const TRACKS: Partial<Record<SongName, string>> = {
+  forest: "ash-lantern-prayer.mp3",
+  cave: "song-of-the-empty-sky.mp3",
+  chains: "the-giant-and-the-knight.mp3",
+  graveyard: "inexorable-ascent.mp3",
+  boss: "clockwork-requiem.mp3",
+  lullaby: "the-knights-lullaby.mp3",
+};
 
 export class GameAudio {
   private ctx: AudioContext | null = null;
@@ -155,10 +167,76 @@ export class GameAudio {
   private timer: number | null = null;
   private musicOn = true;
   private sfxOn = true;
+  private trackBase: string | null = null;
+  private track: HTMLAudioElement | null = null;
+  private trackName: SongName | null = null;
+  private fadeTimer: number | null = null;
   muted = false;
+
+  /** Where the recorded tracks live; null keeps the chiptune only. */
+  setTrackBase(base: string | null) {
+    this.trackBase = base;
+  }
+
+  private trackVolume(): number {
+    return this.muted || !this.musicOn ? 0 : 0.55;
+  }
+
+  /** Cross-fades the recording for a song in; returns false when there is none to play. */
+  private playTrack(name: SongName): boolean {
+    const file = TRACKS[name];
+    if (!this.trackBase || !file) return false;
+    if (this.trackName === name && this.track) return true;
+    const old = this.track;
+    const next = new Audio(`${this.trackBase}/${file}`);
+    next.loop = true;
+    next.preload = "auto";
+    next.volume = 0;
+    this.track = next;
+    this.trackName = name;
+    const started = next.play();
+    if (started) started.catch(() => undefined);
+    this.fadeTracks(old, next);
+    return true;
+  }
+
+  private fadeTracks(old: HTMLAudioElement | null, next: HTMLAudioElement | null) {
+    if (this.fadeTimer !== null) window.clearInterval(this.fadeTimer);
+    let k = 0;
+    this.fadeTimer = window.setInterval(() => {
+      k += 1;
+      const t = Math.min(1, k / 20);
+      if (old) old.volume = Math.max(0, (1 - t) * this.trackVolume());
+      if (next) next.volume = t * this.trackVolume();
+      if (t >= 1) {
+        if (old) {
+          old.pause();
+          old.src = "";
+        }
+        if (this.fadeTimer !== null) window.clearInterval(this.fadeTimer);
+        this.fadeTimer = null;
+      }
+    }, 50);
+  }
+
+  private stopTrack() {
+    if (!this.track) return;
+    this.fadeTracks(this.track, null);
+    this.track = null;
+    this.trackName = null;
+  }
+
+  /** Recordings need a user gesture too: retry the current one when the page is first touched. */
+  private resumeTrack() {
+    if (this.track && this.track.paused) {
+      const p = this.track.play();
+      if (p) p.catch(() => undefined);
+    }
+  }
 
   /** Must be called from a user gesture. */
   unlock() {
+    this.resumeTrack();
     if (this.ctx) {
       if (this.ctx.state === "suspended") void this.ctx.resume();
       return;
@@ -187,6 +265,7 @@ export class GameAudio {
   setMusicOn(on: boolean) {
     this.musicOn = on;
     if (this.musicGain && this.ctx) this.musicGain.gain.setTargetAtTime(on ? 0.35 : 0, this.ctx.currentTime, 0.02);
+    if (this.track) this.track.volume = this.trackVolume();
   }
 
   setSfxOn(on: boolean) {
@@ -195,12 +274,20 @@ export class GameAudio {
 
   setMuted(muted: boolean) {
     this.muted = muted;
+    if (this.track) this.track.volume = this.trackVolume();
     if (this.master && this.ctx) {
       this.master.gain.setTargetAtTime(muted ? 0 : 0.5, this.ctx.currentTime, 0.02);
     }
   }
 
   playSong(name: SongName) {
+    if (this.playTrack(name)) {
+      // The recording carries the music; the sequencer stays quiet.
+      this.songName = name;
+      this.song = null;
+      return;
+    }
+    this.stopTrack();
     this.songName = name;
     this.song = SONGS[name];
     this.step = 0;
@@ -212,6 +299,7 @@ export class GameAudio {
   }
 
   stopSong() {
+    this.stopTrack();
     this.songName = null;
     this.song = null;
     if (this.timer !== null) {
@@ -222,6 +310,11 @@ export class GameAudio {
 
   dispose() {
     this.stopSong();
+    if (this.track) {
+      this.track.pause();
+      this.track.src = "";
+      this.track = null;
+    }
     if (this.ctx) void this.ctx.close();
     this.ctx = null;
   }
