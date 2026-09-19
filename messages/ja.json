@@ -65,6 +65,10 @@
     "game": {
       "title": "プレイ：ランタンの誓い | Lost Garden",
       "description": "Lost Garden の世界を舞台にした無料のレトロブラウザゲーム。青いキノコの森、鎖の世界、傾いた城をランタンと駆け抜けろ。魔界村スタイル。"
+    },
+    "webtoon": {
+      "title": "ウェブトゥーン | Lost Garden",
+      "description": "Lost Garden を縦読みウェブトゥーンに翻案。第1話の冒頭をコマごとに、絵コンテと翻案エンジンとともに。"
     }
   },
   "episode": {
@@ -110,7 +114,8 @@
     "home": "ホーム",
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる",
-    "game": "ゲーム"
+    "game": "ゲーム",
+    "webtoon": "ウェブトゥーン"
   },
   "notFound": {
     "title": "ページが見つかりません",
@@ -754,5 +759,88 @@
       "三発受けると鎧は苔に沈み、最後の中間地点で立ち上がる。ランタンは決して喋らない。"
     ],
     "credits": "Frank Houbre のアニメ Lost Garden のオリジナルゲーム。ダウンロード不要、アカウント不要、ブラウザで遊べます。"
+  },
+  "webtoon": {
+    "breadcrumbHome": "ホーム",
+    "breadcrumbWebtoon": "ウェブトゥーン",
+    "headline": "ウェブトゥーン",
+    "lead": "縦に読む Lost Garden。各ストリップは、エピソードと脚本から翻案エンジンが生成します。同じ物語、同じショット、スクロールのための演出。",
+    "indexEmpty": "まだストリップはありません。",
+    "read": "読む",
+    "openEditor": "エディターを開く",
+    "backToReader": "リーダーに戻る",
+    "backToIndex": "すべてのストリップ",
+    "panels": "{count} コマ",
+    "height": "高さ {px} px",
+    "source": "出典：第{episode}話、{start} から {end}",
+    "storyboardTitle": "各コマが存在する理由",
+    "storyboardLead": "エンジンの翻案ノート：各コマの元になった映像のショットと、その役割。",
+    "beat": "ビート",
+    "panel": "コマ",
+    "shot": "ショット",
+    "fidelityDirect": "映像のショットに一致",
+    "fidelityReframe": "同じ瞬間、新しい構図",
+    "fidelityBridge": "二つのショットをつなぐ",
+    "imagePending": "画像を生成中",
+    "jsonLink": "絵コンテ JSON をダウンロード",
+    "pipelineTitle": "制作の仕組み",
+    "pipelineSteps": [
+      "ソース：エピソード、脚本、キャラクターと場所の設定資料。",
+      "物語分析：ショット、台詞、音、連続性。",
+      "ビートへの分割。",
+      "翻案エンジン：コマ、高さ、間隔、台詞、転換。",
+      "参照の解決：各コマに合う設定資料。",
+      "コマごとのプロンプト、そして生成。",
+      "縦レイアウト、そしてこのリーダーとエディター。"
+    ],
+    "editor": {
+      "title": "ウェブトゥーン エディター",
+      "lead": "編集内容はこのブラウザに保存されます。JSON を書き出してパイプラインに戻してください。",
+      "panelsList": "コマ",
+      "selected": "選択中のコマ",
+      "height": "高さ (px)",
+      "spacingBefore": "前の余白 (px)",
+      "spacingAfter": "後の余白 (px)",
+      "background": "背景",
+      "border": "枠線",
+      "focal": "焦点 (x, y %)",
+      "shotType": "ショットの種類",
+      "transition": "転換",
+      "purpose": "役割",
+      "description": "説明",
+      "prompt": "生成プロンプト",
+      "dialogue": "台詞",
+      "caption": "キャプション",
+      "sfx": "効果音",
+      "speaker": "話者",
+      "text": "テキスト",
+      "style": "スタイル",
+      "anchor": "位置 (x, y %)",
+      "add": "追加",
+      "remove": "削除",
+      "moveUp": "上へ",
+      "moveDown": "下へ",
+      "delete": "コマを削除",
+      "insertAfter": "後にコマを挿入",
+      "merge": "次のコマと結合",
+      "split": "二つに分割",
+      "reset": "エンジンの版に戻す",
+      "exportJson": "JSON を書き出す",
+      "importJson": "JSON を読み込む",
+      "copyPrompt": "プロンプトをコピー",
+      "copied": "コピーしました",
+      "regenerate": "再生成の対象にする",
+      "stale": "画像がプロンプトより古い",
+      "missing": "画像はまだありません",
+      "generated": "画像生成済み",
+      "preview": "プレビュー",
+      "showIds": "コマ ID を表示",
+      "saved": "このブラウザに保存済み",
+      "references": "ビジュアル参照",
+      "total": "総高さ：{px} px、{count} コマ",
+      "white": "白",
+      "black": "黒",
+      "abyss": "深淵の青"
+    }
   }
 }

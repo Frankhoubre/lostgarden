@@ -25,6 +25,7 @@ export function SiteNav() {
     { label: nav.trailer, href: "#trailer" },
     { label: nav.join, href: "#discover" },
     { label: nav.game, href: localePath(locale, "/game") },
+    { label: nav.webtoon, href: localePath(locale, "/webtoon") },
     { label: nav.experience, href: localePath(locale, "/experience") },
   ];
 

@@ -1,0 +1,249 @@
+import type { ReferenceAsset, WebtoonPanel } from "./types";
+
+/**
+ * Reference library: the character sheets, location sheets and objects the
+ * generation step may attach to a prompt. Images are the published site
+ * assets, which are frames of the finished episodes, so they carry the exact
+ * design the webtoon must keep.
+ *
+ * `must_keep` is injected into prompts; `description` is the sheet in words
+ * for generators that take text only, and for screenplay-only runs where no
+ * frame of the scene exists yet.
+ */
+export const REFERENCE_LIBRARY: ReferenceAsset[] = [
+  {
+    id: "char.lanterne",
+    kind: "character",
+    name: "Lanterne, the 12th Knight",
+    image: "/images/sol.png",
+    must_keep:
+      "Lanterne is a hollow suit of old armour with no body inside. Head: a pale, slightly weathered cylindrical lantern-shaped helmet with a small metal ring on top, a narrow rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf wrapped around the neck. Dark charcoal chest plate with small brass buckles and straps. Steel gauntlets, dark gloves, steel greaves and sabatons. A torn beige cape. Modest, slightly clumsy proportions: not a tall heroic knight.",
+    description:
+      "A silent, damaged, strangely innocent hollow knight. He does not speak; only hollow metallic sounds and small gestures show what he feels. Fragile posture, shoulders a little forward, head slightly tilted when he looks at something.",
+    tags: ["lanterne", "knight", "armour", "protagonist"],
+  },
+  {
+    id: "char.lanterne.full",
+    kind: "character",
+    name: "Lanterne, full body reference",
+    image: "/images/hero-banner.png",
+    must_keep:
+      "Full body of Lanterne walking: same lantern helmet, engraved pauldrons, cream scarf, dark chest plate, steel gauntlets and greaves, torn beige cape reaching the knees.",
+    description: "Lanterne in motion, holding Rose's hand in the blue forest.",
+    tags: ["lanterne", "full_body", "walking"],
+  },
+  {
+    id: "char.lanterne.sheet",
+    kind: "character",
+    name: "Lanterne, model sheet",
+    image: "/webtoon/references/lanterne-sheet.png",
+    must_keep:
+      "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
+    description:
+      "Front, side and back views of the final design (09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
+    tags: ["lanterne", "knight", "armour", "protagonist", "model_sheet"],
+  },
+  {
+    id: "char.rose",
+    kind: "character",
+    name: "Rose",
+    image: "/images/rose.png",
+    must_keep:
+      "Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.",
+    description:
+      "Calm, serene, almost unreal. She looks at the world as if she heard what it forgot. She is a child, not a symbol.",
+    tags: ["rose", "child", "girl"],
+  },
+  {
+    id: "loc.white-lily-field",
+    kind: "location",
+    name: "The white lily field (memory)",
+    image: "/webtoon/ep1-opening/source/ep1-00m15s.jpg",
+    must_keep:
+      "An endless field of white lilies under a blown-out white sky. The ground rises in a soft crest. Everything is washed out and pale; the only colours are Rose's pink hair and the muted brown of Lanterne's pauldrons.",
+    description:
+      "The dream or memory that opens episode 1. No sun, no horizon detail, only white light and lilies; petals drift slowly.",
+    tags: ["lily_field", "white", "memory", "dream"],
+  },
+  {
+    id: "loc.altar-sanctuary",
+    kind: "location",
+    name: "The altar sanctuary",
+    image: "/images/sol.png",
+    must_keep:
+      "A dark underground stone sanctuary. High above, a large ornate circular rose window glows cold cyan-blue, its tracery like a mandala; icicle-like stalactites hang from the vault around it. Wet carved stone walls in deep blue. In the centre, a long rectangular stone altar, like a sarcophagus lid, seen along its length. Thin mist on the floor, small blue bioluminescent mushrooms and blue moss at the edges, twisted roots on the walls.",
+    description:
+      "Where Lanterne wakes. Cold, silent, sacred without being religious. Light comes only from the rose window and the mushrooms.",
+    tags: ["altar", "sanctuary", "cavern", "rose_window", "blue"],
+  },
+  {
+    id: "loc.altar-sanctuary.window",
+    kind: "location",
+    name: "Rose window above the altar (source frame)",
+    image: "/webtoon/ep1-opening/source/t29.jpg",
+    must_keep:
+      "The exact composition of the source: the altar seen from its foot in the lower half, the glowing rose window high above, stalactites around it, everything else in blue darkness.",
+    description: "Frame at 0:30 of episode 1.",
+    tags: ["altar", "rose_window", "source_frame"],
+  },
+  {
+    id: "loc.cavern-wide",
+    kind: "location",
+    name: "The great cavern",
+    image: "/images/underground-cavern.png",
+    must_keep:
+      "Architecture of the underground world: colossal twisted root-columns, floating stone platforms covered in blue moss, cyan mist, a distant terraced temple.",
+    description: "The wider world beneath the earth, for context and palette only.",
+    tags: ["cavern", "blue", "world"],
+  },
+  {
+    id: "loc.blue-forest",
+    kind: "location",
+    name: "The blue forest",
+    image: "/images/blue-forest.png",
+    must_keep:
+      "Blue forest lighting: black trunks, cyan mist, glowing blue mushrooms, pale lilies.",
+    description: "Palette reference for every underground scene.",
+    tags: ["blue_forest", "mushrooms", "palette"],
+  },
+  {
+    id: "src.ep1.s01",
+    kind: "source_frame",
+    name: "Episode 1, 0:00, Lanterne in the white",
+    image: "/webtoon/ep1-opening/source/t00.jpg",
+    must_keep: "Lanterne alone in the white world, medium shot, facing the viewer, cape lifting right, petals.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s02",
+    kind: "source_frame",
+    name: "Episode 1, 0:05, lilies macro",
+    image: "/webtoon/ep1-opening/source/ep1-00m05s.jpg",
+    must_keep: "White lilies filling the frame, orange stamens, soft edges, white light.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s03",
+    kind: "source_frame",
+    name: "Episode 1, 0:09, the field",
+    image: "/webtoon/ep1-opening/source/t09.jpg",
+    must_keep: "Wide lily field: Lanterne small at left, Rose far right on the rise, white sky.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s04",
+    kind: "source_frame",
+    name: "Episode 1, 0:11, Rose close-up",
+    image: "/webtoon/ep1-opening/source/t11.jpg",
+    must_keep: "Rose's face against the white sky, flower on the viewer's right, eyes to camera.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s05",
+    kind: "source_frame",
+    name: "Episode 1, 0:13, the hem",
+    image: "/webtoon/ep1-opening/source/t13.jpg",
+    must_keep: "Lace hem of the cream dress and bare legs among lilies.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s06",
+    kind: "source_frame",
+    name: "Episode 1, 0:15, the hill",
+    image: "/webtoon/ep1-opening/source/ep1-00m15s.jpg",
+    must_keep: "A hill of lilies, Rose a speck at the summit, Lanterne a speck at the base left.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s07",
+    kind: "source_frame",
+    name: "Episode 1, 0:17, Find me",
+    image: "/webtoon/ep1-opening/source/t17.jpg",
+    must_keep: "Rose waist up in her cloak among lilies, speaking.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s09",
+    kind: "source_frame",
+    name: "Episode 1, 0:25, the sanctuary",
+    image: "/webtoon/ep1-opening/source/ep1-00m25s.jpg",
+    must_keep: "Extreme wide blue sanctuary: beams of light, roots, mushrooms, the altar tiny in the distance.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s10",
+    kind: "source_frame",
+    name: "Episode 1, 0:26, the larva",
+    image: "/webtoon/ep1-opening/source/t26.jpg",
+    must_keep: "Pale larva on a black root in the foreground, altar with the lying knight behind.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+  {
+    id: "src.ep1.s11",
+    kind: "source_frame",
+    name: "Episode 1, 0:29, the rose window",
+    image: "/webtoon/ep1-opening/source/t29.jpg",
+    must_keep: "Altar from its foot, sabatons on the lid, the glowing rose window above, stalactites.",
+    description: "Frame of the finished episode, composition and lighting reference.",
+    tags: ["source_frame"],
+  },
+];
+
+const byId = new Map(REFERENCE_LIBRARY.map((asset) => [asset.id, asset]));
+
+export function getReference(id: string): ReferenceAsset {
+  const asset = byId.get(id);
+  if (!asset) throw new Error(`Unknown reference asset: ${id}`);
+  return asset;
+}
+
+/**
+ * Reference resolution: pick the assets a panel needs from what it shows.
+ * Characters map to their sheets, the location to its sheet, and any source
+ * frame listed by the analysis shot the panel draws from is attached as a
+ * composition reference. Explicit ids on the panel always win.
+ */
+export function resolveReferences(input: {
+  characters: string[];
+  location: string;
+  objects: string[];
+  source_frames: string[];
+  explicit?: string[];
+}): ReferenceAsset[] {
+  const picked = new Map<string, ReferenceAsset>();
+  const add = (asset: ReferenceAsset | undefined) => {
+    if (asset && !picked.has(asset.id)) picked.set(asset.id, asset);
+  };
+
+  for (const id of input.explicit ?? []) add(byId.get(id));
+
+  for (const character of input.characters) {
+    add(byId.get(`char.${character}`));
+  }
+  add(byId.get(`loc.${input.location}`));
+  for (const object of input.objects) add(byId.get(`obj.${object}`));
+
+  for (const frame of input.source_frames) {
+    const match = REFERENCE_LIBRARY.find(
+      (asset) => asset.kind === "source_frame" && asset.image === frame,
+    );
+    add(match);
+  }
+
+  return [...picked.values()];
+}
+
+export function referencesForPanel(panel: WebtoonPanel): ReferenceAsset[] {
+  return panel.visual_references
+    .map((id) => byId.get(id))
+    .filter((asset): asset is ReferenceAsset => Boolean(asset));
+}

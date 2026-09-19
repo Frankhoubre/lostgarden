@@ -1865,3 +1865,396 @@ h3 {
   height: 4rem;
   font-size: 1.3rem;
 }
+
+/* ---------- Webtoon reader ---------- */
+
+.webtoon-stage {
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+@media (min-width: 1080px) {
+  .webtoon-stage {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1080px;
+  }
+}
+
+.webtoon-strip {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.webtoon-panel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.webtoon-panel > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.webtoon-img-stale {
+  filter: saturate(0.6);
+}
+
+.webtoon-panel-bordered {
+  outline: 2px solid rgba(2, 8, 23, 0.9);
+  outline-offset: -2px;
+}
+
+.webtoon-panel-interactive {
+  cursor: pointer;
+}
+
+.webtoon-panel-selected {
+  outline: 3px solid var(--magic);
+  outline-offset: -3px;
+}
+
+.webtoon-panel-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(2, 8, 23, 0.7);
+}
+
+.webtoon-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 6cqw;
+  text-align: center;
+  color: rgba(216, 210, 194, 0.7);
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 12px, transparent 12px 24px),
+    #060d1c;
+  font-size: 2.6cqw;
+}
+
+.webtoon-placeholder-light {
+  color: rgba(6, 22, 47, 0.6);
+  background:
+    repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0 12px, transparent 12px 24px),
+    #efece5;
+}
+
+.webtoon-placeholder-desc {
+  max-width: 70cqw;
+  font-size: 2.1cqw;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+/* Lettering */
+
+.webtoon-lettering {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.webtoon-tail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #fff;
+  stroke: #0b0f1a;
+  stroke-width: 0.35;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.webtoon-bubble {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 44cqw;
+  padding: 2.2cqw 3cqw;
+  border-radius: 50% / 50%;
+  background: #fff;
+  color: #0b0f1a;
+  border: 0.32cqw solid #0b0f1a;
+  font-family: var(--font-zen), sans-serif;
+  font-weight: 700;
+  font-size: 3.3cqw;
+  line-height: 1.25;
+  text-align: center;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0.6cqw 1.6cqw rgba(0, 0, 0, 0.12);
+}
+
+.webtoon-bubble-whisper {
+  border-style: dashed;
+  font-weight: 500;
+  color: #2a2f3d;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.webtoon-bubble-thought {
+  border-style: dotted;
+  border-radius: 48% 52% 50% 50% / 55% 55% 45% 45%;
+}
+
+.webtoon-bubble-shout {
+  border-radius: 12% / 20%;
+  font-size: 4.2cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.webtoon-bubble-off {
+  border-radius: 0.6cqw;
+  font-style: italic;
+}
+
+.webtoon-caption {
+  position: absolute;
+  max-width: 60cqw;
+  padding: 1.4cqw 2.2cqw;
+  background: rgba(2, 8, 23, 0.82);
+  color: var(--ivory);
+  font-family: var(--font-zen), sans-serif;
+  font-size: 2.8cqw;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.webtoon-caption-location,
+.webtoon-caption-time {
+  font-family: var(--font-oswald), sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 2.4cqw;
+}
+
+.webtoon-sfx {
+  position: absolute;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow:
+    0 0 0.4cqw #0b0f1a,
+    0.3cqw 0.3cqw 0 #0b0f1a,
+    -0.3cqw -0.3cqw 0 #0b0f1a,
+    0.3cqw -0.3cqw 0 #0b0f1a,
+    -0.3cqw 0.3cqw 0 #0b0f1a;
+}
+
+.webtoon-sfx-soft {
+  font-weight: 500;
+  opacity: 0.85;
+  color: var(--cyan-pale);
+}
+
+.webtoon-sfx-rumble {
+  color: #d8d2c2;
+  letter-spacing: 0.18em;
+}
+
+/* Index cards and notes */
+
+.webtoon-card {
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 1rem;
+  background: rgba(6, 22, 47, 0.55);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.webtoon-card:hover {
+  border-color: rgba(125, 223, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.webtoon-card-cover {
+  aspect-ratio: 16 / 9;
+  background: #04101f;
+}
+
+.webtoon-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.webtoon-note {
+  padding: 0.75rem 1rem;
+  border-left: 2px solid rgba(56, 189, 248, 0.35);
+  background: rgba(6, 22, 47, 0.4);
+}
+
+/* Editor */
+
+.webtoon-editor {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .webtoon-editor {
+    grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .webtoon-editor-side {
+    position: sticky;
+    top: 4.5rem;
+    max-height: calc(100vh - 5.5rem);
+    overflow: auto;
+  }
+}
+
+.webtoon-editor-side {
+  padding: 1rem;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 1rem;
+  background: rgba(6, 22, 47, 0.55);
+  font-size: 0.85rem;
+}
+
+.webtoon-editor-preview {
+  max-width: 540px;
+  margin: 0 auto;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.webtoon-btn {
+  min-height: 0;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.65rem;
+}
+
+.webtoon-mini,
+.webtoon-list-item {
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 0.5rem;
+  background: rgba(2, 8, 23, 0.5);
+  color: var(--cyan-pale);
+  font-size: 0.72rem;
+  padding: 0.35rem 0.6rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.webtoon-mini:hover,
+.webtoon-list-item:hover {
+  border-color: rgba(125, 223, 255, 0.6);
+  background: rgba(6, 22, 47, 0.9);
+}
+
+.webtoon-mini-danger {
+  color: #f3b0b0;
+  border-color: rgba(243, 176, 176, 0.35);
+}
+
+.webtoon-list-item {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.webtoon-list-item-active {
+  border-color: var(--magic);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.webtoon-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.webtoon-field-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.webtoon-field > span,
+.webtoon-field-label {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan-pale);
+}
+
+.webtoon-editor input[type="text"],
+.webtoon-editor input[type="number"],
+.webtoon-editor input:not([type]),
+.webtoon-editor select,
+.webtoon-editor textarea {
+  width: 100%;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 0.4rem;
+  background: rgba(2, 8, 23, 0.6);
+  color: var(--lily);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.webtoon-editor textarea {
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.webtoon-editor input[type="range"] {
+  width: 100%;
+  accent-color: var(--magic);
+}
+
+.webtoon-subcard {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  background: rgba(2, 8, 23, 0.45);
+}
+
+.webtoon-ref {
+  display: flex;
+  width: 96px;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.6rem;
+  color: rgba(216, 210, 194, 0.75);
+}
+
+.webtoon-ref img {
+  width: 96px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 0.3rem;
+}

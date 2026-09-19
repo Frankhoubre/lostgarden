@@ -65,6 +65,10 @@
     "game": {
       "title": "Jouer : Le Serment de la Lanterne | Lost Garden",
       "description": "Un jeu rétro gratuit dans l'univers de Lost Garden, jouable dans le navigateur : guide Lanterne à travers la forêt des champignons bleus, le monde des chaînes et le château penché, à la Ghouls'n Ghosts."
+    },
+    "webtoon": {
+      "title": "Webtoon | Lost Garden",
+      "description": "Lost Garden adapté en webtoon vertical : l'ouverture de l'épisode 1, case par case, avec le storyboard et le moteur d'adaptation qui le produit."
     }
   },
   "episode": {
@@ -110,7 +114,8 @@
     "home": "Accueil",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "game": "Jeu"
+    "game": "Jeu",
+    "webtoon": "Webtoon"
   },
   "notFound": {
     "title": "Page introuvable",
@@ -755,5 +760,88 @@
       "Trois coups reçus et l'armure retombe dans la mousse. Elle se relève au dernier point de passage. Lanterne ne parle jamais."
     ],
     "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur."
+  },
+  "webtoon": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbWebtoon": "Webtoon",
+    "headline": "Webtoon",
+    "lead": "Lost Garden à lire verticalement. Chaque bande est produite par le moteur d'adaptation à partir de l'épisode et du scénario : même histoire, mêmes plans, une mise en scène pensée pour le défilement.",
+    "indexEmpty": "Aucune bande pour l'instant.",
+    "read": "Lire",
+    "openEditor": "Ouvrir l'éditeur",
+    "backToReader": "Retour au lecteur",
+    "backToIndex": "Toutes les bandes",
+    "panels": "{count} cases",
+    "height": "{px} px de haut",
+    "source": "Source : épisode {episode}, de {start} à {end}",
+    "storyboardTitle": "Pourquoi chaque case existe",
+    "storyboardLead": "Les notes d'adaptation du moteur : le plan du film dont vient chaque case, et à quoi elle sert.",
+    "beat": "Beat",
+    "panel": "Case",
+    "shot": "Plan",
+    "fidelityDirect": "Correspond à un plan du film",
+    "fidelityReframe": "Même instant, nouveau cadrage",
+    "fidelityBridge": "Relie deux plans",
+    "imagePending": "Image en attente",
+    "jsonLink": "Télécharger le JSON du storyboard",
+    "pipelineTitle": "Comment c'est fabriqué",
+    "pipelineSteps": [
+      "Source : l'épisode, son scénario, les fiches personnages et lieux.",
+      "Analyse narrative : plans, dialogues, sons, continuité.",
+      "Segmentation en beats.",
+      "Moteur d'adaptation : cases, hauteurs, espacements, dialogues, transitions.",
+      "Résolution des références : les bonnes fiches pour chaque case.",
+      "Prompts par case, puis génération.",
+      "Mise en page verticale, puis ce lecteur et son éditeur."
+    ],
+    "editor": {
+      "title": "Éditeur webtoon",
+      "lead": "Les modifications restent dans ce navigateur. Exportez le JSON pour le rendre au pipeline.",
+      "panelsList": "Cases",
+      "selected": "Case sélectionnée",
+      "height": "Hauteur (px)",
+      "spacingBefore": "Espace avant (px)",
+      "spacingAfter": "Espace après (px)",
+      "background": "Fond",
+      "border": "Bordure",
+      "focal": "Point focal (x, y %)",
+      "shotType": "Valeur de plan",
+      "transition": "Transition",
+      "purpose": "Fonction",
+      "description": "Description",
+      "prompt": "Prompt de génération",
+      "dialogue": "Dialogues",
+      "caption": "Cartouches",
+      "sfx": "Onomatopées",
+      "speaker": "Personnage",
+      "text": "Texte",
+      "style": "Style",
+      "anchor": "Position (x, y %)",
+      "add": "Ajouter",
+      "remove": "Retirer",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "delete": "Supprimer la case",
+      "insertAfter": "Insérer une case après",
+      "merge": "Fusionner avec la suivante",
+      "split": "Scinder en deux",
+      "reset": "Revenir à la version du moteur",
+      "exportJson": "Exporter le JSON",
+      "importJson": "Importer un JSON",
+      "copyPrompt": "Copier le prompt",
+      "copied": "Copié",
+      "regenerate": "Marquer à régénérer",
+      "stale": "Image en retard sur le prompt",
+      "missing": "Pas encore d'image",
+      "generated": "Image générée",
+      "preview": "Aperçu",
+      "showIds": "Afficher les identifiants",
+      "saved": "Enregistré dans ce navigateur",
+      "references": "Références visuelles",
+      "total": "Hauteur totale : {px} px, {count} cases",
+      "white": "Blanc",
+      "black": "Noir",
+      "abyss": "Bleu abysse"
+    }
   }
 }
