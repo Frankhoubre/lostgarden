@@ -4,12 +4,15 @@
  * a triangle bass and a noise hat, one pattern per level.
  */
 
-type Note = number | 0; // MIDI note number, 0 = rest
+import { ASH_LANTERN_PRAYER, CLOCKWORK_REQUIEM, GIANT_AND_KNIGHT, KNIGHTS_LULLABY } from "./songs";
+
+type Note = number; // MIDI note number, 0 = rest, -1 = hold the previous note
 
 export type Song = {
   bpm: number;
   lead: Note[];
   bass: Note[];
+  harm?: Note[];
   hat: (0 | 1)[];
 };
 
@@ -125,12 +128,17 @@ const SONG_LULLABY: Song = {
   hat: new Array(64).fill(0) as (0 | 1)[],
 };
 
+/** The original soundtrack, in its chiptune renditions; the older patterns stay as fallbacks. */
 export const SONGS = {
-  forest: SONG_FOREST,
-  chains: SONG_CHAINS,
+  forest: ASH_LANTERN_PRAYER,
+  chains: GIANT_AND_KNIGHT,
   castle: SONG_CASTLE,
-  boss: SONG_BOSS,
-  lullaby: SONG_LULLABY,
+  boss: CLOCKWORK_REQUIEM,
+  lullaby: KNIGHTS_LULLABY,
+  forestClassic: SONG_FOREST,
+  chainsClassic: SONG_CHAINS,
+  bossClassic: SONG_BOSS,
+  lullabyClassic: SONG_LULLABY,
 } as const;
 
 export type SongName = keyof typeof SONGS;
@@ -210,14 +218,24 @@ export class GameAudio {
   private schedule() {
     if (!this.ctx || !this.song || !this.musicGain) return;
     const stepDur = 60 / this.song.bpm / 4;
+    const song = this.song;
+    // A note lasts its own step plus every following hold step.
+    const held = (track: Note[], i: number) => {
+      let n = 1;
+      while (n < 64 && track[(i + n) % track.length] === -1) n += 1;
+      return n;
+    };
     while (this.nextStepTime < this.ctx.currentTime + 0.2) {
-      const i = this.step % this.song.lead.length;
-      const lead = this.song.lead[i];
-      const bass = this.song.bass[i % this.song.bass.length];
-      const hat = this.song.hat[i % this.song.hat.length];
-      if (lead) this.tone(midi(lead), this.nextStepTime, stepDur * 0.9, "square", 0.12, this.musicGain);
-      if (bass) this.tone(midi(bass), this.nextStepTime, stepDur * 1.6, "triangle", 0.3, this.musicGain);
-      if (hat) this.noise(this.nextStepTime, 0.03, 0.05, this.musicGain);
+      const i = this.step % song.lead.length;
+      const lead = song.lead[i];
+      const bass = song.bass[i % song.bass.length];
+      const harm = song.harm ? song.harm[i % song.harm.length] : 0;
+      const hat = song.hat[i % song.hat.length];
+      const t = this.nextStepTime;
+      if (lead > 0) this.tone(midi(lead), t, stepDur * held(song.lead, i) * 0.92, "square", 0.11, this.musicGain);
+      if (bass > 0) this.tone(midi(bass), t, stepDur * Math.min(8, held(song.bass, i % song.bass.length)) * 0.95, "triangle", 0.28, this.musicGain);
+      if (harm > 0 && song.harm) this.tone(midi(harm), t, stepDur * held(song.harm, i % song.harm.length) * 0.9, "triangle", 0.09, this.musicGain);
+      if (hat) this.noise(t, 0.03, 0.04, this.musicGain);
       this.nextStepTime += stepDur;
       this.step += 1;
     }

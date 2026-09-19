@@ -22,15 +22,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Retro game
 
-`/[locale]/game` hosts **The Lantern's Oath**, a Ghouls'n Ghosts style platformer set in the Lost Garden universe. It is written from scratch in TypeScript on a 320x192 canvas (no game framework, no image or audio assets):
+`/[locale]/game` hosts **The Lantern's Oath**, a Ghouls'n Ghosts style platformer set in the Lost Garden universe, behind the site's login. The current stage follows episode 1 on a 480x288 canvas with generated pixel art:
 
-- `lib/game/pixel.ts` and `lib/game/sprites.ts`: ASCII pixel art rasterised at runtime (Lanterne, Serrure, Bourdon, Barrik, Rose, enemies, bosses, tiles)
-- `lib/game/engine.ts`: game loop, tile physics, player state (two-hit armour, committed jumps, four throwable weapons), HUD, screens
-- `lib/game/actors.ts`: enemy and boss behaviours (the Machine, the Decrocheur, the Dark Knight)
-- `lib/game/levels.ts`: three stages built from 16-column segments
-- `lib/game/audio.ts`: chiptune music and sound effects synthesised with WebAudio
-- `lib/game/text.ts`: in-game text in the four site locales
+- `lib/game/mockup.ts`: the episode 1 stage. Lighting stack, platforms, pale reptilians, glowing beetles, the one-eyed machine, the roots of the Source Tree, the pilgrims' gong and Serrure's tavern as checkpoints, lily pickups, the Machine as boss, the gate
+- `lib/game/audio.ts` and `lib/game/songs.ts`: WebAudio step sequencer and the chiptune renditions of the original soundtrack (Ash Lantern Prayer, The Knight's Lullaby, Clockwork Requiem, The Giant and the Knight), transcribed from the recordings
+- `scripts/build-game-assets.py` and `scripts/game-assets-manifest.json`: slice the generated sources into the strips in `public/game/` (`--fetch` downloads the sources, `--generated` builds)
+- `components/game/GameGate.tsx`: the pixel-art login screen, then the game once signed in
 - `components/game/GameShell.tsx`: canvas host, keyboard and touch controls
+- `lib/game/engine.ts`, `actors.ts`, `levels.ts`, `sprites.ts`, `text.ts`: the earlier three-stage engine, still reachable with `?engine=full`
 
 ## Webtoon
 

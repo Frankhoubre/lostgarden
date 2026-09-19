@@ -746,6 +746,7 @@
       "Z, W, Espace ou Haut : sauter",
       "Bas + saut : descendre d'une plateforme",
       "X, K ou Entrée : lancer la lueur",
+      "Bas + X : lancer bas, au ras de la mousse",
       "M : son"
     ],
     "touchHint": "Sur téléphone, utilise les boutons à l'écran.",
@@ -754,12 +755,21 @@
     "unmute": "Activer le son",
     "loreTitle": "Ce que tu vas croiser",
     "lore": [
-      "Un niveau complet dans la forêt des champignons bleus : plateformes, trois meutes de Reptiliens pâles, et la Machine au bout du chemin.",
-      "Les Reptiliens se cabrent avant de griffer : saute en arrière. Quatre lueurs et ils tombent.",
-      "La Machine piétine (des éclats courent au sol, saute-les) et tire un rayon depuis ses yeux (baisse-toi derrière une plateforme ou saute). Vingt-huit lueurs pour l'abattre.",
-      "Trois coups reçus et l'armure retombe dans la mousse. Elle se relève au dernier point de passage. Lanterne ne parle jamais."
+      "Le chemin de l'épisode 1 : la forêt des champignons bleus, la machine borgne au-dessus des corniches, le gong des pèlerins, les racines de l'Arbre-Source, la taverne de Serrure, puis l'arène de la Machine et la porte.",
+      "Les Reptiliens se cabrent avant de griffer : saute en arrière. Quatre lueurs et ils tombent. Les scarabées lumineux rampent au sol : lance bas ou saute dessus. Un sur trois laisse une lueur qui répare l'armure.",
+      "La machine borgne plane, se recroqueville, puis s'écrase : monte sur une corniche, redescends et frappe-la pendant qu'elle est sonnée. La mousse tremble avant qu'une racine ne perce : ne t'arrête pas dessus.",
+      "Les pèlerins masqués frappent leur gong et Serrure t'accueille sous son toit : l'armure se répare, le point de passage est pris. La Machine piétine et tire un rayon ; à mi-vie elle appelle les scarabées. Vingt-huit lueurs pour l'abattre.",
+      "Trois coups reçus et l'armure retombe dans la mousse. Elle se relève au dernier point de passage. Six lys pâles sont cachés sur le chemin. Lanterne ne parle jamais."
     ],
-    "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur."
+    "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur.",
+    "gate": {
+      "eyebrow": "Lost Garden · Episode 1",
+      "title": "Le Serment de la Lanterne",
+      "lead": "Lanterne dort dans la mousse. Connecte-toi avec ton compte Lost Garden pour le réveiller : le même compte ouvre l'espace membre, les épisodes et les coulisses.",
+      "loading": "La lanterne s'allume…",
+      "hint": "Le jeu est gratuit, sans téléchargement. Ton compte garde ta place parmi les voyageurs.",
+      "welcome": "Bienvenue, {name}. La forêt des champignons bleus t'attend."
+    }
   },
   "webtoon": {
     "breadcrumbHome": "Accueil",
