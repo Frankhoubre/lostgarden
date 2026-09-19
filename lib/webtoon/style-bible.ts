@@ -21,12 +21,14 @@ export type StyleBible = {
 };
 
 export const STYLE_BIBLE: StyleBible = {
-  id: "lost-garden-webtoon-v2",
+  id: "lost-garden-webtoon-v3",
   base:
-    "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.",
+    "Lost Garden, an original dark fantasy anime by Frank Houbre, redrawn as a Korean webtoon (manhwa) panel. Keep the identity of the series: the same characters and designs, the poetic dark fantasy mood, the deep blue and cyan palette, the strong readable silhouettes. Draw it like a webtoon artist inks and colours a weekly episode: bold flat colour fills (large flat shapes of colour), hard-edged cel shading with only one shadow tone and one highlight tone per surface, clean confident ink outlines of varied weight around characters and props, simplified backgrounds built from a few big flat shapes and soft gradients, mist and light as simple flat or gradient shapes, very few small details, plenty of empty space. It must look hand-drawn and coloured digitally, graphic and readable at phone size.",
   rendering: [
     "Single illustration, one scene only, no collage, no split screen, no page layout, no multiple panels.",
-    "Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector.",
+    "Flat webtoon rendering: no painterly brushwork, no photographic lighting, no fine texture, no film grain, no micro-detail, no realistic materials; surfaces are flat colour with one hard shadow.",
+    "Line art is visible and clean, like digital inking; colours stay inside the lines; backgrounds are simpler and softer than the characters.",
+    "The reference images give the character designs, the framing and the palette only; do not copy their rendering, their detail level or their lighting, redraw them flat.",
     "Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom.",
     "The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.",
   ],
@@ -45,5 +47,6 @@ export const STYLE_BIBLE: StyleBible = {
     "No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige.",
     "No extra characters, animals or creatures unless named in the prompt.",
     "No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+    "No painterly or semi-realistic rendering, no dense detail, no complex textures, no volumetric rendering: flat colours and clean lines only.",
   ],
 };

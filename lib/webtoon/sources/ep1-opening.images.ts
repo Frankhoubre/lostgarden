@@ -7,8 +7,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1350,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "974cf7e1-8d33-4ad8-aba7-f399b05e7f7c",
-    "generated_at": "2026-09-19T16:55:08Z",
+    "job_id": "b240115c-b6aa-4ab2-a124-aa27f4a32ea2",
+    "generated_at": "2026-09-19T17:11:01Z",
     "status": "generated"
   },
   "p02": {
@@ -16,8 +16,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 717,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "ad901fbd-3ec8-4899-8916-746ec233eb58",
-    "generated_at": "2026-09-19T16:55:08Z",
+    "job_id": "66eae535-23ee-455e-8182-541458d35bac",
+    "generated_at": "2026-09-19T17:11:01Z",
     "status": "generated"
   },
   "p03": {
@@ -25,8 +25,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1910,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "760c4420-2eda-48cb-9d96-bf71ec2e7f0c",
-    "generated_at": "2026-09-19T16:59:44Z",
+    "job_id": "1fcf705d-8d5d-471c-8ad6-988e805ac77a",
+    "generated_at": "2026-09-19T17:11:01Z",
     "status": "generated"
   },
   "p04": {
@@ -34,8 +34,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1350,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "54e5db68-20d9-47d1-9c11-a65dc285cd96",
-    "generated_at": "2026-09-19T16:59:45Z",
+    "job_id": "a10aa807-5c5a-417c-b20e-02241a02ee56",
+    "generated_at": "2026-09-19T17:11:01Z",
     "status": "generated"
   },
   "p05": {
@@ -43,8 +43,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 611,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "06e9eb84-f96d-4f90-94bb-5d8f95627ed2",
-    "generated_at": "2026-09-19T16:59:45Z",
+    "job_id": "935471a3-abee-40c0-9411-8ac28d172c72",
+    "generated_at": "2026-09-19T17:11:01Z",
     "status": "generated"
   },
   "p06": {
@@ -52,8 +52,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1910,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "792055a5-a797-4b9d-ae4e-ee9be08cf6af",
-    "generated_at": "2026-09-19T16:59:46Z",
+    "job_id": "6238035f-33ea-4ed7-86ca-36be285b6c6a",
+    "generated_at": "2026-09-19T17:12:22Z",
     "status": "generated"
   },
   "p07": {
@@ -61,8 +61,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1350,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "a16f70ab-96fb-4d3e-b827-e9a08e623ee3",
-    "generated_at": "2026-09-19T16:59:45Z",
+    "job_id": "c6a8ea5b-6603-4146-810a-eb86fc577754",
+    "generated_at": "2026-09-19T17:12:22Z",
     "status": "generated"
   },
   "p08": {
@@ -70,8 +70,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1910,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "ee85bc20-182b-4594-b131-ae217e91cd24",
-    "generated_at": "2026-09-19T16:55:08Z",
+    "job_id": "601a70dc-5cd1-4ff3-a264-98ca4d7f1612",
+    "generated_at": "2026-09-19T17:12:22Z",
     "status": "generated"
   },
   "p09": {
@@ -79,8 +79,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 717,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "09923a8f-b49f-46e7-beca-b342ce7aab42",
-    "generated_at": "2026-09-19T16:55:08Z",
+    "job_id": "48759c2b-30b1-4a65-b2cc-6a07fef944bf",
+    "generated_at": "2026-09-19T17:12:22Z",
     "status": "generated"
   },
   "p10": {
@@ -88,8 +88,8 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "width": 1080,
     "height": 1350,
     "model": "gpt-image-2.5-sunburst",
-    "job_id": "e0d58e5f-3af3-4e82-a05a-7d1562d64232",
-    "generated_at": "2026-09-19T16:55:08Z",
+    "job_id": "7205772a-189e-43a5-b431-61956090a0ff",
+    "generated_at": "2026-09-19T17:12:22Z",
     "status": "generated"
   }
 };

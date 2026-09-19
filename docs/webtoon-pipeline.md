@@ -54,4 +54,4 @@ Le frontend ne décide rien : il empile ce que le moteur a décidé. La distance
 - Les 30 s de l'épisode 1 font onze plans (coupes à 4.4, 6.3, 11.2, 12.9, 13.9, 16.9, 20.6, 22.6, 25.5, 27.6 s) et une seule réplique, « Find me. » à 17.9 s.
 - Dix cases, 16 028 px de haut, cinq beats. Le noir du film (20.6 à 22.6 s) n'est pas une case : c'est un gap de 1 400 px et le changement de fond.
 - Aucune case n'invente d'action : chaque case est marquée `direct` et pointe le plan dont elle vient.
-- Première passe : Nano Banana (via Higgsfield). Seconde passe, celle qui est en ligne : GPT Image 2.5 Sunburst, style webtoon, fiches personnages jointes en premier sur chaque case. Les cases de la première passe restent dans `public/webtoon/ep1-opening/panels-v1-nano-banana/` pour comparaison.
+- Trois passes : Nano Banana (`panels-v1-nano-banana/`), GPT Image 2.5 Sunburst en rendu détaillé (`panels-v2-sunburst-rendered/`), puis GPT Image 2.5 Sunburst en rendu webtoon à aplats (bible v3, `panels/`, celle qui est en ligne). Fiches personnages jointes en premier sur chaque case à chaque passe.
