@@ -2,14 +2,15 @@
  * Lost Garden: The Lantern's Oath.
  * A Ghouls'n Ghosts style platformer in a 320x192 pixel window.
  */
-import { drawEntity, updateEntity, SPAWN, BOSS_STATS } from "./actors";
+import { drawEntity, updateEntity, SPAWN, BOSS_STATS, NPC_SHAPES } from "./actors";
 import { GameAudio } from "./audio";
-import { drawBackground, type BackgroundTheme } from "./backgrounds";
-import { LEVELS, type LevelDef, type Theme } from "./levels";
+import { drawBackground, drawForeground, rnd } from "./backgrounds";
+import { LEVELS, type LevelDef } from "./levels";
 import type { Sprite } from "./pixel";
 import { getSprite, lanterneSprite } from "./sprites";
 import { getGameText, type GameText } from "./text";
 import {
+  S,
   TILE,
   VIEW_H,
   VIEW_W,
@@ -27,13 +28,13 @@ import type { Locale } from "@/lib/i18n/config";
 /* Tuning                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRAVITY = 0.3;
-const MAX_FALL = 6.5;
-const WALK_SPEED = 1.4;
-const JUMP_VY = -5.8;
-const PLAYER_W = 10;
-const PLAYER_H = 22;
-const CROUCH_H = 14;
+const GRAVITY = 0.3 * S;
+const MAX_FALL = 6.5 * S;
+const WALK_SPEED = 1.4 * S;
+const JUMP_VY = -5.8 * S;
+const PLAYER_W = 14;
+const PLAYER_H = 34;
+const CROUCH_H = 22;
 const INVULN = 100;
 const START_LIVES = 3;
 
@@ -54,6 +55,8 @@ export type GameOptions = {
 };
 
 type Dialogue = { text: string; speaker: string; timer: number; color: string };
+type Light = { x: number; y: number; r: number; a: number; color?: string };
+type Deco = { name: string; x: number; y: number; light?: number; flicker?: boolean };
 
 export type InputName = "left" | "right" | "up" | "down" | "jump" | "throw" | "pause" | "mute" | "any";
 
@@ -106,7 +109,9 @@ export class Game implements World {
   private continueChoice = 0;
   private endingT = 0;
   private bossHp = { cur: 0, max: 0, name: "" };
-  private lastTick = 0;
+  private lights: Light[] = [];
+  private lightCanvas: HTMLCanvasElement | null = null;
+  private decos: Deco[] = [];
 
   constructor(canvas: HTMLCanvasElement, options: GameOptions) {
     this.canvas = canvas;
@@ -372,8 +377,19 @@ export class Game implements World {
       e.hp = stats.hp;
       e.maxHp = stats.hp;
       e.points = stats.points;
+      e.ox = stats.ox;
+      e.oy = stats.oy;
       e.state = "intro";
       e.alpha = 0;
+    }
+    if (kind === "npc") {
+      const shape = NPC_SHAPES[sub];
+      if (shape) {
+        e.w = shape.w;
+        e.h = shape.h;
+        e.ox = shape.ox;
+        e.oy = shape.oy;
+      }
     }
     this.entities.push(e);
     return e;
@@ -384,11 +400,14 @@ export class Game implements World {
     e.vx = vx;
     e.vy = vy;
     if (sub === "scythe") {
-      e.w = 12;
-      e.h = 12;
+      e.w = 18;
+      e.h = 18;
     } else if (sub === "shard") {
-      e.w = 3;
-      e.h = 3;
+      e.w = 5;
+      e.h = 5;
+    } else {
+      e.w = 5;
+      e.h = 5;
     }
     return e;
   }
@@ -406,7 +425,7 @@ export class Game implements World {
         maxLife: 45,
         color,
         size: Math.random() < 0.3 ? 2 : 1,
-        gravity: 0.05,
+        gravity: 0.05 * S,
       });
     }
   }
@@ -416,8 +435,13 @@ export class Game implements World {
     if (alpha <= 0) return;
     const prev = ctx.globalAlpha;
     ctx.globalAlpha = alpha;
-    ctx.drawImage(flip ? s.flipped : s.canvas, Math.round(x - this.cameraX), Math.round(y));
+    ctx.drawImage(flip ? s.flipped : s.canvas, Math.round(x - this.cameraX) - s.pad, Math.round(y) - s.pad);
     ctx.globalAlpha = prev;
+  }
+
+  /** Register a light source for this frame's lighting pass (world coordinates). */
+  light(x: number, y: number, r: number, a: number, color?: string) {
+    this.lights.push({ x, y, r, a, color });
   }
 
   hurtPlayer() {
@@ -427,10 +451,10 @@ export class Game implements World {
       p.armor = 1;
       p.invuln = INVULN;
       this.sfx("armor");
-      this.particles(p.x + p.w / 2, p.y + 8, 12, "#c3ad84", 1.6);
+      this.particles(p.x + p.w / 2, p.y + 12, 16, "#c3ad84", 2.2);
       this.shake(4);
-      p.vy = -3;
-      p.vx = -p.dir * 1.2;
+      p.vy = -3 * S;
+      p.vx = -p.dir * 1.2 * S;
       p.jumping = true;
       p.onGround = false;
       return;
@@ -473,6 +497,7 @@ export class Game implements World {
       deadT: 0,
       walkT: 0,
       frame: "idle",
+      landT: 0,
     };
   }
 
@@ -490,14 +515,20 @@ export class Game implements World {
     this.ambientT = 0;
 
     const tiles: string[] = [];
-    let startX = 32;
-    let startY = 100;
+    let startX = TILE * 2;
+    let startY = TILE * 9 - PLAYER_H;
+    /** Place an actor standing on the bottom of its map tile, centred. */
+    const place = (kind: EntityKind, tx: number, ty: number, sub = ""): Entity => {
+      const def = SPAWN[kind];
+      const shape = kind === "npc" ? NPC_SHAPES[sub] : undefined;
+      const w = shape?.w ?? def.w;
+      const h = shape?.h ?? def.h;
+      return this.spawn(kind, tx * TILE + (TILE - w) / 2, ty * TILE + TILE - h, sub);
+    };
     for (let y = 0; y < this.level.height; y += 1) {
       let row = "";
       for (let x = 0; x < this.level.width; x += 1) {
         const ch = this.level.map[y][x];
-        const px = x * TILE;
-        const py = y * TILE;
         let tile = ".";
         switch (ch) {
           case "#":
@@ -506,62 +537,62 @@ export class Game implements World {
             tile = ch;
             break;
           case "P":
-            startX = px + 3;
-            startY = py + TILE - PLAYER_H;
+            startX = x * TILE + (TILE - PLAYER_W) / 2;
+            startY = y * TILE + TILE - PLAYER_H;
             break;
           case "c":
-            this.spawn("chest", px + 1, py + 4);
+            place("chest", x, y);
             break;
           case "E": {
-            const ex = this.spawn("exit", px, py - 16);
-            ex.h = 32;
+            const ex = this.spawn("exit", x * TILE, y * TILE - TILE, "");
+            ex.h = TILE * 2;
+            ex.w = TILE;
             break;
           }
           case "X": {
-            const ex = this.spawn("exit", px, py);
-            ex.sub = "bossTrigger";
-            ex.w = 4;
+            const ex = this.spawn("exit", x * TILE, y * TILE, "bossTrigger");
+            ex.w = 6;
             ex.h = TILE;
             break;
           }
           case "S":
-            this.spawn("npc", px, py - 10, "serrure");
+            place("npc", x, y, "serrure");
             break;
           case "B":
-            this.spawn("npc", px, py - 10, "bourdon");
+            place("npc", x, y, "bourdon");
             break;
           case "s":
-            this.spawn("spore", px + 3, py + 5).state = "hop";
+            place("spore", x, y).state = "hop";
             break;
           case "j":
-            this.spawn("meduse", px + 3, py + 2);
+            place("meduse", x, y);
             break;
           case "p":
-            this.spawn("penitent", px + 3, py - 8);
+            place("penitent", x, y);
             break;
           case "a":
-            this.spawn("rouage", px + 1, py + 5);
+            place("rouage", x, y);
             break;
           case "w":
-            this.spawn("loup", px, py + 5);
+            place("loup", x, y);
             break;
           case "r":
-            this.spawn("reptile", px + 3, py - 8);
+            place("reptile", x, y);
             break;
           case "k":
-            this.spawn("colosse", px - 8, py - 6);
+            place("colosse", x, y);
             break;
           case "g":
-            this.spawn("golem", px + 2, py - 8);
+            place("golem", x, y);
             break;
           case "m":
-            this.spawn("souris", px + 4, py + 8);
+            place("souris", x, y);
             break;
           case "l":
-            this.spawn("item", px + 3, py + 6, "lys");
+            place("item", x, y, "lys");
             break;
           case "d":
-            this.spawn("item", px + 3, py + 6, "medaillon");
+            place("item", x, y, "medaillon");
             break;
           default:
             break;
@@ -571,6 +602,7 @@ export class Game implements World {
       tiles.push(row);
     }
     this.tiles = tiles;
+    this.buildDecorations();
 
     const weapon = this.player.weapon;
     if (fromCheckpoint) {
@@ -588,6 +620,45 @@ export class Game implements World {
     this.cameraX = Math.max(0, Math.min(this.levelWidth - VIEW_W, this.player.x - VIEW_W / 2));
     this.audio.playSong(this.level.song);
     this.fade = 1;
+  }
+
+  /** Scatter grass, mushrooms, bones, candles and banners along the level using a stable hash. */
+  private buildDecorations() {
+    const decos: Deco[] = [];
+    const theme = this.level.theme;
+    const W = this.level.width;
+    const H = this.level.height;
+    for (let ty = 0; ty < H; ty += 1) {
+      for (let tx = 0; tx < W; tx += 1) {
+        if (this.tileAt(tx, ty) !== "#") continue;
+        const x = tx * TILE;
+        const y = ty * TILE;
+        const r = rnd(tx * 31 + ty * 7);
+        const r2 = rnd(tx * 13 + ty * 101);
+        const topFree = this.tileAt(tx, ty - 1) === ".";
+        const belowFree = this.tileAt(tx, ty + 1) === "." && ty < H - 1;
+        if (topFree) {
+          if (theme === "forest") {
+            if (r < 0.45) decos.push({ name: "decoGrass", x: x + Math.floor(r2 * 10), y: y - 5 });
+            else if (r < 0.62) decos.push({ name: "decoMushroomSmall", x: x + 4 + Math.floor(r2 * 10), y: y - 7, light: 22 });
+            else if (r < 0.7) decos.push({ name: "decoMushroomTall", x: x + 6 + Math.floor(r2 * 6), y: y - 10, light: 30 });
+          } else if (theme === "chains") {
+            if (r < 0.2) decos.push({ name: "decoBones", x: x + Math.floor(r2 * 10), y: y - 4 });
+            else if (r < 0.3) decos.push({ name: "decoSkull", x: x + 4 + Math.floor(r2 * 10), y: y - 6 });
+          } else if (theme === "castle") {
+            if (r < 0.14) decos.push({ name: "decoCandle", x: x + 4 + Math.floor(r2 * 12), y: y - 8, light: 26, flicker: true });
+            else if (r < 0.2) decos.push({ name: "decoCandelabra", x: x + 2 + Math.floor(r2 * 6), y: y - 12, light: 38, flicker: true });
+            else if (r < 0.25) decos.push({ name: "decoSkull", x: x + 6 + Math.floor(r2 * 8), y: y - 6 });
+          }
+        }
+        if (belowFree) {
+          if (theme === "chains" && r2 < 0.12) decos.push({ name: "decoChainHook", x: x + 8, y: y + TILE });
+          if (theme === "castle" && r2 < 0.16) decos.push({ name: "decoBanner", x: x + 7, y: y + TILE });
+          if (theme === "forest" && r2 < 0.1) decos.push({ name: "decoMushroomSmall", x: x + 8, y: y + TILE - 1 });
+        }
+      }
+    }
+    this.decos = decos;
   }
 
   private setScreen(screen: GameScreen) {
@@ -804,6 +875,7 @@ export class Game implements World {
         p.jumping = true;
         p.onGround = false;
         this.sfx("jump");
+        this.particles(p.x + p.w / 2, p.y + p.h, 5, "#8fa9b8", 1.2);
       } else if (this.pressed.has("jump") && p.crouch && down) {
         // Drop through a one-way platform.
         const below = p.y + p.h + 1;
@@ -825,8 +897,10 @@ export class Game implements World {
     const wasGround = p.onGround;
     this.moveBox(p, p.crouch && down && this.pressed.has("jump"));
     if (!wasGround && p.onGround) {
-      this.particles(p.x + p.w / 2, p.y + p.h, 3, "#5fa88a", 0.5);
+      this.particles(p.x + p.w / 2, p.y + p.h, 6, "#7fa9b8", 1);
+      p.landT = 8;
     }
+    if (p.landT > 0) p.landT -= 1;
 
     // Level bounds.
     if (p.x < 0) p.x = 0;
@@ -836,7 +910,7 @@ export class Game implements World {
     if (p.x + p.w > this.levelWidth) p.x = this.levelWidth - p.w;
 
     // Pits and thorns.
-    if (p.y > this.level.height * TILE + 8) this.killPlayer();
+    if (p.y > this.level.height * TILE + 12) this.killPlayer();
     if (this.hazardAt(p.x + p.w / 2, p.y + p.h - 1) || this.hazardAt(p.x + 2, p.y + p.h - 1) || this.hazardAt(p.x + p.w - 2, p.y + p.h - 1)) {
       this.hurtPlayer();
     }
@@ -864,32 +938,32 @@ export class Game implements World {
     if (active >= max) return;
     p.throwT = 12;
     p.cooldown = p.weapon === "dague" ? 8 : 14;
-    const y = p.crouch ? p.y + 4 : p.y + 8;
-    const x = p.dir > 0 ? p.x + p.w : p.x - 8;
+    const y = p.crouch ? p.y + 6 : p.y + 12;
+    const x = p.dir > 0 ? p.x + p.w : p.x - 12;
     const s = this.spawn("shot", x, y, p.weapon);
     s.dir = p.dir;
     switch (p.weapon) {
       case "lueur":
-        s.w = 8;
-        s.h = 3;
-        s.vx = p.dir * 4;
+        s.w = 12;
+        s.h = 5;
+        s.vx = p.dir * 4 * S;
         break;
       case "cle":
-        s.w = 8;
-        s.h = 8;
-        s.vx = p.dir * 3.2;
+        s.w = 12;
+        s.h = 12;
+        s.vx = p.dir * 3.2 * S;
         s.data.pierce = true;
         break;
       case "dague":
-        s.w = 9;
+        s.w = 14;
         s.h = 3;
-        s.vx = p.dir * 6;
+        s.vx = p.dir * 6 * S;
         break;
       case "cloche":
-        s.w = 8;
-        s.h = 8;
-        s.vx = p.dir * 2.2;
-        s.vy = -3.4;
+        s.w = 12;
+        s.h = 12;
+        s.vx = p.dir * 2.2 * S;
+        s.vy = -3.4 * S;
         break;
       default:
         break;
@@ -1030,10 +1104,10 @@ export class Game implements World {
     } else {
       sub = "cape";
     }
-    const item = this.spawn("item", chest.x + 2, chest.y - 8, sub);
-    item.vy = -3;
-    item.vx = 0.4;
-    this.particles(chest.x + 7, chest.y + 4, 8, "#d9b24a", 1.2);
+    const item = this.spawn("item", chest.x + 4, chest.y - 12, sub);
+    item.vy = -3 * S;
+    item.vx = 0.4 * S;
+    this.particles(chest.x + 10, chest.y + 6, 12, "#d9b24a", 1.8);
   }
 
   private pickup(e: Entity) {
@@ -1075,7 +1149,7 @@ export class Game implements World {
   private touchNpc(e: Entity) {
     if (e.state === "done") return;
     e.state = "done";
-    this.checkpoint = { x: e.x + 24, y: this.player.y };
+    this.checkpoint = { x: e.x + e.w + 12, y: this.player.y };
     this.sfx("checkpoint");
     let key = "serrure1";
     let color = "#8fe3ff";
@@ -1108,12 +1182,12 @@ export class Game implements World {
   private startBoss(trigger: Entity) {
     this.bossAlive = true;
     trigger.dead = true;
-    const arenaL = Math.floor((trigger.x - 8 * TILE) / TILE) * TILE;
+    const arenaL = Math.floor((trigger.x - 8 * TILE + 2) / TILE) * TILE;
     const arenaR = Math.min(this.levelWidth, arenaL + VIEW_W);
     this.cameraLock = { l: arenaL, r: arenaR };
     this.checkpoint = { x: arenaL + 16, y: this.player.y };
     const stats = BOSS_STATS[this.level.boss];
-    const bx = arenaR - stats.w - 24;
+    const bx = arenaR - stats.w - 36;
     const ground = this.groundBelow(bx + stats.w / 2, TILE * 2) ?? 160;
     const boss = this.spawn("boss", bx, ground - stats.h, this.level.boss);
     boss.data.arenaL = arenaL;
@@ -1135,7 +1209,7 @@ export class Game implements World {
       if (e.kind === "enemyShot" || e.kind === "golem") e.dead = true;
     }
     const exit = this.entities.find((e) => e.kind === "exit" && e.sub !== "bossTrigger");
-    if (exit) this.particles(exit.x + 8, exit.y + 16, 20, "#8fe3ff", 1.5);
+    if (exit) this.particles(exit.x + 12, exit.y + 24, 30, "#8fe3ff", 2);
   }
 
   /* ---------------- ambience / camera / particles ---------------- */
@@ -1147,26 +1221,26 @@ export class Game implements World {
     if (!period || this.ambientT < period) return;
     this.ambientT = 0;
     const p = this.player;
-    const x = p.x + p.dir * (90 + Math.random() * 60);
-    if (x < 16 || x > this.levelWidth - 16) return;
+    const x = p.x + p.dir * (90 + Math.random() * 60) * S;
+    if (x < TILE || x > this.levelWidth - TILE) return;
     if (this.level.theme === "forest") {
       const gy = this.groundBelow(x, p.y);
-      if (gy === null || gy > this.level.height * TILE - 8) return;
-      const s = this.spawn("spore", x, gy - 11);
+      if (gy === null || gy > this.level.height * TILE - 12) return;
+      const s = this.spawn("spore", x, gy - SPAWN.spore.h);
       s.state = "rise";
       s.alpha = 0;
-      this.particles(x + 5, gy, 5, "#3fa9e8", 0.6);
+      this.particles(x + 7, gy, 8, "#3fa9e8", 0.9);
     } else {
-      const m = this.spawn("meduse", x, VIEW_H + 10);
+      const m = this.spawn("meduse", x, VIEW_H + 16);
       m.state = "rise";
-      m.data.baseY = VIEW_H + 10;
-      m.data.targetY = 60 + Math.random() * 80;
+      m.data.baseY = VIEW_H + 16;
+      m.data.targetY = 90 + Math.random() * 120;
     }
   }
 
   private tickCamera() {
     const p = this.player;
-    const target = p.x + p.w / 2 - VIEW_W / 2 + p.dir * 24;
+    const target = p.x + p.w / 2 - VIEW_W / 2 + p.dir * 36;
     let cx = this.cameraX + (target - this.cameraX) * 0.12;
     if (this.cameraLock) {
       cx = this.cameraLock.l;
@@ -1258,6 +1332,7 @@ export class Game implements World {
     if (shadow) {
       ctx.fillStyle = "#020817";
       ctx.fillText(text, x + 1, y + 1);
+      ctx.fillText(text, x + 1, y);
     }
     ctx.fillStyle = color;
     ctx.fillText(text, x, y);
@@ -1285,34 +1360,99 @@ export class Game implements World {
     return lines.length;
   }
 
-  private themeBackground(theme: Theme): BackgroundTheme {
-    return theme;
+  /* ---------------- lighting ---------------- */
+
+  private renderLighting(darkness: number) {
+    if (!this.lightCanvas) {
+      this.lightCanvas = document.createElement("canvas");
+      this.lightCanvas.width = VIEW_W;
+      this.lightCanvas.height = VIEW_H;
+    }
+    const lc = this.lightCanvas.getContext("2d");
+    if (!lc) return;
+    lc.globalCompositeOperation = "source-over";
+    lc.clearRect(0, 0, VIEW_W, VIEW_H);
+    lc.fillStyle = `rgba(2, 6, 18, ${darkness})`;
+    lc.fillRect(0, 0, VIEW_W, VIEW_H);
+    lc.globalCompositeOperation = "destination-out";
+    for (const l of this.lights) {
+      const x = l.x - this.cameraX;
+      if (x < -l.r || x > VIEW_W + l.r) continue;
+      const g = lc.createRadialGradient(x, l.y, 0, x, l.y, l.r);
+      g.addColorStop(0, `rgba(0, 0, 0, ${l.a})`);
+      g.addColorStop(0.45, `rgba(0, 0, 0, ${l.a * 0.6})`);
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      lc.fillStyle = g;
+      lc.fillRect(x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    }
+    this.ctx.drawImage(this.lightCanvas, 0, 0);
+    // Coloured glow, additive.
+    const ctx = this.ctx;
+    ctx.globalCompositeOperation = "lighter";
+    for (const l of this.lights) {
+      if (!l.color) continue;
+      const x = l.x - this.cameraX;
+      if (x < -l.r || x > VIEW_W + l.r) continue;
+      const g = ctx.createRadialGradient(x, l.y, 0, x, l.y, l.r * 0.8);
+      g.addColorStop(0, l.color);
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    }
+    ctx.globalCompositeOperation = "source-over";
   }
+
+  private themeDarkness(): number {
+    switch (this.level.theme) {
+      case "forest":
+        return 0.5;
+      case "chains":
+        return 0.58;
+      case "castle":
+        return 0.5;
+      default:
+        return 0.4;
+    }
+  }
+
+  /* ---------------- title ---------------- */
 
   private renderTitle() {
     const ctx = this.ctx;
-    drawBackground(ctx, "title", this.time, this.time);
-    // Ground strip.
-    const tile = getSprite("tileForestGround");
-    for (let x = 0; x < VIEW_W; x += TILE) ctx.drawImage(tile.canvas, x, VIEW_H - 32);
-    for (let x = 0; x < VIEW_W; x += TILE) ctx.drawImage(getSprite("tileForestRock").canvas, x, VIEW_H - 16);
-
-    // Lanterne standing, Serrure beside him.
-    const bob = Math.floor(this.time / 30) % 2;
+    this.lights = [];
     this.cameraX = 0;
-    this.drawGlow(60, VIEW_H - 32 - 20, 26, 0.5);
-    ctx.drawImage(lanterneSprite("idle", false).canvas, 52, VIEW_H - 32 - 24);
-    ctx.drawImage(getSprite("serrure").flipped, 84, VIEW_H - 32 - 26 + bob);
-
-    this.drawText(this.text.title, VIEW_W / 2, 30, "#f8fafc", 20, "center");
-    this.drawText(this.text.subtitle, VIEW_W / 2, 58, "#8fe3ff", 8, "center");
-    if (Math.floor(this.time / 30) % 2 === 0) {
-      this.drawText(this.text.pressStart, VIEW_W / 2, 100, "#f8fafc", 8, "center");
+    drawBackground(ctx, "title", this.time, this.time);
+    const groundY = VIEW_H - 48;
+    const ground = getSprite("tileForestGround");
+    const rock = getSprite("tileForestRock");
+    for (let x = 0; x < VIEW_W; x += TILE) {
+      ctx.drawImage(ground.canvas, x, groundY);
+      ctx.drawImage(rock.canvas, x, groundY + TILE);
     }
-    this.drawText(`${this.text.hiScore} ${String(this.hiScore).padStart(6, "0")}`, VIEW_W / 2, 122, "#c8b48a", 6, "center");
+    const grass = getSprite("decoGrass");
+    for (let x = 6; x < VIEW_W; x += 52) ctx.drawImage(grass.canvas, x, groundY - 5);
+
+    // Lanterne and Serrure on the road.
+    const bob = Math.floor(this.time / 30) % 2;
+    const lx = 78;
+    const spr = lanterneSprite(Math.floor(this.time / 40) % 2 ? "idle1" : "idle", false);
+    this.light(lx + 14, groundY - 37, 70, 0.9, "rgba(255, 200, 120, 0.35)");
+    ctx.drawImage(spr.canvas, lx - spr.pad, groundY - 44 - spr.pad);
+    const ser = getSprite("serrure");
+    ctx.drawImage(ser.flipped, 124 - ser.pad, groundY - 44 + bob - ser.pad);
+    drawForeground(ctx, "title", this.time * 0.4, this.time);
+    this.renderLighting(0.35);
+
+    this.drawText(this.text.title, VIEW_W / 2 + 2, 44, "#020817", 26, "center", false);
+    this.drawText(this.text.title, VIEW_W / 2, 42, "#f8fafc", 26, "center");
+    this.drawText(this.text.subtitle, VIEW_W / 2, 80, "#8fe3ff", 10, "center");
+    if (Math.floor(this.time / 30) % 2 === 0) {
+      this.drawText(this.text.pressStart, VIEW_W / 2, 140, "#f8fafc", 10, "center");
+    }
+    this.drawText(`${this.text.hiScore} ${String(this.hiScore).padStart(6, "0")}`, VIEW_W / 2, 168, "#c8b48a", 7, "center");
     ctx.fillStyle = "rgba(2, 8, 23, 0.7)";
-    ctx.fillRect(0, VIEW_H - 30, VIEW_W, 30);
-    this.drawParagraph(this.text.controlsHint, VIEW_W / 2, VIEW_H - 25, VIEW_W - 24, "#b9c0ca", 5, 8, "center");
+    ctx.fillRect(0, VIEW_H - 32, VIEW_W, 32);
+    this.drawParagraph(this.text.controlsHint, VIEW_W / 2, VIEW_H - 26, VIEW_W - 30, "#b9c0ca", 6, 10, "center");
   }
 
   private renderIntro() {
@@ -1322,26 +1462,36 @@ export class Game implements World {
     const lv = this.text.levels[this.levelIndex];
     const alpha = Math.min(1, this.screenT / 40);
     ctx.globalAlpha = alpha;
-    this.drawText(`${this.text.stage} ${this.levelIndex + 1}`, VIEW_W / 2, 30, "#8fe3ff", 8, "center");
-    this.drawParagraph(lv.title, VIEW_W / 2, 46, VIEW_W - 30, "#f8fafc", 12, 16, "center");
-    this.drawParagraph(lv.intro, 20, 90, VIEW_W - 40, "#d8d2c2", 6, 9, "left");
+    // A faint vignette of the level colour.
+    const tint = this.level.theme === "forest" ? "56, 189, 248" : this.level.theme === "chains" ? "120, 90, 60" : "200, 90, 60";
+    const g = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 20, VIEW_W / 2, VIEW_H / 2, 300);
+    g.addColorStop(0, `rgba(${tint}, 0.18)`);
+    g.addColorStop(1, "rgba(2, 8, 23, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    this.drawText(`${this.text.stage} ${this.levelIndex + 1}`, VIEW_W / 2, 50, "#8fe3ff", 10, "center");
+    this.drawParagraph(lv.title, VIEW_W / 2, 72, VIEW_W - 60, "#f8fafc", 16, 22, "center");
+    this.drawParagraph(lv.intro, 40, 136, VIEW_W - 80, "#d8d2c2", 8, 13, "left");
     if (this.screenT > 60 && Math.floor(this.time / 30) % 2 === 0) {
-      this.drawText(this.text.ready, VIEW_W / 2, VIEW_H - 24, "#ff9a2a", 8, "center");
+      this.drawText(this.text.ready, VIEW_W / 2, VIEW_H - 36, "#ff9a2a", 10, "center");
     }
     ctx.globalAlpha = 1;
   }
 
+  /* ---------------- play ---------------- */
+
   private renderPlay() {
     const ctx = this.ctx;
-    const shakeX = this.shakeT > 0 ? Math.round((Math.random() - 0.5) * 4) : 0;
-    const shakeY = this.shakeT > 0 ? Math.round((Math.random() - 0.5) * 3) : 0;
+    this.lights = [];
+    const shakeX = this.shakeT > 0 ? Math.round((Math.random() - 0.5) * 6) : 0;
+    const shakeY = this.shakeT > 0 ? Math.round((Math.random() - 0.5) * 4) : 0;
     ctx.save();
     ctx.translate(shakeX, shakeY);
 
-    drawBackground(ctx, this.themeBackground(this.level.theme), this.cameraX, this.time);
+    drawBackground(ctx, this.level.theme, this.cameraX, this.time);
     this.renderTiles();
+    this.renderDecorations();
 
-    // Entities behind the player: NPCs, chests, items, exit.
     for (const e of this.entities) {
       if (e.kind === "npc" || e.kind === "chest" || e.kind === "item" || e.kind === "exit") this.renderEntity(e);
     }
@@ -1350,6 +1500,9 @@ export class Game implements World {
       if (!(e.kind === "npc" || e.kind === "chest" || e.kind === "item" || e.kind === "exit")) this.renderEntity(e);
     }
     this.renderParticles();
+    this.collectEntityLights();
+    this.renderLighting(this.themeDarkness());
+    drawForeground(ctx, this.level.theme, this.cameraX, this.time);
     ctx.restore();
 
     this.renderHud();
@@ -1357,13 +1510,68 @@ export class Game implements World {
     if (this.paused) {
       ctx.fillStyle = "rgba(2, 8, 23, 0.6)";
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-      this.drawText(this.text.pause, VIEW_W / 2, 80, "#f8fafc", 14, "center");
-      this.drawText(this.text.resume, VIEW_W / 2, 104, "#b9c0ca", 6, "center");
+      this.drawText(this.text.pause, VIEW_W / 2, 120, "#f8fafc", 18, "center");
+      this.drawText(this.text.resume, VIEW_W / 2, 152, "#b9c0ca", 8, "center");
     }
     if (this.screen === "clear") this.renderClearOverlay();
     if (this.fade > 0) {
       ctx.fillStyle = `rgba(2, 8, 23, ${this.fade})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+  }
+
+  private collectEntityLights() {
+    for (const e of this.entities) {
+      if (e.dead) continue;
+      const cx = e.x + e.w / 2;
+      const cy = e.y + e.h / 2;
+      switch (e.kind) {
+        case "spore":
+          this.light(cx, e.y + 4, 34, 0.8, "rgba(63, 169, 232, 0.16)");
+          break;
+        case "meduse":
+          this.light(cx, cy, 36, 0.9 * e.alpha, "rgba(127, 216, 255, 0.18)");
+          break;
+        case "rouage":
+          this.light(cx, e.y + 5, 18, 0.7, "rgba(255, 154, 42, 0.25)");
+          break;
+        case "golem":
+          if (e.state !== "dormant") this.light(cx, e.y + 5, 22, 0.8, "rgba(255, 154, 42, 0.25)");
+          break;
+        case "shot":
+          this.light(cx, cy, e.sub === "lueur" ? 40 : 22, 0.9, e.sub === "lueur" ? "rgba(255, 241, 168, 0.3)" : undefined);
+          break;
+        case "enemyShot":
+          this.light(cx, cy, 20, 0.8, "rgba(255, 154, 42, 0.3)");
+          break;
+        case "item":
+          this.light(cx, cy, 26, 0.8, "rgba(255, 241, 168, 0.18)");
+          break;
+        case "chest":
+          if (e.state === "open") this.light(cx, cy, 30, 0.6, "rgba(217, 178, 74, 0.2)");
+          break;
+        case "exit":
+          if (e.sub !== "bossTrigger" && this.exitOpen) this.light(cx, cy, 80, 1, "rgba(143, 227, 255, 0.3)");
+          break;
+        case "npc":
+          if (e.sub === "bourdon") this.light(cx, e.y + 24, 70, 0.9, "rgba(255, 150, 60, 0.28)");
+          else this.light(cx, cy, 40, 0.5);
+          break;
+        case "boss":
+          if (e.sub === "machine") this.light(cx, e.y + 14, 60, 0.9 * e.alpha, "rgba(255, 154, 42, 0.25)");
+          else if (e.sub === "sombre") this.light(cx, cy, 44, 0.6 * e.alpha);
+          else this.light(cx, e.y + 12, 40, 0.5 * e.alpha, "rgba(232, 228, 216, 0.12)");
+          break;
+        default:
+          break;
+      }
+    }
+    // Ambient light from the background mushrooms so the forest floor reads.
+    if (this.level.theme === "forest") {
+      for (let i = 0; i < 6; i += 1) {
+        const x = this.cameraX + ((i * 97 + Math.floor(this.cameraX * 0.4)) % VIEW_W);
+        this.light(x, VIEW_H - 60, 50, 0.35);
+      }
     }
   }
 
@@ -1380,24 +1588,32 @@ export class Game implements World {
     const ctx = this.ctx;
     const x = Math.round(e.x - this.cameraX);
     const y = Math.round(e.y);
-    // A wooden door in the cliff, lit in blue when the way is open.
-    ctx.fillStyle = "#2a1d10";
-    ctx.fillRect(x, y, 16, 32);
-    ctx.fillStyle = "#5a4530";
-    ctx.fillRect(x + 2, y + 2, 12, 30);
+    // A wooden door set in the rock, lit in blue when the way is open.
+    ctx.fillStyle = "#1b1208";
+    ctx.fillRect(x - 2, y - 2, TILE + 4, TILE * 2 + 2);
     ctx.fillStyle = "#3a2a1e";
-    for (let i = 0; i < 3; i += 1) ctx.fillRect(x + 3 + i * 4, y + 2, 1, 30);
+    ctx.fillRect(x, y, TILE, TILE * 2);
+    ctx.fillStyle = "#5a4530";
+    ctx.fillRect(x + 2, y + 2, TILE - 4, TILE * 2 - 2);
+    ctx.fillStyle = "#3a2a1e";
+    for (let i = 0; i < 4; i += 1) ctx.fillRect(x + 4 + i * 5, y + 2, 1, TILE * 2 - 2);
+    ctx.fillStyle = "#2a1d10";
+    ctx.fillRect(x + 2, y + 14, TILE - 4, 2);
+    ctx.fillRect(x + 2, y + 34, TILE - 4, 2);
     ctx.fillStyle = "#d1a043";
-    ctx.fillRect(x + 11, y + 17, 2, 2);
+    ctx.fillRect(x + 17, y + 26, 3, 3);
+    ctx.beginPath();
+    ctx.fillStyle = "#1b1208";
+    ctx.arc(x + TILE / 2, y, TILE / 2 + 2, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = "#5a4530";
+    ctx.beginPath();
+    ctx.arc(x + TILE / 2, y + 2, TILE / 2 - 2, Math.PI, 0);
+    ctx.fill();
     if (this.exitOpen) {
       const pulse = 0.5 + 0.5 * Math.sin(this.time / 10);
-      const g = ctx.createRadialGradient(x + 8, y + 16, 2, x + 8, y + 16, 30);
-      g.addColorStop(0, `rgba(143, 227, 255, ${0.5 + pulse * 0.3})`);
-      g.addColorStop(1, "rgba(143, 227, 255, 0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(x - 24, y - 16, 64, 64);
-      ctx.fillStyle = `rgba(185, 243, 255, ${0.5 + pulse * 0.5})`;
-      ctx.fillRect(x + 2, y + 2, 12, 30);
+      ctx.fillStyle = `rgba(185, 243, 255, ${0.55 + pulse * 0.4})`;
+      ctx.fillRect(x + 3, y + 3, TILE - 6, TILE * 2 - 4);
     }
   }
 
@@ -1405,7 +1621,8 @@ export class Game implements World {
     const ctx = this.ctx;
     const theme = this.level.theme;
     const ground = getSprite(theme === "forest" ? "tileForestGround" : theme === "chains" ? "tileBoneGround" : "tileCastleFloor");
-    const rock = getSprite(theme === "forest" ? "tileForestRock" : theme === "chains" ? "tileBoneRock" : "tileCastleStone");
+    const rockA = getSprite(theme === "forest" ? "tileForestRock" : theme === "chains" ? "tileBoneRock" : "tileCastleStone");
+    const rockB = getSprite(theme === "forest" ? "tileForestRockB" : theme === "chains" ? "tileBoneRockB" : "tileCastleStone");
     const platform = getSprite(theme === "forest" ? "tileMushroom" : theme === "chains" ? "tileChain" : "tileBeam");
     const thorns = getSprite("tileThorns");
     const startTx = Math.floor(this.cameraX / TILE);
@@ -1414,46 +1631,61 @@ export class Game implements World {
       for (let tx = startTx; tx <= endTx; tx += 1) {
         const t = this.tileAt(tx, ty);
         if (t === ".") continue;
-        const x = tx * TILE - this.cameraX;
+        const x = Math.round(tx * TILE - this.cameraX);
         const y = ty * TILE;
         if (t === "#") {
           const above = this.tileAt(tx, ty - 1);
-          ctx.drawImage(above === "#" ? rock.canvas : ground.canvas, Math.round(x), y);
+          if (above !== "#") ctx.drawImage(ground.canvas, x, y);
+          else ctx.drawImage((rnd(tx * 3 + ty * 11) < 0.5 ? rockA : rockB).canvas, x, y);
+          // Soft shadow under overhangs and on the left of walls.
+          if (this.tileAt(tx, ty + 1) === ".") {
+            ctx.fillStyle = "rgba(2, 6, 18, 0.35)";
+            ctx.fillRect(x, y + TILE, TILE, 6);
+          }
+          if (this.tileAt(tx + 1, ty) === "." && this.tileAt(tx + 1, ty - 1) === ".") {
+            ctx.fillStyle = "rgba(2, 6, 18, 0.25)";
+            ctx.fillRect(x + TILE, y, 5, TILE);
+          }
         } else if (t === "-") {
-          ctx.drawImage(platform.canvas, Math.round(x), y);
+          ctx.drawImage(platform.canvas, x - platform.pad, y - platform.pad);
         } else if (t === "^") {
-          ctx.drawImage(thorns.canvas, Math.round(x), y);
+          ctx.drawImage(thorns.canvas, x, y);
         }
       }
     }
   }
 
-  private drawGlow(cx: number, cy: number, radius: number, strength: number) {
-    const ctx = this.ctx;
-    const g = ctx.createRadialGradient(cx, cy, 1, cx, cy, radius);
-    g.addColorStop(0, `rgba(255, 220, 150, ${strength})`);
-    g.addColorStop(0.5, `rgba(255, 200, 120, ${strength * 0.35})`);
-    g.addColorStop(1, "rgba(255, 200, 120, 0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+  private renderDecorations() {
+    const camL = this.cameraX - 40;
+    const camR = this.cameraX + VIEW_W + 40;
+    for (const d of this.decos) {
+      if (d.x < camL || d.x > camR) continue;
+      const spr = getSprite(d.name);
+      this.drawSprite(spr, d.x, d.y, false, 1);
+      if (d.light) {
+        const flick = d.flicker ? 0.75 + 0.25 * Math.sin(this.time / 4 + d.x) : 1;
+        const warm = d.flicker;
+        this.light(d.x + spr.width / 2 - spr.pad, d.y + (warm ? 1 : 3), d.light * flick, 0.85, warm ? "rgba(255, 180, 70, 0.25)" : "rgba(63, 169, 232, 0.16)");
+      }
+    }
   }
 
   private renderPlayer() {
     const p = this.player;
     const ctx = this.ctx;
-    const sx = Math.round(p.x - 3 - this.cameraX);
-    const sy = Math.round(p.y + p.h - 24);
-    // Lantern glow, flickering.
-    const flick = 0.35 + 0.08 * Math.sin(this.time / 4) + (p.dead ? -0.2 : 0);
-    const headY = p.crouch ? sy + 11 : sy + 5;
-    const headX = sx + 7;
-    this.drawGlow(headX, p.dead ? sy + 18 : headY, 28, Math.max(0.05, flick));
+    const squash = p.landT > 0 ? 1 : 0;
+    const sx = Math.round(p.x - 9 - this.cameraX);
+    const sy = Math.round(p.y + p.h - 44) + squash;
+    const headY = p.crouch ? sy + 17 : sy + 7;
+    const headX = sx + 14;
+    const flick = 0.95 + 0.05 * Math.sin(this.time / 4);
+    this.light(headX + this.cameraX, p.dead ? sy + 30 : headY, p.dead ? 50 : 96 * flick, 1, "rgba(255, 200, 120, 0.22)");
 
     let frame = p.frame;
     if (p.dead) frame = p.deadT < 30 ? "deadA" : "deadB";
     if (p.invuln > 0 && !p.dead && Math.floor(p.invuln / 3) % 2 === 0) return;
     const spr = lanterneSprite(frame, p.armor === 1);
-    ctx.drawImage(p.dir < 0 ? spr.flipped : spr.canvas, sx, sy);
+    ctx.drawImage(p.dir < 0 ? spr.flipped : spr.canvas, sx - spr.pad, sy - spr.pad);
   }
 
   private renderParticles() {
@@ -1465,71 +1697,79 @@ export class Game implements World {
     }
     ctx.globalAlpha = 1;
     for (const f of this.floats) {
-      f.y -= 0.4;
+      f.y -= 0.5;
       f.life -= 1;
-      this.drawText(f.text, Math.round(f.x - this.cameraX), Math.round(f.y), "#fff1a8", 5, "left");
+      this.drawText(f.text, Math.round(f.x - this.cameraX), Math.round(f.y), "#fff1a8", 7, "left");
     }
     this.floats = this.floats.filter((f) => f.life > 0);
   }
 
   private renderHud() {
     const ctx = this.ctx;
-    ctx.fillStyle = "rgba(2, 8, 23, 0.55)";
-    ctx.fillRect(0, 0, VIEW_W, 18);
-    this.drawText(`${String(this.score).padStart(6, "0")}`, 4, 3, "#f8fafc", 7);
-    this.drawText(`HI ${String(this.hiScore).padStart(6, "0")}`, 4, 11, "#c8b48a", 5);
+    const g = ctx.createLinearGradient(0, 0, 0, 30);
+    g.addColorStop(0, "rgba(2, 8, 23, 0.85)");
+    g.addColorStop(1, "rgba(2, 8, 23, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, VIEW_W, 30);
+    this.drawText(String(this.score).padStart(6, "0"), 8, 5, "#f8fafc", 10);
+    this.drawText(`HI ${String(this.hiScore).padStart(6, "0")}`, 8, 17, "#c8b48a", 6);
 
     // Timer.
     const sec = Math.ceil(this.timeLeft / 60);
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     const timerColor = sec <= 10 && Math.floor(this.time / 15) % 2 === 0 ? "#ff9a2a" : "#f8fafc";
-    this.drawText(`${m}:${String(s).padStart(2, "0")}`, VIEW_W / 2, 5, timerColor, 8, "center");
+    this.drawText(`${m}:${String(s).padStart(2, "0")}`, VIEW_W / 2, 6, timerColor, 12, "center");
 
-    // Lives: small lantern heads.
+    // Lives: lantern heads.
     for (let i = 0; i < Math.max(0, this.lives); i += 1) {
-      const x = VIEW_W - 8 - i * 8;
-      ctx.fillStyle = "#e6e9ee";
-      ctx.fillRect(x, 4, 5, 6);
+      const x = VIEW_W - 12 - i * 11;
+      ctx.fillStyle = "#586170";
+      ctx.fillRect(x - 1, 5, 8, 10);
+      ctx.fillStyle = "#eef1f5";
+      ctx.fillRect(x, 6, 6, 8);
       ctx.fillStyle = "#12121a";
-      ctx.fillRect(x + 1, 6, 1, 1);
-      ctx.fillRect(x + 3, 6, 1, 1);
-      ctx.fillStyle = "#9aa3b1";
-      ctx.fillRect(x + 1, 3, 3, 1);
+      ctx.fillRect(x + 1, 9, 1, 2);
+      ctx.fillRect(x + 4, 9, 1, 2);
+      ctx.fillStyle = "#c4cbd5";
+      ctx.fillRect(x + 1, 4, 4, 1);
+      ctx.fillRect(x + 2, 3, 2, 1);
     }
-    // Weapon icon.
-    const wIcon = getSprite(
-      { lueur: "itemLueur", cle: "itemCle", dague: "itemDague", cloche: "itemCloche" }[this.player.weapon],
-    );
-    ctx.drawImage(wIcon.canvas, VIEW_W - 60, 3);
-    // Armour state.
-    ctx.drawImage(getSprite("itemCape").canvas, VIEW_W - 76, 3);
+    // Armour and weapon.
+    const cape = getSprite("itemCape");
+    ctx.drawImage(cape.canvas, VIEW_W - 100, 4);
     if (this.player.armor === 1) {
-      ctx.fillStyle = "rgba(2, 8, 23, 0.7)";
-      ctx.fillRect(VIEW_W - 76, 3, 10, 10);
+      ctx.fillStyle = "rgba(2, 8, 23, 0.75)";
+      ctx.fillRect(VIEW_W - 100, 4, 14, 14);
+      ctx.fillStyle = "#ff5a2a";
+      ctx.fillRect(VIEW_W - 99, 17, 12, 1);
     }
+    const wIcon = getSprite({ lueur: "itemLueur", cle: "itemCle", dague: "itemDague", cloche: "itemCloche" }[this.player.weapon]);
+    ctx.drawImage(wIcon.canvas, VIEW_W - 80, 4);
 
-    // Medallion: glows bluer as Rose gets closer (level progress).
+    // Medallion: glows bluer as Rose gets closer.
     const progress = Math.min(1, this.player.x / Math.max(1, this.levelWidth - VIEW_W));
-    const mx = VIEW_W / 2 + 40;
-    const g = ctx.createRadialGradient(mx + 5, 8, 1, mx + 5, 8, 6 + progress * 10);
-    g.addColorStop(0, `rgba(143, 227, 255, ${0.2 + progress * 0.7})`);
-    g.addColorStop(1, "rgba(143, 227, 255, 0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(mx - 12, -8, 34, 34);
-    ctx.drawImage(getSprite("itemMedaillon").canvas, mx, 3);
+    const mx = VIEW_W / 2 + 56;
+    const mg = ctx.createRadialGradient(mx + 7, 11, 1, mx + 7, 11, 8 + progress * 14);
+    mg.addColorStop(0, `rgba(143, 227, 255, ${0.25 + progress * 0.7})`);
+    mg.addColorStop(1, "rgba(143, 227, 255, 0)");
+    ctx.fillStyle = mg;
+    ctx.fillRect(mx - 16, -12, 46, 46);
+    ctx.drawImage(getSprite("itemMedaillon").canvas, mx, 4);
 
     // Boss bar.
     if (this.bossAlive && this.bossHp.max > 0) {
-      const w = 120;
+      const w = 180;
       const x = VIEW_W / 2 - w / 2;
-      ctx.fillStyle = "rgba(2, 8, 23, 0.7)";
-      ctx.fillRect(x - 1, VIEW_H - 15, w + 2, 8);
-      ctx.fillStyle = "#7d2323";
-      ctx.fillRect(x, VIEW_H - 14, w, 6);
+      ctx.fillStyle = "rgba(2, 8, 23, 0.75)";
+      ctx.fillRect(x - 2, VIEW_H - 22, w + 4, 11);
+      ctx.fillStyle = "#4a1616";
+      ctx.fillRect(x, VIEW_H - 20, w, 7);
       ctx.fillStyle = "#ff9a2a";
-      ctx.fillRect(x, VIEW_H - 14, Math.round((w * this.bossHp.cur) / this.bossHp.max), 6);
-      this.drawText(this.bossHp.name, VIEW_W / 2, VIEW_H - 24, "#f8fafc", 6, "center");
+      ctx.fillRect(x, VIEW_H - 20, Math.round((w * this.bossHp.cur) / this.bossHp.max), 7);
+      ctx.fillStyle = "#ffd27a";
+      ctx.fillRect(x, VIEW_H - 20, Math.round((w * this.bossHp.cur) / this.bossHp.max), 2);
+      this.drawText(this.bossHp.name, VIEW_W / 2, VIEW_H - 34, "#f8fafc", 8, "center");
     }
   }
 
@@ -1537,72 +1777,84 @@ export class Game implements World {
     const ctx = this.ctx;
     const alpha = Math.min(1, d.timer / 20);
     ctx.globalAlpha = alpha;
-    const h = 34;
-    ctx.fillStyle = "rgba(2, 8, 23, 0.85)";
-    ctx.fillRect(8, VIEW_H - h - 8, VIEW_W - 16, h);
+    const h = 50;
+    const x = 12;
+    const w = VIEW_W - 24;
+    const y = VIEW_H - h - 12;
+    ctx.fillStyle = "rgba(2, 8, 23, 0.88)";
+    ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = d.color;
     ctx.lineWidth = 1;
-    ctx.strokeRect(8.5, VIEW_H - h - 7.5, VIEW_W - 17, h - 1);
-    let y = VIEW_H - h - 4;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.fillStyle = d.color;
+    ctx.fillRect(x + 4, y + 4, 2, h - 8);
+    let ty = y + 6;
     if (d.speaker) {
-      this.drawText(d.speaker, 14, y, d.color, 6);
-      y += 9;
+      this.drawText(d.speaker, x + 12, ty, d.color, 8);
+      ty += 13;
     }
-    this.drawParagraph(d.text, 14, y, VIEW_W - 30, "#f8fafc", 6, 8);
+    this.drawParagraph(d.text, x + 12, ty, w - 24, "#f8fafc", 7, 11);
     ctx.globalAlpha = 1;
   }
 
   private renderClearOverlay() {
     const ctx = this.ctx;
-    ctx.fillStyle = "rgba(2, 8, 23, 0.55)";
-    ctx.fillRect(0, 40, VIEW_W, 80);
-    this.drawText(this.text.stageClear, VIEW_W / 2, 50, "#8fe3ff", 12, "center");
+    ctx.fillStyle = "rgba(2, 8, 23, 0.6)";
+    ctx.fillRect(0, 70, VIEW_W, 110);
+    this.drawText(this.text.stageClear, VIEW_W / 2, 84, "#8fe3ff", 16, "center");
     const sec = Math.ceil(this.timeLeft / 60);
-    this.drawText(`${this.text.timeBonus} ${sec} x 10`, VIEW_W / 2, 76, "#f8fafc", 7, "center");
-    this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 92, "#c8b48a", 7, "center");
+    this.drawText(`${this.text.timeBonus} ${sec} x 10`, VIEW_W / 2, 120, "#f8fafc", 9, "center");
+    this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 142, "#c8b48a", 9, "center");
   }
 
   private renderGameOver() {
     const ctx = this.ctx;
+    this.lights = [];
+    this.cameraX = 0;
     ctx.fillStyle = "#020817";
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.drawImage(lanterneSprite("deadB", this.player.armor === 1).canvas, VIEW_W / 2 - 8, 60);
-    this.drawGlow(VIEW_W / 2 + 4, 78, 20, 0.15);
-    this.drawParagraph(this.text.gameOver, VIEW_W / 2, 96, VIEW_W - 40, "#d8d2c2", 7, 10, "center");
-    this.drawText(this.text.continueQ, VIEW_W / 2, 124, "#f8fafc", 8, "center");
+    const spr = lanterneSprite("deadB", this.player.armor === 1);
+    ctx.drawImage(spr.canvas, VIEW_W / 2 - 16 - spr.pad, 84 - spr.pad);
+    this.light(VIEW_W / 2 + 6, 104, 40, 0.5, "rgba(255, 200, 120, 0.15)");
+    this.renderLighting(0.2);
+    this.drawParagraph(this.text.gameOver, VIEW_W / 2, 140, VIEW_W - 60, "#d8d2c2", 9, 13, "center");
+    this.drawText(this.text.continueQ, VIEW_W / 2, 180, "#f8fafc", 11, "center");
     const yesColor = this.continueChoice === 0 ? "#ff9a2a" : "#b9c0ca";
     const noColor = this.continueChoice === 1 ? "#ff9a2a" : "#b9c0ca";
-    this.drawText(this.text.yes, VIEW_W / 2 - 30, 142, yesColor, 8, "center");
-    this.drawText(this.text.no, VIEW_W / 2 + 30, 142, noColor, 8, "center");
-    this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 168, "#c8b48a", 6, "center");
+    this.drawText(this.text.yes, VIEW_W / 2 - 44, 206, yesColor, 11, "center");
+    this.drawText(this.text.no, VIEW_W / 2 + 44, 206, noColor, 11, "center");
+    this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 250, "#c8b48a", 8, "center");
   }
 
   private renderEnding() {
     const ctx = this.ctx;
     const t = this.endingT;
-    drawBackground(ctx, "white", t * 0.4, this.time);
-    const ground = getSprite("tileWhiteGround");
-    for (let x = -(Math.floor(t * 0.4) % TILE); x < VIEW_W + TILE; x += TILE) {
-      ctx.drawImage(ground.canvas, x, VIEW_H - 32);
-      ctx.drawImage(ground.canvas, x, VIEW_H - 16);
-    }
+    this.lights = [];
     this.cameraX = 0;
-    const groundY = VIEW_H - 32;
+    drawBackground(ctx, "white", t * 0.6, this.time);
+    const ground = getSprite("tileWhiteGround");
+    const groundY = VIEW_H - 48;
+    for (let x = -(Math.floor(t * 0.6) % TILE); x < VIEW_W + TILE; x += TILE) {
+      ctx.drawImage(ground.canvas, x, groundY);
+      ctx.drawImage(ground.canvas, x, groundY + TILE);
+    }
 
     // Lanterne and Serrure walking, then Barrik dropping in, then Rose.
     const walk = `walk${Math.floor(t / 7) % 4}`;
-    const lx = Math.min(120, 20 + t * 0.4);
+    const lx = Math.min(180, 30 + t * 0.6);
     const walking = t < 250;
-    this.drawGlow(lx + 7, groundY - 19, 26, 0.4);
-    ctx.drawImage(lanterneSprite(walking ? walk : "idle", false).canvas, lx, groundY - 24);
-    ctx.drawImage(getSprite("serrure").canvas, lx - 26, groundY - 26 + (walking ? Math.floor(t / 8) % 2 : 0));
+    const spr = lanterneSprite(walking ? walk : "idle", false);
+    this.light(lx + 14, groundY - 37, 70, 0.8, "rgba(255, 200, 120, 0.2)");
+    ctx.drawImage(spr.canvas, lx - spr.pad, groundY - 44 - spr.pad);
+    const ser = getSprite("serrure");
+    ctx.drawImage(ser.canvas, lx - 40 - ser.pad, groundY - 44 + (walking ? Math.floor(t / 8) % 2 : 0) - ser.pad);
 
     if (t > 300) {
-      // Barrik falls from above and lands with a bounce.
       const fall = Math.min(1, (t - 300) / 40);
-      const by = -30 + fall * (groundY - 26 + 30);
-      const bounce = t > 340 && t < 352 ? -4 : 0;
-      ctx.drawImage(getSprite("barrik").flipped, 190, by + bounce);
+      const by = -50 + fall * (groundY - 39 + 50);
+      const bounce = t > 340 && t < 352 ? -6 : 0;
+      const bar = getSprite("barrik");
+      ctx.drawImage(bar.flipped, 290 - bar.pad, by + bounce - bar.pad);
       if (t === 341) {
         this.shake(6);
         this.sfx("hit");
@@ -1611,28 +1863,29 @@ export class Game implements World {
     if (t > 620) {
       const alpha = Math.min(1, (t - 620) / 60);
       ctx.globalAlpha = alpha;
-      const g = ctx.createRadialGradient(272, groundY - 20, 2, 272, groundY - 20, 40);
+      const g = ctx.createRadialGradient(410, groundY - 30, 2, 410, groundY - 30, 60);
       g.addColorStop(0, "rgba(242, 167, 200, 0.6)");
       g.addColorStop(1, "rgba(242, 167, 200, 0)");
       ctx.fillStyle = g;
-      ctx.fillRect(232, groundY - 60, 80, 80);
-      ctx.drawImage(getSprite("rose").flipped, 266, groundY - 22);
+      ctx.fillRect(350, groundY - 90, 120, 120);
+      const rose = getSprite("rose");
+      ctx.drawImage(rose.flipped, 400 - rose.pad, groundY - 35 - rose.pad);
       ctx.globalAlpha = 1;
     }
+    this.renderLighting(0.12);
 
-    // Text cards.
     const lines = this.text.ending;
     const idx = Math.floor(t / 220);
-    ctx.fillStyle = "rgba(2, 8, 23, 0.65)";
-    ctx.fillRect(0, 16, VIEW_W, 52);
+    ctx.fillStyle = "rgba(2, 8, 23, 0.7)";
+    ctx.fillRect(0, 22, VIEW_W, 70);
     if (idx < lines.length) {
       const local = t % 220;
       ctx.globalAlpha = local < 30 ? local / 30 : local > 190 ? (220 - local) / 30 : 1;
-      this.drawParagraph(lines[idx], VIEW_W / 2, 24, VIEW_W - 40, "#f8fafc", 7, 10, "center");
+      this.drawParagraph(lines[idx], VIEW_W / 2, 36, VIEW_W - 60, "#f8fafc", 9, 14, "center");
       ctx.globalAlpha = 1;
     } else {
-      this.drawParagraph(this.text.thanks, VIEW_W / 2, 22, VIEW_W - 40, "#f8fafc", 6, 9, "center");
-      this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 50, "#c8b48a", 7, "center");
+      this.drawParagraph(this.text.thanks, VIEW_W / 2, 32, VIEW_W - 60, "#f8fafc", 8, 12, "center");
+      this.drawText(`${this.text.score} ${String(this.score).padStart(6, "0")}`, VIEW_W / 2, 70, "#c8b48a", 9, "center");
     }
     if (t > 340 && t < 600) {
       this.renderDialogue({ text: this.text.dialogue.barrik, speaker: "BARRIK", timer: 600 - t, color: "#a8733c" });

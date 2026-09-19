@@ -1,8 +1,10 @@
 import type { Sprite } from "./pixel";
 
-export const TILE = 16;
-export const VIEW_W = 320;
-export const VIEW_H = 192;
+export const TILE = 24;
+export const VIEW_W = 480;
+export const VIEW_H = 288;
+/** World scale relative to the original 16px tile design (speeds, distances). */
+export const S = 1.5;
 
 export type WeaponKind = "lueur" | "cle" | "dague" | "cloche";
 
@@ -92,6 +94,7 @@ export type PlayerState = {
   deadT: number;
   walkT: number;
   frame: string;
+  landT: number;
 };
 
 export type Rect = { x: number; y: number; w: number; h: number };

@@ -3,8 +3,17 @@
 import { Press_Start_2P } from "next/font/google";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import type { Game, GameScreen, InputName } from "@/lib/game/engine";
+import type { GameScreen, InputName } from "@/lib/game/engine";
 import { VIEW_H, VIEW_W } from "@/lib/game/types";
+
+type Playable = {
+  start: () => void;
+  destroy: () => void;
+  setInput: (name: InputName, down: boolean) => void;
+  releaseAll: () => void;
+  toggleMute: () => boolean;
+  muted: boolean;
+};
 
 const pixelFont = Press_Start_2P({
   weight: "400",
@@ -49,7 +58,7 @@ export function GameShell() {
   const copy = dict.game;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const gameRef = useRef<Game | null>(null);
+  const gameRef = useRef<Playable | null>(null);
   const [ready, setReady] = useState(false);
   const [muted, setMuted] = useState(false);
   const [screen, setScreen] = useState<GameScreen>("title");
@@ -59,7 +68,7 @@ export function GameShell() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let disposed = false;
-    let game: Game | null = null;
+    let game: Playable | null = null;
 
     const boot = async () => {
       try {
@@ -67,13 +76,24 @@ export function GameShell() {
       } catch {
         /* font fallback is fine */
       }
-      const { Game: GameCtor } = await import("@/lib/game/engine");
-      if (disposed) return;
-      game = new GameCtor(canvas, {
-        locale,
-        font: `${pixelFont.style.fontFamily}, monospace`,
-        onScreenChange: setScreen,
-      });
+      const fullEngine = new URLSearchParams(window.location.search).get("engine") === "full";
+      if (fullEngine) {
+        const { Game: GameCtor } = await import("@/lib/game/engine");
+        if (disposed) return;
+        game = new GameCtor(canvas, {
+          locale,
+          font: `${pixelFont.style.fontFamily}, monospace`,
+          onScreenChange: setScreen,
+        });
+      } else {
+        const { Mockup } = await import("@/lib/game/mockup");
+        const mock = new Mockup(canvas);
+        await mock.load();
+        if (disposed) return;
+        game = mock;
+        setScreen("play");
+      }
+      if (!game) return;
       gameRef.current = game;
       game.start();
       setReady(true);
