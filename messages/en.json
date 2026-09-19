@@ -739,10 +739,12 @@
     "controlsTitle": "Controls",
     "controls": [
       "Arrow keys or A / D: move",
-      "Z, W, Space or Up: jump",
+      "Z, W, Space or Up: jump (release early for a short hop)",
+      "Down: crouch, ducks under the Machine's beam",
       "Down + jump: drop through a platform",
-      "X, K or Enter: throw the glimmer",
-      "Down + X: throw low, along the moss",
+      "X, K or Enter: throw the glimmer (crouched or Down: throw low)",
+      "Hold X after a throw, then release: charged glimmer, 3 damage, pierces",
+      "C, L or Shift: dodge roll, invulnerable while rolling",
       "M: sound"
     ],
     "touchHint": "On a phone, use the on-screen buttons.",
@@ -752,6 +754,7 @@
     "loreTitle": "What you will meet",
     "lore": [
       "The road of episode 1: the blue mushroom forest, the one-eyed machine over the ledges, the pilgrims' gong, the roots of the Source Tree, Serrure's tavern, then the Machine's arena and the gate.",
+      "Dodge roll (C or Shift) through an attack, variable jump height, coyote time and jump buffering: the controls answer like a modern game. At Serrure's, press Down with three lilies to gain a heart.",
       "Reptilians rear up before clawing: jump back. Four glimmers and they fall. Glowing beetles crawl along the ground: throw low or stomp them. One in three leaves a light that mends the armour.",
       "The one-eyed machine hovers, curls up, then slams down: climb a ledge, drop back and hit it while it lies stunned. The moss trembles before a root breaks through: never stand on it.",
       "The masked pilgrims strike their gong and Serrure welcomes you under his roof: the armour is mended and the checkpoint is yours. The Machine stomps and fires a beam; at half health it calls the beetles. Twenty-eight glimmers bring it down.",

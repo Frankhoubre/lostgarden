@@ -25,6 +25,10 @@ const ARENA_R = ARENA_L + VIEW_W;
 const GATE_X = ARENA_R + 90;
 const BOSS_HP = 28;
 const EYE_HP = 7;
+const ROLL_T = 18;
+const ROLL_SPEED = 4.6;
+const CHARGE_T = 40;
+const MAX_HP_CAP = 5;
 
 type Light = { x: number; y: number; r: number; a: number; color?: string; parallax: number };
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; size: number; parallax: number };
@@ -45,7 +49,10 @@ type Reptile = {
   flash: number;
   home: number;
 };
-type Shot = { x: number; y: number; vx: number; life: number; dead: boolean };
+type Shot = { x: number; y: number; vx: number; life: number; dead: boolean; power: number; hits: number; hitList: object[] };
+type Pop = { x: number; y: number; text: string; life: number; color: string };
+type Ghost = { x: number; y: number; sheet: HTMLImageElement; frame: number; cw: number; ch: number; flip: boolean; life: number };
+type Pose = { sheet: HTMLImageElement; frame: number; cw: number; ch: number };
 type BossShot = { x: number; y: number; vx: number; vy: number; w: number; h: number; life: number; dead: boolean; kind: "bolt" | "shard" };
 type Platform = { x: number; y: number; w: number; kind: PlatformKind };
 type PlatformKind = "small" | "wide" | "log" | "ledge";
@@ -68,6 +75,7 @@ type ItemKind = "lily" | "light";
 type Item = { x: number; y: number; vy: number; kind: ItemKind; t: number; dead: boolean; rest: number };
 type Checkpoint = { x: number; kind: "gong" | "tavern"; done: boolean; t: number };
 type Cell = { w: number; h: number };
+type ExtraMeta = { crouch: { n: number; cell: Cell }; roll: { n: number; cell: Cell }; charge: { n: number; cell: Cell } };
 type LoreMeta = {
   beetle: { n: number; cell: Cell };
   root: { n: number; cell: Cell };
@@ -174,6 +182,25 @@ export class Mockup {
   private checkpoints: Checkpoint[] = [];
   private lilies = 0;
   private lastHurt = "";
+  private crouchSheet!: HTMLImageElement;
+  private rollSheet!: HTMLImageElement;
+  private chargeSheet!: HTMLImageElement;
+  private extra!: ExtraMeta;
+  private maxHp = PLAYER_HP;
+  private coyote = 0;
+  private jumpBuffer = 0;
+  private jumpCut = false;
+  private crouching = false;
+  private crouchT = 0;
+  private rollT = 0;
+  private rollCooldown = 0;
+  private chargeT = 0;
+  private bigThrowT = 0;
+  private squash = 0;
+  private stretch = 0;
+  private nearSerrure = false;
+  private pops: Pop[] = [];
+  private ghosts: Ghost[] = [];
   private lilyTotal = 0;
   private caption: { title: string; lines: string[]; t: number } | null = null;
   private song: SongName | null = null;
@@ -195,6 +222,7 @@ export class Mockup {
   private feetY = 0;
   private lightCanvas: HTMLCanvasElement;
   private fxCanvas: HTMLCanvasElement;
+  private flashCanvas: HTMLCanvasElement;
   private ready = false;
 
   // Player
@@ -238,6 +266,9 @@ export class Mockup {
     this.fxCanvas = document.createElement("canvas");
     this.fxCanvas.width = VIEW_W;
     this.fxCanvas.height = VIEW_H;
+    this.flashCanvas = document.createElement("canvas");
+    this.flashCanvas.width = 256;
+    this.flashCanvas.height = 192;
     (canvas as HTMLCanvasElement & { lostGardenMockup?: Mockup }).lostGardenMockup = this;
   }
 
@@ -285,6 +316,16 @@ export class Mockup {
       loadImage(asset("item-medallion.png")),
       fetch(asset("lore-assets.json")).then((r) => r.json() as Promise<LoreMeta>),
     ]);
+    const [crouchSheet, rollSheet, chargeSheet, extra] = await Promise.all([
+      loadImage(asset("lanterne-crouch.png")),
+      loadImage(asset("lanterne-roll.png")),
+      loadImage(asset("lanterne-charge.png")),
+      fetch(asset("lanterne-extra.json")).then((r) => r.json() as Promise<ExtraMeta>),
+    ]);
+    this.crouchSheet = crouchSheet;
+    this.rollSheet = rollSheet;
+    this.chargeSheet = chargeSheet;
+    this.extra = extra;
     this.beetleSheet = beetleSheet;
     this.rootSheet = rootSheet;
     this.eyeSheet = eyeSheet;
@@ -397,8 +438,14 @@ export class Mockup {
     this.vx = 0;
     this.vy = 0;
     this.dir = 1;
-    this.hp = PLAYER_HP;
+    this.maxHp = PLAYER_HP;
+    this.hp = this.maxHp;
     this.checkpoint = 120;
+    this.rollT = 0;
+    this.chargeT = 0;
+    this.bigThrowT = 0;
+    this.pops = [];
+    this.ghosts = [];
     this.reptiles = [];
     this.beetles = [];
     this.eyes = [];
@@ -502,6 +549,10 @@ export class Mockup {
       checkpoints: this.checkpoints.map((c) => c.done),
       caption: this.caption?.title ?? null,
       lastHurt: this.lastHurt,
+      rolling: this.rollT > 0,
+      crouching: this.crouching,
+      chargeT: this.chargeT,
+      maxHp: this.maxHp,
       cleared: this.cleared,
       gateOpen: this.gateOpen,
       checkpoint: this.checkpoint,
@@ -544,14 +595,20 @@ export class Mockup {
       this.pressed.clear();
       return;
     }
-    const busy = this.hurtT > 0;
-    const left = this.held.has("left") && !busy;
-    const right = this.held.has("right") && !busy;
+    const rolling = this.rollT > 0;
+    const busy = this.hurtT > 0 || rolling || this.bigThrowT > 0;
     const feetY = this.feetY;
+    // Crouch: hold down on the ground. Lanterne ducks under the Machine's beam and throws low.
+    this.crouching = this.onGround && this.held.has("down") && !busy && this.throwT === 0;
+    this.crouchT = this.crouching ? this.crouchT + 1 : 0;
+    const left = this.held.has("left") && !busy && !this.crouching;
+    const right = this.held.has("right") && !busy && !this.crouching;
 
     // Horizontal motion with a little inertia (the armour is heavy).
     const target = left ? -WALK : right ? WALK : 0;
-    if (this.onGround) {
+    if (rolling) {
+      this.vx = this.dir * ROLL_SPEED * (this.rollT > 4 ? 1 : 0.5);
+    } else if (this.onGround) {
       this.vx += (target - this.vx) * ACCEL;
       if (Math.abs(this.vx) < 0.05) this.vx = 0;
     } else {
@@ -559,9 +616,13 @@ export class Mockup {
     }
     if (left && !right) this.dir = -1;
     if (right && !left) this.dir = 1;
-
     if (this.dropT > 0) this.dropT -= 1;
-    if (this.pressed.has("jump") && this.onGround && !busy) {
+    if (this.coyote > 0) this.coyote -= 1;
+    if (this.jumpBuffer > 0) this.jumpBuffer -= 1;
+    // Jump buffer: a press a few frames before landing still counts. Coyote time: a few frames after a ledge too.
+    if (this.pressed.has("jump")) this.jumpBuffer = 7;
+    if (this.jumpBuffer > 0 && (this.onGround || this.coyote > 0) && !busy) {
+      this.jumpBuffer = 0;
       if (this.held.has("down") && this.onPlatform) {
         // Drop through the platform.
         this.dropT = 12;
@@ -571,25 +632,84 @@ export class Mockup {
       } else {
         this.vy = JUMP_VY;
         this.onGround = false;
+        this.coyote = 0;
         this.jumpT = 0;
+        this.jumpCut = false;
+        this.stretch = 5;
+        this.crouching = false;
         this.puff(6, "#7fa9b8", 1.4);
         this.audio.sfx("jump");
       }
     }
+    // Variable height: let go of the button early to cut the jump short.
+    if (!this.onGround && !this.jumpCut && !this.held.has("jump") && this.vy < -2.5) {
+      this.vy *= 0.5;
+      this.jumpCut = true;
+    }
     if (!this.onGround) this.jumpT += 1;
+    // Dodge roll: a burst forward, invulnerable and low for most of it.
+    if (this.rollCooldown > 0) this.rollCooldown -= 1;
+    if (this.pressed.has("roll") && this.onGround && this.rollCooldown <= 0 && !busy) {
+      this.rollT = ROLL_T;
+      this.rollCooldown = ROLL_T + 22;
+      this.throwT = 0;
+      this.chargeT = 0;
+      this.crouching = false;
+      this.puff(8, "#7fa9b8", 1.8);
+      this.audio.sfx("roll");
+    }
+    if (rolling) {
+      this.rollT -= 1;
+      if (this.time % 3 === 0) this.ghosts.push(this.ghostOf());
+      if (this.rollT === 0) this.puff(4, "#7fa9b8", 1.2);
+    }
     if (this.throwCooldown > 0) this.throwCooldown -= 1;
     if (this.pressed.has("throw") && this.throwCooldown <= 0 && !busy) {
       this.throwT = 1;
       this.throwCooldown = 26;
-      // Holding down when the button is pressed throws low, along the moss: that is how you reach the beetles.
-      this.throwLow = this.held.has("down");
+      // Crouching, or holding down when the button is pressed, throws low along the moss: that is how you reach the beetles.
+      this.throwLow = this.crouching || this.held.has("down");
+      this.chargeT = 1;
+    }
+    // Keep the button held after a throw to gather a bigger glimmer; let go to hurl it.
+    if (this.chargeT > 0) {
+      if (this.held.has("throw") && !busy) {
+        this.chargeT += 1;
+        if (this.chargeT === CHARGE_T) this.audio.sfx("charge");
+        if (this.chargeT > 14 && this.time % 2 === 0) {
+          // Sparks gather at the raised hand.
+          const hx = this.px + this.dir * 8;
+          const hy = this.py - 70;
+          const a = Math.random() * Math.PI * 2;
+          const d = 18 + Math.random() * 22;
+          this.particles.push({ x: hx + Math.cos(a) * d, y: hy + Math.sin(a) * d, vx: -Math.cos(a) * d / 9, vy: -Math.sin(a) * d / 9, life: 9, max: 9, color: this.chargeT >= CHARGE_T ? "#ffffff" : "#ffd27a", size: 1, parallax: 1 });
+        }
+      } else {
+        if (this.chargeT >= CHARGE_T && !busy) {
+          this.bigThrowT = 1;
+          this.throwT = 0;
+        }
+        this.chargeT = 0;
+      }
+    }
+    if (this.bigThrowT > 0) {
+      this.bigThrowT += 1;
+      if (this.bigThrowT === 8) {
+        this.shots.push({ x: this.px + this.dir * 34, y: this.py - 54, vx: this.dir * 6.4, life: 110, dead: false, power: 3, hits: 0, hitList: [] });
+        this.flare = 60;
+        this.shake = 5;
+        this.hitStop = 2;
+        this.audio.sfx("big");
+        this.burst(this.px + this.dir * 34, this.py - 54, 18, "#fff1a8", 3);
+      }
+      if (this.bigThrowT > 22) this.bigThrowT = 0;
     }
     if (this.throwT > 0) {
       this.throwT += 1;
       // Release the glimmer on the third frame of the throw.
       if (this.throwT === 9) {
         const low = this.throwLow;
-        this.shots.push({ x: this.px + this.dir * 22, y: this.py - (low ? 16 : 52), vx: this.dir * 5.2, life: 90, dead: false });
+        this.shots.push({ x: this.px + this.dir * 22, y: this.py - (low ? 16 : 52), vx: this.dir * 5.2, life: 90, dead: false, power: 1, hits: 0, hitList: [] });
         this.flare = 30;
         this.audio.sfx("throw");
       }
@@ -611,7 +731,9 @@ export class Mockup {
     this.tickGate();
     if (this.caption && this.caption.t > 0) this.caption.t -= 1;
 
-    this.vy = Math.min(MAX_FALL, this.vy + GRAVITY);
+    // Fast fall: hold down in the air.
+    const diving = !this.onGround && this.held.has("down") && this.vy > 0 && !rolling;
+    this.vy = Math.min(diving ? 12 : MAX_FALL, this.vy + (diving ? GRAVITY * 1.7 : GRAVITY));
     const prevFeet = this.py;
     this.px += this.vx;
     this.py += this.vy;
@@ -637,9 +759,14 @@ export class Mockup {
     }
     if (!wasGround && this.onGround) {
       this.landT = 8;
+      this.squash = 6;
+      this.jumpCut = false;
       this.puff(8, "#7fa9b8", 1.8);
     }
+    if (wasGround && !this.onGround && this.vy < GRAVITY * 2) this.coyote = 6;
     if (this.landT > 0) this.landT -= 1;
+    if (this.squash > 0) this.squash -= 1;
+    if (this.stretch > 0) this.stretch -= 1;
     const minX = this.cameraLock ? this.cameraLock.l + 16 : 40;
     const maxX = this.cameraLock ? this.cameraLock.r - 16 : LEVEL_W - 40;
     if (this.px < minX) {
@@ -708,6 +835,22 @@ export class Mockup {
       pt.life -= 1;
     }
     this.particles = this.particles.filter((pt) => pt.life > 0 && pt.y < VIEW_H + 10);
+    for (const pop of this.pops) {
+      pop.life -= 1;
+      pop.y -= pop.life > 20 ? 0.6 : 0.2;
+    }
+    this.pops = this.pops.filter((pop) => pop.life > 0);
+    for (const g of this.ghosts) g.life -= 1;
+    this.ghosts = this.ghosts.filter((g) => g.life > 0);
+  }
+
+  private pop(x: number, y: number, text: string, color: string) {
+    this.pops.push({ x, y, text, life: 34, color });
+  }
+
+  /** The player box: 16 wide, 84 tall above the feet, half that when crouched or rolling. */
+  private boxH(): number {
+    return this.crouching || this.rollT > 0 ? 44 : 84;
   }
 
   private tickZones() {
@@ -747,8 +890,12 @@ export class Mockup {
 
   private respawn() {
     this.deadT = 0;
-    this.hp = PLAYER_HP;
+    this.hp = this.maxHp;
     this.invuln = 90;
+    this.rollT = 0;
+    this.chargeT = 0;
+    this.bigThrowT = 0;
+    this.ghosts = [];
     this.hurtT = 0;
     this.vx = 0;
     this.vy = 0;
@@ -795,28 +942,38 @@ export class Mockup {
       if (this.time % 2 === 0) {
         this.particles.push({ x: sh.x - sh.vx, y: sh.y + (Math.random() - 0.5) * 4, vx: -sh.vx * 0.05, vy: (Math.random() - 0.5) * 0.3, life: 14, max: 14, color: Math.random() < 0.5 ? "#fff1a8" : "#ffb347", size: 1, parallax: 1 });
       }
+      // A charged glimmer pierces: it goes through up to three targets, once each.
+      const land = (target: object): boolean => {
+        if (sh.power > 1) {
+          if (sh.hitList.includes(target)) return false;
+          sh.hitList.push(target);
+          sh.hits += 1;
+          if (sh.hits >= 3) sh.dead = true;
+        } else {
+          sh.dead = true;
+        }
+        return true;
+      };
       for (const r of this.reptiles) {
         if (r.state === "dead" || sh.dead) continue;
         const { x0, x1 } = this.reptileBox(r);
-        if (sh.x > x0 && sh.x < x1 && sh.y > this.feetY - 92 && sh.y < this.feetY) {
-          sh.dead = true;
-          this.hitReptile(r, sh.vx > 0 ? 1 : -1);
+        if (sh.x > x0 && sh.x < x1 && sh.y > this.feetY - 92 && sh.y < this.feetY && land(r)) {
+          this.hitReptile(r, sh.vx > 0 ? 1 : -1, sh.power);
           this.burst(sh.x, sh.y, 14, "#fff1a8", 2.2);
         }
       }
       for (const be of this.beetles) {
         if (be.state !== "crawl" || sh.dead) continue;
-        if (Math.abs(sh.x - be.x) < 22 && sh.y > this.feetY - 44 && sh.y < this.feetY + 2) {
-          sh.dead = true;
+        if (Math.abs(sh.x - be.x) < 22 && sh.y > this.feetY - (sh.power > 1 ? 60 : 44) && sh.y < this.feetY + 2 && land(be)) {
+          this.pop(be.x, this.feetY - 40, "1", "#bff4ff");
           this.killBeetle(be);
         }
       }
       for (const e of this.eyes) {
         if (sh.dead || e.state === "dead" || e.state === "dying") continue;
         const ch = this.lore.eye.cell.h;
-        if (Math.abs(sh.x - e.x) < 36 && sh.y > e.y - ch + 10 && sh.y < e.y) {
-          sh.dead = true;
-          this.hitEye(e);
+        if (Math.abs(sh.x - e.x) < 36 && sh.y > e.y - ch + 10 && sh.y < e.y && land(e)) {
+          this.hitEye(e, sh.power);
           this.burst(sh.x, sh.y, 14, "#fff1a8", 2.2);
         }
       }
@@ -824,9 +981,8 @@ export class Mockup {
       if (b && !sh.dead && (b.state === "idle" || b.state === "walk" || b.state === "stomp" || b.state === "blast" || b.state === "stagger")) {
         const bx0 = b.x - 70;
         const bx1 = b.x + 70;
-        if (sh.x > bx0 && sh.x < bx1 && sh.y > this.feetY - 165 && sh.y < this.feetY) {
-          sh.dead = true;
-          this.hitBoss(b);
+        if (sh.x > bx0 && sh.x < bx1 && sh.y > this.feetY - 165 && sh.y < this.feetY && land(b)) {
+          this.hitBoss(b, sh.power);
           this.burst(sh.x, sh.y, 16, "#fff1a8", 2.4);
         }
       }
@@ -836,11 +992,12 @@ export class Mockup {
 
   /* ---------------- the Machine ---------------- */
 
-  private hitBoss(b: Boss) {
-    b.hp -= 1;
+  private hitBoss(b: Boss, dmg = 1) {
+    b.hp -= dmg;
     b.flash = 6;
-    b.hits += 1;
-    this.hitStop = 2;
+    b.hits += dmg;
+    this.hitStop = dmg > 1 ? 5 : 2;
+    this.pop(b.x + (Math.random() - 0.5) * 40, this.feetY - 130, String(dmg), dmg > 1 ? "#ffffff" : "#fff1a8");
     this.audio.sfx("bossHit");
     if (!b.summoned && b.hp <= BOSS_HP / 2) {
       // Wounded, the Machine shakes the moss: beetles come crawling out of it.
@@ -999,10 +1156,9 @@ export class Mockup {
       if (this.time % 3 === 0) {
         this.particles.push({ x: s.x, y: s.y + (Math.random() - 0.5) * s.h, vx: -s.vx * 0.1, vy: (Math.random() - 0.5) * 0.4, life: 12, max: 12, color: s.kind === "bolt" ? "#ffd27a" : "#9fb0bd", size: s.kind === "bolt" ? 2 : 1, parallax: 1 });
       }
-      // Player box: 16 wide, 84 tall above the feet.
       const px0 = this.px - 8;
       const px1 = this.px + 8;
-      const py0 = this.py - 84;
+      const py0 = this.py - this.boxH();
       if (!s.dead && s.x + s.w / 2 > px0 && s.x - s.w / 2 < px1 && s.y + s.h / 2 > py0 && s.y - s.h / 2 < this.py) {
         this.hurtPlayer(s.x, s.kind);
         s.dead = true;
@@ -1023,11 +1179,12 @@ export class Mockup {
     return { x0: r.x - 20, x1: r.x + 20 };
   }
 
-  private hitReptile(r: Reptile, knock: 1 | -1) {
-    r.hp -= 1;
+  private hitReptile(r: Reptile, knock: 1 | -1, dmg = 1) {
+    r.hp -= dmg;
     r.flash = 8;
-    this.hitStop = 3;
+    this.hitStop = dmg > 1 ? 5 : 3;
     this.shake = 5;
+    this.pop(r.x, this.feetY - 100, String(dmg), dmg > 1 ? "#ffffff" : "#fff1a8");
     if (r.hp <= 0) {
       r.state = "dead";
       r.t = 0;
@@ -1044,8 +1201,12 @@ export class Mockup {
   }
 
   private hurtPlayer(from: number, source = "?") {
-    if (this.invuln > 0 || this.deadT > 0) return;
+    if (this.invuln > 0 || this.deadT > 0 || this.rollT > 3) return;
     this.hp -= 1;
+    this.rollT = 0;
+    this.chargeT = 0;
+    this.bigThrowT = 0;
+    this.pop(this.px, this.py - 96, "-1", "#ff6b6b");
     this.lastHurt = `${source}@${Math.round(from)}`;
     this.hurtT = 26;
     this.invuln = 70;
@@ -1149,8 +1310,7 @@ export class Mockup {
   /* ---------------- episode 1 creatures ---------------- */
 
   private playerBoxHits(x0: number, x1: number, y0: number, y1: number): boolean {
-    // Player box: 16 wide, 84 tall above the feet.
-    return this.px + 8 > x0 && this.px - 8 < x1 && this.py > y0 && this.py - 84 < y1;
+    return this.px + 8 > x0 && this.px - 8 < x1 && this.py > y0 && this.py - this.boxH() < y1;
   }
 
   private killBeetle(be: Beetle) {
@@ -1162,7 +1322,7 @@ export class Mockup {
     this.burst(be.x, this.feetY - 16, 18, "#8fe3ff", 2.4);
     this.burst(be.x, this.feetY - 16, 6, "#ffffff", 1.4);
     // Its light lingers: one beetle in three leaves a glimmer that mends the armour.
-    if (Math.random() < 0.34 && this.hp < PLAYER_HP) this.items.push({ x: be.x, y: this.feetY - 20, vy: -2.6, kind: "light", t: 0, dead: false, rest: this.feetY });
+    if (Math.random() < 0.34 && this.hp < this.maxHp) this.items.push({ x: be.x, y: this.feetY - 20, vy: -2.6, kind: "light", t: 0, dead: false, rest: this.feetY });
   }
 
   private tickBeetles() {
@@ -1194,11 +1354,12 @@ export class Mockup {
     this.beetles = this.beetles.filter((be) => !(be.state === "dead" && be.t > 16));
   }
 
-  private hitEye(e: Eye) {
-    e.hp -= 1;
+  private hitEye(e: Eye, dmg = 1) {
+    e.hp -= dmg;
     e.flash = 6;
-    this.hitStop = 2;
+    this.hitStop = dmg > 1 ? 5 : 2;
     this.shake = 4;
+    this.pop(e.x, e.y - this.lore.eye.cell.h - 6, String(dmg), dmg > 1 ? "#ffffff" : "#fff1a8");
     if (e.hp <= 0) {
       e.state = "dying";
       e.t = 0;
@@ -1360,7 +1521,7 @@ export class Mockup {
           this.audio.sfx("item");
           this.burst(it.x, it.y - 10, 10, "#ffffff", 1.6);
         } else {
-          this.hp = Math.min(PLAYER_HP, this.hp + 1);
+          this.hp = Math.min(this.maxHp, this.hp + 1);
           this.flare = 40;
           this.audio.sfx("chest");
           this.burst(it.x, it.y - 10, 16, "#fff1a8", 2);
@@ -1380,7 +1541,7 @@ export class Mockup {
       c.done = true;
       c.t = 0;
       this.checkpoint = c.x;
-      this.hp = PLAYER_HP;
+      this.hp = this.maxHp;
       this.flare = 50;
       if (c.kind === "gong") {
         this.audio.sfx("bell");
@@ -1393,8 +1554,20 @@ export class Mockup {
         this.caption = { title: "SERRURE", lines: ["Oh ! Encore un chevalier !", "Suis la lumière bleue de ton pendentif,", "et tu trouveras Rose."], t: 420 };
       }
     }
-    // The tavern has its own hush; the forest takes over again on the way out.
+    // Serrure trades three lilies for one more heart: the armour remembers one more life.
     const tavern = this.checkpoints[1];
+    const serrureX = TAVERN_X - 44;
+    this.nearSerrure = tavern.done && Math.abs(this.px - serrureX) < 54 && this.onGround && this.deadT === 0;
+    if (this.nearSerrure && this.pressed.has("down") && this.lilies >= 3 && this.maxHp < MAX_HP_CAP) {
+      this.lilies -= 3;
+      this.maxHp += 1;
+      this.hp = this.maxHp;
+      this.flare = 60;
+      this.audio.sfx("chest");
+      this.burst(this.px, this.py - 60, 30, "#ffffff", 2.6);
+      this.pop(this.px, this.py - 100, "+1", "#bff4ff");
+      this.caption = { title: "SERRURE", lines: ["Des lys pâles ! Garde-les contre ton coeur.", "L'armure se souvient d'une vie de plus."], t: 300 };
+    }
     if (this.boss && this.boss.state === "asleep" && this.deadT === 0) {
       const inside = tavern.done && this.px > TAVERN_X - 120 && this.px < TAVERN_X + 150;
       this.music(inside ? "lullaby" : "forest");
@@ -1478,6 +1651,7 @@ export class Mockup {
     if (this.boss && (this.boss.state === "dead" || this.boss.state === "dying")) this.drawBoss(this.boss, cam);
     this.drawItems(cam);
     for (const be of this.beetles) this.drawBeetle(be, cam);
+    this.drawGhosts(cam);
     this.drawPlayer(cam);
     for (const r of this.reptiles) if (r.state !== "dead") this.drawReptile(r, cam);
     for (const e of this.eyes) if (e.state !== "dead") this.drawEye(e, cam);
@@ -1486,6 +1660,7 @@ export class Mockup {
     this.drawShots(cam);
     this.drawBossShots(cam);
     this.drawParticles(cam, (p) => p.parallax >= 1);
+    this.drawPops(cam);
 
     this.renderLighting(0.5);
     this.drawForeground(cam);
@@ -1504,7 +1679,7 @@ export class Mockup {
   private drawHud() {
     const ctx = this.ctx;
     // Lanterne's hearts: little lantern heads.
-    for (let i = 0; i < PLAYER_HP; i += 1) {
+    for (let i = 0; i < this.maxHp; i += 1) {
       const x = 10 + i * 14;
       const y = 8;
       const on = i < this.hp;
@@ -1720,20 +1895,8 @@ export class Mockup {
       ctx.ellipse(b.x - cam, this.feetY + 2, 80, 6, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.save();
-    if (flip) {
-      ctx.translate(x + cw, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
-    } else {
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
-    }
-    if (b.flash > 0 && b.flash % 2 === 0) {
-      ctx.globalCompositeOperation = "source-atop";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-      ctx.fillRect(flip ? 0 : x, y, cw, ch);
-    }
-    ctx.restore();
+    if (b.flash > 0 && b.flash % 2 === 0) this.drawFlashed(sheet, frame, cw, ch, x, y, flip, 0.7);
+    else this.drawSprite(sheet, frame, cw, ch, x, y, flip);
   }
 
   private drawProps(cam: number) {
@@ -1862,21 +2025,10 @@ export class Mockup {
       ctx.fill();
       this.lights.push({ x: e.x - cam + e.dir * 14, y: eyeY, r: 40 + charge * 40, a: 1, color: `rgba(255, ${charge > 0 ? 120 : 200}, ${charge > 0 ? 60 : 150}, ${0.25 + charge * 0.35})`, parallax: 1 });
     }
-    ctx.save();
     ctx.globalAlpha = alpha;
-    if (flip) {
-      ctx.translate(x + cw, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
-    } else {
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
-    }
-    if (e.flash > 0 && e.flash % 2 === 0) {
-      ctx.globalCompositeOperation = "source-atop";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      ctx.fillRect(flip ? 0 : x, y, cw, ch);
-    }
-    ctx.restore();
+    if (e.flash > 0 && e.flash % 2 === 0) this.drawFlashed(sheet, frame, cw, ch, x, y, flip, 0.8);
+    else this.drawSprite(sheet, frame, cw, ch, x, y, flip);
+    ctx.globalAlpha = 1;
     if (e.state !== "dead" && e.state !== "dying" && e.hp < EYE_HP) {
       const bx = Math.round(e.x - cam) - 16;
       const by = Math.round(e.y - ch) - 8;
@@ -1906,6 +2058,22 @@ export class Mockup {
     for (const sh of this.shots) {
       const x = Math.round(sh.x - cam);
       const y = Math.round(sh.y);
+      if (sh.power > 1) {
+        // The charged glimmer: a blazing orb with a trail of sparks.
+        const k = 0.9 + 0.1 * Math.sin(this.time);
+        this.lights.push({ x, y, r: 110 * k, a: 1, color: "rgba(255, 230, 160, 0.5)", parallax: 1 });
+        ctx.fillStyle = "#ffb347";
+        ctx.fillRect(x - 9, y - 5, 18, 10);
+        ctx.fillRect(x - 5, y - 9, 10, 18);
+        ctx.fillStyle = "#fff1a8";
+        ctx.fillRect(x - 7, y - 3, 14, 6);
+        ctx.fillRect(x - 3, y - 7, 6, 14);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x - 4, y - 2, 8, 4);
+        ctx.fillRect(x - 2, y - 4, 4, 8);
+        if (this.time % 2 === 0) this.particles.push({ x: sh.x - sh.vx * 2, y: sh.y + (Math.random() - 0.5) * 10, vx: -sh.vx * 0.1, vy: (Math.random() - 0.5) * 0.6, life: 16, max: 16, color: "#ffd27a", size: 2, parallax: 1 });
+        continue;
+      }
       this.lights.push({ x, y, r: 46, a: 1, color: "rgba(255, 220, 140, 0.35)", parallax: 1 });
       ctx.fillStyle = "#ffb347";
       ctx.fillRect(x - 4, y - 2, 8, 4);
@@ -1963,21 +2131,10 @@ export class Mockup {
       // Amber eyes glint.
       this.lights.push({ x: r.x - cam + r.dir * 10, y: this.feetY - 84, r: 22, a: 0.6, color: "rgba(242, 193, 78, 0.12)", parallax: 1 });
     }
-    ctx.save();
     ctx.globalAlpha = alpha;
-    if (flip) {
-      ctx.translate(x + cw, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
-    } else {
-      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
-    }
-    if (r.flash > 0 && r.flash % 2 === 0) {
-      ctx.globalCompositeOperation = "source-atop";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.fillRect(flip ? 0 : x, y, cw, ch);
-    }
-    ctx.restore();
+    if (r.flash > 0 && r.flash % 2 === 0) this.drawFlashed(sheet, frame, cw, ch, x, y, flip, 0.85);
+    else this.drawSprite(sheet, frame, cw, ch, x, y, flip);
+    ctx.globalAlpha = 1;
     // Small health bar while wounded.
     if (r.state !== "dead" && r.hp < REPTILE_HP) {
       const bx = Math.round(r.x - cam) - 14;
@@ -2070,22 +2227,38 @@ export class Mockup {
     ctx.restore();
   }
 
-  private drawPlayer(cam: number) {
-    const ctx = this.ctx;
+  /** Which sheet and frame Lanterne shows right now. */
+  private pose(): Pose {
     const { w: cw, h: ch } = this.anim.cell;
     const moving = Math.abs(this.vx) > 0.3 && this.onGround;
-    const flip = this.dir < 0;
-
-    // Pick the sheet and frame.
     let sheet = this.idleSheet;
     let frame = Math.floor(this.time / 9) % this.anim.idle;
     let cellW = cw;
+    let cellH = ch;
     if (this.deadT > 0) {
       sheet = this.hurtSheet;
       frame = 1;
     } else if (this.hurtT > 0) {
       sheet = this.hurtSheet;
       frame = this.hurtT > 16 ? 0 : this.hurtT > 6 ? 1 : 2;
+    } else if (this.rollT > 0) {
+      sheet = this.rollSheet;
+      cellW = this.extra.roll.cell.w;
+      frame = Math.min(this.extra.roll.n - 1, Math.floor(((ROLL_T - this.rollT) * this.extra.roll.n) / ROLL_T));
+    } else if (this.bigThrowT > 0) {
+      sheet = this.chargeSheet;
+      cellW = this.extra.charge.cell.w;
+      cellH = this.extra.charge.cell.h;
+      frame = this.bigThrowT < 6 ? 2 : 3;
+    } else if (this.chargeT > 16 && this.onGround && this.throwT === 0 && !moving && !this.crouching) {
+      sheet = this.chargeSheet;
+      cellW = this.extra.charge.cell.w;
+      cellH = this.extra.charge.cell.h;
+      frame = this.chargeT >= CHARGE_T ? 2 : this.chargeT > 28 ? 1 : 0;
+    } else if (this.crouching || (this.throwT > 0 && this.throwLow && this.onGround)) {
+      sheet = this.crouchSheet;
+      cellW = this.extra.crouch.cell.w;
+      frame = this.throwT > 0 ? (this.throwT < 12 ? 2 : 3) : this.crouchT < 4 ? 0 : 1;
     } else if (this.throwT > 0) {
       sheet = this.throwSheet;
       cellW = this.anim.throwCellW;
@@ -2102,20 +2275,90 @@ export class Mockup {
       sheet = this.walkSheet;
       frame = Math.floor(this.walkT / 4.2) % this.anim.walk;
     }
+    return { sheet, frame, cw: cellW, ch: cellH };
+  }
+
+  private ghostOf(): Ghost {
+    const p = this.pose();
+    return { x: this.px, y: this.py, sheet: p.sheet, frame: p.frame, cw: p.cw, ch: p.ch, flip: this.dir < 0, life: 12 };
+  }
+
+  private drawSprite(sheet: HTMLImageElement, frame: number, cw: number, ch: number, x: number, y: number, flip: boolean) {
+    const ctx = this.ctx;
+    if (flip) {
+      ctx.save();
+      ctx.translate(x + cw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
+      ctx.restore();
+    } else {
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
+    }
+  }
+
+  /** Draws a frame washed white: the tint is applied on a scratch canvas so only the sprite's own pixels light up. */
+  private drawFlashed(sheet: HTMLImageElement, frame: number, cw: number, ch: number, x: number, y: number, flip: boolean, alpha: number) {
+    const fc = this.flashCanvas.getContext("2d");
+    if (!fc) return;
+    fc.imageSmoothingEnabled = false;
+    fc.globalCompositeOperation = "source-over";
+    fc.clearRect(0, 0, cw, ch);
+    fc.drawImage(sheet, frame * cw, 0, cw, ch, 0, 0, cw, ch);
+    fc.globalCompositeOperation = "source-atop";
+    fc.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    fc.fillRect(0, 0, cw, ch);
+    const ctx = this.ctx;
+    if (flip) {
+      ctx.save();
+      ctx.translate(x + cw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(this.flashCanvas, 0, 0, cw, ch, 0, y, cw, ch);
+      ctx.restore();
+    } else {
+      ctx.drawImage(this.flashCanvas, 0, 0, cw, ch, x, y, cw, ch);
+    }
+  }
+
+  private drawGhosts(cam: number) {
+    const ctx = this.ctx;
+    for (const g of this.ghosts) {
+      ctx.globalAlpha = (g.life / 12) * 0.45;
+      this.drawSprite(g.sheet, g.frame, g.cw, g.ch, Math.round(g.x - g.cw / 2 - cam), Math.round(g.y - g.ch), g.flip);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  private drawPops(cam: number) {
+    for (const pop of this.pops) {
+      const a = Math.min(1, pop.life / 12);
+      this.ctx.globalAlpha = a;
+      this.text(pop.text, Math.round(pop.x - cam), Math.round(pop.y), pop.color, pop.text.length > 2 ? 7 : 8, "center");
+    }
+    this.ctx.globalAlpha = 1;
+  }
+
+  private drawPlayer(cam: number) {
+    const ctx = this.ctx;
+    const pose = this.pose();
+    const { sheet, frame, cw: cellW, ch } = pose;
+    const flip = this.dir < 0;
+    const low = this.crouching || this.rollT > 0;
 
     const x = Math.round(this.px - cellW / 2 - cam);
     const y = Math.round(this.py - ch);
     if (this.invuln > 0 && this.deadT === 0 && Math.floor(this.time / 4) % 3 === 0) {
       // Still emit light while blinking.
-      this.lights.push({ x: this.px - cam, y: this.py - 66, r: 90, a: 1, color: "rgba(255, 190, 110, 0.22)", parallax: 1 });
+      this.lights.push({ x: this.px - cam, y: this.py - (low ? 30 : 66), r: 90, a: 1, color: "rgba(255, 190, 110, 0.22)", parallax: 1 });
       return;
     }
 
-    // Lantern light: warm, flickering, brighter on a flare.
+    // Lantern light: warm, flickering, brighter on a flare, swelling with a charged glimmer.
     const flick = 0.94 + 0.06 * Math.sin(this.time / 3) + 0.03 * Math.sin(this.time / 7);
-    const flare = this.flare > 0 ? 1 + (this.flare / 40) * 0.8 : 1;
-    const headY = this.py - 78 + (sheet === this.jumpSheet && (frame === 0 || frame === 5) ? 14 : 0);
-    this.lights.push({ x: this.px - cam + this.dir * 2, y: headY, r: 105 * flick * flare, a: 1, color: `rgba(255, 190, 110, ${0.28 * flare})`, parallax: 1 });
+    const charge = this.chargeT > 14 ? Math.min(1, (this.chargeT - 14) / (CHARGE_T - 14)) : 0;
+    const flare = (this.flare > 0 ? 1 + (this.flare / 40) * 0.8 : 1) + charge * 0.6;
+    const headY = low ? this.py - 40 : this.py - 78 + (sheet === this.jumpSheet && (frame === 0 || frame === 5) ? 14 : 0);
+    this.lights.push({ x: this.px - cam + this.dir * 2, y: headY, r: 105 * flick * flare, a: 1, color: `rgba(255, ${190 + charge * 40}, ${110 + charge * 60}, ${0.28 * flare})`, parallax: 1 });
+    if (charge > 0) this.lights.push({ x: this.px - cam + this.dir * 8, y: this.py - 70, r: 20 + charge * 40, a: 1, color: `rgba(255, 240, 200, ${0.3 + charge * 0.4})`, parallax: 1 });
 
     // Contact shadow on the ground.
     ctx.fillStyle = "rgba(2, 6, 18, 0.35)";
@@ -2123,15 +2366,32 @@ export class Mockup {
     ctx.ellipse(this.px - cam, this.feetY + 1, this.onGround ? 13 : 9, 3, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Squash on landing, stretch at take-off, around the feet.
+    const sx = this.squash > 0 ? 1 + 0.14 * (this.squash / 6) : this.stretch > 0 ? 1 - 0.08 * (this.stretch / 5) : 1;
+    const sy = this.squash > 0 ? 1 - 0.14 * (this.squash / 6) : this.stretch > 0 ? 1 + 0.1 * (this.stretch / 5) : 1;
     ctx.save();
-    if (flip) {
-      ctx.translate(x + cellW, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(sheet, frame * cellW, 0, cellW, ch, 0, y, cellW, ch);
-    } else {
-      ctx.drawImage(sheet, frame * cellW, 0, cellW, ch, x, y, cellW, ch);
+    if (sx !== 1 || sy !== 1) {
+      ctx.translate(this.px - cam, this.py);
+      ctx.scale(sx, sy);
+      ctx.translate(-(this.px - cam), -this.py);
     }
+    this.drawSprite(sheet, frame, cellW, ch, x, y, flip);
     ctx.restore();
+
+    // Charge gauge under the feet while gathering a glimmer.
+    if (this.chargeT > 10) {
+      const bx = Math.round(this.px - cam) - 12;
+      const by = Math.round(this.py) + 5;
+      const full = this.chargeT >= CHARGE_T;
+      ctx.fillStyle = "rgba(2, 6, 18, 0.8)";
+      ctx.fillRect(bx - 1, by - 1, 26, 4);
+      ctx.fillStyle = full ? (Math.floor(this.time / 3) % 2 === 0 ? "#ffffff" : "#ffd27a") : "#ffb347";
+      ctx.fillRect(bx, by, Math.round(24 * Math.min(1, this.chargeT / CHARGE_T)), 2);
+    }
+    // Serrure's offer.
+    if (this.nearSerrure && this.lilies >= 3 && this.maxHp < MAX_HP_CAP) {
+      this.text("BAS : 3 LYS = 1 COEUR", Math.round(TAVERN_X - 44 - cam), this.feetY - 118 + Math.round(Math.sin(this.time / 10) * 2), "#bff4ff", 7, "center");
+    }
   }
 
   private drawParticles(cam: number, filter: (p: Particle) => boolean) {

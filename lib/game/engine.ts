@@ -58,7 +58,7 @@ type Dialogue = { text: string; speaker: string; timer: number; color: string };
 type Light = { x: number; y: number; r: number; a: number; color?: string };
 type Deco = { name: string; x: number; y: number; light?: number; flicker?: boolean };
 
-export type InputName = "left" | "right" | "up" | "down" | "jump" | "throw" | "pause" | "mute" | "any";
+export type InputName = "left" | "right" | "up" | "down" | "jump" | "throw" | "roll" | "pause" | "mute" | "any";
 
 /* ------------------------------------------------------------------ */
 

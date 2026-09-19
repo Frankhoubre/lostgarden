@@ -698,3 +698,27 @@ def build_generated_lore():
 
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_lore()
+
+
+def build_generated_extra():
+    """Lanterne's crouch, dodge roll and charged throw sheets (generated after the base set)."""
+    crouch = slice_equal(GEN / "crouch1.png", 4)
+    roll = slice_equal(GEN / "roll1.png", 6)
+    charge = slice_equal(GEN / "charge1.png", 4)
+    palette_img = palette_from(Image.open(GEN / "idle1.png").convert("RGBA"), 32)
+    # The knees-bent frame is the tallest of the crouch: about 86% of the standing knight.
+    s_crouch = 70 / max(f.height for f in crouch)
+    # The last roll frame stands back up at full height.
+    s_roll = 90 / roll[-1].height
+    # The charge frames hold an orb above the helmet; scale on the first, calm frame.
+    s_charge = 92 / charge[0].height
+    n_crouch = build_strip("crouch", crouch, s_crouch, 64, 96, palette_img)
+    n_roll = build_strip("roll", roll, s_roll, 64, 96, palette_img)
+    n_charge = build_strip("charge", charge, s_charge, 128, 112, palette_img)
+    meta = {"crouch": {"n": n_crouch, "cell": {"w": 64, "h": 96}}, "roll": {"n": n_roll, "cell": {"w": 64, "h": 96}}, "charge": {"n": n_charge, "cell": {"w": 128, "h": 112}}}
+    (OUT / "lanterne-extra.json").write_text(json.dumps(meta))
+    print("extra:", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_extra()

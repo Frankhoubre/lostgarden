@@ -343,6 +343,19 @@ export class GameAudio {
       case "timer":
         this.tone(1200, t, 0.05, "square", 0.1);
         break;
+      case "roll":
+        this.noise(t, 0.16, 0.14);
+        this.tone(140, t, 0.14, "triangle", 0.18, undefined, 90);
+        break;
+      case "charge":
+        this.tone(660, t, 0.12, "square", 0.1, undefined, 660);
+        this.tone(1320, t + 0.1, 0.18, "sine", 0.12);
+        break;
+      case "big":
+        this.tone(90, t, 0.35, "sawtooth", 0.3, undefined, -50);
+        this.tone(1760, t, 0.1, "square", 0.12, undefined, -900);
+        this.noise(t, 0.3, 0.3);
+        break;
       case "select":
         this.tone(660, t, 0.05, "square", 0.1);
         break;

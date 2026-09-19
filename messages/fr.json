@@ -738,10 +738,12 @@
     "controlsTitle": "Commandes",
     "controls": [
       "Flèches ou Q / D : se déplacer",
-      "Z, W, Espace ou Haut : sauter",
+      "Z, W, Espace ou Haut : sauter (relâche tôt pour un petit saut)",
+      "Bas : s'accroupir, passe sous le rayon de la Machine",
       "Bas + saut : descendre d'une plateforme",
-      "X, K ou Entrée : lancer la lueur",
-      "Bas + X : lancer bas, au ras de la mousse",
+      "X, K ou Entrée : lancer la lueur (accroupi ou Bas : lancer bas)",
+      "Maintenir X après un lancer, puis relâcher : lueur chargée, 3 dégâts, traverse",
+      "C, L ou Maj : roulade, invincible pendant la roulade",
       "M : son"
     ],
     "touchHint": "Sur téléphone, utilise les boutons à l'écran.",
@@ -751,6 +753,7 @@
     "loreTitle": "Ce que tu vas croiser",
     "lore": [
       "Le chemin de l'épisode 1 : la forêt des champignons bleus, la machine borgne au-dessus des corniches, le gong des pèlerins, les racines de l'Arbre-Source, la taverne de Serrure, puis l'arène de la Machine et la porte.",
+      "Roulade (C ou Maj) pour traverser une attaque, saut à hauteur variable, coyote time et saut en mémoire : les commandes répondent comme dans un jeu moderne. Chez Serrure, appuie sur Bas avec trois lys pour gagner un coeur.",
       "Les Reptiliens se cabrent avant de griffer : saute en arrière. Quatre lueurs et ils tombent. Les scarabées lumineux rampent au sol : lance bas ou saute dessus. Un sur trois laisse une lueur qui répare l'armure.",
       "La machine borgne plane, se recroqueville, puis s'écrase : monte sur une corniche, redescends et frappe-la pendant qu'elle est sonnée. La mousse tremble avant qu'une racine ne perce : ne t'arrête pas dessus.",
       "Les pèlerins masqués frappent leur gong et Serrure t'accueille sous son toit : l'armure se répare, le point de passage est pris. La Machine piétine et tire un rayon ; à mi-vie elle appelle les scarabées. Vingt-huit lueurs pour l'abattre.",

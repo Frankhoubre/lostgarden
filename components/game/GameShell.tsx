@@ -48,6 +48,10 @@ const KEY_MAP: Record<string, InputName> = {
   KeyX: "throw",
   KeyK: "throw",
   Enter: "throw",
+  KeyC: "roll",
+  KeyL: "roll",
+  ShiftLeft: "roll",
+  ShiftRight: "roll",
   KeyP: "pause",
   Escape: "pause",
   KeyM: "mute",
@@ -195,6 +199,7 @@ export function GameShell() {
             <TouchButton label="▼" name="down" press={press} />
           </div>
           <div className="game-touch-group">
+            <TouchButton label="↻" name="roll" press={press} />
             <TouchButton label="✦" name="throw" press={press} wide />
             <TouchButton label="▲" name="jump" press={press} wide />
           </div>
