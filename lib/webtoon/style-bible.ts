@@ -21,13 +21,13 @@ export type StyleBible = {
 };
 
 export const STYLE_BIBLE: StyleBible = {
-  id: "lost-garden-v1",
+  id: "lost-garden-webtoon-v2",
   base:
-    "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.",
+    "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.",
   rendering: [
-    "Single illustration, one scene only, no collage, no split screen.",
-    "Drawn 2D anime frame, not 3D render, not photograph, not live action.",
-    "Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size.",
+    "Single illustration, one scene only, no collage, no split screen, no page layout, no multiple panels.",
+    "Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector.",
+    "Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom.",
     "The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.",
   ],
   palettes: {

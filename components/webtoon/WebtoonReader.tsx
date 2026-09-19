@@ -1,5 +1,6 @@
 "use client";
 
+import { Bangers, Nunito } from "next/font/google";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { computeLayout } from "@/lib/webtoon/layout";
@@ -10,6 +11,10 @@ const BG: Record<PanelBackground, string> = {
   black: "#020409",
   abyss: "#020817",
 };
+
+/** Webtoon lettering faces: a rounded sans for bubbles, a display face for SFX. */
+const bubbleFont = Nunito({ subsets: ["latin", "latin-ext"], weight: ["600", "800"], variable: "--font-bubble", display: "swap" });
+const sfxFont = Bangers({ subsets: ["latin"], weight: "400", variable: "--font-sfx", display: "swap" });
 
 type WebtoonReaderProps = {
   panels: WebtoonPanel[];
@@ -39,23 +44,38 @@ export function WebtoonReader({
 
   return (
     <div
-      className={`webtoon-strip ${className}`}
+      className={`webtoon-strip ${bubbleFont.variable} ${sfxFont.variable} ${className}`}
       style={{ background: BG[panels[0]?.background ?? "black"] }}
       role="list"
       aria-label={dict.webtoon.headline}
     >
       {panels.map((panel, index) => {
         const placement = layout.placements[index];
+        const previous = index > 0 ? panels[index - 1] : null;
         const interactive = Boolean(onSelect);
         const selected = selectedId === panel.panel_id;
         const focal = `${panel.focal_point.x}% ${panel.focal_point.y}%`;
+        const newBeat = previous !== null && previous.beat_id !== panel.beat_id;
+        const worldChange = previous !== null && previous.background !== panel.background;
+        // The gap before a panel: a soft fall when the world changes, a small
+        // beat mark when a new beat starts, plain distance otherwise.
+        const gapStyle: React.CSSProperties = { paddingTop: pct(placement.gap_before), position: "relative" };
+        if (worldChange && previous) {
+          gapStyle.background = `linear-gradient(to bottom, ${BG[previous.background]} 0%, ${BG[panel.background]} 38%, ${BG[panel.background]} 100%)`;
+        }
         return (
           <div key={panel.panel_id} role="listitem" style={{ background: BG[panel.background] }}>
-            <div style={{ paddingTop: pct(placement.gap_before) }} aria-hidden="true" />
+            <div style={gapStyle} aria-hidden="true">
+              {newBeat && !worldChange ? (
+                <span className={`webtoon-beat-mark ${panel.background === "white" ? "webtoon-beat-mark-light" : ""}`} />
+              ) : null}
+            </div>
             <div
-              className={`webtoon-panel ${panel.border ? "webtoon-panel-bordered" : ""} ${
-                selected ? "webtoon-panel-selected" : ""
-              } ${interactive ? "webtoon-panel-interactive" : ""}`}
+              className={`webtoon-panel ${panel.bleed ? "webtoon-panel-bleed" : "webtoon-panel-framed"} ${
+                panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"
+              } ${panel.border ? "webtoon-panel-bordered" : ""} ${selected ? "webtoon-panel-selected" : ""} ${
+                interactive ? "webtoon-panel-interactive" : ""
+              }`}
               style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}` }}
               onClick={interactive ? () => onSelect?.(panel.panel_id) : undefined}
               data-panel-id={panel.panel_id}

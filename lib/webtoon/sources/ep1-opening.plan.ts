@@ -100,8 +100,11 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
       "Lanterne placed slightly right of centre in the lower two thirds; generous empty white above the helmet; the cape's movement points right, out of frame. No ground line visible, the white swallows his legs below the waist.",
     transition_type: "breath",
     spacing_before: 220,
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne", "loc.white-lily-field"],
+    bleed: false,
+    sfx: [
+      { text: { en: "whoooosh", fr: "fshhhhh", ja: "ヒュウウウ", ko: "휘이이잉" }, anchor: { x: 68, y: 36 }, rotate: -14, size: 70, style: "soft" },
+    ],
+    exclude_references: ["loc.white-lily-field"],
     prompt_notes: [
       "The whole image is white and pale grey with faint bloom; the darkest values are the eye holes of the helmet and the black of the chest plate, softened by the light.",
       "Keep the two dark oval eye holes small and calm, no glow.",
@@ -126,6 +129,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     composition:
       "Three or four large lilies across the frame, the sharpest one just left of centre, the others dissolving into white at the edges. No sky, no ground, only flowers.",
     transition_type: "cut",
+    bleed: false,
     exclude_references: ["loc.white-lily-field"],
     prompt_notes: [
       "The orange of the stamens is the one saturated colour; keep everything else white, ivory and pale green.",
@@ -150,8 +154,11 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     composition:
       "Vertical 9:16. The field occupies the lower half; the upper half is white sky with drifting petals. Lanterne small in the lower left; Rose smaller, at the right, on the crest, slightly above him. Nothing in the centre of the frame.",
     transition_type: "beat",
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne"],
+    bleed: true,
+    sfx: [
+      { text: { en: "fwooooo", fr: "fwooooo", ja: "フォオオオ", ko: "후우우우" }, anchor: { x: 30, y: 22 }, rotate: -6, size: 64, style: "soft" },
+    ],
+    exclude_references: ["char.lanterne.still"],
     prompt_notes: [
       "Both characters are tiny; their silhouettes must still read: the lantern helmet and the pauldrons for him, the round pink head and the cloak for her.",
       "Rose is seen from the front, facing him; Lanterne from behind at three quarters.",
@@ -176,6 +183,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     composition:
       "Her face fills the upper two thirds, eyes on the upper third line, a little left of centre; white sky around her; the hood and collar at the bottom edge.",
     transition_type: "cut",
+    bleed: false,
     exclude_references: ["loc.white-lily-field"],
     prompt_notes: [
       "Her eyes are a soft warm brown with a pink reflection, never glowing.",
@@ -191,7 +199,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     purpose:
       "A beat of ground: the hem of her dress and her bare feet in the lilies. It says she is really standing there, small and unprotected, before the hill shows how far.",
     description:
-      "Low insert among the lilies: the lace hem of Rose's cream dress and her bare pale legs and feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.",
+      "Low insert among the lilies: the lace hem of Rose's cream dress and her small feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.",
     characters: ["rose"],
     location: "white-lily-field",
     action: "She stands still among the flowers.",
@@ -202,9 +210,10 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
       "Wide 16:9 strip. The hem crosses the frame just above centre, the feet lower right, lilies in the foreground left; no face, no sky.",
     aspect_ratio: "16:9",
     transition_type: "continuous",
+    bleed: false,
     exclude_references: ["char.rose", "loc.white-lily-field"],
     prompt_notes: [
-      "Only the lower half of a small child's dress and her bare feet; no face in frame.",
+      "Only the lower part of the cream dress and the small feet among the flowers; no face in frame.",
     ],
   },
   {
@@ -226,8 +235,8 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     composition:
       "Vertical 9:16. The hill sits in the lower third with its summit just below the centre of the frame; the upper half is white sky with a few petals. Rose a few pixels tall at the summit, Lanterne a few pixels tall at the lower left.",
     transition_type: "beat",
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne", "loc.white-lily-field"],
+    bleed: true,
+    exclude_references: ["loc.white-lily-field", "char.lanterne.still"],
     prompt_notes: [
       "The figures are minuscule; the hill and the white are the subject.",
     ],
@@ -251,6 +260,7 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     composition:
       "Rose slightly right of centre, head in the upper third; the upper left is plain white sky; lilies at the bottom corners.",
     transition_type: "cut",
+    bleed: false,
     exclude_references: ["loc.white-lily-field"],
     negative: ["No empty rectangle, box, frame or blank shape drawn anywhere in the image."],
     dialogue: [
@@ -286,8 +296,12 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
       "Vertical 9:16. Beams of light enter from the top edge and widen downward; roots in silhouette across the upper left; the altar small, low, right of centre, in the brightest pool of light; mushrooms in the lower corners. The darkest values at the edges, the light at the centre bottom.",
     transition_type: "fall",
     spacing_before: 1400,
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne", "loc.altar-sanctuary"],
+    bleed: true,
+    sfx: [
+      { text: { en: "vmmmmm", fr: "vmmmmm", ja: "ヴウウウ", ko: "브으으음" }, anchor: { x: 24, y: 12 }, rotate: -90, size: 60, style: "rumble" },
+      { text: { en: "drip", fr: "ploc", ja: "ぽた", ko: "똑" }, anchor: { x: 62, y: 84 }, rotate: 0, size: 40, style: "soft" },
+    ],
+    exclude_references: ["loc.altar-sanctuary", "char.lanterne.still"],
     prompt_notes: [
       "The lying knight is a tiny pale shape on the altar, arms along the body, helmet toward the left.",
       "Blue-black darkness everywhere except the beams, the mushrooms and the pool of light at the altar.",
@@ -313,8 +327,11 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
       "3:2 panel. The root enters from the lower left and rises to the right; the larva on it left of centre, sharp; the altar and the lying armour behind, upper right, soft. Shallow depth of field.",
     aspect_ratio: "3:2",
     transition_type: "continuous",
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne"],
+    bleed: false,
+    sfx: [
+      { text: { en: "skrt skrt", fr: "crr crr", ja: "カサ カサ", ko: "스륵 스륵" }, anchor: { x: 22, y: 78 }, rotate: -8, size: 44, style: "soft" },
+    ],
+    exclude_references: ["char.lanterne.still"],
     prompt_notes: [
       "The larva is white-blue, translucent, about the length of a forearm, with soft rounded segments and no face detail; it is gentle, not monstrous.",
     ],
@@ -339,8 +356,11 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
       "The rose window centred in the upper half, partly cut by the top edge; the altar's foot and the two sabatons in the lower third, centred, in silhouette against the light; symmetry is allowed here as in the film. Stalactites frame the window left and right.",
     transition_type: "cut",
     spacing_after: 420,
-    references: ["char.lanterne.sheet"],
-    exclude_references: ["char.lanterne"],
+    bleed: false,
+    sfx: [
+      { text: { en: "VMMMMMMM", fr: "VMMMMMMM", ja: "ヴヴヴヴヴ", ko: "브으으으음" }, anchor: { x: 50, y: 8 }, rotate: 0, size: 78, style: "rumble" },
+    ],
+    exclude_references: ["char.lanterne.still"],
     prompt_notes: [
       "Only the sabatons and the lower legs of the knight are visible, dark against the glowing window; the rest of the body is hidden by perspective.",
     ],

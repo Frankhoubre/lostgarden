@@ -30,6 +30,10 @@ export type ReferenceAsset = {
   description: string;
   /** Free tags used by reference resolution (e.g. "lanterne", "altar"). */
   tags: string[];
+  /** Character id this sheet belongs to; every sheet of a character is attached. */
+  subject?: string;
+  /** Order among a character's sheets: 1 is the model sheet. */
+  priority?: number;
 };
 
 export type ShotType =

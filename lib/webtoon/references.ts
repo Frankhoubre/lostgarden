@@ -14,45 +14,52 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
   {
     id: "char.lanterne",
     kind: "character",
-    name: "Lanterne, the 12th Knight",
-    image: "/images/sol.png",
-    must_keep:
-      "Lanterne is a hollow suit of old armour with no body inside. Head: a pale, slightly weathered cylindrical lantern-shaped helmet with a small metal ring on top, a narrow rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf wrapped around the neck. Dark charcoal chest plate with small brass buckles and straps. Steel gauntlets, dark gloves, steel greaves and sabatons. A torn beige cape. Modest, slightly clumsy proportions: not a tall heroic knight.",
-    description:
-      "A silent, damaged, strangely innocent hollow knight. He does not speak; only hollow metallic sounds and small gestures show what he feels. Fragile posture, shoulders a little forward, head slightly tilted when he looks at something.",
-    tags: ["lanterne", "knight", "armour", "protagonist"],
-  },
-  {
-    id: "char.lanterne.full",
-    kind: "character",
-    name: "Lanterne, full body reference",
-    image: "/images/hero-banner.png",
-    must_keep:
-      "Full body of Lanterne walking: same lantern helmet, engraved pauldrons, cream scarf, dark chest plate, steel gauntlets and greaves, torn beige cape reaching the knees.",
-    description: "Lanterne in motion, holding Rose's hand in the blue forest.",
-    tags: ["lanterne", "full_body", "walking"],
-  },
-  {
-    id: "char.lanterne.sheet",
-    kind: "character",
+    subject: "lanterne",
+    priority: 1,
     name: "Lanterne, model sheet",
     image: "/webtoon/references/lanterne-sheet.png",
     must_keep:
       "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
     description:
-      "Front, side and back views of the final design (09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
+      "Front, side and back views of the final design (lost-garden/09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
     tags: ["lanterne", "knight", "armour", "protagonist", "model_sheet"],
+  },
+  {
+    id: "char.lanterne.still",
+    kind: "character",
+    subject: "lanterne",
+    priority: 2,
+    name: "Lanterne, episode still",
+    image: "/images/sol.png",
+    must_keep:
+      "Same design as the model sheet, seen in the finished episode: the lantern helmet, the engraved pauldrons, the cream scarf, the dark chest plate with brass buckles, sitting on the altar among blue mushrooms.",
+    description: "How the design reads once lit and animated. Use for materials and light on the armour.",
+    tags: ["lanterne", "still"],
   },
   {
     id: "char.rose",
     kind: "character",
-    name: "Rose",
+    subject: "rose",
+    priority: 1,
+    name: "Rose, episode still (face)",
     image: "/images/rose.png",
     must_keep:
-      "Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.",
+      "Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette.",
     description:
       "Calm, serene, almost unreal. She looks at the world as if she heard what it forgot. She is a child, not a symbol.",
     tags: ["rose", "child", "girl"],
+  },
+  {
+    id: "char.rose.full",
+    kind: "character",
+    subject: "rose",
+    priority: 2,
+    name: "Rose, episode still (full body)",
+    image: "/images/hero-banner.png",
+    must_keep:
+      "Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.",
+    description: "No model sheet exists for Rose yet (lost-garden/09_Fiches_modeles has none): the two episode stills are the canon reference.",
+    tags: ["rose", "full_body", "still"],
   },
   {
     id: "loc.white-lily-field",
@@ -227,7 +234,10 @@ export function resolveReferences(input: {
   for (const id of input.explicit ?? []) add(byId.get(id));
 
   for (const character of input.characters) {
-    add(byId.get(`char.${character}`));
+    const sheets = REFERENCE_LIBRARY.filter(
+      (asset) => asset.kind === "character" && asset.subject === character,
+    ).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+    for (const sheet of sheets) add(sheet);
   }
   add(byId.get(`loc.${input.location}`));
   for (const object of input.objects) add(byId.get(`obj.${object}`));

@@ -50,6 +50,7 @@ export function WebtoonEditor({ script }: WebtoonEditorProps) {
   const [selectedId, setSelectedId] = useState<string | null>(script.panels[0]?.panel_id ?? null);
   const [showIds, setShowIds] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -120,6 +121,47 @@ export function WebtoonEditor({ script }: WebtoonEditorProps) {
         // Not a storyboard JSON: ignore.
       }
     });
+  };
+
+  /**
+   * Regenerate the selected panel through /api/webtoon/<slug>/generate
+   * (Vercel AI Gateway, GPT Image 2.5 Sunburst, sheets attached). The result
+   * replaces the panel image in this browser session; the batch script
+   * persists final choices into the repository.
+   */
+  const regenerate = async () => {
+    if (!selected || busyId) return;
+    setBusyId(selected.panel_id);
+    try {
+      const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ panel_id: selected.panel_id, panel: selected }),
+      });
+      const payload = (await response.json()) as { data_url?: string; model?: string; error?: string };
+      if (!response.ok || !payload.data_url) {
+        flash(payload.error ?? `HTTP ${response.status}`);
+        setPanels((current) => markForRegeneration(current, selected.panel_id));
+        return;
+      }
+      setPanels((current) =>
+        updatePanel(current, selected.panel_id, {
+          image: {
+            src: payload.data_url as string,
+            width: 1080,
+            height: selected.panel_height,
+            model: payload.model,
+            generated_at: new Date().toISOString(),
+            status: "generated",
+          },
+        }),
+      );
+      flash(t.generated);
+    } catch (error) {
+      flash(error instanceof Error ? error.message : "error");
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const copyPrompt = () => {
@@ -365,7 +407,9 @@ export function WebtoonEditor({ script }: WebtoonEditorProps) {
             </label>
             <div className="flex flex-wrap gap-2">
               <button type="button" className="webtoon-mini" onClick={copyPrompt}>{t.copyPrompt}</button>
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => markForRegeneration(c, selected.panel_id))}>{t.regenerate}</button>
+              <button type="button" className="webtoon-mini" onClick={regenerate} disabled={busyId !== null}>
+                {busyId === selected.panel_id ? "…" : t.regenerate}
+              </button>
             </div>
             <div>
               <span className="webtoon-field-label">{t.references}</span>

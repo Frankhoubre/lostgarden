@@ -122,7 +122,7 @@
         "time_start": 12.9,
         "time_end": 13.9,
         "timing": "approx",
-        "description": "Detail at ground level: the lace hem of Rose's cream dress and her bare legs standing among the white lilies.",
+        "description": "Detail at ground level: the lace hem of Rose's cream dress and her small feet standing among the white lilies.",
         "characters": [
           "rose"
         ],
@@ -323,7 +323,7 @@
     ]
   },
   "canvas_width": 1080,
-  "style_bible_id": "lost-garden-v1",
+  "style_bible_id": "lost-garden-webtoon-v2",
   "beats": [
     {
       "beat_id": "b1",
@@ -401,15 +401,32 @@
       "spacing_after": 0,
       "background": "white",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
-      "sfx": [],
+      "sfx": [
+        {
+          "text": {
+            "en": "whoooosh",
+            "fr": "fshhhhh",
+            "ja": "ヒュウウウ",
+            "ko": "휘이이잉"
+          },
+          "anchor": {
+            "x": 68,
+            "y": 36
+          },
+          "rotate": -14,
+          "size": 70,
+          "style": "soft"
+        }
+      ],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
+        "char.lanterne.still",
         "src.ep1.s01"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: medium shot, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Lanterne alone in an overexposed white void with no horizon. Medium shot, waist up, facing the viewer, arms at his sides, the torn beige cape lifting to the right in a slow wind. Small white petals drift across the frame. His colours are washed out, as if remembered.\n\nCOMPOSITION: Lanterne placed slightly right of centre in the lower two thirds; generous empty white above the helmet; the cape's movement points right, out of frame. No ground line visible, the white swallows his legs below the waist.\n\nACTION AND MOOD: He stands still. Only the cape and the petals move. Emotion: suspended, unreal, quiet.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Episode 1, 0:00, Lanterne in the white (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The whole image is white and pale grey with faint bloom; the darkest values are the eye holes of the helmet and the black of the chest plate, softened by the light. Keep the two dark oval eye holes small and calm, no glow.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: medium shot, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Lanterne alone in an overexposed white void with no horizon. Medium shot, waist up, facing the viewer, arms at his sides, the torn beige cape lifting to the right in a slow wind. Small white petals drift across the frame. His colours are washed out, as if remembered.\n\nCOMPOSITION: Lanterne placed slightly right of centre in the lower two thirds; generous empty white above the helmet; the cape's movement points right, out of frame. No ground line visible, the white swallows his legs below the waist.\n\nACTION AND MOOD: He stands still. Only the cape and the petals move. Emotion: suspended, unreal, quiet.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight. Lanterne, episode still: Same design as the model sheet, seen in the finished episode: the lantern helmet, the engraved pauldrons, the cream scarf, the dark chest plate with brass buckles, sitting on the altar among blue mushrooms.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Lanterne, episode still (character design to copy exactly); image 3 is Episode 1, 0:00, Lanterne in the white (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The whole image is white and pale grey with faint bloom; the darkest values are the eye holes of the helmet and the black of the chest plate, softened by the light. Keep the two dark oval eye holes small and calm, no glow.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -421,10 +438,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p01.jpg",
         "width": 1080,
-        "height": 1341,
-        "model": "nano_banana_2",
-        "job_id": "cf9c1f19-cf23-4652-9c0b-b0c44287310b",
-        "generated_at": "2026-09-19T15:49:32Z",
+        "height": 1350,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "974cf7e1-8d33-4ad8-aba7-f399b05e7f7c",
+        "generated_at": "2026-09-19T16:55:08Z",
         "status": "generated"
       }
     },
@@ -460,14 +477,14 @@
       "spacing_after": 0,
       "background": "white",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
       "sfx": [],
       "visual_references": [
         "src.ep1.s02"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: detail shot, insert on one element, camera at eye level. Vertical webtoon panel, aspect ratio 3:2, read on a phone.\n\nSCENE: Macro on white lilies filling the whole frame: open trumpets, curled white petals, orange-red stamens, pale green stems, the edges of the frame softly out of focus, white light behind.\n\nCOMPOSITION: Three or four large lilies across the frame, the sharpest one just left of centre, the others dissolving into white at the edges. No sky, no ground, only flowers.\n\nACTION AND MOOD: Nothing moves but a petal. Emotion: tender, close.\n\nREFERENCE IMAGES, in order: image 1 is Episode 1, 0:05, lilies macro (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The orange of the stamens is the one saturated colour; keep everything else white, ivory and pale green.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: detail shot, insert on one element, camera at eye level. Vertical webtoon panel, aspect ratio 3:2, read on a phone.\n\nSCENE: Macro on white lilies filling the whole frame: open trumpets, curled white petals, orange-red stamens, pale green stems, the edges of the frame softly out of focus, white light behind.\n\nCOMPOSITION: Three or four large lilies across the frame, the sharpest one just left of centre, the others dissolving into white at the edges. No sky, no ground, only flowers.\n\nACTION AND MOOD: Nothing moves but a petal. Emotion: tender, close.\n\nREFERENCE IMAGES, in order: image 1 is Episode 1, 0:05, lilies macro (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The orange of the stamens is the one saturated colour; keep everything else white, ivory and pale green.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -479,10 +496,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p02.jpg",
         "width": 1080,
-        "height": 725,
-        "model": "nano_banana_2",
-        "job_id": "5a7fdb2f-f8b2-4dd0-a05a-9f8e1d56884a",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 717,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "ad901fbd-3ec8-4899-8916-746ec233eb58",
+        "generated_at": "2026-09-19T16:55:08Z",
         "status": "generated"
       }
     },
@@ -524,14 +541,31 @@
       "bleed": true,
       "dialogue": [],
       "caption": [],
-      "sfx": [],
+      "sfx": [
+        {
+          "text": {
+            "en": "fwooooo",
+            "fr": "fwooooo",
+            "ja": "フォオオオ",
+            "ko": "후우우우"
+          },
+          "anchor": {
+            "x": 30,
+            "y": 22
+          },
+          "rotate": -6,
+          "size": 64,
+          "style": "soft"
+        }
+      ],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
         "char.rose",
+        "char.rose.full",
         "loc.white-lily-field",
         "src.ep1.s03"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: A vast field of white lilies under a blown-out white sky. Lanterne stands small at the left in the middle distance, seen from behind at three quarters, facing right. Far to the right and a little higher, on a low rise of lilies, a tiny figure faces him: Rose, in a grey-green hooded cloak, pink hair. Lilies in soft focus in the foreground.\n\nCOMPOSITION: Vertical 9:16. The field occupies the lower half; the upper half is white sky with drifting petals. Lanterne small in the lower left; Rose smaller, at the right, on the crest, slightly above him. Nothing in the centre of the frame.\n\nACTION AND MOOD: The two figures face each other across the field. Neither moves. Emotion: longing, distance.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight. Rose: Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.\n\nLOCATION, design locked: An endless field of white lilies under a blown-out white sky. The ground rises in a soft crest. Everything is washed out and pale; the only colours are Rose's pink hair and the muted brown of Lanterne's pauldrons.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Rose (character design to copy exactly); image 3 is The white lily field (memory) (location design to copy); image 4 is Episode 1, 0:09, the field (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Both characters are tiny; their silhouettes must still read: the lantern helmet and the pauldrons for him, the round pink head and the cloak for her. Rose is seen from the front, facing him; Lanterne from behind at three quarters.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: A vast field of white lilies under a blown-out white sky. Lanterne stands small at the left in the middle distance, seen from behind at three quarters, facing right. Far to the right and a little higher, on a low rise of lilies, a tiny figure faces him: Rose, in a grey-green hooded cloak, pink hair. Lilies in soft focus in the foreground.\n\nCOMPOSITION: Vertical 9:16. The field occupies the lower half; the upper half is white sky with drifting petals. Lanterne small in the lower left; Rose smaller, at the right, on the crest, slightly above him. Nothing in the centre of the frame.\n\nACTION AND MOOD: The two figures face each other across the field. Neither moves. Emotion: longing, distance.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight. Rose, episode still (face): Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette. Rose, episode still (full body): Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.\n\nLOCATION, design locked: An endless field of white lilies under a blown-out white sky. The ground rises in a soft crest. Everything is washed out and pale; the only colours are Rose's pink hair and the muted brown of Lanterne's pauldrons.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Rose, episode still (face) (character design to copy exactly); image 3 is Rose, episode still (full body) (character design to copy exactly); image 4 is The white lily field (memory) (location design to copy); image 5 is Episode 1, 0:09, the field (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Both characters are tiny; their silhouettes must still read: the lantern helmet and the pauldrons for him, the round pink head and the cloak for her. Rose is seen from the front, facing him; Lanterne from behind at three quarters.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -543,10 +577,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p03.jpg",
         "width": 1080,
-        "height": 1935,
-        "model": "nano_banana_2",
-        "job_id": "a0610612-7fab-460d-9845-a4b470a33b81",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 1910,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "760c4420-2eda-48cb-9d96-bf71ec2e7f0c",
+        "generated_at": "2026-09-19T16:59:44Z",
         "status": "generated"
       }
     },
@@ -584,15 +618,16 @@
       "spacing_after": 0,
       "background": "white",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
       "sfx": [],
       "visual_references": [
         "char.rose",
+        "char.rose.full",
         "src.ep1.s04"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: close-up, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Big close-up of Rose against a white sky: short pink bob hair moving in the wind, the white flower in her hair on the viewer's right, large soft eyes looking straight at the viewer, small closed mouth, hood down on her shoulders. A single white petal crosses the foreground, out of focus.\n\nCOMPOSITION: Her face fills the upper two thirds, eyes on the upper third line, a little left of centre; white sky around her; the hood and collar at the bottom edge.\n\nACTION AND MOOD: She looks at Lanterne, at the viewer. She does not speak. Emotion: calm, watchful, unreadable.\n\nCHARACTERS, design locked: Rose: Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.\n\nREFERENCE IMAGES, in order: image 1 is Rose (character design to copy exactly); image 2 is Episode 1, 0:11, Rose close-up (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Her eyes are a soft warm brown with a pink reflection, never glowing. Skin very pale, lit from everywhere by the white; almost no shadow.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: close-up, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Big close-up of Rose against a white sky: short pink bob hair moving in the wind, the white flower in her hair on the viewer's right, large soft eyes looking straight at the viewer, small closed mouth, hood down on her shoulders. A single white petal crosses the foreground, out of focus.\n\nCOMPOSITION: Her face fills the upper two thirds, eyes on the upper third line, a little left of centre; white sky around her; the hood and collar at the bottom edge.\n\nACTION AND MOOD: She looks at Lanterne, at the viewer. She does not speak. Emotion: calm, watchful, unreadable.\n\nCHARACTERS, design locked: Rose, episode still (face): Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette. Rose, episode still (full body): Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.\n\nREFERENCE IMAGES, in order: image 1 is Rose, episode still (face) (character design to copy exactly); image 2 is Rose, episode still (full body) (character design to copy exactly); image 3 is Episode 1, 0:11, Rose close-up (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Her eyes are a soft warm brown with a pink reflection, never glowing. Skin very pale, lit from everywhere by the white; almost no shadow.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -604,10 +639,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p04.jpg",
         "width": 1080,
-        "height": 1341,
-        "model": "nano_banana_2",
-        "job_id": "89c4ecfa-a4d0-48fe-a2d3-d20503ecd86a",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 1350,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "54e5db68-20d9-47d1-9c11-a65dc285cd96",
+        "generated_at": "2026-09-19T16:59:45Z",
         "status": "generated"
       }
     },
@@ -623,7 +658,7 @@
       "fidelity": "direct",
       "narrative_role": "detail",
       "purpose": "A beat of ground: the hem of her dress and her bare feet in the lilies. It says she is really standing there, small and unprotected, before the hill shows how far.",
-      "description": "Low insert among the lilies: the lace hem of Rose's cream dress and her bare pale legs and feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.",
+      "description": "Low insert among the lilies: the lace hem of Rose's cream dress and her small feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.",
       "characters": [
         "rose"
       ],
@@ -645,14 +680,15 @@
       "spacing_after": 0,
       "background": "white",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
       "sfx": [],
       "visual_references": [
+        "char.rose.full",
         "src.ep1.s05"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: detail shot, insert on one element, low angle, camera close to the ground looking up. Vertical webtoon panel, aspect ratio 16:9, read on a phone.\n\nSCENE: Low insert among the lilies: the lace hem of Rose's cream dress and her bare pale legs and feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.\n\nCOMPOSITION: Wide 16:9 strip. The hem crosses the frame just above centre, the feet lower right, lilies in the foreground left; no face, no sky.\n\nACTION AND MOOD: She stands still among the flowers. Emotion: fragile, grounded.\n\nREFERENCE IMAGES, in order: image 1 is Episode 1, 0:13, the hem (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Only the lower half of a small child's dress and her bare feet; no face in frame.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: detail shot, insert on one element, low angle, camera close to the ground looking up. Vertical webtoon panel, aspect ratio 16:9, read on a phone.\n\nSCENE: Low insert among the lilies: the lace hem of Rose's cream dress and her small feet standing between white lily blooms, seen from knee height. White light, soft focus in front and behind.\n\nCOMPOSITION: Wide 16:9 strip. The hem crosses the frame just above centre, the feet lower right, lilies in the foreground left; no face, no sky.\n\nACTION AND MOOD: She stands still among the flowers. Emotion: fragile, grounded.\n\nCHARACTERS, design locked: Rose, episode still (full body): Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.\n\nREFERENCE IMAGES, in order: image 1 is Rose, episode still (full body) (character design to copy exactly); image 2 is Episode 1, 0:13, the hem (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Only the lower part of the cream dress and the small feet among the flowers; no face in frame.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -664,10 +700,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p05.jpg",
         "width": 1080,
-        "height": 603,
-        "model": "nano_banana_2",
-        "job_id": "c5efaf80-d541-4f72-89e7-3f9478665ffb",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 611,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "06e9eb84-f96d-4f90-94bb-5d8f95627ed2",
+        "generated_at": "2026-09-19T16:59:45Z",
         "status": "generated"
       }
     },
@@ -711,11 +747,12 @@
       "caption": [],
       "sfx": [],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
         "char.rose",
+        "char.rose.full",
         "src.ep1.s06"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: Extreme wide: a rounded hill entirely covered in white lilies under a blown-out white sky. At the summit, a speck: Rose, cloak and pink hair. At the base of the hill on the left, another speck: Lanterne, facing the hill. Lilies in soft focus in the foreground.\n\nCOMPOSITION: Vertical 9:16. The hill sits in the lower third with its summit just below the centre of the frame; the upper half is white sky with a few petals. Rose a few pixels tall at the summit, Lanterne a few pixels tall at the lower left.\n\nACTION AND MOOD: Both stand still, very far apart. Emotion: immensity, separation.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight. Rose: Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Rose (character design to copy exactly); image 3 is Episode 1, 0:15, the hill (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The figures are minuscule; the hill and the white are the subject.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: Extreme wide: a rounded hill entirely covered in white lilies under a blown-out white sky. At the summit, a speck: Rose, cloak and pink hair. At the base of the hill on the left, another speck: Lanterne, facing the hill. Lilies in soft focus in the foreground.\n\nCOMPOSITION: Vertical 9:16. The hill sits in the lower third with its summit just below the centre of the frame; the upper half is white sky with a few petals. Rose a few pixels tall at the summit, Lanterne a few pixels tall at the lower left.\n\nACTION AND MOOD: Both stand still, very far apart. Emotion: immensity, separation.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight. Rose, episode still (face): Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette. Rose, episode still (full body): Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Rose, episode still (face) (character design to copy exactly); image 3 is Rose, episode still (full body) (character design to copy exactly); image 4 is Episode 1, 0:15, the hill (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The figures are minuscule; the hill and the white are the subject.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -727,10 +764,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p06.jpg",
         "width": 1080,
-        "height": 1935,
-        "model": "nano_banana_2",
-        "job_id": "2233a372-ea6e-4e1f-9571-5703112ea961",
-        "generated_at": "2026-09-19T15:49:32Z",
+        "height": 1910,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "792055a5-a797-4b9d-ae4e-ee9be08cf6af",
+        "generated_at": "2026-09-19T16:59:46Z",
         "status": "generated"
       }
     },
@@ -768,7 +805,7 @@
       "spacing_after": 0,
       "background": "white",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [
         {
           "speaker": "Rose",
@@ -793,9 +830,10 @@
       "sfx": [],
       "visual_references": [
         "char.rose",
+        "char.rose.full",
         "src.ep1.s07"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: medium close-up, waist up, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Medium close-up of Rose, waist up, among the lilies against the white sky: grey-green hooded short cloak fastened at the collar over the cream dress, pink bob hair, the white flower in her hair on the viewer's right, lips just parted as she speaks, eyes on the viewer.\n\nCOMPOSITION: Rose slightly right of centre, head in the upper third; the upper left is plain white sky; lilies at the bottom corners.\n\nACTION AND MOOD: Rose says: Find me. Emotion: tender, a quiet plea.\n\nCHARACTERS, design locked: Rose: Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.\n\nREFERENCE IMAGES, in order: image 1 is Rose (character design to copy exactly); image 2 is Episode 1, 0:17, Find me (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The upper left quarter of the image is plain, empty white sky with nothing drawn in it: no box, no rectangle, no frame, no bubble, no outline. Lettering is added afterwards on top of the finished art.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions. No empty rectangle, box, frame or blank shape drawn anywhere in the image.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nOverexposed white world of a memory: blown-out white sky, pale washed-out colours, almost monochrome, soft bloom, tiny white petals drifting in the air, gentle wind, no sun visible.\n\nSHOT: medium close-up, waist up, camera at eye level. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Medium close-up of Rose, waist up, among the lilies against the white sky: grey-green hooded short cloak fastened at the collar over the cream dress, pink bob hair, the white flower in her hair on the viewer's right, lips just parted as she speaks, eyes on the viewer.\n\nCOMPOSITION: Rose slightly right of centre, head in the upper third; the upper left is plain white sky; lilies at the bottom corners.\n\nACTION AND MOOD: Rose says: Find me. Emotion: tender, a quiet plea.\n\nCHARACTERS, design locked: Rose, episode still (face): Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette. Rose, episode still (full body): Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.\n\nREFERENCE IMAGES, in order: image 1 is Rose, episode still (face) (character design to copy exactly); image 2 is Rose, episode still (full body) (character design to copy exactly); image 3 is Episode 1, 0:17, Find me (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The upper left quarter of the image is plain, empty white sky with nothing drawn in it: no box, no rectangle, no frame, no bubble, no outline. Lettering is added afterwards on top of the finished art.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions. No empty rectangle, box, frame or blank shape drawn anywhere in the image.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -808,10 +846,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p07.jpg",
         "width": 1080,
-        "height": 1341,
-        "model": "nano_banana_2",
-        "job_id": "58c7a3ec-ca2e-4b0b-a7aa-b8bc4857bc67",
-        "generated_at": "2026-09-19T15:59:43Z",
+        "height": 1350,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "a16f70ab-96fb-4d3e-b827-e9a08e623ee3",
+        "generated_at": "2026-09-19T16:59:45Z",
         "status": "generated"
       }
     },
@@ -852,12 +890,43 @@
       "bleed": true,
       "dialogue": [],
       "caption": [],
-      "sfx": [],
+      "sfx": [
+        {
+          "text": {
+            "en": "vmmmmm",
+            "fr": "vmmmmm",
+            "ja": "ヴウウウ",
+            "ko": "브으으음"
+          },
+          "anchor": {
+            "x": 24,
+            "y": 12
+          },
+          "rotate": -90,
+          "size": 60,
+          "style": "rumble"
+        },
+        {
+          "text": {
+            "en": "drip",
+            "fr": "ploc",
+            "ja": "ぽた",
+            "ko": "똑"
+          },
+          "anchor": {
+            "x": 62,
+            "y": 84
+          },
+          "rotate": 0,
+          "size": 40,
+          "style": "soft"
+        }
+      ],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
         "src.ep1.s09"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: Extreme wide of a vast underground sanctuary in deep blue and black. Pale cyan light falls in long beams from high above through mist; twisted black roots frame the left edge and the top; glowing blue mushrooms and pools of cold light along the stone floor; thin ground mist. Far in the middle distance, tiny, a long stone altar with an armoured figure lying on it.\n\nCOMPOSITION: Vertical 9:16. Beams of light enter from the top edge and widen downward; roots in silhouette across the upper left; the altar small, low, right of centre, in the brightest pool of light; mushrooms in the lower corners. The darkest values at the edges, the light at the centre bottom.\n\nACTION AND MOOD: Nothing moves. The knight lies on the altar, minuscule in the space. Emotion: cold, sacred, held breath.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Episode 1, 0:25, the sanctuary (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The lying knight is a tiny pale shape on the altar, arms along the body, helmet toward the left. Blue-black darkness everywhere except the beams, the mushrooms and the pool of light at the altar.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: extreme wide shot, the figures tiny in the space, camera at eye level. Vertical webtoon panel, aspect ratio 9:16, read on a phone.\n\nSCENE: Extreme wide of a vast underground sanctuary in deep blue and black. Pale cyan light falls in long beams from high above through mist; twisted black roots frame the left edge and the top; glowing blue mushrooms and pools of cold light along the stone floor; thin ground mist. Far in the middle distance, tiny, a long stone altar with an armoured figure lying on it.\n\nCOMPOSITION: Vertical 9:16. Beams of light enter from the top edge and widen downward; roots in silhouette across the upper left; the altar small, low, right of centre, in the brightest pool of light; mushrooms in the lower corners. The darkest values at the edges, the light at the centre bottom.\n\nACTION AND MOOD: Nothing moves. The knight lies on the altar, minuscule in the space. Emotion: cold, sacred, held breath.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is Episode 1, 0:25, the sanctuary (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The lying knight is a tiny pale shape on the altar, arms along the body, helmet toward the left. Blue-black darkness everywhere except the beams, the mushrooms and the pool of light at the altar.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -869,10 +938,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p08.jpg",
         "width": 1080,
-        "height": 1935,
-        "model": "nano_banana_2",
-        "job_id": "3dba1246-6336-42ff-8285-e47581c06c4a",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 1910,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "ee85bc20-182b-4594-b131-ae217e91cd24",
+        "generated_at": "2026-09-19T16:55:08Z",
         "status": "generated"
       }
     },
@@ -910,16 +979,32 @@
       "spacing_after": 0,
       "background": "black",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
-      "sfx": [],
+      "sfx": [
+        {
+          "text": {
+            "en": "skrt skrt",
+            "fr": "crr crr",
+            "ja": "カサ カサ",
+            "ko": "스륵 스륵"
+          },
+          "anchor": {
+            "x": 22,
+            "y": 78
+          },
+          "rotate": -8,
+          "size": 44,
+          "style": "soft"
+        }
+      ],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
         "loc.altar-sanctuary",
         "src.ep1.s10"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: medium shot, camera at eye level. Vertical webtoon panel, aspect ratio 3:2, read on a phone.\n\nSCENE: Medium shot at root level: in the foreground a pale translucent segmented larva-like creature, softly glowing from inside, crawls along a thick black root that crosses the frame diagonally. Behind it, out of focus, the stone altar with Lanterne lying on it in blue light, small mushrooms glowing on the floor.\n\nCOMPOSITION: 3:2 panel. The root enters from the lower left and rises to the right; the larva on it left of centre, sharp; the altar and the lying armour behind, upper right, soft. Shallow depth of field.\n\nACTION AND MOOD: The creature crawls toward the altar. Lanterne does not move. Emotion: first sign of life, curiosity.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nLOCATION, design locked: A dark underground stone sanctuary. High above, a large ornate circular rose window glows cold cyan-blue, its tracery like a mandala; icicle-like stalactites hang from the vault around it. Wet carved stone walls in deep blue. In the centre, a long rectangular stone altar, like a sarcophagus lid, seen along its length. Thin mist on the floor, small blue bioluminescent mushrooms and blue moss at the edges, twisted roots on the walls.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is The altar sanctuary (location design to copy); image 3 is Episode 1, 0:26, the larva (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The larva is white-blue, translucent, about the length of a forearm, with soft rounded segments and no face detail; it is gentle, not monstrous.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: medium shot, camera at eye level. Vertical webtoon panel, aspect ratio 3:2, read on a phone.\n\nSCENE: Medium shot at root level: in the foreground a pale translucent segmented larva-like creature, softly glowing from inside, crawls along a thick black root that crosses the frame diagonally. Behind it, out of focus, the stone altar with Lanterne lying on it in blue light, small mushrooms glowing on the floor.\n\nCOMPOSITION: 3:2 panel. The root enters from the lower left and rises to the right; the larva on it left of centre, sharp; the altar and the lying armour behind, upper right, soft. Shallow depth of field.\n\nACTION AND MOOD: The creature crawls toward the altar. Lanterne does not move. Emotion: first sign of life, curiosity.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nLOCATION, design locked: A dark underground stone sanctuary. High above, a large ornate circular rose window glows cold cyan-blue, its tracery like a mandala; icicle-like stalactites hang from the vault around it. Wet carved stone walls in deep blue. In the centre, a long rectangular stone altar, like a sarcophagus lid, seen along its length. Thin mist on the floor, small blue bioluminescent mushrooms and blue moss at the edges, twisted roots on the walls.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is The altar sanctuary (location design to copy); image 3 is Episode 1, 0:26, the larva (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: The larva is white-blue, translucent, about the length of a forearm, with soft rounded segments and no face detail; it is gentle, not monstrous.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -931,10 +1016,10 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p09.jpg",
         "width": 1080,
-        "height": 725,
-        "model": "nano_banana_2",
-        "job_id": "086fd1be-0f43-4668-91cd-e1be60abcdcb",
-        "generated_at": "2026-09-19T15:49:31Z",
+        "height": 717,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "09923a8f-b49f-46e7-beca-b342ce7aab42",
+        "generated_at": "2026-09-19T16:55:08Z",
         "status": "generated"
       }
     },
@@ -972,16 +1057,32 @@
       "spacing_after": 420,
       "background": "black",
       "border": false,
-      "bleed": true,
+      "bleed": false,
       "dialogue": [],
       "caption": [],
-      "sfx": [],
+      "sfx": [
+        {
+          "text": {
+            "en": "VMMMMMMM",
+            "fr": "VMMMMMMM",
+            "ja": "ヴヴヴヴヴ",
+            "ko": "브으으으음"
+          },
+          "anchor": {
+            "x": 50,
+            "y": 8
+          },
+          "rotate": 0,
+          "size": 78,
+          "style": "rumble"
+        }
+      ],
       "visual_references": [
-        "char.lanterne.sheet",
+        "char.lanterne",
         "loc.altar-sanctuary",
         "src.ep1.s11"
       ],
-      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre. Modern high-end Japanese TV anime look: clean 2D cel shading with soft painterly backgrounds, cinematic composition, strong readable silhouettes, careful volumetric light, mist and floating particles, deep contrast, film-like depth of field.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: wide shot, low angle, camera close to the ground looking up. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Low wide shot along the stone altar from its foot. Closest to the viewer, two dark armoured sabatons rest on the carved stone lid. Above and beyond, an immense ornate circular rose window glows cold cyan and white, its tracery like a mandala, ice-like stalactites hanging from the vault around it; beams of light fall from it onto the altar; carved stone walls in deep blue on both sides.\n\nCOMPOSITION: The rose window centred in the upper half, partly cut by the top edge; the altar's foot and the two sabatons in the lower third, centred, in silhouette against the light; symmetry is allowed here as in the film. Stalactites frame the window left and right.\n\nACTION AND MOOD: Stillness. Light falls on the lying knight. Emotion: awe, expectation.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nLOCATION, design locked: A dark underground stone sanctuary. High above, a large ornate circular rose window glows cold cyan-blue, its tracery like a mandala; icicle-like stalactites hang from the vault around it. Wet carved stone walls in deep blue. In the centre, a long rectangular stone altar, like a sarcophagus lid, seen along its length. Thin mist on the floor, small blue bioluminescent mushrooms and blue moss at the edges, twisted roots on the walls.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is The altar sanctuary (location design to copy); image 3 is Episode 1, 0:29, the rose window (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Only the sabatons and the lower legs of the knight are visible, dark against the glowing window; the rest of the body is hidden by perspective.\n\nSingle illustration, one scene only, no collage, no split screen. Drawn 2D anime frame, not 3D render, not photograph, not live action. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
+      "generation_prompt": "Lost Garden, an original dark fantasy anime by Frank Houbre, drawn as a premium full-colour Korean webtoon panel. Keep the identity of the series exactly: its characters, its poetic dark fantasy mood, its deep blue and cyan palette, its strong readable silhouettes, its mist and floating particles. Render it the webtoon way: clean confident line art with varied line weight, soft cel shading with smooth airbrushed gradients on skin and cloth, luminous painterly backgrounds slightly softer than the figures, crisp edges on the characters, generous negative space, composition built for a phone screen.\n\nDeep underground stone sanctuary: near black shadows, cold blue and cyan light, wet carved stone, thin mist along the ground, faint bioluminescent blue mushrooms and blue moss at the edges, no sky, no sunlight.\n\nSHOT: wide shot, low angle, camera close to the ground looking up. Vertical webtoon panel, aspect ratio 4:5, read on a phone.\n\nSCENE: Low wide shot along the stone altar from its foot. Closest to the viewer, two dark armoured sabatons rest on the carved stone lid. Above and beyond, an immense ornate circular rose window glows cold cyan and white, its tracery like a mandala, ice-like stalactites hanging from the vault around it; beams of light fall from it onto the altar; carved stone walls in deep blue on both sides.\n\nCOMPOSITION: The rose window centred in the upper half, partly cut by the top edge; the altar's foot and the two sabatons in the lower third, centred, in silhouette against the light; symmetry is allowed here as in the film. Stalactites frame the window left and right.\n\nACTION AND MOOD: Stillness. Light falls on the lying knight. Emotion: awe, expectation.\n\nCHARACTERS, design locked: Lanterne, model sheet: Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.\n\nLOCATION, design locked: A dark underground stone sanctuary. High above, a large ornate circular rose window glows cold cyan-blue, its tracery like a mandala; icicle-like stalactites hang from the vault around it. Wet carved stone walls in deep blue. In the centre, a long rectangular stone altar, like a sarcophagus lid, seen along its length. Thin mist on the floor, small blue bioluminescent mushrooms and blue moss at the edges, twisted roots on the walls.\n\nREFERENCE IMAGES, in order: image 1 is Lanterne, model sheet (character design to copy exactly); image 2 is The altar sanctuary (location design to copy); image 3 is Episode 1, 0:29, the rose window (composition and lighting reference from the finished episode). Source frames give framing, light and palette; character sheets give the design. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.\n\nNOTES: Only the sabatons and the lower legs of the knight are visible, dark against the glowing window; the rest of the body is hidden by perspective.\n\nSingle illustration, one scene only, no collage, no split screen, no page layout, no multiple panels. Drawn 2D webtoon illustration, not 3D render, not photograph, not live action, not flat vector. Composition designed for a vertical webtoon panel read on a phone: the subject stays readable at small size, the eye reads top to bottom. The artwork fills the whole image edge to edge with no frame, border, margin or vignette drawn into it.\n\nDO NOT: No text, letters, numbers, logo, signature, watermark or caption anywhere in the image. No speech bubbles and no panel borders drawn in the artwork. No human face, eyes, skin or hair inside Lanterne's helmet: the helmet is a hollow lantern with two small dark oval holes. No glowing eyes on Lanterne, no sword, no shield, no weapon, no wings, no cape colour other than beige. No extra characters, animals or creatures unless named in the prompt. No modern objects, no photographic realism, no 3D CGI look, no chibi proportions.",
       "negative_constraints": [
         "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
         "No speech bubbles and no panel borders drawn in the artwork.",
@@ -993,28 +1094,44 @@
       "image": {
         "src": "/webtoon/ep1-opening/panels/p10.jpg",
         "width": 1080,
-        "height": 1341,
-        "model": "nano_banana_2",
-        "job_id": "c04c60c0-0382-4723-85ea-5af44bf79ce4",
-        "generated_at": "2026-09-19T15:49:32Z",
+        "height": 1350,
+        "model": "gpt-image-2.5-sunburst",
+        "job_id": "e0d58e5f-3af3-4e82-a05a-7d1562d64232",
+        "generated_at": "2026-09-19T16:55:08Z",
         "status": "generated"
       }
     }
   ],
   "references": [
     {
-      "id": "char.lanterne.sheet",
+      "id": "char.lanterne",
       "kind": "character",
+      "subject": "lanterne",
+      "priority": 1,
       "name": "Lanterne, model sheet",
       "image": "/webtoon/references/lanterne-sheet.png",
       "must_keep": "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
-      "description": "Front, side and back views of the final design (09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
+      "description": "Front, side and back views of the final design (lost-garden/09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
       "tags": [
         "lanterne",
         "knight",
         "armour",
         "protagonist",
         "model_sheet"
+      ]
+    },
+    {
+      "id": "char.lanterne.still",
+      "kind": "character",
+      "subject": "lanterne",
+      "priority": 2,
+      "name": "Lanterne, episode still",
+      "image": "/images/sol.png",
+      "must_keep": "Same design as the model sheet, seen in the finished episode: the lantern helmet, the engraved pauldrons, the cream scarf, the dark chest plate with brass buckles, sitting on the altar among blue mushrooms.",
+      "description": "How the design reads once lit and animated. Use for materials and light on the armour.",
+      "tags": [
+        "lanterne",
+        "still"
       ]
     },
     {
@@ -1042,14 +1159,31 @@
     {
       "id": "char.rose",
       "kind": "character",
-      "name": "Rose",
+      "subject": "rose",
+      "priority": 1,
+      "name": "Rose, episode still (face)",
       "image": "/images/rose.png",
-      "must_keep": "Rose is a small girl of about seven. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a grey-green hooded short cloak fastened at the collar. Bare, delicate, childlike proportions.",
+      "must_keep": "Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette.",
       "description": "Calm, serene, almost unreal. She looks at the world as if she heard what it forgot. She is a child, not a symbol.",
       "tags": [
         "rose",
         "child",
         "girl"
+      ]
+    },
+    {
+      "id": "char.rose.full",
+      "kind": "character",
+      "subject": "rose",
+      "priority": 2,
+      "name": "Rose, episode still (full body)",
+      "image": "/images/hero-banner.png",
+      "must_keep": "Rose full body next to Lanterne: cream long dress with wide sleeves and a lace hem, grey-green hooded short cloak, short pink bob hair with the white flower, a small child about waist height to Lanterne, gentle silhouette.",
+      "description": "No model sheet exists for Rose yet (lost-garden/09_Fiches_modeles has none): the two episode stills are the canon reference.",
+      "tags": [
+        "rose",
+        "full_body",
+        "still"
       ]
     },
     {

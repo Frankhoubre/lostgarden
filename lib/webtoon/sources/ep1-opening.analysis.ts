@@ -103,7 +103,7 @@ export const EP1_OPENING_ANALYSIS: SourceAnalysis = {
       time_end: 13.9,
       timing: "approx",
       description:
-        "Detail at ground level: the lace hem of Rose's cream dress and her bare legs standing among the white lilies.",
+        "Detail at ground level: the lace hem of Rose's cream dress and her small feet standing among the white lilies.",
       characters: ["rose"],
       location: "white-lily-field",
       action: "She stands still among the flowers.",

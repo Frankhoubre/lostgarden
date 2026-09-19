@@ -40,9 +40,18 @@ Le frontend ne décide rien : il empile ce que le moteur a décidé. La distance
 5. Générer les cases avec les références listées, dans l'ordre, puis `python3 scripts/webtoon-images.py <slug> jobs.json`.
 6. Relancer l'export. La page et l'API lisent le même code.
 
+## Génération : Vercel AI Gateway et les fiches personnages
+
+- Fournisseur de référence : **Vercel AI Gateway**, modèle `openai/gpt-image-2.5-sunburst` (`lib/webtoon/providers/vercel-gateway.ts`). Clé `AI_GATEWAY_API_KEY` côté serveur, jamais côté client.
+- En lot : `AI_GATEWAY_API_KEY=… node scripts/webtoon-generate.mjs ep1-opening [p03 p07]` génère, écrit `public/webtoon/<slug>/panels/*.png` et met à jour `<slug>.images.ts`. `--dry-run` imprime les requêtes.
+- À la demande : `POST /api/webtoon/<slug>/generate` avec `{ panel_id }` renvoie l'image en data URL ; le bouton « Régénérer » de l'éditeur l'appelle et remplace l'image dans le navigateur.
+- Références **toujours** jointes, dans cet ordre : les fiches du personnage (planche modèle d'abord, puis still du film), la fiche du lieu, l'image du plan source. La résolution se fait par `subject` dans `lib/webtoon/references.ts` : chaque personnage présent dans une case attache toutes ses fiches.
+- Fiches disponibles dans `lost-garden/09_Fiches_modeles` : Lanterne, Serrure, Bourdon, Barrik, le Roi Voûte, le Décrocheur, le Chevalier Sombre, le Colosse, le Reptilien. **Rose n'a pas de planche modèle** : ses références sont deux stills du film (visage, corps entier). Une planche générée depuis ces stills renforcerait la cohérence.
+- Tailles : GPT Image produit 1024x1024, 1024x1536 ou 1536x1024 ; `sizeForAspect` choisit l'orientation et la mise en page recadre au point focal. Un plan peut demander `2:3` ou `3:2` pour éviter tout recadrage.
+
 ## Ce que la première passe a établi
 
 - Les 30 s de l'épisode 1 font onze plans (coupes à 4.4, 6.3, 11.2, 12.9, 13.9, 16.9, 20.6, 22.6, 25.5, 27.6 s) et une seule réplique, « Find me. » à 17.9 s.
 - Dix cases, 16 028 px de haut, cinq beats. Le noir du film (20.6 à 22.6 s) n'est pas une case : c'est un gap de 1 400 px et le changement de fond.
 - Aucune case n'invente d'action : chaque case est marquée `direct` et pointe le plan dont elle vient.
-- Les images ont été générées avec Nano Banana Pro (via Higgsfield), références jointes dans l'ordre du prompt : fiche modèle de Lanterne, still de Rose, image du film correspondante.
+- Première passe : Nano Banana (via Higgsfield). Seconde passe, celle qui est en ligne : GPT Image 2.5 Sunburst, style webtoon, fiches personnages jointes en premier sur chaque case. Les cases de la première passe restent dans `public/webtoon/ep1-opening/panels-v1-nano-banana/` pour comparaison.

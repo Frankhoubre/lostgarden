@@ -18,25 +18,25 @@ type LetteringProps = {
 };
 
 function Tail({ from, to }: { from: { x: number; y: number }; to: { x: number; y: number } }) {
+  // A webtoon tail: a short curved wedge. Its base sits under the bubble, the
+  // tip stops a little short of the speaker, and the two sides bow the same
+  // way so the tail reads as one brush stroke rather than a triangle.
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const length = Math.hypot(dx, dy) || 1;
-  // The tail is a slim triangle: its base sits under the bubble (hidden by
-  // it), its tip stops a little short of the target so it points at the
-  // speaker without touching the mouth.
-  const px = (-dy / length) * 3.4;
-  const py = (dx / length) * 3.4;
-  const tipX = from.x + dx * 0.92;
-  const tipY = from.y + dy * 0.92;
-  const points = `${from.x + px},${from.y + py} ${from.x - px},${from.y - py} ${tipX},${tipY}`;
+  const nx = -dy / length;
+  const ny = dx / length;
+  const base = 3.6;
+  const b1 = { x: from.x + nx * base, y: from.y + ny * base };
+  const b2 = { x: from.x - nx * base, y: from.y - ny * base };
+  const tip = { x: from.x + dx * 0.9, y: from.y + dy * 0.9 };
+  const bow = 1.6;
+  const c1 = { x: from.x + dx * 0.5 + nx * (base * 0.6 + bow), y: from.y + dy * 0.5 + ny * (base * 0.6 + bow) };
+  const c2 = { x: from.x + dx * 0.5 - nx * (base * 0.6 - bow), y: from.y + dy * 0.5 - ny * (base * 0.6 - bow) };
+  const d = `M ${b1.x} ${b1.y} Q ${c1.x} ${c1.y} ${tip.x} ${tip.y} Q ${c2.x} ${c2.y} ${b2.x} ${b2.y} Z`;
   return (
-    <svg
-      className="webtoon-tail"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <polygon points={points} />
+    <svg className="webtoon-tail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d={d} />
     </svg>
   );
 }
