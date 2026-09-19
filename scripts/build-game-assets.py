@@ -393,7 +393,42 @@ def slice_sheet(path: Path, gap_min=6):
     return frames
 
 
-def build_strip(name: str, frames, scale: float, cell_w: int, cell_h: int, palette_img: Image.Image, colors=32):
+def slice_equal(path: Path, n: int):
+    """Split a sheet into n frames: connected components assigned to the cell holding their centre."""
+    from scipy import ndimage
+
+    img = Image.open(path).convert("RGBA")
+    a = np.asarray(img).copy()
+    solid = a[..., 3] > 120
+    cols = np.where(solid.any(axis=0))[0]
+    x0, x1 = int(cols[0]), int(cols[-1]) + 1
+    cell = (x1 - x0) / n
+    # Dilate so limbs separated by an outline gap still count as one body.
+    labels, count = ndimage.label(ndimage.binary_dilation(solid, iterations=6))
+    frames = []
+    for i in range(n):
+        cx0 = x0 + i * cell
+        cx1 = x0 + (i + 1) * cell
+        keep = np.zeros_like(solid)
+        best_size = 0
+        for lab in range(1, count + 1):
+            comp = labels == lab
+            ys, xs = np.where(comp)
+            cx = xs.mean()
+            if cx0 <= cx < cx1:
+                size = comp.sum()
+                if size > best_size:
+                    best_size = size
+                    keep = comp
+        m = keep & solid
+        ys, xs = np.where(m)
+        fa = a.copy()
+        fa[..., 3] = np.where(m, fa[..., 3], 0)
+        frames.append(Image.fromarray(fa, "RGBA").crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)))
+    return frames
+
+
+def build_strip(name: str, frames, scale: float, cell_w: int, cell_h: int, palette_img: Image.Image, colors=32, prefix="lanterne", align="bottom"):
     """Scale frames uniformly, quantise to a shared palette, bottom-centre them in fixed cells."""
     strip = Image.new("RGBA", (cell_w * len(frames), cell_h), (0, 0, 0, 0))
     for i, fr in enumerate(frames):
@@ -414,7 +449,7 @@ def build_strip(name: str, frames, scale: float, cell_w: int, cell_h: int, palet
         x = i * cell_w + (cell_w - w) // 2
         y = cell_h - h
         strip.paste(cell, (x, y), cell)
-    strip.save(OUT / f"lanterne-{name}.png", optimize=True)
+    strip.save(OUT / f"{prefix}-{name}.png", optimize=True)
     return len(frames)
 
 
@@ -439,7 +474,15 @@ def build_generated_lanterne():
     n_walk = build_strip("walk", walk, scale_walk, cell_w, cell_h, palette_img)
     n_jump = build_strip("jump", jump, scale_jump, cell_w, cell_h, palette_img)
     n_idle = build_strip("idle", idle, scale_idle, cell_w, cell_h, palette_img)
-    meta = {"cell": {"w": cell_w, "h": cell_h}, "walk": n_walk, "jump": n_jump, "idle": n_idle}
+    # Throw: the glowing ball in frame 3 is part of the art; keep it but widen the cells.
+    throw = slice_equal(GEN / "throw1.png", 5)
+    hurt = slice_sheet(GEN / "hurt1.png")
+    scale_throw = target_h / max(f.height for f in throw)
+    scale_hurt = target_h / max(f.height for f in hurt)
+    n_throw = build_strip("throw", throw, scale_throw, 72, cell_h, palette_img)
+    n_hurt = build_strip("hurt", hurt, scale_hurt, cell_w, cell_h, palette_img)
+    print("throw/hurt frames:", n_throw, n_hurt)
+    meta = {"cell": {"w": cell_w, "h": cell_h}, "walk": n_walk, "jump": n_jump, "idle": n_idle, "throw": n_throw, "throwCellW": 72, "hurt": n_hurt}
     (OUT / "lanterne-anim.json").write_text(json.dumps(meta))
 
     # Foreground trunk.
@@ -463,3 +506,30 @@ def build_generated_lanterne():
 
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_lanterne()
+
+
+def build_generated_reptile():
+    """The pale reptilian: walk, attack, hurt+death strips, same 90px scale as Lanterne."""
+    base = Image.open(GEN / "reptile1.png").convert("RGBA")
+    ba = np.asarray(base)
+    mask = ba[..., 3] > 120
+    pal_src = Image.fromarray(ba[mask][:, :3].reshape(1, -1, 3), "RGB")
+    palette_img = pal_src.quantize(colors=28, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    walk = slice_equal(GEN / "rwalk1.png", 6)
+    attack = slice_equal(GEN / "rattack1.png", 5)
+    die = slice_equal(GEN / "rdie1.png", 6)
+    print("reptile frames:", len(walk), len(attack), len(die))
+    # Scale everything from the standing walk frames so the creature keeps one size across sheets.
+    ref_h = max(f.height for f in walk)
+    scale = 96 / ref_h
+    cell_h = 100
+    n_walk = build_strip("walk", walk, scale, 80, cell_h, palette_img, prefix="reptile")
+    n_attack = build_strip("attack", attack, scale, 96, cell_h, palette_img, prefix="reptile")
+    n_die = build_strip("die", die, scale, 96, cell_h, palette_img, prefix="reptile")
+    meta = {"cell": {"h": cell_h}, "walk": {"n": n_walk, "w": 80}, "attack": {"n": n_attack, "w": 96}, "die": {"n": n_die, "w": 96}}
+    (OUT / "reptile-anim.json").write_text(json.dumps(meta))
+    print("reptile", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_reptile()

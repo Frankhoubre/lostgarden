@@ -739,10 +739,9 @@
     "controlsTitle": "Controls",
     "controls": [
       "Arrow keys or A / D: move",
-      "Z, W, Space or Up: jump (once you leap, you commit)",
-      "X, K or Enter: throw your weapon",
-      "Down: crouch · Down + jump: drop through a platform",
-      "P: pause · M: sound"
+      "Z, W, Space or Up: jump",
+      "X, K or Enter: throw the glimmer",
+      "M: sound"
     ],
     "touchHint": "On a phone, use the on-screen buttons.",
     "fullscreen": "Fullscreen",
@@ -750,10 +749,10 @@
     "unmute": "Sound on",
     "loreTitle": "What you will meet",
     "lore": [
-      "Spores, jellyfish and hooded penitents in the blue forest, then the Machine, red and black, two orange eyes.",
-      "Pale reptiles, armoured colossi and rusted chains in the world of chains, hunted by the Decrocheur and its scythe.",
-      "Empty armours that wake in the leaning castle, Bourdon's forge, dressed mice, and the Dark Knight who is no longer himself.",
-      "Serrure and Bourdon mark your checkpoints. Lanterne never speaks."
+      "Playable mockup: the blue mushroom forest, Lanterne, and prowling pale reptilians.",
+      "They charge, rear up before clawing, and fall after four glimmers.",
+      "Three hits and the armour sinks into the moss. It gets up again a little further on.",
+      "Lanterne never speaks."
     ],
     "credits": "An original game for the anime Lost Garden by Frank Houbre. No download, no account, plays in the browser."
   }

@@ -738,10 +738,9 @@
     "controlsTitle": "Commandes",
     "controls": [
       "Flèches ou Q / D : se déplacer",
-      "Z, W, Espace ou Haut : sauter (une fois en l'air, on ne revient pas)",
-      "X, K ou Entrée : lancer l'arme",
-      "Bas : s'accroupir · Bas + saut : descendre d'une plateforme",
-      "P : pause · M : son"
+      "Z, W, Espace ou Haut : sauter",
+      "X, K ou Entrée : lancer la lueur",
+      "M : son"
     ],
     "touchHint": "Sur téléphone, utilise les boutons à l'écran.",
     "fullscreen": "Plein écran",
@@ -749,10 +748,10 @@
     "unmute": "Activer le son",
     "loreTitle": "Ce que tu vas croiser",
     "lore": [
-      "Des spores, des méduses et des pénitents encapuchonnés dans la forêt bleue, puis la Machine, rouge et noire, deux yeux orange.",
-      "Des reptiliens pâles, des colosses cuirassés et des chaînes rouillées dans le monde des chaînes, sous la faux du Décrocheur.",
-      "Des armures vides qui s'éveillent dans le château penché, la forge de Bourdon, ses souris habillées, et le Chevalier Sombre qui n'est plus lui-même.",
-      "Serrure et Bourdon marquent tes points de passage. Lanterne ne parle jamais."
+      "Maquette jouable : la forêt des champignons bleus, Lanterne, et des Reptiliens pâles qui rôdent.",
+      "Ils te chargent, se cabrent avant de griffer, et tombent au bout de quatre lueurs.",
+      "Trois coups et l'armure retombe dans la mousse. Elle se relève un peu plus loin.",
+      "Lanterne ne parle jamais."
     ],
     "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur."
   }
