@@ -47,6 +47,17 @@ type BgMeta = {
   lanterne: { w: number; h: number };
 };
 
+let assetBase = "/game";
+
+/** Where the generated assets live (default: the site's /game folder). */
+export function setAssetBase(base: string) {
+  assetBase = base;
+}
+
+function asset(name: string): string {
+  return `${assetBase}/${name}`;
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -140,20 +151,20 @@ export class Mockup {
 
   async load() {
     const [bg, ground, walk, jump, idle, throwS, hurtS, metaRes, animRes, trunk, rWalk, rAttack, rDie, rMeta] = await Promise.all([
-      loadImage("/game/bg-forest.png"),
-      loadImage("/game/ground-forest.png"),
-      loadImage("/game/lanterne-walk.png"),
-      loadImage("/game/lanterne-jump.png"),
-      loadImage("/game/lanterne-idle.png"),
-      loadImage("/game/lanterne-throw.png"),
-      loadImage("/game/lanterne-hurt.png"),
-      fetch("/game/bg-forest.json").then((r) => r.json() as Promise<BgMeta>),
-      fetch("/game/lanterne-anim.json").then((r) => r.json() as Promise<AnimMeta>),
-      loadImage("/game/fg-trunk.png").catch(() => null),
-      loadImage("/game/reptile-walk.png"),
-      loadImage("/game/reptile-attack.png"),
-      loadImage("/game/reptile-die.png"),
-      fetch("/game/reptile-anim.json").then((r) => r.json() as Promise<ReptileMeta>),
+      loadImage(asset("bg-forest.png")),
+      loadImage(asset("ground-forest.png")),
+      loadImage(asset("lanterne-walk.png")),
+      loadImage(asset("lanterne-jump.png")),
+      loadImage(asset("lanterne-idle.png")),
+      loadImage(asset("lanterne-throw.png")),
+      loadImage(asset("lanterne-hurt.png")),
+      fetch(asset("bg-forest.json")).then((r) => r.json() as Promise<BgMeta>),
+      fetch(asset("lanterne-anim.json")).then((r) => r.json() as Promise<AnimMeta>),
+      loadImage(asset("fg-trunk.png")).catch(() => null),
+      loadImage(asset("reptile-walk.png")),
+      loadImage(asset("reptile-attack.png")),
+      loadImage(asset("reptile-die.png")),
+      fetch(asset("reptile-anim.json")).then((r) => r.json() as Promise<ReptileMeta>),
     ]);
     this.bg = bg;
     this.ground = ground;
