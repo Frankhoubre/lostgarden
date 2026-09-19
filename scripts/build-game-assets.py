@@ -5,6 +5,8 @@ production artwork kept in the private lost-garden repository.
   python3 scripts/build-game-assets.py /path/to/lost-garden
 
 Outputs go to public/game/. Nothing here runs at build time.
+
+  python3 scripts/build-game-assets.py --fetch --generated   # generated pixel-art assets
 """
 import json
 import sys
@@ -240,6 +242,224 @@ def build_lanterne():
     (OUT / "lanterne.json").write_text(json.dumps(meta))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--generated" not in sys.argv:
     build_forest_background()
     build_lanterne()
+
+
+# ---------------------------------------------------------------------------
+# Generated pixel-art assets (Higgsfield / GPT Image), re-sampled to 1:1 pixels
+# ---------------------------------------------------------------------------
+
+GEN = Path(__file__).resolve().parent.parent / ".game-assets-src"
+MANIFEST = Path(__file__).resolve().parent / "game-assets-manifest.json"
+
+
+def fetch_generated():
+    """Download the generated source images listed in the manifest (not committed: ~26 MB)."""
+    import urllib.request
+
+    GEN.mkdir(parents=True, exist_ok=True)
+    manifest = json.loads(MANIFEST.read_text())
+    for local, remote in manifest["files"].items():
+        dest = GEN / local
+        if dest.exists():
+            continue
+        print("fetching", local)
+        urllib.request.urlretrieve(manifest["base"] + remote, dest)
+
+
+def detect_lights(bg: Image.Image, limit=140):
+    a = np.asarray(bg.convert("RGB")).astype(int)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    mask = (b > 200) & (g > 170) & (b + g > 2 * r + 80) & ((r + g + b) > 500)
+    lights = []
+    seen = np.zeros(mask.shape, dtype=bool)
+    H, W = mask.shape
+    for y in range(H):
+        for x in range(W):
+            if not mask[y, x] or seen[y, x]:
+                continue
+            q = deque([(y, x)])
+            seen[y, x] = True
+            pts = []
+            while q:
+                cy, cx = q.popleft()
+                pts.append((cy, cx))
+                for ny, nx in ((cy - 1, cx), (cy + 1, cx), (cy, cx - 1), (cy, cx + 1)):
+                    if 0 <= ny < H and 0 <= nx < W and mask[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True
+                        q.append((ny, nx))
+            if len(pts) < 4:
+                continue
+            ys = [p[0] for p in pts]
+            xs = [p[1] for p in pts]
+            lights.append({"x": round(float(np.mean(xs)), 1), "y": round(float(np.mean(ys)), 1), "r": round(6 + len(pts) ** 0.5 * 2.4, 1)})
+    lights.sort(key=lambda l: -l["r"])
+    return lights[:limit]
+
+
+def build_generated_forest(bg_name="bg2", ground_name="ground1", lanterne_name="lan2"):
+    target_w = 512
+    # Backdrop: resample close to its native pixel grid, then re-quantise.
+    bg = Image.open(GEN / f"{bg_name}.png").convert("RGB")
+    h = int(round(bg.height * target_w / bg.width))
+    small = bg.resize((target_w, h), Image.LANCZOS)
+    small = quantize(small, 48)
+    if small.height > VIEW_H:
+        small = small.crop((0, small.height - VIEW_H, target_w, small.height))
+    small.save(OUT / "bg-forest.png", optimize=True)
+
+    # Ground strip with alpha.
+    gr = Image.open(GEN / f"{ground_name}.png").convert("RGBA")
+    gh = int(round(gr.height * target_w / gr.width))
+    gs = gr.resize((target_w, gh), Image.LANCZOS)
+    ga = np.asarray(gs).copy()
+    ga[..., 3] = np.where(ga[..., 3] > 110, 255, 0)
+    rgb = Image.fromarray(ga[..., :3], "RGB")
+    rgb = quantize(rgb, 40)
+    ga[..., :3] = np.asarray(rgb)
+    cover = (ga[..., 3] > 0).mean(axis=1)
+    top = int(np.argmax(cover > 0.85))  # first row where the ground is solid: the walkable line
+    first = int(np.argmax(cover > 0.02))  # first row with any content (mushroom caps)
+    crop = ga[first:, :, :]
+    Image.fromarray(crop, "RGBA").save(OUT / "ground-forest.png", optimize=True)
+    ground_meta = {"top": top - first, "height": crop.shape[0]}
+
+    # Lanterne: keyed sprite scaled to ~90px.
+    lan = Image.open(GEN / f"{lanterne_name}.png").convert("RGBA")
+    la = np.asarray(lan).copy()
+    la[..., 3] = np.where(la[..., 3] > 120, 255, 0)
+    lan = Image.fromarray(la, "RGBA")
+    bbox = lan.getbbox()
+    lan = lan.crop(bbox)
+    height = 90
+    w = int(round(lan.width * height / lan.height))
+    prem = np.asarray(lan).astype(float)
+    alpha = prem[..., 3:4] / 255.0
+    pm = np.concatenate([prem[..., :3] * alpha, prem[..., 3:4]], axis=2)
+    small_l = Image.fromarray(pm.astype(np.uint8), "RGBA").resize((w, height), Image.LANCZOS)
+    p = np.asarray(small_l).astype(float)
+    a = p[..., 3:4] / 255.0
+    rgbl = np.clip(np.where(a > 0, p[..., :3] / np.maximum(a, 1e-3), 0), 0, 255).astype(np.uint8)
+    q = Image.fromarray(rgbl, "RGB").quantize(colors=32, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGB")
+    out = np.zeros((height, w, 4), dtype=np.uint8)
+    out[..., :3] = np.asarray(q)
+    out[..., 3] = np.where(p[..., 3] > 110, 255, 0)
+
+    lights = detect_lights(small)
+    ground_lights = detect_lights(Image.fromarray(crop[..., :3], "RGB"), limit=80)
+    meta = {
+        "width": target_w,
+        "height": VIEW_H,
+        "ground": ground_meta,
+        "lights": lights,
+        "groundLights": ground_lights,
+        "lanterne": {"w": w, "h": height},
+    }
+    (OUT / "bg-forest.json").write_text(json.dumps(meta))
+    print("generated forest:", small.size, "ground", ground_meta, "lanterne", (w, height), "lights", len(lights), len(ground_lights))
+
+
+if __name__ == "__main__" and "--fetch" in sys.argv:
+    fetch_generated()
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_forest()
+
+
+def slice_sheet(path: Path, gap_min=6):
+    """Split a horizontal sprite sheet into frames using transparent column gaps."""
+    img = Image.open(path).convert("RGBA")
+    a = np.asarray(img)
+    solid = a[..., 3] > 120
+    cols = solid.any(axis=0)
+    frames = []
+    x = 0
+    W = len(cols)
+    while x < W:
+        if not cols[x]:
+            x += 1
+            continue
+        start = x
+        while x < W and (cols[x] or (x + gap_min < W and cols[x : x + gap_min].any())):
+            x += 1
+        end = x
+        sub = solid[:, start:end]
+        rows = np.where(sub.any(axis=1))[0]
+        if len(rows) == 0 or end - start < 40:
+            continue
+        frames.append(img.crop((start, int(rows[0]), end, int(rows[-1]) + 1)))
+    return frames
+
+
+def build_strip(name: str, frames, scale: float, cell_w: int, cell_h: int, palette_img: Image.Image, colors=32):
+    """Scale frames uniformly, quantise to a shared palette, bottom-centre them in fixed cells."""
+    strip = Image.new("RGBA", (cell_w * len(frames), cell_h), (0, 0, 0, 0))
+    for i, fr in enumerate(frames):
+        w = max(1, int(round(fr.width * scale)))
+        h = max(1, int(round(fr.height * scale)))
+        arr = np.asarray(fr).astype(float)
+        alpha = arr[..., 3:4] / 255.0
+        pm = np.concatenate([arr[..., :3] * alpha, arr[..., 3:4]], axis=2)
+        small = Image.fromarray(pm.astype(np.uint8), "RGBA").resize((w, h), Image.LANCZOS)
+        p = np.asarray(small).astype(float)
+        al = p[..., 3:4] / 255.0
+        rgb = np.clip(np.where(al > 0, p[..., :3] / np.maximum(al, 1e-3), 0), 0, 255).astype(np.uint8)
+        q = Image.fromarray(rgb, "RGB").quantize(palette=palette_img, dither=Image.Dither.NONE).convert("RGB")
+        out = np.zeros((h, w, 4), dtype=np.uint8)
+        out[..., :3] = np.asarray(q)
+        out[..., 3] = np.where(p[..., 3] > 110, 255, 0)
+        cell = Image.fromarray(out, "RGBA")
+        x = i * cell_w + (cell_w - w) // 2
+        y = cell_h - h
+        strip.paste(cell, (x, y), cell)
+    strip.save(OUT / f"lanterne-{name}.png", optimize=True)
+    return len(frames)
+
+
+def build_generated_lanterne():
+    walk = slice_sheet(GEN / "walk2.png")
+    jump = slice_sheet(GEN / "jump1.png")
+    idle = slice_sheet(GEN / "idle1.png")
+    print("frames:", len(walk), len(jump), len(idle))
+    target_h = 90
+    cell_w, cell_h = 56, 96
+    scale_walk = target_h / max(f.height for f in walk)
+    scale_idle = target_h / max(f.height for f in idle)
+    # The push-off frame of the jump is close to full height.
+    scale_jump = target_h / max(f.height for f in jump) * 0.98
+    # Shared palette from the idle sheet.
+    idle_rgb = Image.open(GEN / "idle1.png").convert("RGBA")
+    ia = np.asarray(idle_rgb)
+    mask = ia[..., 3] > 120
+    pixels = ia[mask][:, :3]
+    pal_src = Image.fromarray(pixels.reshape(1, -1, 3), "RGB")
+    palette_img = pal_src.quantize(colors=32, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    n_walk = build_strip("walk", walk, scale_walk, cell_w, cell_h, palette_img)
+    n_jump = build_strip("jump", jump, scale_jump, cell_w, cell_h, palette_img)
+    n_idle = build_strip("idle", idle, scale_idle, cell_w, cell_h, palette_img)
+    meta = {"cell": {"w": cell_w, "h": cell_h}, "walk": n_walk, "jump": n_jump, "idle": n_idle}
+    (OUT / "lanterne-anim.json").write_text(json.dumps(meta))
+
+    # Foreground trunk.
+    tr = Image.open(GEN / "trunk1.png").convert("RGBA")
+    h = VIEW_H
+    w = int(round(tr.width * h / tr.height))
+    arr = np.asarray(tr).astype(float)
+    alpha = arr[..., 3:4] / 255.0
+    pm = np.concatenate([arr[..., :3] * alpha, arr[..., 3:4]], axis=2)
+    small = Image.fromarray(pm.astype(np.uint8), "RGBA").resize((w, h), Image.LANCZOS)
+    p = np.asarray(small).astype(float)
+    al = p[..., 3:4] / 255.0
+    rgb = np.clip(np.where(al > 0, p[..., :3] / np.maximum(al, 1e-3), 0), 0, 255).astype(np.uint8)
+    q = Image.fromarray(rgb, "RGB").quantize(colors=20, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGB")
+    out = np.zeros((h, w, 4), dtype=np.uint8)
+    out[..., :3] = np.asarray(q)
+    out[..., 3] = np.where(p[..., 3] > 110, 255, 0)
+    Image.fromarray(out, "RGBA").save(OUT / "fg-trunk.png", optimize=True)
+    print("trunk", (w, h), "anim", meta)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_lanterne()

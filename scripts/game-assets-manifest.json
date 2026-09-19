@@ -1,0 +1,16 @@
+{
+  "note": "Source images generated with GPT Image 2.5 through Higgsfield on 2026-09-19, from Lost Garden references (lostgarden.world). Re-download with: python3 scripts/build-game-assets.py --fetch --generated",
+  "base": "https://d8j0ntlcm91z4.cloudfront.net/user_2zzrQhjwX8lBm0VXDRvGGR7ZfU0/",
+  "files": {
+    "bg1.png": "hf_20260919_125645_8d6cfbba-e4de-406a-953a-533d58b8083d.png",
+    "bg2.png": "hf_20260919_125645_f63f951b-8bd3-4482-bed2-1ccfab8b669d.png",
+    "lan1.png": "hf_20260919_125650_0c2bb995-7c57-456b-9462-feacc3661fca.png",
+    "lan2.png": "hf_20260919_125650_526fc80f-8fdd-4d5b-82c4-f7c579b651e2.png",
+    "ground1.png": "hf_20260919_125653_76b4488d-399e-4599-8811-d245f1fab5ad.png",
+    "walk1.png": "hf_20260919_130013_a1c4e57f-e5fa-406d-aa9d-3a7e55e43670.png",
+    "walk2.png": "hf_20260919_130013_8aca45e3-03ec-428c-8793-cec7634fb6e2.png",
+    "jump1.png": "hf_20260919_130018_13a1f232-c4d7-4a9a-8e4b-eeb036a262f3.png",
+    "idle1.png": "hf_20260919_130021_be571ab3-2bb2-41dd-b49e-b043944caea6.png",
+    "trunk1.png": "hf_20260919_130023_f983542d-0280-4cff-93ee-a036cf731f54.png"
+  }
+}

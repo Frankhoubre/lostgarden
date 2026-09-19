@@ -17,12 +17,15 @@ const ACCEL = 0.35;
 type Light = { x: number; y: number; r: number; a: number; color?: string; parallax: number };
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; size: number; parallax: number };
 
+type BgLight = { x: number; y: number; r: number };
+type AnimMeta = { cell: { w: number; h: number }; walk: number; jump: number; idle: number };
 type BgMeta = {
   width: number;
   height: number;
-  groundTop: number;
-  feetY: number;
-  lights: { x: number; y: number; r: number }[];
+  ground: { top: number; height: number };
+  lights: BgLight[];
+  groundLights: BgLight[];
+  lanterne: { w: number; h: number };
 };
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -53,11 +56,15 @@ export class Mockup {
 
   private bg!: HTMLImageElement;
   private ground!: HTMLImageElement;
-  private side!: HTMLImageElement;
-  private front!: HTMLImageElement;
-  private trunkL!: HTMLImageElement;
-  private trunkR!: HTMLImageElement;
+  private walkSheet!: HTMLImageElement;
+  private jumpSheet!: HTMLImageElement;
+  private idleSheet!: HTMLImageElement;
+  private anim!: AnimMeta;
+  private trunk: HTMLImageElement | null = null;
   private meta!: BgMeta;
+  private jumpT = 0;
+  private groundY = 0;
+  private feetY = 0;
   private lightCanvas: HTMLCanvasElement;
   private fxCanvas: HTMLCanvasElement;
   private ready = false;
@@ -96,23 +103,28 @@ export class Mockup {
   }
 
   async load() {
-    const [bg, ground, side, front, trunkL, trunkR, metaRes] = await Promise.all([
+    const [bg, ground, walk, jump, idle, metaRes, animRes, trunk] = await Promise.all([
       loadImage("/game/bg-forest.png"),
       loadImage("/game/ground-forest.png"),
-      loadImage("/game/lanterne-side.png"),
-      loadImage("/game/lanterne-front.png"),
-      loadImage("/game/fg-trunk-left.png"),
-      loadImage("/game/fg-trunk-right.png"),
+      loadImage("/game/lanterne-walk.png"),
+      loadImage("/game/lanterne-jump.png"),
+      loadImage("/game/lanterne-idle.png"),
       fetch("/game/bg-forest.json").then((r) => r.json() as Promise<BgMeta>),
+      fetch("/game/lanterne-anim.json").then((r) => r.json() as Promise<AnimMeta>),
+      loadImage("/game/fg-trunk.png").catch(() => null),
     ]);
     this.bg = bg;
     this.ground = ground;
-    this.side = side;
-    this.front = front;
-    this.trunkL = trunkL;
-    this.trunkR = trunkR;
+    this.walkSheet = walk;
+    this.jumpSheet = jump;
+    this.idleSheet = idle;
+    this.anim = animRes;
+    this.trunk = trunk;
     this.meta = metaRes;
-    this.py = this.meta.feetY;
+    // The near ground strip sits at the bottom; its walkable line is the feet line.
+    this.groundY = VIEW_H - this.meta.ground.height + 14;
+    this.feetY = this.groundY + this.meta.ground.top;
+    this.py = this.feetY;
     this.ready = true;
   }
 
@@ -172,7 +184,7 @@ export class Mockup {
     this.time += 1;
     const left = this.held.has("left");
     const right = this.held.has("right");
-    const feetY = this.meta.feetY;
+    const feetY = this.feetY;
 
     // Horizontal motion with a little inertia (the armour is heavy).
     const target = left ? -WALK : right ? WALK : 0;
@@ -188,8 +200,10 @@ export class Mockup {
     if (this.pressed.has("jump") && this.onGround) {
       this.vy = JUMP_VY;
       this.onGround = false;
+      this.jumpT = 0;
       this.puff(6, "#7fa9b8", 1.4);
     }
+    if (!this.onGround) this.jumpT += 1;
     if (this.pressed.has("throw")) this.flare = 40;
     if (this.flare > 0) this.flare -= 1;
 
@@ -248,7 +262,7 @@ export class Mockup {
     if (this.time % 25 === 0) {
       this.particles.push({
         x: this.cameraX + Math.random() * VIEW_W,
-        y: this.meta.groundTop + 20 + Math.random() * 60,
+        y: this.groundY - 40 + Math.random() * 60,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.15,
         life: 240,
@@ -304,16 +318,16 @@ export class Mockup {
     if (fx) {
       fx.globalCompositeOperation = "source-over";
       fx.clearRect(0, 0, VIEW_W, VIEW_H);
-      const haze = fx.createLinearGradient(0, this.meta.groundTop - 70, 0, this.meta.groundTop + 30);
+      const haze = fx.createLinearGradient(0, this.groundY - 80, 0, this.groundY + 20);
       haze.addColorStop(0, "rgba(60, 140, 220, 0)");
-      haze.addColorStop(1, "rgba(60, 140, 220, 0.3)");
+      haze.addColorStop(1, "rgba(60, 140, 220, 0.25)");
       fx.fillStyle = haze;
-      fx.fillRect(0, this.meta.groundTop - 70, VIEW_W, 100);
+      fx.fillRect(0, this.groundY - 80, VIEW_W, 100);
       this.drawLightShafts(fx, cam);
-      this.ditherAlpha(this.fxCanvas, 6, false);
+      this.ditherAlpha(this.fxCanvas, 8, true);
       ctx.drawImage(this.fxCanvas, 0, 0);
     }
-    this.drawTiled(this.ground, 1, this.meta.groundTop, cam);
+    this.drawTiled(this.ground, 1, this.groundY, cam);
     this.collectBackgroundLights(cam);
 
     this.drawParticles(cam, (p) => p.parallax < 1);
@@ -349,30 +363,30 @@ export class Mockup {
     }
   }
 
-  /** Light sources baked from the painted backdrop (glowing mushrooms). */
+  /** Light sources baked from the painted layers (glowing mushrooms). */
   private collectBackgroundLights(cam: number) {
-    const w = this.bg.width;
-    for (const l of this.meta.lights) {
-      const near = l.y >= this.meta.groundTop;
-      const parallax = near ? 1 : 0.45;
+    const place = (lights: BgLight[], imgW: number, parallax: number, yOffset: number, near: boolean) => {
       const offset = Math.round(cam * parallax);
-      const period = w * 2;
+      const period = imgW * 2;
       const base = -(((offset % period) + period) % period);
-      for (let k = -1; k <= 2; k += 1) {
-        const tileX = base + k * period;
-        // Normal copy, then mirrored copy.
-        const xs = [tileX + l.x, tileX + w * 2 - l.x];
-        for (const sx of xs) {
-          if (sx < -80 || sx > VIEW_W + 80) continue;
-          const pulse = 0.75 + 0.25 * Math.sin(this.time / 28 + l.x * 0.13 + l.y * 0.07);
-          const r = Math.min(near ? 36 : 22, l.r * (near ? 0.9 : 0.55)) * pulse;
-          this.lights.push({ x: sx, y: l.y, r, a: near ? 0.85 : 0.5, color: near ? "rgba(90, 190, 255, 0.16)" : undefined, parallax });
+      for (const l of lights) {
+        for (let k = -1; k <= 2; k += 1) {
+          const tileX = base + k * period;
+          const xs = [tileX + l.x, tileX + imgW * 2 - l.x];
+          for (const sx of xs) {
+            if (sx < -80 || sx > VIEW_W + 80) continue;
+            const pulse = 0.75 + 0.25 * Math.sin(this.time / 28 + l.x * 0.13 + l.y * 0.07);
+            const r = Math.min(near ? 34 : 24, l.r * (near ? 1 : 0.7)) * pulse;
+            this.lights.push({ x: sx, y: l.y + yOffset, r, a: near ? 0.85 : 0.55, color: near ? "rgba(90, 190, 255, 0.16)" : "rgba(90, 190, 255, 0.08)", parallax });
+          }
         }
       }
-    }
+    };
+    place(this.meta.lights, this.bg.width, 0.45, 0, false);
+    place(this.meta.groundLights, this.ground.width, 1, this.groundY, true);
   }
 
-  /** Posterise a canvas's alpha into a few levels with a Bayer 4x4 ordered dither. */
+  /** Posterise a canvas's alpha into a few levels, optionally with a Bayer 4x4 ordered dither. */
   private ditherAlpha(canvas: HTMLCanvasElement, levels: number, dither = true) {
     const c = canvas.getContext("2d");
     if (!c) return;
@@ -396,7 +410,7 @@ export class Mockup {
     ctx.save();
     for (let i = 0; i < 6; i += 1) {
       const x = ((i * 137 - cam * 0.3 + this.time * 0.05) % (VIEW_W + 200)) - 100;
-      const a = 0.16 + 0.06 * Math.sin(this.time / 90 + i);
+      const a = 0.07 + 0.03 * Math.sin(this.time / 90 + i);
       const g = ctx.createLinearGradient(x, 0, x + 60, VIEW_H);
       g.addColorStop(0, `rgba(150, 210, 255, ${a})`);
       g.addColorStop(0.7, `rgba(150, 210, 255, ${a * 0.4})`);
@@ -415,73 +429,50 @@ export class Mockup {
 
   private drawPlayer(cam: number) {
     const ctx = this.ctx;
-    const spr = this.side;
-    const w = spr.width;
-    const h = spr.height;
-    const x = Math.round(this.px - w / 2 - cam);
-    const y = Math.round(this.py - h);
+    const { w: cw, h: ch } = this.anim.cell;
     const moving = Math.abs(this.vx) > 0.3 && this.onGround;
-    const idleFront = this.idleT > 240;
+    const flip = this.dir < 0;
+
+    // Pick the sheet and frame.
+    let sheet = this.idleSheet;
+    let frame = Math.floor(this.time / 9) % this.anim.idle;
+    if (!this.onGround) {
+      sheet = this.jumpSheet;
+      if (this.vy < -3) frame = this.jumpT < 4 ? 1 : 2;
+      else if (this.vy < 1.5) frame = 3;
+      else frame = 4;
+    } else if (this.landT > 0) {
+      sheet = this.jumpSheet;
+      frame = 5;
+    } else if (moving) {
+      sheet = this.walkSheet;
+      frame = Math.floor(this.walkT / 4.2) % this.anim.walk;
+    }
+
+    const x = Math.round(this.px - cw / 2 - cam);
+    const y = Math.round(this.py - ch);
 
     // Lantern light: warm, flickering, brighter on a flare.
     const flick = 0.94 + 0.06 * Math.sin(this.time / 3) + 0.03 * Math.sin(this.time / 7);
     const flare = this.flare > 0 ? 1 + (this.flare / 40) * 0.8 : 1;
-    const headX = this.px - cam;
-    const headY = this.py - h + 10;
-    this.lights.push({ x: headX, y: headY, r: 105 * flick * flare, a: 1, color: `rgba(255, 190, 110, ${0.28 * flare})`, parallax: 1 });
+    const headY = this.py - 78 + (sheet === this.jumpSheet && (frame === 0 || frame === 5) ? 14 : 0);
+    this.lights.push({ x: this.px - cam + this.dir * 2, y: headY, r: 105 * flick * flare, a: 1, color: `rgba(255, 190, 110, ${0.28 * flare})`, parallax: 1 });
+
     // Contact shadow on the ground.
     ctx.fillStyle = "rgba(2, 6, 18, 0.35)";
     ctx.beginPath();
-    ctx.ellipse(this.px - cam, this.py + 1, 11, 3, 0, 0, Math.PI * 2);
+    ctx.ellipse(this.px - cam, this.feetY + 1, this.onGround ? 13 : 9, 3, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    if (idleFront) {
-      const f = this.front;
-      const bob = Math.round(Math.sin(this.time / 40));
-      ctx.drawImage(f, Math.round(this.px - f.width / 2 - cam), y + bob);
-      return;
-    }
-
-    const headEnd = 19;
-    const hip = 47;
-    const bob = moving ? Math.round(Math.abs(Math.sin(this.walkT / 5)) * -2) : Math.round(Math.sin(this.time / 40) * 1);
-    const squash = this.landT > 0 ? 2 : 0;
-    const flip = this.dir < 0;
-
-    const draw = (sy: number, sh: number, dx: number, dy: number, shear: number, alpha = 1, darken = false) => {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      const cx = x + w / 2;
-      ctx.translate(cx, 0);
-      if (flip) ctx.scale(-1, 1);
-      // Shear around the hip line so parts pivot from the body.
-      ctx.transform(1, 0, shear, 1, -shear * (y + hip), 0);
-      ctx.drawImage(spr, 0, sy, w, sh, -w / 2 + dx, y + sy + dy, w, sh);
-      if (darken) {
-        ctx.globalCompositeOperation = "source-atop";
-        ctx.fillStyle = "rgba(2, 6, 18, 0.35)";
-        ctx.fillRect(-w / 2 + dx, y + sy + dy, w, sh);
-      }
-      ctx.restore();
-    };
-
-    // Legs: two copies swinging in opposite phases read as a stride.
-    const legsH = h - hip;
-    if (moving) {
-      const swing = Math.sin(this.walkT / 5) * 0.45;
-      draw(hip, legsH, -1, bob + squash, -swing * 0.9, 1, true);
-      draw(hip, legsH, 1, bob + squash, swing);
-    } else if (!this.onGround) {
-      const tuck = this.vy < 0 ? -0.35 : 0.25;
-      draw(hip, legsH, -1, 0, tuck * 0.7, 1, true);
-      draw(hip, legsH, 1, 0, tuck);
+    ctx.save();
+    if (flip) {
+      ctx.translate(x + cw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, 0, y, cw, ch);
     } else {
-      draw(hip, legsH, 0, squash, 0);
+      ctx.drawImage(sheet, frame * cw, 0, cw, ch, x, y, cw, ch);
     }
-    // Torso and head, with a lean when moving or airborne.
-    const lean = moving ? 0.07 * Math.sign(this.vx) * this.dir : !this.onGround ? 0.1 : 0;
-    draw(headEnd, hip - headEnd, 0, bob + squash, lean);
-    draw(0, headEnd, 0, bob + squash + (moving ? Math.round(Math.sin(this.walkT / 5 + 1)) : 0), lean);
+    ctx.restore();
   }
 
   private drawParticles(cam: number, filter: (p: Particle) => boolean) {
@@ -519,7 +510,7 @@ export class Mockup {
       lc.fillStyle = rg;
       lc.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
     }
-    this.ditherAlpha(this.lightCanvas, 12, false);
+    this.ditherAlpha(this.lightCanvas, 16, true);
     const ctx = this.ctx;
     ctx.drawImage(this.lightCanvas, 0, 0);
     // Coloured glow, additive, posterised the same way.
@@ -535,7 +526,7 @@ export class Mockup {
       fx.fillStyle = rg;
       fx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
     }
-    this.ditherAlpha(this.fxCanvas, 6, false);
+    this.ditherAlpha(this.fxCanvas, 8, true);
     ctx.globalCompositeOperation = "lighter";
     ctx.drawImage(this.fxCanvas, 0, 0);
     ctx.globalCompositeOperation = "source-over";
@@ -544,49 +535,18 @@ export class Mockup {
   private drawForeground(cam: number) {
     const ctx = this.ctx;
     const fg = cam * 1.5;
-    // Painted trunks from the frame, spaced out along the road.
-    const period = 1040;
-    ctx.globalAlpha = 0.88;
-    for (let i = -1; i < 3; i += 1) {
-      const idx = Math.floor(fg / period) + i;
-      const base = idx * period - (fg % period);
-      const jitter = rnd(idx + 900) * 160;
-      ctx.drawImage(this.trunkL, Math.round(base + jitter), 0);
-      ctx.drawImage(this.trunkR, Math.round(base + jitter + 560 + rnd(idx + 901) * 160), 0);
-    }
-    ctx.globalAlpha = 1;
-    // Canopy silhouettes along the top, rim-lit by the blue haze.
-    const canopy = cam * 1.25;
-    for (let i = -1; i < 8; i += 1) {
-      const idx = Math.floor(canopy / 120) + i;
-      const x = idx * 120 - (canopy % 120) + rnd(idx + 700) * 40;
-      const rx = 40 + rnd(idx + 701) * 50;
-      const ry = 10 + rnd(idx + 702) * 20;
-      ctx.fillStyle = "#020a17";
-      ctx.beginPath();
-      ctx.ellipse(x, -6 + Math.sin(this.time / 90 + idx) * 2, rx, ry, 0, 0, Math.PI);
-      ctx.fill();
-      ctx.fillStyle = "#061426";
-      ctx.beginPath();
-      ctx.ellipse(x + rx * 0.3, -10 + Math.sin(this.time / 90 + idx) * 2, rx * 0.5, ry * 0.7, 0, 0, Math.PI);
-      ctx.fill();
-    }
-    // Foreground mushroom caps at the bottom edge.
-    const near = cam * 1.6;
-    for (let i = -1; i < 5; i += 1) {
-      const idx = Math.floor(near / 260) + i;
-      const x = idx * 260 - (near % 260) + rnd(idx + 600) * 100;
-      if (rnd(idx + 601) > 0.55) continue;
-      const w = 50 + rnd(idx + 602) * 50;
-      ctx.fillStyle = "#020a17";
-      ctx.beginPath();
-      ctx.ellipse(x, VIEW_H + 8, w / 2, 22, 0, Math.PI, 0);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(90, 190, 255, 0.45)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(x, VIEW_H + 8, w / 2 - 3, 20, 0, Math.PI * 1.15, Math.PI * 1.85);
-      ctx.stroke();
+    // Generated foreground trunk, spaced out along the road.
+    if (this.trunk) {
+      const period = 1100;
+      ctx.globalAlpha = 0.86;
+      for (let i = -1; i < 3; i += 1) {
+        const idx = Math.floor(fg / period) + i;
+        const base = idx * period - (fg % period) + 320 + rnd(idx + 900) * 200;
+        const scale = VIEW_H / this.trunk.height;
+        const w = Math.round(this.trunk.width * scale);
+        ctx.drawImage(this.trunk, Math.round(base), 0, w, VIEW_H);
+      }
+      ctx.globalAlpha = 1;
     }
   }
 
