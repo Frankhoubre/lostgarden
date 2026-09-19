@@ -17,6 +17,13 @@
     "hurt1.png": "hf_20260919_131922_22af67dd-79df-4118-a427-1d17d572fe6e.png",
     "rwalk1.png": "hf_20260919_132044_753de281-a98a-4bef-b0ca-890703d19e34.png",
     "rattack1.png": "hf_20260919_132044_bea2c0d5-b496-41ae-a739-7b0ff20065a7.png",
-    "rdie1.png": "hf_20260919_132045_29aa432b-9c5b-4623-aa1d-922819fbdb8c.png"
+    "rdie1.png": "hf_20260919_132045_29aa432b-9c5b-4623-aa1d-922819fbdb8c.png",
+    "machine1.png": "hf_20260919_140734_6e1d080b-57e9-4860-8136-2e0babaa7ae6.png",
+    "platforms1.png": "hf_20260919_140734_68efe411-045b-4324-95f4-073d8e6cfdd5.png",
+    "gate1.png": "hf_20260919_140734_0cf17529-de41-4fb0-8587-099a694066ed.png",
+    "mwalk1.png": "hf_20260919_140857_efd5eafa-3e6c-4862-9908-8561b9333989.png",
+    "mstomp1.png": "hf_20260919_140857_cc95f840-90c5-4969-bc1d-eb535316598b.png",
+    "mblast1.png": "hf_20260919_140857_ca4c3085-ee0d-4767-95c9-5ec5c12edb98.png",
+    "mdie1.png": "hf_20260919_140857_27645217-de79-4cc3-bb62-4183ca68181a.png"
   }
 }

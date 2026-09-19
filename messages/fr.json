@@ -739,6 +739,7 @@
     "controls": [
       "Flèches ou Q / D : se déplacer",
       "Z, W, Espace ou Haut : sauter",
+      "Bas + saut : descendre d'une plateforme",
       "X, K ou Entrée : lancer la lueur",
       "M : son"
     ],
@@ -748,10 +749,10 @@
     "unmute": "Activer le son",
     "loreTitle": "Ce que tu vas croiser",
     "lore": [
-      "Maquette jouable : la forêt des champignons bleus, Lanterne, et des Reptiliens pâles qui rôdent.",
-      "Ils te chargent, se cabrent avant de griffer, et tombent au bout de quatre lueurs.",
-      "Trois coups et l'armure retombe dans la mousse. Elle se relève un peu plus loin.",
-      "Lanterne ne parle jamais."
+      "Un niveau complet dans la forêt des champignons bleus : plateformes, trois meutes de Reptiliens pâles, et la Machine au bout du chemin.",
+      "Les Reptiliens se cabrent avant de griffer : saute en arrière. Quatre lueurs et ils tombent.",
+      "La Machine piétine (des éclats courent au sol, saute-les) et tire un rayon depuis ses yeux (baisse-toi derrière une plateforme ou saute). Vingt-huit lueurs pour l'abattre.",
+      "Trois coups reçus et l'armure retombe dans la mousse. Elle se relève au dernier point de passage. Lanterne ne parle jamais."
     ],
     "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur."
   }

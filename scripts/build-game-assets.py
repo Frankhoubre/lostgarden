@@ -533,3 +533,107 @@ def build_generated_reptile():
 
 if __name__ == "__main__" and "--generated" in sys.argv:
     build_generated_reptile()
+
+
+def components(path: Path, min_size=400):
+    """All connected components of a transparent sheet, left to right, as cropped RGBA images."""
+    from scipy import ndimage
+
+    img = Image.open(path).convert("RGBA")
+    a = np.asarray(img).copy()
+    solid = a[..., 3] > 120
+    labels, count = ndimage.label(ndimage.binary_dilation(solid, iterations=8))
+    parts = []
+    for lab in range(1, count + 1):
+        comp = (labels == lab) & solid
+        if comp.sum() < min_size:
+            continue
+        ys, xs = np.where(comp)
+        fa = a.copy()
+        fa[..., 3] = np.where(comp, fa[..., 3], 0)
+        parts.append((int(xs.min()), Image.fromarray(fa, "RGBA").crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))))
+    parts.sort(key=lambda p: p[0])
+    return [p[1] for p in parts]
+
+
+def to_pixel(img: Image.Image, scale: float, colors: int, palette_img=None) -> Image.Image:
+    """Premultiplied downscale, hard alpha, palette quantisation."""
+    w = max(1, int(round(img.width * scale)))
+    h = max(1, int(round(img.height * scale)))
+    arr = np.asarray(img).astype(float)
+    alpha = arr[..., 3:4] / 255.0
+    pm = np.concatenate([arr[..., :3] * alpha, arr[..., 3:4]], axis=2)
+    small = Image.fromarray(pm.astype(np.uint8), "RGBA").resize((w, h), Image.LANCZOS)
+    p = np.asarray(small).astype(float)
+    al = p[..., 3:4] / 255.0
+    rgb = np.clip(np.where(al > 0, p[..., :3] / np.maximum(al, 1e-3), 0), 0, 255).astype(np.uint8)
+    src = Image.fromarray(rgb, "RGB")
+    q = src.quantize(palette=palette_img, dither=Image.Dither.NONE) if palette_img is not None else src.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    out = np.zeros((h, w, 4), dtype=np.uint8)
+    out[..., :3] = np.asarray(q.convert("RGB"))
+    out[..., 3] = np.where(p[..., 3] > 110, 255, 0)
+    return Image.fromarray(out, "RGBA")
+
+
+def build_generated_level():
+    # Platforms: four pieces, scaled so the small chunk is about 72px wide.
+    parts = components(GEN / "platforms1.png")
+    print("platform parts:", len(parts), [p.size for p in parts])
+    ref_w = parts[0].width
+    scale = 78 / ref_w
+    meta = {}
+    names = ["small", "wide", "log", "ledge"]
+    for name, part in zip(names, parts):
+        px = to_pixel(part, scale, 24)
+        px.save(OUT / f"platform-{name}.png", optimize=True)
+        # Walkable top: first row where at least 60% of the width is solid.
+        a = np.asarray(px)
+        cover = (a[..., 3] > 0).mean(axis=1)
+        top = int(np.argmax(cover > 0.6))
+        meta[name] = {"w": px.width, "h": px.height, "top": top}
+    # Gate: about 150px tall.
+    gate = Image.open(GEN / "gate1.png").convert("RGBA")
+    gate = gate.crop(gate.getbbox())
+    gpx = to_pixel(gate, 150 / gate.height, 36)
+    gpx.save(OUT / "gate.png", optimize=True)
+    meta["gate"] = {"w": gpx.width, "h": gpx.height}
+    (OUT / "level-assets.json").write_text(json.dumps(meta))
+    print("level assets", meta)
+
+
+def build_generated_machine():
+    """The Machine boss: base sprite plus walk, stomp, blast and death strips."""
+    base_parts = components(GEN / "machine1.png")
+    base = max(base_parts, key=lambda p: p.width * p.height)  # drop the knight drawn for scale
+    ba = np.asarray(base)
+    mask = ba[..., 3] > 120
+    pal_src = Image.fromarray(ba[mask][:, :3].reshape(1, -1, 3), "RGB")
+    palette_img = pal_src.quantize(colors=40, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    target_h = 176
+    scale = target_h / base.height
+    cell_w, cell_h = 250, 190
+    meta = {"cell": {"w": cell_w, "h": cell_h}}
+    sheets = {"walk": ("mwalk1.png", 4), "stomp": ("mstomp1.png", 4), "blast": ("mblast1.png", 3), "die": ("mdie1.png", 5)}
+    for name, (src, n) in sheets.items():
+        path = GEN / src
+        if not path.exists():
+            print("missing", src)
+            continue
+        frames = slice_equal(path, n)
+        # Scale from the walk sheet's tallest frame so all strips share one scale.
+        if name == "walk":
+            scale = target_h / max(f.height for f in frames)
+        count = build_strip(name, frames, scale, cell_w, cell_h, palette_img, prefix="machine")
+        meta[name] = count
+    idle = to_pixel(base, target_h / base.height, 40, palette_img)
+    strip = Image.new("RGBA", (cell_w, cell_h), (0, 0, 0, 0))
+    strip.paste(idle, ((cell_w - idle.width) // 2, cell_h - idle.height), idle)
+    strip.save(OUT / "machine-idle.png", optimize=True)
+    meta["idle"] = 1
+    (OUT / "machine-anim.json").write_text(json.dumps(meta))
+    print("machine", meta, idle.size)
+
+
+if __name__ == "__main__" and "--generated" in sys.argv:
+    build_generated_level()
+    build_generated_machine()
