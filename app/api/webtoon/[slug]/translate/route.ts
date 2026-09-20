@@ -1,3 +1,4 @@
+import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
@@ -61,9 +62,11 @@ export async function POST(request: Request, { params }: RouteContext) {
   );
 
   try {
-    const result = await completeJson<{ translations?: Record<string, Partial<Record<Locale, string>>> }>({ system, user });
+    let cost = 0;
+    const result = await completeJson<{ translations?: Record<string, Partial<Record<Locale, string>>> }>({ system, user, onCost: (usd) => { cost += usd; } });
+    void recordCost({ idToken: identity.idToken, slug, usd: cost, kind: "translate" });
     const translations = result.translations ?? {};
-    return Response.json({ translations, count: Object.keys(translations).length });
+    return Response.json({ translations, count: Object.keys(translations).length, cost_usd: cost });
   } catch (error) {
     const message = error instanceof Error ? error.message : "translation failed";
     return Response.json({ error: message }, { status: 502 });

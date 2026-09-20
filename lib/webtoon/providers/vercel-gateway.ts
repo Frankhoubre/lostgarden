@@ -22,6 +22,8 @@ export type GatewayImage = {
   model: string;
   media_type: string;
   base64: string;
+  /** What the gateway billed for this image, in USD (0 when not reported). */
+  cost_usd: number;
 };
 
 export type GatewayOptions = {
@@ -87,10 +89,12 @@ export async function generateWithGateway(
   const json = (await response.json()) as {
     data?: { b64_json?: string; url?: string }[];
     model?: string;
+    providerMetadata?: { gateway?: { cost?: string | number } };
   };
   const first = json.data?.[0];
   if (!first?.b64_json) {
     throw new Error("AI Gateway returned no image data");
   }
-  return { model: json.model ?? model, media_type: "image/png", base64: first.b64_json };
+  const cost = Number(json.providerMetadata?.gateway?.cost ?? 0);
+  return { model: json.model ?? model, media_type: "image/png", base64: first.b64_json, cost_usd: Number.isFinite(cost) ? cost : 0 };
 }

@@ -23,6 +23,8 @@ export async function completeJson<T>(input: {
    * the answer comes back empty or cut ("length" with 0 chars observed).
    */
   reasoning?: "none" | "low" | "medium" | "high";
+  /** Receives what the gateway billed for the call (and its repair), in USD. */
+  onCost?: (usd: number) => void;
 }): Promise<T> {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error("AI_GATEWAY_API_KEY is not set");
@@ -46,13 +48,15 @@ export async function completeJson<T>(input: {
     const detail = await response.text();
     throw new Error(`AI Gateway ${response.status}: ${detail.slice(0, 500)}`);
   }
-  const json = (await response.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[] };
+  const json = (await response.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[]; usage?: { cost?: number | string } };
+  const billed = Number(json.usage?.cost ?? 0);
+  if (Number.isFinite(billed) && billed > 0) input.onCost?.(billed);
   const choice = json.choices?.[0];
   const content = choice?.message?.content ?? "";
   if (choice?.finish_reason && choice.finish_reason !== "stop") {
     console.warn(`[webtoon] gateway text answer ended with ${choice.finish_reason} after ${content.length} chars`);
   }
-  return parseJsonAnswer<T>(content, apiKey, baseUrl);
+  return parseJsonAnswer<T>(content, apiKey, baseUrl, input.onCost);
 }
 
 const REPAIR_MODEL = "anthropic/claude-haiku-4.5";
@@ -62,7 +66,7 @@ const REPAIR_MODEL = "anthropic/claude-haiku-4.5";
  * broken quote or a stray comma; rather than losing the whole call, a small
  * model is asked once to return the same JSON, valid.
  */
-async function parseJsonAnswer<T>(content: string, apiKey: string, baseUrl: string): Promise<T> {
+async function parseJsonAnswer<T>(content: string, apiKey: string, baseUrl: string, onCost?: (usd: number) => void): Promise<T> {
   const extract = (text: string) => /\{[\s\S]*\}/.exec(text.replace(/^```(?:json)?\s*|\s*```$/g, ""))?.[0] ?? null;
   const first = extract(content);
   if (!first) throw new Error("AI Gateway returned no JSON");
@@ -84,7 +88,9 @@ async function parseJsonAnswer<T>(content: string, apiKey: string, baseUrl: stri
       }),
     });
     if (!response.ok) throw new Error(`AI Gateway returned invalid JSON (${reason}) and the repair failed (${response.status})`);
-    const repaired = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+    const repaired = (await response.json()) as { choices?: { message?: { content?: string } }[]; usage?: { cost?: number | string } };
+    const repairBilled = Number(repaired.usage?.cost ?? 0);
+    if (Number.isFinite(repairBilled) && repairBilled > 0) onCost?.(repairBilled);
     const second = extract(repaired.choices?.[0]?.message?.content ?? "");
     if (!second) throw new Error(`AI Gateway returned invalid JSON (${reason}) and the repair returned none`);
     try {

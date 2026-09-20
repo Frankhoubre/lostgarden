@@ -4,6 +4,7 @@ import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { recordCost } from "@/lib/webtoon/cost-server";
 import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
@@ -73,6 +74,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       model: body.model,
       resolveReference: referenceAsDataUrl,
     });
+    void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "images" });
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({
       idToken: identity.idToken,
@@ -85,6 +87,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       model: image.model,
       ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }),
       generated_at: new Date().toISOString(),
+      cost_usd: image.cost_usd,
       generation_prompt: panel.generation_prompt,
       negative_constraints: panel.negative_constraints,
       visual_references: panel.visual_references,
