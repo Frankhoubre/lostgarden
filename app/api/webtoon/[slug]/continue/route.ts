@@ -191,10 +191,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       const adaptedUntil = Math.max(0, ...current.map((p) => p.source_time_end ?? 0));
       // Fewer frames than panels: the writer must have room to decompose an event into several panels.
       // An action sequence gets far fewer frames per batch, so every second of it is told in several panels.
+      // Inside a bounded span (a rewrite), the frames left are spread over the panels left to write, so
+      // the whole count lands on the span instead of running out of frames after the first batch.
       const perPanel = pace === "action" ? 0.4 : pace === "calm" ? 1 : 0.75;
-      const frames = studioFilmFrames()
-        .filter((f) => f.seconds > adaptedUntil && (until === null || f.seconds <= until))
-        .slice(0, Math.min(MAX_FRAMES, Math.max(2, Math.ceil(batch * perPanel))));
+      const available = studioFilmFrames().filter((f) => f.seconds > adaptedUntil && (until === null || f.seconds <= until));
+      const share = until === null ? Math.max(2, Math.ceil(batch * perPanel)) : Math.max(1, Math.ceil((available.length * batch) / Math.max(batch, count)));
+      const frames = available.slice(0, Math.min(MAX_FRAMES, share));
       if (!frames.length) {
         if (!created.length) return Response.json({ error: "Fin de l'épisode : il n'y a plus d'image du film après la dernière case" }, { status: 400 });
         break;
