@@ -3503,6 +3503,52 @@ h3 {
   white-space: nowrap;
 }
 
+.studio-thumb-item {
+  position: relative;
+}
+
+.studio-thumb-check {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.35rem;
+  z-index: 2;
+  display: flex;
+  padding: 0.15rem;
+  border-radius: 0.3rem;
+  background: rgba(2, 4, 9, 0.6);
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.studio-thumb-item:hover .studio-thumb-check,
+.studio-thumb-item.is-checked .studio-thumb-check {
+  opacity: 1;
+}
+
+.studio-thumb-check input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #7ddfff;
+  cursor: pointer;
+}
+
+.studio-thumb-item.is-checked .studio-thumb {
+  outline: 2px solid rgba(125, 223, 255, 0.9);
+  outline-offset: 1px;
+}
+
+.studio-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid rgba(125, 223, 255, 0.35);
+  border-radius: 0.6rem;
+  background: rgba(125, 223, 255, 0.08);
+}
+
 .studio-gear {
   position: relative;
 }
@@ -3628,6 +3674,8 @@ h3 {
 }
 
 .studio-lightbox {
+  /* Tailwind's preflight zeroes every margin, dialog included: put the modal back in the middle. */
+  margin: auto;
   border: 0;
   padding: 0;
   background: transparent;

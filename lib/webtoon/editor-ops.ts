@@ -68,6 +68,14 @@ export function deletePanel(panels: WebtoonPanel[], id: string): WebtoonPanel[] 
   return renumber(panels.filter((p) => p.panel_id !== id));
 }
 
+/** Delete several panels at once; the strip always keeps at least one. */
+export function deletePanels(panels: WebtoonPanel[], ids: Iterable<string>): WebtoonPanel[] {
+  const gone = new Set(ids);
+  const kept = panels.filter((p) => !gone.has(p.panel_id));
+  if (!kept.length) return panels.slice(0, 1).map((p, i) => ({ ...p, order: i + 1 }));
+  return renumber(kept);
+}
+
 /** Insert an empty panel after `id`, inheriting beat, location and background. */
 export function insertAfter(panels: WebtoonPanel[], id: string): WebtoonPanel[] {
   const index = panels.findIndex((p) => p.panel_id === id);

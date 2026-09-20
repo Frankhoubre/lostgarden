@@ -13,6 +13,7 @@ import { attachedFrames, composePanel, needsComposition, panelForGeneration } fr
 import {
   appendFromFrame,
   deletePanel,
+  deletePanels,
   insertAfter,
   markForRegeneration,
   mergeWithNext,
@@ -159,6 +160,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
+  /** Panels ticked in the list for a batch action (regenerate, translate, delete). */
+  const [checked, setChecked] = useState<Set<string>>(() => new Set());
+  const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
   /** Measured image durations, so the estimate learns from the real speed. */
   const imageTimes = useRef<number[]>([]);
@@ -439,6 +443,58 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     patch({ characters, image: selected.image.status === "generated" ? { ...selected.image, status: "stale" } : selected.image });
   };
 
+  const toggleChecked = (id: string, shiftKey: boolean) => {
+    // Read the anchor now: the state updater runs later, once the anchor has moved.
+    const anchor = shiftKey ? lastChecked.current : null;
+    lastChecked.current = id;
+    setChecked((current) => {
+      const next = new Set(current);
+      if (anchor) {
+        const a = panels.findIndex((p) => p.panel_id === anchor);
+        const b = panels.findIndex((p) => p.panel_id === id);
+        if (a >= 0 && b >= 0) {
+          for (const p of panels.slice(Math.min(a, b), Math.max(a, b) + 1)) next.add(p.panel_id);
+          return next;
+        }
+      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const checkedPanels = panels.filter((p) => checked.has(p.panel_id));
+
+  const regenerateChecked = async () => {
+    if (busy || !checkedPanels.length) return;
+    const withText = checkedPanels.filter((p) => p.description.trim() || p.generation_prompt.trim());
+    if (!withText.length) {
+      notify("Aucune des cases cochées n'a de description");
+      return;
+    }
+    if (!window.confirm(`Regénérer ${withText.length} case${withText.length > 1 ? "s" : ""} (${withText.map((p) => p.panel_id).join(", ")}) ?`)) return;
+    setBusy(true);
+    stopBatch.current = false;
+    try {
+      const ok = await runImages(withText);
+      notify(`${ok}/${withText.length} image${withText.length > 1 ? "s" : ""} regénérée${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
+    } finally {
+      setJob(null);
+      setBusy(false);
+    }
+  };
+
+  const deleteChecked = () => {
+    if (!checkedPanels.length) return;
+    if (!window.confirm(`Supprimer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${checkedPanels.map((p) => p.panel_id).join(", ")}) ?`)) return;
+    const next = deletePanels(panels, checked);
+    setPanels(next);
+    setChecked(new Set());
+    if (selected && checked.has(selected.panel_id)) select(next[Math.min(index, next.length - 1)]?.panel_id ?? null);
+    onAutosave?.();
+    notify(`${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} supprimée${checkedPanels.length > 1 ? "s" : ""}`);
+  };
+
   const copyPrompt = () => {
     if (!selected) return;
     navigator.clipboard.writeText(JSON.stringify(buildGenerationRequest(panelForGeneration(selected, script), "openai/gpt-image-2.5-sunburst", library), null, 2)).then(() => notify("Requête copiée"));
@@ -481,6 +537,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 {job.deadline > now ? `≈ ${remaining(job.deadline - now)} restantes` : "encore quelques secondes…"}
               </span>
             </div>
+          ) : checked.size ? (
+            <div className="studio-selection" role="toolbar" aria-label="Cases cochées">
+              <span className="text-xs text-ivory/85"><b>{checked.size}</b> case{checked.size > 1 ? "s" : ""} cochée{checked.size > 1 ? "s" : ""}</span>
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void regenerateChecked()} disabled={busy} title="Regénère les cases cochées, dans l'ordre de la bande">Regénérer</button>
+              <button type="button" className="webtoon-mini" onClick={() => void translatePanels(checkedPanels, false)} disabled={busy} title="Remplit les langues vides des cases cochées">Traduire</button>
+              <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
+              <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
+              <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
+            </div>
           ) : (
             <>
               <button type="button" className="webtoon-mini" onClick={generatePending} disabled={busy || !pending} title="Génère chaque case sans image ou dont le prompt a changé">
@@ -494,11 +559,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
         <ol>
           {panels.map((panel) => (
-            <li key={panel.panel_id}>
+            <li key={panel.panel_id} className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""}`}>
+              <label className="studio-thumb-check" title="Cocher pour une action en lot (Maj+clic : plage)" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={checked.has(panel.panel_id)}
+                  onChange={() => undefined}
+                  onClick={(e) => toggleChecked(panel.panel_id, e.shiftKey)}
+                  aria-label={`Cocher la case ${panel.panel_id}`}
+                />
+              </label>
               <button
                 type="button"
                 className={`studio-thumb ${panel.panel_id === selected.panel_id ? "is-active" : ""} ${job?.current === panel.panel_id ? "is-generating" : ""} ${job?.queue.includes(panel.panel_id) ? "is-queued" : ""}`}
-                onClick={() => select(panel.panel_id)}
+                onClick={(e) => (e.shiftKey ? toggleChecked(panel.panel_id, true) : select(panel.panel_id))}
                 style={{ background: panel.background === "white" ? "#f6f4ef" : "#020409" }}
               >
                 {panel.image.src && panel.image.status !== "missing" ? (
