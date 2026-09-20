@@ -119,7 +119,8 @@ export type Dialogue = {
 export type Caption = {
   text: LocalizedText;
   anchor: Anchor;
-  style: "narration" | "location" | "time";
+  /** `title` is a title card: centred, large, on a plain background, no image behind. */
+  style: "narration" | "location" | "time" | "title";
 };
 
 export type Sfx = {
