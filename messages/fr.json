@@ -738,15 +738,18 @@
     "breadcrumbHome": "Accueil",
     "breadcrumbGame": "Jeu",
     "headline": "Le Serment de la Lanterne",
-    "lead": "Un jeu de plateforme rétro sous la terre. Lanterne, douzième des treize chevaliers, marche vers Rose. Deux coups et l'armure tombe. Sauts engagés, lueurs lancées, coffres, et trois boss tirés de la série.",
+    "lead": "Un jeu de plateforme rétro sous la terre, dans l'univers de Lost Garden. Lanterne, douzième des treize chevaliers, traverse une grande carte en huit zones : la forêt bleue, les corniches, les racines, le chemin profond, la taverne de Serrure, le cimetière des machines. Roulade, lueur chargée, lumière à cacher, et la Machine au bout.",
     "start": "Touche pour jouer",
     "controlsTitle": "Commandes",
     "controls": [
       "Flèches ou Q / D : se déplacer",
-      "Z, W, Espace ou Haut : sauter",
+      "Z, W, Espace ou Haut : sauter (relâche tôt pour un petit saut)",
+      "Bas : s'accroupir, passe sous le rayon de la Machine",
       "Bas + saut : descendre d'une plateforme",
-      "X, K ou Entrée : lancer la lueur",
-      "Bas + X : lancer bas, au ras de la mousse",
+      "X, K ou Entrée : lancer la lueur (accroupi ou Bas : lancer bas)",
+      "Maintenir X après un lancer, puis relâcher : lueur chargée, 3 dégâts, traverse",
+      "C, L ou Maj : roulade, invincible pendant la roulade",
+      "Echap ou P : pause et options (musique, effets, langue)",
       "M : son"
     ],
     "touchHint": "Sur téléphone, utilise les boutons à l'écran.",
@@ -755,11 +758,14 @@
     "unmute": "Activer le son",
     "loreTitle": "Ce que tu vas croiser",
     "lore": [
-      "Le chemin de l'épisode 1 : la forêt des champignons bleus, la machine borgne au-dessus des corniches, le gong des pèlerins, les racines de l'Arbre-Source, la taverne de Serrure, puis l'arène de la Machine et la porte.",
-      "Les Reptiliens se cabrent avant de griffer : saute en arrière. Quatre lueurs et ils tombent. Les scarabées lumineux rampent au sol : lance bas ou saute dessus. Un sur trois laisse une lueur qui répare l'armure.",
-      "La machine borgne plane, se recroqueville, puis s'écrase : monte sur une corniche, redescends et frappe-la pendant qu'elle est sonnée. La mousse tremble avant qu'une racine ne perce : ne t'arrête pas dessus.",
-      "Les pèlerins masqués frappent leur gong et Serrure t'accueille sous son toit : l'armure se répare, le point de passage est pris. La Machine piétine et tire un rayon ; à mi-vie elle appelle les scarabées. Vingt-huit lueurs pour l'abattre.",
-      "Trois coups reçus et l'armure retombe dans la mousse. Elle se relève au dernier point de passage. Six lys pâles sont cachés sur le chemin. Lanterne ne parle jamais."
+      "Une seule grande carte, huit zones qui s'enchaînent : l'Eveil, les Corniches, la Descente des Racines, le Gong des Pèlerins, le Chemin Profond, la Taverne de Serrure, le Cimetière des Machines, l'Arène.",
+      "La Meute : des masses-loups de cendre qui dorment près des chemins profonds et se jettent sur toute lumière. Accroupi, ta lanterne se cache : on peut passer. Une lueur chargée sur une bête endormie frappe deux fois plus fort.",
+      "Les Dormants : cocoonés dans les racines. Un coup ou une lumière qui traîne les réveille, et ils sont lents mais durs. Les papillons de cendre volent vers ta lanterne. Les scarabées rampent au sol : lance bas ou saute dessus.",
+      "Les Écaillés observent depuis l'ombre et s'effacent quand on approche : ils ne sont pas des ennemis. Les méduses polies du gouffre servent de plateformes. Les racines de l'Arbre-Source percent la mousse après un tremblement.",
+      "Le gong des pèlerins et la taverne de Serrure réparent l'armure et servent de point de passage. Chez Serrure, trois lys valent un coeur. La Machine, au bout du cimetière, piétine, tire un rayon et appelle les scarabées à mi-vie.",
+      "Au cimetière des machines, un colosse s'éveille : c'est une course. Cours sans te retourner, saute les murets et les gouffres, évite ses griffes qui s'abattent devant toi, et laisse-toi tomber dans l'arène où il ne peut pas suivre. La Machine, elle, t'y attend.",
+      "Echap ouvre les options en jeu : musique, effets, langue (français ou anglais), commandes. Trois coups reçus et l'armure retombe dans la mousse. Lanterne ne parle jamais.",
+      "La bande-son est celle de la série, composée par Frank Houbre : Ash Lantern Prayer dans la forêt, Song of the Empty Sky dans les racines, The Giant and the Knight sur le chemin profond et pendant la course, The Knight's Lullaby chez Serrure, Inexorable Ascent au cimetière, Clockwork Requiem face à la Machine."
     ],
     "credits": "Un jeu original pour l'anime Lost Garden de Frank Houbre. Sans téléchargement, sans compte, directement dans le navigateur.",
     "gate": {
@@ -769,7 +775,8 @@
       "loading": "La lanterne s'allume…",
       "hint": "Le jeu est gratuit, sans téléchargement. Ton compte garde ta place parmi les voyageurs.",
       "welcome": "Bienvenue, {name}. La forêt des champignons bleus t'attend."
-    }
+    },
+    "options": "Options"
   },
   "webtoon": {
     "breadcrumbHome": "Accueil",

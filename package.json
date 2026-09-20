@@ -8,7 +8,8 @@
     "build": "npm run build:press && next build",
     "start": "next start",
     "lint": "eslint",
-    "check:copy": "node scripts/check-no-em-dash.mjs"
+    "check:copy": "node scripts/check-no-em-dash.mjs",
+    "playtest": "node scripts/playtest.mjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright-core": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
