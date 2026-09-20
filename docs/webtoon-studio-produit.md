@@ -30,7 +30,7 @@ Ce qui est spécifique à Lost Garden : l'analyse et le plan de la première min
 
 ## Où le produit doit vivre
 
-**Dans ScreenWeaver**, pas sur lostgarden.world. ScreenWeaver a déjà les comptes, les projets, les crédits (`lib/credits`, un crédit = 0,005 $ de coût fournisseur, calcul de coût par modèle), l'import FDX et l'export PDF (`docs/IMPORT_EXPORT.md`), les entités personnages et lieux avec fiches et moodboards, la génération d'images par le Gateway et un canvas de storyboard. Le webtoon y devient une **sortie de plus d'un projet** : un projet ScreenWeaver est déjà « une histoire », il lui manque « le webtoon de cette histoire ». Le moteur de ce dépôt se copie dans `lib/webtoon` de ScreenWeaver ; les routes prennent un identifiant de projet à la place du slug ; Firestore range les cases sous le projet.
+**Un produit à part entière, indépendant**, sans lien avec ScreenWeaver ni avec lostgarden.world (décision de Frank, 20 septembre 2026). Concrètement : une application Next.js dédiée dans son propre dépôt, son propre projet Firebase (Auth Google et e-mail, Firestore, Storage, plan Blaze), son propre projet Vercel avec la clé du Gateway, son nom et son domaine. Le moteur de ce dépôt (`lib/webtoon`, les routes de génération, l'éditeur, le lecteur) s'y copie tel quel ; les crédits et l'abonnement reprennent le modèle d'Imaginode (Stripe, abonnement plus recharges, coût affiché avant chaque génération), qui est déjà à Frank.
 
 Lost Garden garde son studio privé comme premier client et comme banc d'essai, et son lecteur public reste la vitrine.
 
@@ -38,15 +38,15 @@ Lost Garden garde son studio privé comme premier client et comme banc d'essai, 
 
 ### 1. Projets et données (fondation)
 
-- Une collection `webtoons/{projectId}` : titre, style choisi, langues, source (`video`, `screenplay`, `scratch`), état. Sous-collections : `panels` (ou une chaîne JSON comme aujourd'hui tant que la bande reste sous 1 Mo), `published`, `library`, `sources`.
+- Une collection `projects/{projectId}` : propriétaire, titre, style choisi, langues, source (`video`, `screenplay`, `scratch`), état. Sous-collections : `panels` (ou une chaîne JSON comme aujourd'hui tant que la bande reste sous 1 Mo), `published`, `library`, `sources`.
 - Règles Firestore et Storage par propriétaire du projet (plus de liste blanche).
-- Les routes `generate`, `continue`, `translate`, `asset` reçoivent `projectId`, vérifient l'appartenance, débitent les crédits avant d'appeler le Gateway (coût réel d'une case en 2k : environ 0,20 $ ; d'une fiche : 0,20 $ ; d'un appel écrivain : 0,05 à 0,30 $ selon le nombre d'images du film envoyées).
+- Les routes `generate`, `continue`, `translate`, `asset` reçoivent `projectId`, vérifient l'appartenance, débitent les crédits avant d'appeler le Gateway (coût réel d'une case en 2k : environ 0,20 $ ; d'une fiche : 0,20 $ ; d'un appel écrivain : 0,05 à 0,30 $ selon le nombre d'images du film envoyées). Comptes, abonnement et crédits : Firebase Auth et Stripe, sur le modèle d'Imaginode.
 - Le registre de scripts en code (`scripts.ts`) disparaît : un projet est ses données.
 
 ### 2. Les trois points de départ
 
 - **Vidéo.** Envoi du fichier, extraction d'une image toutes les 5 secondes **dans le navigateur** (balise vidéo et canvas, pas de ffmpeg serveur), envoi des images dans Storage, sous-titres si fournis. L'écrivain actuel fonctionne déjà sur ces images.
-- **Scénario.** Import FDX ou PDF avec le pipeline d'import de ScreenWeaver, ou texte collé. L'écrivain reçoit le scénario seul : il faut lui apprendre à découper sans images (le brief actuel est conçu pour ça, l'analyse peut porter `time: null` et `frames: []`).
+- **Scénario.** Import PDF, FDX (XML de Final Draft, simple à lire), Fountain ou texte collé, avec un analyseur à écrire dans le produit. L'écrivain reçoit le scénario seul : il faut lui apprendre à découper sans images (le brief actuel est conçu pour ça, l'analyse peut porter `time: null` et `frames: []`).
 - **De zéro.** Un projet vide avec l'éditeur d'histoire ; l'écrivain travaille scène par scène.
 
 ### 3. Le style, fixé par projet
@@ -59,7 +59,6 @@ Lost Garden garde son studio privé comme premier client et comme banc d'essai, 
 
 - Éditeur d'histoire simple (chapitres, scènes, texte), avec un assistant qui propose le découpage en temps forts.
 - Bibliothèque de références comme aujourd'hui, étendue aux **objets** (`kind: "object"`, déjà prévu dans le schéma), avec les prompts prédéfinis de fiche : tour complet fond blanc plus expressions pour un personnage, illustration large pour un lieu, vue sur fond blanc pour un objet. Verrou de design obligatoire avant génération, réécrit en anglais par le modèle si l'utilisateur l'écrit dans sa langue.
-- Import des entités ScreenWeaver existantes du projet : un personnage ScreenWeaver devient une entrée de la bibliothèque webtoon.
 
 ### 5. Génération, lettrage, publication
 
@@ -69,8 +68,8 @@ Lost Garden garde son studio privé comme premier client et comme banc d'essai, 
 
 ## Décisions à prendre
 
-1. **Le produit dans ScreenWeaver** (recommandé) ou ailleurs (Imaginode a aussi les crédits et le Gateway, mais pas l'histoire ni les entités).
-2. **Tarif** : crédits par case, par fiche, par appel écrivain, sur la grille de ScreenWeaver.
+1. **Nom et domaine** du produit, et le nom du dépôt.
+2. **Tarif** : abonnement et crédits par case, par fiche, par appel écrivain.
 3. **Langues** du produit au départ (le studio actuel gère fr, en, ja, ko).
 4. **Styles** à valider en premier : commencer par deux ou trois, testés sur de vraies planches.
 
