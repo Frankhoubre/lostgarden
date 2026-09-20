@@ -1,7 +1,7 @@
 import { REFERENCE_LIBRARY } from "@/lib/webtoon/references";
 import { EP1_OPENING_ANALYSIS } from "@/lib/webtoon/sources/ep1-opening.analysis";
 import filmFrames from "@/lib/webtoon/sources/ep1.film-frames.json";
-import filmFramesDense from "@/lib/webtoon/sources/ep1.film-frames-2s.json";
+import filmFramesDense from "@/lib/webtoon/sources/ep1.film-frames-1s.json";
 import screenplay from "@/lib/webtoon/sources/ep1.screenplay.json";
 import lieux from "@/lib/webtoon/sources/bible-lieux.json";
 import dreamina from "@/lib/webtoon/sources/fiches-dreamina.json";
@@ -214,9 +214,9 @@ export function studioFilmFrames(): StudioFrame[] {
 }
 
 /**
- * One frame every two seconds, for the writer: a gesture of three seconds
- * (a pendant taken out, opened, thrown) does not exist in the five-second
- * grid, and what no frame shows never gets a panel.
+ * One frame every second, for the writer and the film tab: a gesture of
+ * three seconds (a pendant taken out, opened, thrown) does not exist in the
+ * five-second grid, and what no frame shows never gets a panel.
  */
 export function studioFilmFramesDense(): StudioFrame[] {
   return (filmFramesDense as { src: string; seconds: number }[]).map((frame) => ({ ...frame, label: tc(frame.seconds) }));

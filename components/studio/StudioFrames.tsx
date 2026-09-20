@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
-import { STUDIO_ANALYSIS, studioFilmFrames } from "@/lib/webtoon/studio-assets";
+import { STUDIO_ANALYSIS, studioFilmFrames, studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
 
 type StudioFramesProps = {
@@ -18,7 +18,9 @@ type StudioFramesProps = {
  */
 export function StudioFrames({ panels, onCreatePanel }: StudioFramesProps) {
   const [open, setOpen] = useState<{ src: string; label: string; seconds: number } | null>(null);
-  const frames = studioFilmFrames();
+  /** One frame per second (what the writer reads) or one every five seconds (lighter to scan). */
+  const [dense, setDense] = useState(true);
+  const frames = dense ? studioFilmFramesDense() : studioFilmFrames();
   const adaptedUntil = useMemo(() => Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)), [panels]);
   const shotFrames = STUDIO_ANALYSIS.shots.filter((shot) => shot.frames.length);
 
@@ -40,10 +42,18 @@ export function StudioFrames({ panels, onCreatePanel }: StudioFramesProps) {
       </section>
 
       <section className="studio-card">
-        <p className="anime-label text-xs text-cyan-pale">L&apos;épisode entier</p>
-        <h2 className="font-display text-lg text-lily">{frames.length} images, une toutes les 5 secondes</h2>
+        <div className="studio-section-head">
+          <div>
+            <p className="anime-label text-xs text-cyan-pale">L&apos;épisode entier</p>
+            <h2 className="font-display text-lg text-lily">{frames.length} images, une toutes les {dense ? "secondes" : "5 secondes"}</h2>
+          </div>
+          <div className="studio-viewswitch" role="group" aria-label="Densité des images">
+            <button type="button" className={`webtoon-mini ${dense ? "is-active" : ""}`} onClick={() => setDense(true)} title="Ce que l'écrivain lit : chaque seconde du film">1 s</button>
+            <button type="button" className={`webtoon-mini ${!dense ? "is-active" : ""}`} onClick={() => setDense(false)} title="Une image toutes les cinq secondes, plus léger à parcourir">5 s</button>
+          </div>
+        </div>
         <p className="text-xs text-ivory/60">
-          Adapté jusqu&apos;à {adaptedUntil.toFixed(1)} s. Les images grisées sont encore à adapter : ouvre une image et « Nouvelle case » l&apos;ajoute à la fin de la bande, avec l&apos;image jointe au prompt. Le proxy vidéo complet est dans le dépôt de production (12_Episodes/episode-1-proxy.mp4).
+          Adapté jusqu&apos;à {adaptedUntil.toFixed(1)} s. Les images grisées sont encore à adapter : ouvre une image et « Nouvelle case » l&apos;ajoute à la fin de la bande, avec l&apos;image jointe au prompt. Ces images sont extraites du proxy vidéo (12_Episodes/episode-1-proxy.mp4).
         </p>
         <div className="studio-frames studio-frames-dense">
           {frames.map((frame) => (

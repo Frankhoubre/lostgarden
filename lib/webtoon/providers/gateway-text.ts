@@ -23,6 +23,8 @@ export async function completeJson<T>(input: {
    * the answer comes back empty or cut ("length" with 0 chars observed).
    */
   reasoning?: "none" | "low" | "medium" | "high";
+  /** Sampling temperature; 0 for a check that must answer the same way twice. */
+  temperature?: number;
   /** Receives what the gateway billed for the call (and its repair), in USD. */
   onCost?: (usd: number) => void;
 }): Promise<T> {
@@ -34,7 +36,7 @@ export async function completeJson<T>(input: {
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: input.model ?? GATEWAY_TEXT_MODEL,
-      temperature: 0.3,
+      temperature: input.temperature ?? 0.3,
       max_tokens: input.maxTokens ?? 4000,
       max_completion_tokens: input.maxTokens ?? 4000,
       ...(input.reasoning ? { reasoning_effort: input.reasoning } : {}),
