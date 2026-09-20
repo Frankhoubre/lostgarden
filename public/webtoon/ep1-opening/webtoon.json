@@ -2818,6 +2818,14 @@
       ]
     }
   ],
+  "palettes": {
+    "white-lily-field": "white_memory",
+    "altar-sanctuary": "blue_sanctuary"
+  },
+  "style_anchors": {
+    "white_memory": "style.webtoon.white",
+    "blue_sanctuary": "style.webtoon.blue"
+  },
   "generated_at": "2026-09-19T00:00:00.000Z",
   "layout": {
     "width": 1080,

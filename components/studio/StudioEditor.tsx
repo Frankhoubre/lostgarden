@@ -8,7 +8,9 @@ import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import { getFirebaseAuth } from "@/lib/firebase";
 import type { Locale } from "@/lib/i18n/config";
 import { SPACING_BY_TRANSITION } from "@/lib/webtoon/adaptation";
+import { attachedFrames, composePanel, needsComposition, panelForGeneration } from "@/lib/webtoon/compose";
 import {
+  appendFromFrame,
   deletePanel,
   insertAfter,
   markForRegeneration,
@@ -16,17 +18,21 @@ import {
   movePanel,
   setTransition,
   splitPanel,
+  toggleFrame,
   updatePanel,
 } from "@/lib/webtoon/editor-ops";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { computeLayout } from "@/lib/webtoon/layout";
-import { referencesForPanel } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryLocations, referencesForPanel } from "@/lib/webtoon/references";
 import { imageSize, readFileAsDataUrl, uploadPanelImage } from "@/lib/webtoon/studio";
+import { studioFilmFrames } from "@/lib/webtoon/studio-assets";
+import { applyTranslations, itemsToTranslate, type LetteringItem } from "@/lib/webtoon/translate";
 import type {
   BubbleStyle,
   CameraAngle,
   Fidelity,
   LocalizedText,
+  NarrativeRole,
   PanelBackground,
   ShotType,
   TransitionType,
@@ -40,9 +46,39 @@ const TRANSITIONS = Object.keys(SPACING_BY_TRANSITION) as TransitionType[];
 const BACKGROUNDS: PanelBackground[] = ["white", "black", "abyss"];
 const BUBBLES: BubbleStyle[] = ["speech", "whisper", "thought", "shout", "off"];
 const FIDELITIES: Fidelity[] = ["direct", "reframe", "bridge"];
+const ROLES: NarrativeRole[] = ["breath", "establishing", "character_intro", "action", "reaction", "dialogue", "detail", "reveal", "transition", "tension", "cliffhanger"];
+const CHARACTERS = libraryCharacters();
+const LOCATIONS = libraryLocations();
+const FILM_FRAMES = studioFilmFrames();
+
+/** Headers of a generation call: the Firebase token, or the local bypass on the dev server. */
+async function studioHeaders(): Promise<Record<string, string>> {
+  const token = (await getFirebaseAuth().currentUser?.getIdToken().catch(() => "")) ?? "";
+  if (token) return { Authorization: `Bearer ${token}` };
+  if (process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).has("dev")) {
+    return { "x-studio-dev": "1" };
+  }
+  return {};
+}
+
+type GeneratePayload = {
+  data_url?: string;
+  model?: string;
+  error?: string;
+  generation_prompt?: string;
+  negative_constraints?: string[];
+  visual_references?: string[];
+};
+
+/** Panels that still need an image: none yet, or the prompt changed since. */
+function pendingPanels(panels: WebtoonPanel[]): WebtoonPanel[] {
+  return panels.filter((p) => p.image.status !== "generated" && (p.description.trim() || p.generation_prompt.trim()));
+}
 
 const LABEL: Record<string, string> = {
   white: "Blanc", black: "Noir", abyss: "Bleu abysse",
+  establishing: "Situation", character_intro: "Entrée d'un personnage", action: "Action", reaction: "Réaction",
+  dialogue: "Dialogue", detail: "Détail", reveal: "Révélation", transition: "Transition", tension: "Tension", cliffhanger: "Suspens",
   speech: "Parole", whisper: "Chuchoté", thought: "Pensée", shout: "Cri", off: "Hors champ",
   soft: "Doux", hard: "Dur", rumble: "Grondement",
   direct: "Plan du film", reframe: "Même instant, recadré", bridge: "Pont",
@@ -72,6 +108,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [showStrip, setShowStrip] = useState(false);
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
+  const stopBatch = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => panels.find((p) => p.panel_id === selectedId) ?? panels[0] ?? null, [panels, selectedId]);
@@ -92,58 +130,175 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (next) select(next.panel_id);
   };
 
-  const setImage = async (dataUrl: string, model?: string) => {
-    if (!selected) return;
+  /** Store an image on a panel: uploaded to Storage when signed in, kept in the session otherwise. */
+  const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}) => {
     let src = dataUrl;
     if (user) {
       try {
-        src = await uploadPanelImage(script.slug, selected.panel_id, dataUrl);
+        src = await uploadPanelImage(script.slug, panel.panel_id, dataUrl);
       } catch (error) {
         notify(`Image gardée dans la session seulement : ${error instanceof Error ? error.message : "envoi impossible"}`);
       }
     }
-    const size = await imageSize(dataUrl).catch(() => ({ width: 1080, height: selected.panel_height }));
-    patch({ image: { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" } });
+    const size = await imageSize(dataUrl).catch(() => ({ width: 1080, height: panel.panel_height }));
+    setPanels((current) =>
+      current.map((p) =>
+        p.panel_id === panel.panel_id
+          ? { ...p, ...extra, image: { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" } }
+          : p,
+      ),
+    );
+  };
+
+  /** One generation call for one panel; the composed prompt comes back with the image. */
+  const generateOne = async (panel: WebtoonPanel): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+        body: JSON.stringify({ panel_id: panel.panel_id, panel }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
+      if (!response.ok || !payload.data_url) {
+        notify(`${panel.panel_id} : ${payload.error ?? `erreur ${response.status}`}`);
+        setPanels((current) => markForRegeneration(current, panel.panel_id));
+        return false;
+      }
+      const composed: Partial<WebtoonPanel> =
+        needsComposition(panel) && payload.generation_prompt
+          ? { generation_prompt: payload.generation_prompt, negative_constraints: payload.negative_constraints ?? panel.negative_constraints, visual_references: payload.visual_references ?? panel.visual_references, prompt_auto: true }
+          : {};
+      await applyImage(panel, payload.data_url, payload.model, composed);
+      return true;
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Erreur de génération");
+      return false;
+    }
   };
 
   const regenerate = async () => {
     if (!selected || busy) return;
+    if (!selected.description.trim() && !selected.generation_prompt.trim()) {
+      notify("Écris d'abord une description de la case");
+      return;
+    }
     setBusy(true);
     try {
-      const token = (await getFirebaseAuth().currentUser?.getIdToken()) ?? "";
-      const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ panel_id: selected.panel_id, panel: selected }),
-      });
-      const payload = (await response.json()) as { data_url?: string; model?: string; error?: string };
-      if (!response.ok || !payload.data_url) {
-        notify(payload.error ?? `Erreur ${response.status}`);
-        setPanels((current) => markForRegeneration(current, selected.panel_id));
-        return;
-      }
-      await setImage(payload.data_url, payload.model);
-      notify("Image regénérée");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : "Erreur de génération");
+      if (await generateOne(selected)) notify(selected.image.src ? "Image regénérée" : "Image générée");
     } finally {
       setBusy(false);
     }
   };
 
+  /** Generate every panel without a current image, one after the other, in strip order. */
+  const generatePending = async () => {
+    if (busy) return;
+    const todo = pendingPanels(panels);
+    if (!todo.length) {
+      notify("Toutes les cases ont une image à jour");
+      return;
+    }
+    if (!window.confirm(`Générer ${todo.length} case${todo.length > 1 ? "s" : ""} (${todo.map((p) => p.panel_id).join(", ")}) ?`)) return;
+    setBusy(true);
+    stopBatch.current = false;
+    setBatch({ done: 0, total: todo.length });
+    let ok = 0;
+    try {
+      for (const [i, panel] of todo.entries()) {
+        if (stopBatch.current) break;
+        select(panel.panel_id);
+        if (await generateOne(panel)) ok += 1;
+        setBatch({ done: i + 1, total: todo.length });
+      }
+      notify(`${ok}/${todo.length} image${todo.length > 1 ? "s" : ""} générée${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
+    } finally {
+      setBatch(null);
+      setBusy(false);
+    }
+  };
+
   const replaceImage = async (file: File) => {
+    if (!selected) return;
     setBusy(true);
     try {
-      await setImage(await readFileAsDataUrl(file), "manual-upload");
+      await applyImage(selected, await readFileAsDataUrl(file), "manual-upload");
       notify("Image remplacée");
     } finally {
       setBusy(false);
     }
   };
 
+  /** Rebuild the prompt and references from the panel's fields, right now, in the browser. */
+  const recompose = () => {
+    if (!selected) return;
+    const next = composePanel(selected, script);
+    patch({ generation_prompt: next.generation_prompt, negative_constraints: next.negative_constraints, visual_references: next.visual_references, prompt_auto: true });
+    notify("Prompt recomposé depuis les champs");
+  };
+
+  const addFromFrame = (src: string) => {
+    const frame = FILM_FRAMES.find((f) => f.src === src);
+    if (!frame) return;
+    const next = appendFromFrame(panels, frame, selected?.panel_id ?? null);
+    setPanels(next);
+    const created = next.find((p) => !panels.some((q) => q.panel_id === p.panel_id));
+    if (created) select(created.panel_id);
+    notify(`Case ${created?.panel_id ?? ""} créée à partir de l'image ${frame.label}`);
+  };
+
+  /**
+   * Translate the lettering of some panels in one call: bubbles, captions
+   * and sounds, from whatever language they were written in, into the four
+   * languages of the site. `all` retranslates filled languages too.
+   */
+  const translatePanels = async (targets: WebtoonPanel[], all: boolean) => {
+    if (busy) return;
+    const batchItems: LetteringItem[] = targets.flatMap((panel) =>
+      itemsToTranslate(panel, all).map((item) => ({ ...item, key: `${panel.panel_id}|${item.key}` })),
+    );
+    if (!batchItems.length) {
+      notify(all ? "Aucun texte à traduire" : "Toutes les langues sont déjà remplies");
+      return;
+    }
+    setBusy(true);
+    try {
+      const scene = targets.length === 1 ? targets[0].description : `${script.series}, episode ${script.episode}, ${targets.length} panels.`;
+      const response = await fetch(`/api/webtoon/${script.slug}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+        body: JSON.stringify({ items: batchItems, scene }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { translations?: Record<string, Record<string, string>>; error?: string };
+      if (!response.ok || !payload.translations) {
+        notify(payload.error ?? `Erreur ${response.status}`);
+        return;
+      }
+      const byPanel = new Map<string, Record<string, Record<string, string>>>();
+      for (const [key, value] of Object.entries(payload.translations)) {
+        const [panelId, itemKey] = key.split("|");
+        if (!panelId || !itemKey) continue;
+        const bucket = byPanel.get(panelId) ?? {};
+        bucket[itemKey] = value;
+        byPanel.set(panelId, bucket);
+      }
+      setPanels((current) => current.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p)));
+      notify(`${batchItems.length} texte${batchItems.length > 1 ? "s" : ""} traduit${batchItems.length > 1 ? "s" : ""} en fr, en, ja, ko`);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Erreur de traduction");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const setCharacters = (id: string, on: boolean) => {
+    if (!selected) return;
+    const characters = on ? [...new Set([...selected.characters, id])] : selected.characters.filter((c) => c !== id);
+    patch({ characters, image: selected.image.status === "generated" ? { ...selected.image, status: "stale" } : selected.image });
+  };
+
   const copyPrompt = () => {
     if (!selected) return;
-    navigator.clipboard.writeText(JSON.stringify(buildGenerationRequest(selected), null, 2)).then(() => notify("Prompt copié"));
+    navigator.clipboard.writeText(JSON.stringify(buildGenerationRequest(panelForGeneration(selected, script)), null, 2)).then(() => notify("Requête copiée"));
   };
 
   const textInputs = (value: LocalizedText, onText: (next: LocalizedText) => void) => (
@@ -159,10 +314,31 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   if (!selected) return <p className="text-sm text-ivory/70">Aucune case.</p>;
 
+  const pending = pendingPanels(panels).length;
+  const preview = panelForGeneration(selected, script);
+  const frames = attachedFrames(selected);
+
   return (
     <div className="studio-editor webtoon-editor">
       <aside className="studio-list">
         <p className="studio-list-total">{panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px</p>
+        <div className="studio-list-actions">
+          {batch ? (
+            <>
+              <span className="text-xs text-ivory/70">Génération {batch.done}/{batch.total}…</span>
+              <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => { stopBatch.current = true; }}>Arrêter</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="webtoon-mini" onClick={generatePending} disabled={busy || !pending} title="Génère chaque case sans image ou dont le prompt a changé">
+                Générer les cases manquantes{pending ? ` (${pending})` : ""}
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => void translatePanels(panels, false)} disabled={busy} title="Remplit les langues vides de toutes les bulles, cartouches et sons">
+                Traduire toute la bande
+              </button>
+            </>
+          )}
+        </div>
         <ol>
           {panels.map((panel) => (
             <li key={panel.panel_id}>
@@ -181,7 +357,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <span className="studio-thumb-meta">
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
-                  {panel.image.status === "stale" ? <i> · à regénérer</i> : null}
+                  {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" ? <i> · à générer</i> : null}
                 </span>
               </button>
             </li>
@@ -214,6 +390,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         <details open>
           <summary>Texte</summary>
           <div className="studio-section">
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini" onClick={() => void translatePanels([selected], false)} disabled={busy} title="Écris dans une langue, les trois autres sont remplies en langage parlé">
+                Traduire les langues vides
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => { if (window.confirm("Retraduire tous les textes de cette case ? Les traductions existantes sont remplacées, la langue d'origine est gardée.")) void translatePanels([selected], true); }} disabled={busy}>
+                Tout retraduire
+              </button>
+            </div>
             <div className="studio-section-head">
               <span className="webtoon-field-label">Bulles</span>
               <button type="button" className="webtoon-mini" onClick={() => patch({ dialogue: [...selected.dialogue, { speaker: "", text: { en: "" }, style: "speech", anchor: { x: 30, y: 20 }, tail: { x: 50, y: 50 } }] })}>+ Bulle</button>
@@ -310,7 +494,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </div>
         </details>
 
-        <details>
+        <details open>
           <summary>Image et prompt</summary>
           <div className="studio-section">
             <p className="text-xs text-ivory/60">
@@ -319,20 +503,91 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               {selected.source_time_start !== null ? ` · film ${selected.source_time_start.toFixed(1)} s à ${selected.source_time_end?.toFixed(1)} s` : ""}
             </p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" className="webtoon-mini" onClick={regenerate} disabled={busy}>{busy ? "…" : "Regénérer (GPT Image 2.5)"}</button>
+              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy}>
+                {busy ? "…" : selected.image.src ? "Regénérer (GPT Image 2.5)" : "Générer (GPT Image 2.5)"}
+              </button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy}>Remplacer par un fichier</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt}>Copier la requête</button>
               <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
             </div>
-            <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} onChange={(e) => patch({ description: e.target.value })} /></label>
+            <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
             <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
-            <label className="webtoon-field"><span>Émotion</span><input value={selected.emotion} onChange={(e) => patch({ emotion: e.target.value })} /></label>
-            <label className="webtoon-field"><span>Pourquoi cette case existe</span><textarea rows={3} value={selected.purpose} onChange={(e) => patch({ purpose: e.target.value })} /></label>
-            <label className="webtoon-field"><span>Prompt de génération</span><textarea rows={12} value={selected.generation_prompt} onChange={(e) => patch({ generation_prompt: e.target.value })} /></label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="webtoon-field"><span>Émotion</span><input value={selected.emotion} onChange={(e) => patch({ emotion: e.target.value })} /></label>
+              <label className="webtoon-field"><span>Rôle narratif</span>
+                <select value={selected.narrative_role} onChange={(e) => patch({ narrative_role: e.target.value as NarrativeRole })}>{ROLES.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select>
+              </label>
+            </div>
+            <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
+            <div>
+              <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
+              <div className="studio-checks">
+                {CHARACTERS.map((c) => (
+                  <label key={c.id}><input type="checkbox" checked={selected.characters.includes(c.id)} onChange={(e) => setCharacters(c.id, e.target.checked)} /> {c.name}</label>
+                ))}
+              </div>
+              <input
+                className="mt-1"
+                placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
+                value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
+                onChange={(e) => {
+                  const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
+                  const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
+                  patch({ characters: [...known, ...others] });
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="webtoon-field"><span>Lieu (sa fiche est jointe)</span>
+                <select value={LOCATIONS.some((l) => l.id === selected.location) ? selected.location : "__other"} onChange={(e) => { if (e.target.value !== "__other") patch({ location: e.target.value }); }}>
+                  {LOCATIONS.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                  <option value="__other">Autre lieu…</option>
+                </select>
+              </label>
+              <label className="webtoon-field"><span>Identifiant du lieu</span><input value={selected.location} onChange={(e) => patch({ location: e.target.value.trim() })} /></label>
+            </div>
+            <div>
+              <div className="studio-section-head">
+                <span className="webtoon-field-label">Images du film jointes</span>
+                <select value="" onChange={(e) => { if (e.target.value) setPanels((c) => toggleFrame(c, selected.panel_id, e.target.value)); }}>
+                  <option value="">+ Joindre une image du film…</option>
+                  {FILM_FRAMES.filter((f) => !frames.includes(f.src)).map((f) => <option key={f.src} value={f.src}>{f.label}</option>)}
+                </select>
+              </div>
+              {frames.length ? (
+                <ul className="mt-1 flex flex-wrap gap-2">
+                  {frames.map((src) => (
+                    <li key={src} className="webtoon-ref">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt="" loading="lazy" />
+                      <span>{FILM_FRAMES.find((f) => f.src === src)?.label ?? src.split("/").pop()}</span>
+                      <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => setPanels((c) => toggleFrame(c, selected.panel_id, src))}>Retirer</button>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-xs text-ivory/50">Aucune image du film jointe à cette case.</p>}
+            </div>
+            <div>
+              <div className="studio-section-head">
+                <span className="webtoon-field-label">Prompt de génération</span>
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1 text-xs text-ivory/70" title="Le prompt est recomposé depuis les champs ci-dessus à chaque génération">
+                    <input type="checkbox" checked={selected.prompt_auto === true} onChange={(e) => (e.target.checked ? recompose() : patch({ prompt_auto: false }))} /> Composé depuis les champs
+                  </label>
+                  <button type="button" className="webtoon-mini" onClick={recompose}>Recomposer</button>
+                </div>
+              </div>
+              <textarea
+                rows={12}
+                value={needsComposition(selected) ? preview.generation_prompt : selected.generation_prompt}
+                onChange={(e) => patch({ generation_prompt: e.target.value, prompt_auto: false })}
+              />
+              {needsComposition(selected) ? <p className="text-xs text-ivory/50">Aperçu du prompt composé. Le modifier à la main fige le texte ; « Recomposer » repart des champs.</p> : null}
+            </div>
             <div>
               <span className="webtoon-field-label">Références jointes, dans l&apos;ordre</span>
               <ul className="mt-1 flex flex-wrap gap-2">
-                {referencesForPanel(selected).map((ref) => (
+                {referencesForPanel(preview).map((ref) => (
                   <li key={ref.id} className="webtoon-ref">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ref.image} alt={ref.name} loading="lazy" />
@@ -351,6 +606,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => movePanel(c, selected.panel_id, -1))}>Monter</button>
               <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => movePanel(c, selected.panel_id, 1))}>Descendre</button>
               <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => insertAfter(c, selected.panel_id))}>Insérer une case après</button>
+              <select value="" onChange={(e) => { if (e.target.value) addFromFrame(e.target.value); }} title="Continue le webtoon : une case après celle-ci, à partir d'une image du film">
+                <option value="">Nouvelle case après, depuis une image du film…</option>
+                {FILM_FRAMES.map((f) => <option key={f.src} value={f.src}>{f.label}{selected.source_time_end !== null && f.seconds > selected.source_time_end ? "" : " (déjà adapté)"}</option>)}
+              </select>
               <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => splitPanel(c, selected.panel_id))}>Couper en deux</button>
               <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => mergeWithNext(c, selected.panel_id))}>Fusionner avec la suivante</button>
               <button

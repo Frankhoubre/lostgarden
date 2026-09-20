@@ -1,4 +1,5 @@
 import { SPACING_BY_TRANSITION } from "./adaptation";
+import { panelFromFrame, type FramePick } from "./compose";
 import type { PanelImage, TransitionType, WebtoonPanel } from "./types";
 
 /**
@@ -91,12 +92,34 @@ export function insertAfter(panels: WebtoonPanel[], id: string): WebtoonPanel[] 
     dialogue: [],
     caption: [],
     sfx: [],
+    visual_references: from.visual_references.filter((id) => !id.startsWith("src.") && !id.startsWith("/")),
     generation_prompt: "",
+    prompt_auto: true,
     image: { src: "", width: 0, height: 0, status: "missing" },
   };
   const next = [...panels];
   next.splice(index + 1, 0, blank);
   return renumber(next);
+}
+
+/** Append a panel drawn from a film frame, after `afterId` or at the end of the strip. */
+export function appendFromFrame(panels: WebtoonPanel[], frame: FramePick, afterId?: string | null): WebtoonPanel[] {
+  const index = afterId ? panels.findIndex((p) => p.panel_id === afterId) : -1;
+  const after = index >= 0 ? panels[index] : panels[panels.length - 1];
+  const created = panelFromFrame(panels, frame, after);
+  const next = [...panels];
+  next.splice(index >= 0 ? index + 1 : panels.length, 0, created);
+  return renumber(next);
+}
+
+/** Attach or detach one film frame on a panel; the prompt is recomposed at the next generation. */
+export function toggleFrame(panels: WebtoonPanel[], id: string, frame: string): WebtoonPanel[] {
+  return panels.map((p) => {
+    if (p.panel_id !== id) return p;
+    const has = p.visual_references.includes(frame);
+    const visual_references = has ? p.visual_references.filter((r) => r !== frame) : [...p.visual_references, frame];
+    return { ...p, visual_references, image: STALE(p.image) };
+  });
 }
 
 /** Merge a panel with the next one: one taller panel, texts concatenated. */

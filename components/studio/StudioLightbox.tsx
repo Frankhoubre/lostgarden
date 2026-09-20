@@ -6,10 +6,12 @@ type StudioLightboxProps = {
   src: string | null;
   label?: string;
   onClose: () => void;
+  /** An extra button in the caption, for instance "make a panel from this frame". */
+  action?: { label: string; onClick: () => void };
 };
 
 /** A full-screen look at one image, closed with Escape, a click outside, or the button. */
-export function StudioLightbox({ src, label, onClose }: StudioLightboxProps) {
+export function StudioLightbox({ src, label, onClose, action }: StudioLightboxProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export function StudioLightbox({ src, label, onClose }: StudioLightboxProps) {
           <img src={src} alt={label ?? ""} />
           <figcaption>
             <span>{label}</span>
+            {action ? <button type="button" className="webtoon-mini studio-primary" onClick={action.onClick}>{action.label}</button> : null}
             <button type="button" className="webtoon-mini" onClick={onClose}>Fermer</button>
           </figcaption>
         </figure>

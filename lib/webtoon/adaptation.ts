@@ -227,6 +227,8 @@ export function adaptScript(input: AdaptationInput): WebtoonScript {
     beats: input.beats,
     panels,
     references: [...used.values()],
+    palettes: input.palettes,
+    style_anchors: input.style_anchors,
     generated_at: input.generated_at ?? new Date(0).toISOString(),
   };
 }
