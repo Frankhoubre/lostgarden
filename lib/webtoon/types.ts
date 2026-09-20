@@ -36,6 +36,12 @@ export type ReferenceAsset = {
   priority?: number;
   /** Written or changed in the studio rather than in the code library. */
   custom?: boolean;
+  /**
+   * Where the face sits in the image, for a round thumbnail: centre in
+   * percent of the image, and how many times the thumbnail zooms into it.
+   * A turnaround sheet has the head of the front view near the top left.
+   */
+  avatar?: { x: number; y: number; zoom: number };
 };
 
 /**

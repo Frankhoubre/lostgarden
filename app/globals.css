@@ -3498,6 +3498,115 @@ h3 {
   z-index: 5;
 }
 
+/* Round face thumbnails and choice chips. */
+.studio-avatar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f6f4ef;
+  border: 1px solid rgba(125, 223, 255, 0.35);
+}
+
+.studio-avatar-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(125, 223, 255, 0.12);
+  color: rgba(216, 210, 194, 0.85);
+  font-family: var(--font-display), serif;
+  font-size: 0.9rem;
+}
+
+.studio-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.studio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(6, 22, 47, 0.5);
+  font-size: 0.78rem;
+  color: rgba(216, 210, 194, 0.8);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.studio-chip:hover {
+  border-color: rgba(125, 223, 255, 0.6);
+}
+
+.studio-chip.is-on {
+  border-color: rgba(125, 223, 255, 0.95);
+  background: rgba(125, 223, 255, 0.16);
+  color: #fff;
+}
+
+.studio-chip .studio-avatar {
+  opacity: 0.7;
+}
+
+.studio-chip.is-on .studio-avatar {
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(125, 223, 255, 0.6);
+}
+
+/* Insert a panel between two others: a bar on the boundary, shown on hover. */
+.studio-strip-insert {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  z-index: 7;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.studio-strip-item:hover .studio-strip-insert,
+.studio-strip-insert:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.studio-strip-insert select {
+  max-width: 11rem;
+  font-size: 0.7rem;
+}
+
+.studio-thumb-insert {
+  position: absolute;
+  left: 50%;
+  bottom: -0.55rem;
+  z-index: 3;
+  width: 1.4rem;
+  height: 1.4rem;
+  transform: translateX(-50%);
+  border: 1px solid rgba(125, 223, 255, 0.6);
+  border-radius: 50%;
+  background: #061018;
+  color: #7ddfff;
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.studio-thumb-item:hover .studio-thumb-insert,
+.studio-thumb-insert:focus-visible {
+  opacity: 1;
+}
+
 /* The strip as a workspace. */
 .studio-strip {
   width: 100%;

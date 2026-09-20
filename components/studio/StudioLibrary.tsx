@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { Avatar } from "@/components/studio/Avatar";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { getFirebaseAuth } from "@/lib/firebase";
@@ -226,6 +227,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
           return (
             <article key={entry.id} className={`studio-card studio-character ${inStrip(entry) ? "is-in-strip" : ""} ${entry.hidden ? "is-hidden" : ""}`}>
               <header className="studio-card-head">
+                {kind === "character" ? <Avatar image={entry.assets.find((a) => a.image)?.image} name={entry.name} crop={entry.assets.find((a) => a.image)?.avatar} size={56} /> : null}
                 <div className="min-w-0 flex-1">
                   <p className="anime-label text-xs text-cyan-pale">
                     {entry.hidden ? "Retiré" : inStrip(entry) ? "Dans la bande" : entry.builtIn ? "Bibliothèque du moteur" : "Ajouté dans le studio"}
