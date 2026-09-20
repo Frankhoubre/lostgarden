@@ -33,7 +33,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Webtoon
 
-`/[locale]/webtoon` hosts the vertical webtoon adaptation of the series, produced by an adaptation engine rather than drawn by hand. The first strip covers the opening of episode 1 (0:00 to 0:30).
+`/[locale]/webtoon` hosts the vertical webtoon adaptation of the series, produced by an adaptation engine rather than drawn by hand. The first strip covers the start of episode 1 (0:00 to 1:04): the white memory, the sanctuary and the awakening.
 
 - `lib/webtoon/`: the engine. `types.ts` (panel schema shared with ScreenWeaver), `adaptation.ts` (panel intents → fully specified panels: timing, aspect, height, spacing, references, prompt), `references.ts` (character, location and source-frame library with automatic resolution), `style-bible.ts`, `prompts.ts`, `layout.ts`, `editor-ops.ts`, `generation.ts`
 - `lib/webtoon/sources/`: per-sequence data. `*.analysis.ts` is the narrative analysis of the source (shots, dialogue, sounds, continuity), `*.plan.ts` the beats and panel intents, `*.images.ts` the generated panels

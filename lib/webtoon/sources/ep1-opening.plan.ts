@@ -2,7 +2,7 @@ import type { PanelIntent } from "../adaptation";
 import type { WebtoonBeat } from "../types";
 
 /**
- * ADAPTATION PLAN · episode 1, 0:00-0:30 · eleven shots become fifteen panels:
+ * ADAPTATION PLAN · episode 1, 0:00-1:04 · twenty-two shots become twenty-five panels:
  * ten direct panels, one per shot of the film, plus five bridges that add no
  * action (a detail, a counter-shot, a breath, a fall).
  *
@@ -26,8 +26,18 @@ import type { WebtoonBeat } from "../types";
  *             bottom, the eye travels down the way the light does.
  *  s10 → p09  the larva on the root, first living thing, small panel.
  *      → p09b reframe: his gauntlet on the stone, one mushroom.
- *  s11 → p10  the rose window over the sabatons: the segment ends on
- *             expectation, the awakening starts after 0:30.
+ *  s11 → p10  the rose window over the sabatons, expectation.
+ *  s12 → p11  the altar from the floor, among the mushrooms.
+ *  s13 → p12  the window wakes, brighter, full bleed.
+ *  s14 → p13  the first beam touches him, high close shot.
+ *  s15 → p14  the beams fall hard on the tiny altar.
+ *  s16 → p15  the whole body under the light.
+ *  s17 → p16  the light enters the metal: the only glowing armour panel.
+ *  s18 → p17  he sits up, the loudest panel, one hard SFX.
+ *  s19 → p18  seated, the glow gone.
+ *  s20 → gap  a second black, shorter: a long dark gap, no panel.
+ *  s21 → p19  he raises his hand and looks at it.
+ *  s22 → p20  he bends over himself and touches his chest.
  * Nothing is invented. Every panel maps to a shot of the film, the bridges
  * only look at that same shot from closer or from behind.
  */
@@ -69,7 +79,39 @@ export const EP1_OPENING_BEATS: WebtoonBeat[] = [
     title: "The sanctuary",
     intent: "The present: a vast blue silence, an altar, a knight who has not moved yet.",
     source_time_start: 22.6,
-    source_time_end: 30,
+    source_time_end: 36.3,
+    background: "black",
+  },
+  {
+    beat_id: "b6",
+    title: "The light",
+    intent: "The window wakes: light falls on the altar and enters the metal.",
+    source_time_start: 36.3,
+    source_time_end: 48.3,
+    background: "black",
+  },
+  {
+    beat_id: "b7",
+    title: "He sits up",
+    intent: "The shock of the awakening, then the emptiness after it.",
+    source_time_start: 48.3,
+    source_time_end: 54,
+    background: "black",
+  },
+  {
+    beat_id: "b8",
+    title: "Black",
+    intent: "A second breath of black, shorter.",
+    source_time_start: 54,
+    source_time_end: 56,
+    background: "black",
+  },
+  {
+    beat_id: "b9",
+    title: "His hands",
+    intent: "He discovers his own body: a hand, then the chest.",
+    source_time_start: 56,
+    source_time_end: 63.8,
     background: "black",
   },
 ];
@@ -518,6 +560,295 @@ export const EP1_OPENING_INTENTS: PanelIntent[] = [
     prompt_notes: [
       "The rose window is a simple flat cyan disc with a few clean tracery lines, the stalactites a few triangles, the altar and sabatons flat dark shapes against the light. No ornament drawn in detail.",
       "Only the sabatons and the lower legs of the knight are visible, dark against the glowing window; the rest of the body is hidden by perspective.",
+    ],
+  },
+  {
+    id: "p11",
+    beat: "b5",
+    shots: ["s12"],
+    fidelity: "direct",
+    narrative_role: "establishing",
+    purpose:
+      "The sanctuary at his level: the altar seen from the floor among the mushrooms, before anything happens. It sets the axis the awakening will play on.",
+    description:
+      "Wide side view of the altar at floor level: the long stone altar runs across the frame, Lanterne lying on it with the helmet to the left and the beige cape hanging over the edge; huge blue mushrooms in the foreground, roots overhead, thin mist.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "Nothing moves.",
+    emotion: "held, sacred",
+    shot_type: "wide",
+    camera_angle: "eye_level",
+    composition:
+      "3:2 panel. The altar crosses the middle third; two big mushroom silhouettes in the lower corners, roots as dark curves along the top edge; the lying knight small but readable, helmet left.",
+    aspect_ratio: "3:2",
+    transition_type: "beat",
+    bleed: false,
+    exclude_references: [],
+    prompt_notes: [
+      "The altar is one long flat block; the mushrooms are two or three big flat cyan caps; the roots a few dark curves; the walls two flat blues.",
+      "The lying knight is small: lantern helmet to the left, cape hanging over the edge as one flat beige shape.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p12",
+    beat: "b6",
+    shots: ["s13"],
+    fidelity: "direct",
+    narrative_role: "reveal",
+    purpose:
+      "The window wakes. Filling a whole tall panel with the rose window, brighter than at 0:29, tells the reader that the light is the event.",
+    description:
+      "The rose window fills the frame, seen from below: a great circular tracery glowing cold cyan, stalactites around it, the light growing brighter as if the window woke.",
+    characters: [],
+    location: "altar-sanctuary",
+    action: "The light in the window grows.",
+    emotion: "sacred, rising",
+    shot_type: "wide",
+    camera_angle: "low",
+    composition:
+      "Vertical 4:5. The window is a full disc centred in the upper two thirds; stalactite triangles frame it left and right; the bottom third is near black with the tops of the beams starting to fall.",
+    aspect_ratio: "4:5",
+    transition_type: "cut",
+    bleed: true,
+    sfx: [
+      { text: { en: "VMMMMMMMM", fr: "VMMMMMMMM", ja: "ヴヴヴヴヴヴ", ko: "우우우우웅" }, anchor: { x: 50, y: 90 }, rotate: 0, size: 120, style: "rumble" },
+    ],
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "The window is one big flat cyan disc with about a dozen clean tracery lines like a mandala, framed by a few stalactite triangles; the rest of the image is near black.",
+      "This is brighter than every earlier panel: the disc is almost white at its centre.",
+    ],
+  },
+  {
+    id: "p13",
+    beat: "b6",
+    shots: ["s14"],
+    fidelity: "direct",
+    narrative_role: "detail",
+    purpose:
+      "From the window straight down to him: a high close shot where the first beam touches the metal. The reader looks at him the way the light does.",
+    description:
+      "High close shot on the lying knight from above the altar: helmet to the right, the two small dark eye holes, the cream scarf, the engraved pauldrons, one gauntlet along the body. A first pale beam touches the metal.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "Still. The first light reaches him.",
+    emotion: "expectation",
+    shot_type: "close_up",
+    camera_angle: "high",
+    composition:
+      "16:9 strip. The helmet on the right third, the chest plate and a pauldron across the centre, the gauntlet at the lower left; a flat translucent beam crosses the image diagonally from the upper left.",
+    aspect_ratio: "16:9",
+    transition_type: "cut",
+    bleed: false,
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "Seen from above: helmet to the right with the two small dark eye holes, the scarf, the pauldrons, one gauntlet along the body; the stone slab a flat blue plane.",
+      "The beam is one flat translucent band across the metal.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p14",
+    beat: "b6",
+    shots: ["s15"],
+    fidelity: "direct",
+    narrative_role: "establishing",
+    purpose:
+      "Back to the floor: the beams now fall hard on the tiny altar. A tall panel so that the light has room to fall.",
+    description:
+      "Wide from the floor among big glowing mushrooms: the altar far and small in the centre, beams of light now falling hard on it, mist along the ground.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "The beams intensify on the altar.",
+    emotion: "the space answers",
+    shot_type: "wide",
+    camera_angle: "low",
+    composition:
+      "Vertical 4:5. Big mushroom caps in the lower corners; the altar tiny in the centre of the lower half; three or four flat beam triangles from the top edge converge on it; the walls fade into black at the sides.",
+    aspect_ratio: "4:5",
+    transition_type: "cut",
+    bleed: true,
+    exclude_references: [],
+    prompt_notes: [
+      "Foreground mushrooms as big flat cyan caps at the bottom corners; the altar tiny in the centre under three or four flat translucent beam triangles; walls two flat blues, black at the edges.",
+      "The only figure in the image is the tiny knight lying flat on the distant altar. Nobody stands anywhere: no standing figure, no silhouette in the foreground, no character walking toward the altar.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p15",
+    beat: "b6",
+    shots: ["s16"],
+    fidelity: "direct",
+    narrative_role: "detail",
+    purpose:
+      "The whole body under the light, from the feet to the helmet, in one calm horizontal line before the light enters him.",
+    description:
+      "Side view along the altar: the whole lying body from the sabatons on the left to the helmet on the right, tall beams of light behind, the cape hanging off the slab.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "Light falls on the whole body.",
+    emotion: "suspended",
+    shot_type: "full",
+    camera_angle: "eye_level",
+    composition:
+      "16:9 strip. The body lies along the middle of the frame on a flat slab, sabatons left, helmet right; tall flat beams behind; black at the top corners.",
+    aspect_ratio: "16:9",
+    transition_type: "continuous",
+    bleed: false,
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "The whole body lies along the frame on a flat stone slab; tall flat beam triangles behind; the cape one flat beige shape hanging off the slab.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p16",
+    beat: "b6",
+    shots: ["s17"],
+    fidelity: "direct",
+    narrative_role: "tension",
+    purpose:
+      "The light enters the metal. The only panel where the armour itself glows: cyan lines running along the seams, held close so that the reader feels it before the shock.",
+    description:
+      "Close on the torso: blue light spreads through the armour, the seams of the chest plate and the joints glow cyan, a pauldron dark in the foreground; the glow pulses brighter and brighter.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "The light enters the metal and spreads through the joints.",
+    emotion: "the armour comes alive",
+    shot_type: "close_up",
+    camera_angle: "high",
+    composition:
+      "Vertical 4:5. The chest plate fills the centre, the pauldron dark in the lower left foreground, the scarf at the top; glowing seams radiate from the centre of the chest.",
+    aspect_ratio: "4:5",
+    transition_type: "cut",
+    bleed: true,
+    sfx: [
+      { text: { en: "vzzzzzzz", fr: "vzzzzzzz", ja: "ヴヴヴッ", ko: "지지지직" }, anchor: { x: 72, y: 18 }, rotate: -10, size: 84, style: "rumble" },
+    ],
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "The chest plate fills the frame; cyan light runs along its seams and joints as clean glowing lines with a flat cyan halo; the pauldron dark in the foreground.",
+      "This is the one panel where the armour itself glows; keep the glow to the seams and joints, the plates stay dark.",
+    ],
+  },
+  {
+    id: "p17",
+    beat: "b7",
+    shots: ["s18"],
+    fidelity: "direct",
+    narrative_role: "action",
+    purpose:
+      "The shock. He sits up bolt upright toward the reader, glowing, lilies falling: the loudest panel of the strip, full bleed, one hard SFX.",
+    description:
+      "Frontal: Lanterne sits up brusquely toward the camera, torso and joints glowing bright cyan, arms braced on the stone, white lilies falling in the foreground; the glow fades as he freezes upright.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "He sits up suddenly, then freezes.",
+    emotion: "shock, awakening",
+    shot_type: "medium",
+    camera_angle: "eye_level",
+    composition:
+      "Vertical 4:5. Lanterne upright and centred, filling the height from the stone at the bottom to the helmet near the top; the glow a flat halo around the torso; three or four falling lily shapes in the foreground corners; the wall behind a flat blue with the window's light above.",
+    aspect_ratio: "4:5",
+    transition_type: "hard_cut",
+    spacing_before: 80,
+    bleed: true,
+    sfx: [
+      { text: { en: "KLANK", fr: "KLANG", ja: "ガシャン", ko: "철컹" }, anchor: { x: 26, y: 30 }, rotate: -12, size: 150, style: "hard" },
+    ],
+    exclude_references: [],
+    prompt_notes: [
+      "Bolt upright, seen from the front, torso and joints glowing cyan, arms braced on the stone; three or four white lily shapes falling in the foreground as flat shapes; the glow is a flat halo.",
+      "Strong contrast: the brightest figure of the strip against a simple dark wall.",
+    ],
+  },
+  {
+    id: "p18",
+    beat: "b7",
+    shots: ["s19"],
+    fidelity: "direct",
+    narrative_role: "reaction",
+    purpose:
+      "After the shock, nothing: he sits, the glow gone, the hollow helmet turned to us. The reader meets him awake for the first time.",
+    description:
+      "Frontal medium, sitting on the altar, the glow gone: the hollow helmet turned to the camera, arms down, hands on the stone, mushrooms and roots behind.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "He stays seated, motionless.",
+    emotion: "empty, dazed",
+    shot_type: "medium",
+    camera_angle: "eye_level",
+    composition:
+      "Vertical 4:5. Lanterne centred, seated, the helmet in the upper third, the hands on the stone at the bottom edge; the background a flat dark blue with a few mushroom shapes.",
+    aspect_ratio: "4:5",
+    transition_type: "beat",
+    bleed: false,
+    exclude_references: [],
+    prompt_notes: [
+      "Sitting on the altar facing the viewer, arms down, hands on the stone, no glow anywhere on the armour; the two eye holes small and dark; mushrooms behind as a few flat shapes.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p19",
+    beat: "b9",
+    shots: ["s21"],
+    fidelity: "direct",
+    narrative_role: "detail",
+    purpose:
+      "After the second black: the first gesture. He raises his right hand and looks at it. The screenplay's 'he looks at his hands, he does not understand' in one image.",
+    description:
+      "Frontal medium, still seated: he lifts his right gauntlet in front of his chest and looks at it, the helmet tilting toward the hand.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "He raises his right hand and looks at it.",
+    emotion: "not understanding",
+    shot_type: "medium",
+    camera_angle: "eye_level",
+    composition:
+      "Vertical 4:5. Lanterne centred, seated; his right forearm raised in front of the chest, the open gauntlet just below the helmet, which tilts toward it; empty dark blue around.",
+    aspect_ratio: "4:5",
+    transition_type: "fade_to_black",
+    bleed: false,
+    sfx: [
+      { text: { en: "krrk", fr: "krrk", ja: "ギ…", ko: "끼익" }, anchor: { x: 72, y: 62 }, rotate: 8, size: 60, style: "soft" },
+    ],
+    exclude_references: [],
+    prompt_notes: [
+      "Same seated position as before: he sits on the edge of the altar with his legs hanging down, not cross-legged. His right forearm is raised in front of his chest, the steel gauntlet open with the palm turned toward his own helmet, fingers slightly curled, and the helmet tilts down toward the hand. He looks at his hand, not at the viewer: this is not a wave and not a greeting.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
+    ],
+  },
+  {
+    id: "p20",
+    beat: "b9",
+    shots: ["s22"],
+    fidelity: "direct",
+    narrative_role: "cliffhanger",
+    purpose:
+      "He bends over himself and touches his chest. The segment ends on the question the whole episode asks: what is inside.",
+    description:
+      "Side view, close: he bends forward over his knees, the helmet pointing down at his own body, the cape sliding over his back, one gauntlet flat on the stone, the other at his chest.",
+    characters: ["lanterne"],
+    location: "altar-sanctuary",
+    action: "He bends over himself and touches his chest.",
+    emotion: "discovery, fear",
+    shot_type: "medium_close_up",
+    camera_angle: "eye_level",
+    composition:
+      "3:2 panel. Lanterne in profile, slightly left of centre, bent forward; the helmet points down toward the lower right; the cape sweeps over his back to the left; the slab a flat plane at the bottom.",
+    aspect_ratio: "3:2",
+    transition_type: "continuous",
+    bleed: false,
+    sfx: [
+      { text: { en: "krrrk", fr: "krrrk", ja: "ギギ", ko: "끼기긱" }, anchor: { x: 20, y: 28 }, rotate: -6, size: 64, style: "soft" },
+    ],
+    exclude_references: ["loc.altar-sanctuary"],
+    prompt_notes: [
+      "Seen from the side, he leans forward over his knees, the helmet pointing down, the cape sliding over his back as one flat beige shape, one gauntlet flat on the stone, the other on his chest plate.",
+      "No glowing lines, no cyan light on the armour itself: only the environment is lit.",
     ],
   },
 ];

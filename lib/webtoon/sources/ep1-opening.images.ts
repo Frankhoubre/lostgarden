@@ -136,5 +136,95 @@ export const EP1_OPENING_IMAGES: Record<string, PanelImage> = {
     "job_id": "81647755-7ab8-4704-874f-5b95dee50b3b",
     "generated_at": "2026-09-19T18:02:55+00:00",
     "status": "generated"
+  },
+  "p11": {
+    "src": "/webtoon/ep1-opening/panels/p11.jpg",
+    "width": 1080,
+    "height": 717,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "9f4eb5b5-4030-4b89-a866-665f08403615",
+    "generated_at": "2026-09-20T10:23:54+00:00",
+    "status": "generated"
+  },
+  "p12": {
+    "src": "/webtoon/ep1-opening/panels/p12.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "75a634b4-1bc3-4bb9-bf3c-a739ea68cf25",
+    "generated_at": "2026-09-20T10:23:54+00:00",
+    "status": "generated"
+  },
+  "p13": {
+    "src": "/webtoon/ep1-opening/panels/p13.jpg",
+    "width": 1080,
+    "height": 611,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "a7e7caa8-2aae-433e-b505-c14985199ed0",
+    "generated_at": "2026-09-20T10:23:54+00:00",
+    "status": "generated"
+  },
+  "p14": {
+    "src": "/webtoon/ep1-opening/panels/p14.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "3349efe0-b2ee-4406-ab31-f8be51785928",
+    "generated_at": "2026-09-20T10:25:15+00:00",
+    "status": "generated"
+  },
+  "p15": {
+    "src": "/webtoon/ep1-opening/panels/p15.jpg",
+    "width": 1080,
+    "height": 611,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "edec3f15-e70c-48e3-9a40-875151634729",
+    "generated_at": "2026-09-20T10:23:55+00:00",
+    "status": "generated"
+  },
+  "p16": {
+    "src": "/webtoon/ep1-opening/panels/p16.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "06af6605-c6da-4d4b-8605-f68fd40338bf",
+    "generated_at": "2026-09-20T10:23:55+00:00",
+    "status": "generated"
+  },
+  "p17": {
+    "src": "/webtoon/ep1-opening/panels/p17.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "e57abacb-675f-4ab4-aa97-2b23101807a8",
+    "generated_at": "2026-09-20T10:23:55+00:00",
+    "status": "generated"
+  },
+  "p18": {
+    "src": "/webtoon/ep1-opening/panels/p18.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "aa744bf2-d288-4e7b-acb0-85f520dc838a",
+    "generated_at": "2026-09-20T10:23:55+00:00",
+    "status": "generated"
+  },
+  "p19": {
+    "src": "/webtoon/ep1-opening/panels/p19.jpg",
+    "width": 1080,
+    "height": 1350,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "c6558f24-b8a2-41f2-a7a6-1197ab80baf3",
+    "generated_at": "2026-09-20T10:25:16+00:00",
+    "status": "generated"
+  },
+  "p20": {
+    "src": "/webtoon/ep1-opening/panels/p20.jpg",
+    "width": 1080,
+    "height": 717,
+    "model": "gpt-image-2.5-sunburst",
+    "job_id": "9b27444c-5d71-40b9-9aee-5c888c9b8652",
+    "generated_at": "2026-09-20T10:23:55+00:00",
+    "status": "generated"
   }
 };

@@ -1,6 +1,6 @@
 # Lost Garden · pipeline webtoon
 
-Le moteur transforme une source (épisode monté, scénario ScreenWeaver, ou les deux) en une bande verticale 1080 px lisible sur téléphone. Première application : les 30 premières secondes de l'épisode 1, lisibles sur `/webtoon/ep1-opening`, éditables sur `/webtoon/ep1-opening/editor`, exportées sur `/api/webtoon/ep1-opening` et dans `public/webtoon/ep1-opening/webtoon.json`.
+Le moteur transforme une source (épisode monté, scénario ScreenWeaver, ou les deux) en une bande verticale 1080 px lisible sur téléphone. Première application : la première minute de l'épisode 1 (0:00 à 1:04), lisibles sur `/webtoon/ep1-opening`, éditables sur `/webtoon/ep1-opening/editor`, exportées sur `/api/webtoon/ep1-opening` et dans `public/webtoon/ep1-opening/webtoon.json`.
 
 ## Étapes et fichiers
 
@@ -51,6 +51,7 @@ Le frontend ne décide rien : il empile ce que le moteur a décidé. La distance
 
 ## Ce que la première passe a établi
 
+- La suite, de 0:31 à 1:04, ajoute onze plans (coupes à 36.3, 39.8, 41.3, 43.8, 45.5, 48.3, 52.0, 54.0, 56.0, 59.8 s, dont un second noir de deux secondes) et dix cases : l'autel vu du sol, la rosace qui se réveille, le premier faisceau, les faisceaux sur l'autel, le corps sous la lumière, la lumière dans les jointures, le redressement (un seul son dur, « KLANG »), l'immobilité, la main levée, le corps penché. Aucune réplique. Le second noir est un espace long de 900 px, sans case.
 - Les 30 s de l'épisode 1 font onze plans (coupes à 4.4, 6.3, 11.2, 12.9, 13.9, 16.9, 20.6, 22.6, 25.5, 27.6 s) et une seule réplique, « Find me. » à 17.9 s.
 - Dix cases, 16 028 px de haut, cinq beats. Le noir du film (20.6 à 22.6 s) n'est pas une case : c'est un gap de 1 400 px et le changement de fond.
 - Aucune case n'invente d'action : chaque case est marquée `direct` et pointe le plan dont elle vient.

@@ -21,6 +21,16 @@ LOCALE = "fr"
 
 BEAT_FR = {"b1": "Le blanc", "b2": "Les lys", "b3": "Trouve-moi", "b4": "Le noir", "b5": "Le sanctuaire"}
 PURPOSE_FR = {
+    "p11": "Le sanctuaire à sa hauteur : l'autel vu du sol entre les champignons, avant que rien n'arrive. La case pose l'axe sur lequel le réveil va se jouer.",
+    "p12": "La rosace se réveille. Une case haute remplie par la fenêtre, plus claire qu'à 0:29 : la lumière est l'événement.",
+    "p13": "De la fenêtre droit sur lui : le premier faisceau touche le métal. On le regarde comme la lumière le regarde.",
+    "p14": "Retour au sol : les faisceaux tombent fort sur l'autel minuscule. Une case haute pour que la lumière ait la place de tomber.",
+    "p15": "Le corps entier sous la lumière, des pieds au heaume, une ligne horizontale calme avant qu'elle n'entre en lui.",
+    "p16": "La lumière entre dans le métal. La seule case où l'armure elle-même luit : des lignes cyan le long des jointures, tenues de près.",
+    "p17": "Le choc. Il se redresse d'un coup vers le lecteur, luisant, des lys qui tombent : la case la plus forte de la bande, pleine largeur, un seul son dur.",
+    "p18": "Après le choc, rien : il est assis, la lueur éteinte, le heaume creux tourné vers nous. Le lecteur le rencontre éveillé pour la première fois.",
+    "p19": "Après le second noir, le premier geste : il lève la main droite et la regarde. « Il regarde ses mains. Il ne comprend pas. »",
+    "p20": "Il se penche sur lui-même et touche son torse. La bande s'arrête sur la question de tout l'épisode : qu'y a-t-il dedans.",
     "p01b": "Case pont : trois pétales sur du blanc, rien d'autre. Le vent de la case précédente continue de tomber avec la page.",
     "p03b": "Contre-champ que le film sous-entend : le dos du heaume, le champ flou devant, la tache rose au loin. Même instant, nouveau cadrage.",
     "p06b": "Un détail avant la seule réplique : la fleur dans ses cheveux et un pétale qui s'envole. La page ralentit pour que « Trouve-moi » arrive seul.",
@@ -164,7 +174,7 @@ h2{{font-family:Oswald,"Arial Narrow",sans-serif;text-transform:uppercase;letter
 .foot{{margin-top:40px;font-size:.75rem;color:rgba(216,210,194,.55)}}
 </style>
 <div class="wrap">
-<span class="eyebrow">Lost Garden · Épisode 1 · ouverture, 0:00 à 0:30</span>
+<span class="eyebrow">Lost Garden · Épisode 1 · 0:00 à 1:04</span>
 <h1>The Awakening of the Lantern Knight</h1>
 <p class="meta">{len(data["panels"])} cases · {total} px de haut sur 1080 px de large · lettrage en français</p>
 <div class="stage"><div class="strip" role="list" aria-label="Webtoon">
