@@ -4,6 +4,7 @@ import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent }
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import type { Locale } from "@/lib/i18n/config";
+import { frameClass, frameStyle } from "@/lib/webtoon/frame";
 import { WEBTOON_WIDTH, type Anchor, type WebtoonPanel } from "@/lib/webtoon/types";
 
 type Drag =
@@ -92,8 +93,8 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
     >
       <div
         ref={surface}
-        className={`webtoon-panel ${variant === "strip" && !panel.bleed ? "webtoon-panel-framed" : "webtoon-panel-bleed"} studio-canvas-panel ${panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"} ${variant === "strip" && panel.border ? "webtoon-panel-bordered" : ""}`}
-        style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}` }}
+        className={`webtoon-panel ${variant === "strip" ? frameClass(panel) : "webtoon-panel-bleed"} studio-canvas-panel ${panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"} ${variant === "strip" && panel.border ? "webtoon-panel-bordered" : ""}`}
+        style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}`, ...(variant === "strip" ? frameStyle(panel) : {}) }}
       >
         {panel.image.src && panel.image.status !== "missing" ? (
           // eslint-disable-next-line @next/next/no-img-element

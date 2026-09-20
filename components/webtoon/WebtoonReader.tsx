@@ -3,6 +3,7 @@
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { frameClass, frameStyle } from "@/lib/webtoon/frame";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { WEBTOON_WIDTH, type PanelBackground, type WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -67,12 +68,12 @@ export function WebtoonReader({
               ) : null}
             </div>
             <div
-              className={`webtoon-panel ${panel.bleed ? "webtoon-panel-bleed" : "webtoon-panel-framed"} ${
+              className={`webtoon-panel ${frameClass(panel)} ${
                 panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"
               } ${panel.border ? "webtoon-panel-bordered" : ""} ${selected ? "webtoon-panel-selected" : ""} ${
                 interactive ? "webtoon-panel-interactive" : ""
               }`}
-              style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}` }}
+              style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}`, ...frameStyle(panel) }}
               onClick={interactive ? () => onSelect?.(panel.panel_id) : undefined}
               data-panel-id={panel.panel_id}
             >

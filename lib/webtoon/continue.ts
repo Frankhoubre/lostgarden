@@ -4,6 +4,7 @@ import { heightForAspect } from "./layout";
 import type {
   Anchor,
   LibraryOverlay,
+  PanelFrame,
   BubbleStyle,
   CameraAngle,
   Fidelity,
@@ -57,6 +58,8 @@ export type NextPanelIntent = {
   bleed?: boolean;
   border?: boolean;
   focal_point?: Anchor;
+  /** How the panel sits on the strip: width in percent, side, shape, overlap of the previous panel, tilt. */
+  frame?: PanelFrame;
   narrative_role?: NarrativeRole;
   transition_type?: TransitionType;
   fidelity?: Fidelity;
@@ -74,6 +77,25 @@ const BUBBLES = new Set<BubbleStyle>(["speech", "whisper", "thought", "shout", "
 
 const pick = <T extends string>(value: unknown, allowed: Set<T>, fallback: T): T =>
   typeof value === "string" && allowed.has(value as T) ? (value as T) : fallback;
+
+const SHAPES = new Set<NonNullable<PanelFrame["shape"]>>(["rect", "rounded", "slant", "slant-reverse", "wedge", "wedge-reverse"]);
+
+/** A clean frame from whatever the writer sent, or undefined when it sent nothing usable. */
+export function cleanFrame(value: unknown): PanelFrame | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const frame: PanelFrame = {};
+  const width = Number(raw.width);
+  if (Number.isFinite(width)) frame.width = Math.round(Math.min(100, Math.max(40, width)));
+  if (raw.align === "left" || raw.align === "center" || raw.align === "right") frame.align = raw.align;
+  if (typeof raw.shape === "string" && SHAPES.has(raw.shape as NonNullable<PanelFrame["shape"]>)) frame.shape = raw.shape as PanelFrame["shape"];
+  const overlap = Number(raw.overlap);
+  if (Number.isFinite(overlap) && overlap > 0) frame.overlap = Math.round(Math.min(400, overlap) / 10) * 10;
+  const tilt = Number(raw.tilt);
+  if (Number.isFinite(tilt) && tilt !== 0) frame.tilt = Math.max(-6, Math.min(6, Math.round(tilt)));
+  if (typeof raw.shadow === "boolean") frame.shadow = raw.shadow;
+  return Object.keys(frame).length ? frame : undefined;
+}
 
 const anchor = (value: Anchor | undefined, fallback: Anchor): Anchor =>
   value && Number.isFinite(value.x) && Number.isFinite(value.y)
@@ -164,6 +186,7 @@ export function panelsFromIntents(
       panel_height: height,
       bleed: typeof intent.bleed === "boolean" ? intent.bleed : base.bleed,
       border: typeof intent.border === "boolean" ? intent.border : base.border,
+      frame: cleanFrame(intent.frame),
       focal_point: anchor(intent.focal_point, { x: 50, y: 50 }),
       transition_type: transition,
       spacing_before: SPACING_BY_TRANSITION[transition],

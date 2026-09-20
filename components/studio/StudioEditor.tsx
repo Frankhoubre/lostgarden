@@ -37,6 +37,7 @@ import type {
   Fidelity,
   LibraryOverlay,
   LocalizedText,
+  PanelFrame,
   NarrativeRole,
   PanelBackground,
   ShotType,
@@ -403,6 +404,56 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     }
   };
 
+  /**
+   * Polish the whole strip: the layout editor gives every panel a frame and
+   * proposes the connective panels the story is missing; their images are
+   * then generated and their lettering translated.
+   */
+  const polishStrip = async () => {
+    if (busy) return;
+    if (!window.confirm("Peaufiner la bande ? L'IA donne une forme de webtoon à chaque case (largeur, côté, bords, chevauchement) et ajoute les cases de liaison qui manquent, puis génère leurs images.")) return;
+    setBusy(true);
+    stopBatch.current = false;
+    setJob({ phase: "writing", label: "Mise en page et cases de liaison…", done: 0, total: 1, queue: [], current: null, placeholders: 0, deadline: deadlineIn(90_000) });
+    try {
+      const response = await fetch(`/api/webtoon/${script.slug}/polish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+        body: JSON.stringify({ panels, library, max_inserts: 10 }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { frames?: Record<string, PanelFrame>; inserts?: { after: string; panel: WebtoonPanel }[]; error?: string };
+      if (!response.ok || !payload.frames) {
+        notify(payload.error ?? `Erreur ${response.status}`);
+        return;
+      }
+      const inserts = payload.inserts ?? [];
+      const next: WebtoonPanel[] = [];
+      for (const panel of panels) {
+        next.push(payload.frames[panel.panel_id] ? { ...panel, frame: payload.frames[panel.panel_id] } : panel);
+        for (const insert of inserts) if (insert.after === panel.panel_id) next.push(insert.panel);
+      }
+      const renumbered = next.map((p, i) => ({ ...p, order: i + 1 }));
+      setPanels(renumbered);
+      onAutosave?.();
+      notify(`Mise en page appliquée à ${Object.keys(payload.frames).length} cases, ${inserts.length} case${inserts.length > 1 ? "s" : ""} de liaison ajoutée${inserts.length > 1 ? "s" : ""}`);
+      const created = inserts.map((i) => i.panel);
+      if (created.length) {
+        const ok = await runImages(created);
+        if (!stopBatch.current) {
+          setJob({ phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
+          setBusy(false);
+          await translatePanels(created, false);
+        }
+        notify(`Bande peaufinée : ${created.length} case${created.length > 1 ? "s" : ""} de liaison, ${ok} image${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
+      }
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Erreur");
+    } finally {
+      setJob(null);
+      setBusy(false);
+    }
+  };
+
   const replaceImage = async (file: File) => {
     if (!selected) return;
     setBusy(true);
@@ -595,6 +646,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </button>
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(panels, false)} disabled={busy} title="Remplit les langues vides de toutes les bulles, cartouches et sons">
                 Traduire toute la bande
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => void polishStrip()} disabled={busy} title="Donne une forme de webtoon à chaque case et ajoute les cases de liaison qui manquent">
+                Peaufiner la bande
               </button>
             </>
           )}
@@ -1028,6 +1082,39 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <label className="webtoon-field"><span>Espace avant (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_before} onChange={(e) => patch({ spacing_before: Number(e.target.value) })} /></label>
               <label className="webtoon-field"><span>Espace après (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_after} onChange={(e) => patch({ spacing_after: Number(e.target.value) })} /></label>
             </div>
+            <div className="studio-section-head mt-3">
+              <span className="webtoon-field-label">Forme de la case sur la bande</span>
+              <button type="button" className="webtoon-mini" onClick={() => patch({ frame: undefined })} disabled={!selected.frame} title="Revenir à la case pleine largeur ou encadrée simple">Réinitialiser</button>
+            </div>
+            {(() => {
+              const frame: PanelFrame = selected.frame ?? {};
+              const setFrame = (changes: Partial<PanelFrame>) => patch({ frame: { ...frame, ...changes } });
+              const width = frame.width ?? (selected.bleed ? 100 : 92);
+              return (
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="webtoon-field"><span>Largeur · {width} %</span>
+                    <input type="range" min={40} max={100} step={2} value={width} onChange={(e) => setFrame({ width: Number(e.target.value) })} />
+                  </label>
+                  <label className="webtoon-field"><span>Côté</span>
+                    <select value={frame.align ?? "center"} onChange={(e) => setFrame({ align: e.target.value as PanelFrame["align"] })} disabled={width >= 100}>
+                      <option value="left">À gauche</option><option value="center">Centrée</option><option value="right">À droite</option>
+                    </select>
+                  </label>
+                  <label className="webtoon-field"><span>Forme</span>
+                    <select value={frame.shape ?? "rect"} onChange={(e) => setFrame({ shape: e.target.value as PanelFrame["shape"] })}>
+                      <option value="rect">Droite</option><option value="rounded">Angles arrondis</option><option value="slant">Bords inclinés</option><option value="slant-reverse">Bords inclinés (inverse)</option><option value="wedge">Bas en biseau</option><option value="wedge-reverse">Bas en biseau (inverse)</option>
+                    </select>
+                  </label>
+                  <label className="webtoon-field"><span>Chevauche la case du dessus · {frame.overlap ?? 0} px</span>
+                    <input type="range" min={0} max={400} step={10} value={frame.overlap ?? 0} onChange={(e) => setFrame({ overlap: Number(e.target.value) })} />
+                  </label>
+                  <label className="webtoon-field"><span>Inclinaison · {frame.tilt ?? 0}°</span>
+                    <input type="range" min={-6} max={6} step={1} value={frame.tilt ?? 0} onChange={(e) => setFrame({ tilt: Number(e.target.value) })} />
+                  </label>
+                  <label className="webtoon-field webtoon-field-row"><input type="checkbox" checked={frame.shadow ?? width < 100} onChange={(e) => setFrame({ shadow: e.target.checked })} /><span>Ombre portée</span></label>
+                </div>
+              );
+            })()}
             <p className="text-xs text-ivory/60">Temps {selected.beat_id} · plans {selected.source_shots.join(", ") || "aucun"}{selected.source_time_start !== null ? ` · film ${selected.source_time_start.toFixed(1)} s à ${selected.source_time_end?.toFixed(1)} s` : ""}{selected.image.model ? ` · ${selected.image.model}` : ""}</p>
           </div>
         ) : null}
