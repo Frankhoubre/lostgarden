@@ -23,6 +23,7 @@ export async function completeJson<T>(input: { system: string; user: UserContent
       model: input.model ?? GATEWAY_TEXT_MODEL,
       temperature: 0.3,
       max_tokens: input.maxTokens ?? 4000,
+      max_completion_tokens: input.maxTokens ?? 4000,
       messages: [
         { role: "system", content: input.system },
         { role: "user", content: input.user },
@@ -33,9 +34,51 @@ export async function completeJson<T>(input: { system: string; user: UserContent
     const detail = await response.text();
     throw new Error(`AI Gateway ${response.status}: ${detail.slice(0, 500)}`);
   }
-  const json = (await response.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = json.choices?.[0]?.message?.content ?? "";
-  const match = /\{[\s\S]*\}/.exec(content.replace(/^```(?:json)?\s*|\s*```$/g, ""));
-  if (!match) throw new Error("AI Gateway returned no JSON");
-  return JSON.parse(match[0]) as T;
+  const json = (await response.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[] };
+  const choice = json.choices?.[0];
+  const content = choice?.message?.content ?? "";
+  if (choice?.finish_reason && choice.finish_reason !== "stop") {
+    console.warn(`[webtoon] gateway text answer ended with ${choice.finish_reason} after ${content.length} chars`);
+  }
+  return parseJsonAnswer<T>(content, apiKey, baseUrl);
+}
+
+const REPAIR_MODEL = "anthropic/claude-haiku-4.5";
+
+/**
+ * Reads the JSON of a model answer. A long answer sometimes carries a
+ * broken quote or a stray comma; rather than losing the whole call, a small
+ * model is asked once to return the same JSON, valid.
+ */
+async function parseJsonAnswer<T>(content: string, apiKey: string, baseUrl: string): Promise<T> {
+  const extract = (text: string) => /\{[\s\S]*\}/.exec(text.replace(/^```(?:json)?\s*|\s*```$/g, ""))?.[0] ?? null;
+  const first = extract(content);
+  if (!first) throw new Error("AI Gateway returned no JSON");
+  try {
+    return JSON.parse(first) as T;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "invalid JSON";
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: REPAIR_MODEL,
+        temperature: 0,
+        max_tokens: 16000,
+        messages: [
+          { role: "system", content: "You repair JSON. Answer with the same JSON, made valid (escape quotes inside strings, fix commas and brackets), and nothing else. Do not change any value beyond what validity requires." },
+          { role: "user", content: `This JSON fails to parse (${reason}):\n\n${first}` },
+        ],
+      }),
+    });
+    if (!response.ok) throw new Error(`AI Gateway returned invalid JSON (${reason}) and the repair failed (${response.status})`);
+    const repaired = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+    const second = extract(repaired.choices?.[0]?.message?.content ?? "");
+    if (!second) throw new Error(`AI Gateway returned invalid JSON (${reason}) and the repair returned none`);
+    try {
+      return JSON.parse(second) as T;
+    } catch {
+      throw new Error(`AI Gateway returned invalid JSON (${reason}) and the repair did not fix it`);
+    }
+  }
 }
