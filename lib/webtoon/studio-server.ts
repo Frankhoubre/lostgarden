@@ -17,13 +17,13 @@ function allowedEmails(): string[] {
 
 type LookupResponse = { users?: { email?: string; emailVerified?: boolean }[] };
 
-export type StudioIdentity = { email: string };
+export type StudioIdentity = { email: string; /** The Firebase ID token of the account, to act on its behalf (Storage). Null behind the dev bypass. */ idToken: string | null };
 
 export async function verifyStudioRequest(request: Request): Promise<StudioIdentity | null> {
   // Local work behind ?dev=1: the gate is open in the browser, so the route
   // opens too, on the dev server only, when the editor says so.
   if (process.env.NODE_ENV === "development" && request.headers.get("x-studio-dev") === "1") {
-    return { email: "dev@localhost" };
+    return { email: "dev@localhost", idToken: null };
   }
   const header = request.headers.get("authorization") ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
@@ -44,7 +44,7 @@ export async function verifyStudioRequest(request: Request): Promise<StudioIdent
     const user = payload.users?.[0];
     const email = user?.email?.toLowerCase();
     if (!email || !user?.emailVerified) return null;
-    return allowedEmails().includes(email) ? { email } : null;
+    return allowedEmails().includes(email) ? { email, idToken: token } : null;
   } catch {
     return null;
   }

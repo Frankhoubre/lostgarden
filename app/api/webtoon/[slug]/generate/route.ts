@@ -4,6 +4,7 @@ import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -12,8 +13,9 @@ import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
  * Body: { panel_id: string, panel?: WebtoonPanel, model?: string }
  *
  * Regenerates one panel through Vercel AI Gateway (GPT Image 2.5 Sunburst by
- * default) with the panel's reference sheets attached, and returns the image
- * as a data URL. A panel written in the studio (empty prompt, or
+ * default) with the panel's reference sheets attached. With a real studio
+ * account the image is stored in Firebase Storage from here and only its
+ * URL comes back (`src`); behind the dev bypass it comes back as a data URL. A panel written in the studio (empty prompt, or
  * `prompt_auto`) gets its references resolved and its prompt composed here,
  * from the same bible as the engine, and the composed prompt comes back
  * with the image. The editor shows it in place; persisting it into the strip
@@ -71,10 +73,17 @@ export async function POST(request: Request, { params }: RouteContext) {
       model: body.model,
       resolveReference: referenceAsDataUrl,
     });
+    const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
+    const src = await storeGeneratedImage({
+      idToken: identity.idToken,
+      path: `webtoon/${slug}/${panel.panel_id}/${Date.now()}.${extension}`,
+      base64: image.base64,
+      mediaType: image.media_type,
+    });
     return Response.json({
       panel_id: panel.panel_id,
       model: image.model,
-      data_url: `data:${image.media_type};base64,${image.base64}`,
+      ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }),
       generated_at: new Date().toISOString(),
       generation_prompt: panel.generation_prompt,
       negative_constraints: panel.negative_constraints,

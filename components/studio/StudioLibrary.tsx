@@ -97,7 +97,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
 
   const storeImage = async (asset: ReferenceAsset, dataUrl: string) => {
     let src = dataUrl;
-    if (user) {
+    if (user && dataUrl.startsWith("data:")) {
       try {
         src = await uploadLibraryImage(script.slug, asset.id, dataUrl);
       } catch (error) {
@@ -120,12 +120,13 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
         body: JSON.stringify({ asset, library }),
       });
-      const payload = (await response.json().catch(() => ({}))) as { data_url?: string; error?: string };
-      if (!response.ok || !payload.data_url) {
+      const payload = (await response.json().catch(() => ({}))) as { src?: string; data_url?: string; error?: string };
+      const received = payload.src ?? payload.data_url;
+      if (!response.ok || !received) {
         notify(payload.error ?? `Erreur ${response.status}`);
         return;
       }
-      await storeImage(asset, payload.data_url);
+      await storeImage(asset, received);
       notify(`Fiche générée pour ${entry.name}`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de génération");

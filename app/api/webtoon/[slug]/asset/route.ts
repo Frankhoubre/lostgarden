@@ -3,6 +3,7 @@ import path from "node:path";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { libraryWith } from "@/lib/webtoon/references";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import { STYLE_BIBLE } from "@/lib/webtoon/style-bible";
 import type { LibraryOverlay, ReferenceAsset } from "@/lib/webtoon/types";
@@ -99,7 +100,14 @@ export async function POST(request: Request, { params }: RouteContext) {
       },
       { resolveReference: referenceAsDataUrl },
     );
-    return Response.json({ id: asset.id, model: image.model, data_url: `data:${image.media_type};base64,${image.base64}`, prompt: lines.join("\n\n") });
+    const safe = asset.id.replace(/[^a-z0-9._-]/gi, "_");
+    const src = await storeGeneratedImage({
+      idToken: identity.idToken,
+      path: `webtoon/${slug}/library/${safe}/${Date.now()}.png`,
+      base64: image.base64,
+      mediaType: image.media_type,
+    });
+    return Response.json({ id: asset.id, model: image.model, ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }), prompt: lines.join("\n\n") });
   } catch (error) {
     const message = error instanceof Error ? error.message : "generation failed";
     return Response.json({ error: message }, { status: 502 });
