@@ -76,7 +76,9 @@ export function WebtoonReader({
               onClick={interactive ? () => onSelect?.(panel.panel_id) : undefined}
               data-panel-id={panel.panel_id}
             >
-              {panel.image.status === "missing" || !panel.image.src ? (
+              {panel.caption.some((c) => c.style === "title") && !panel.image.src ? (
+                <div className="webtoon-title-card" aria-hidden="true" />
+              ) : panel.image.status === "missing" || !panel.image.src ? (
                 <div
                   className={`webtoon-placeholder ${
                     panel.background === "white" ? "webtoon-placeholder-light" : ""

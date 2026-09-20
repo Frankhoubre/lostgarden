@@ -347,7 +347,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       onAutosave?.();
       select(created[0].panel_id);
       notify(`${created.length} cases écrites. Génération des images…`);
-      const ok = await runImages(created);
+      // A title card has no image to make.
+      const ok = await runImages(created.filter((p) => p.description.trim() || p.generation_prompt.trim()));
       if (!stopBatch.current) {
         setJob({ phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
         setBusy(false);
@@ -713,8 +714,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             {selected.caption.map((box, i) => (
               <div key={i} className="webtoon-subcard">
                 {textInputs(box.text, (text) => patch({ caption: selected.caption.map((c, k) => (k === i ? { ...c, text } : c)) }))}
-                <select value={box.style} onChange={(e) => patch({ caption: selected.caption.map((c, k) => (k === i ? { ...c, style: e.target.value as "narration" | "location" | "time" } : c)) })}>
-                  <option value="narration">Narration</option><option value="location">Lieu</option><option value="time">Temps</option>
+                <select value={box.style} onChange={(e) => patch({ caption: selected.caption.map((c, k) => (k === i ? { ...c, style: e.target.value as "narration" | "location" | "time" | "title" } : c)) })}>
+                  <option value="narration">Narration</option><option value="location">Lieu</option><option value="time">Temps</option><option value="title">Titre (carte-titre, sans image)</option>
                 </select>
                 <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => patch({ caption: selected.caption.filter((_, k) => k !== i) })}>Supprimer</button>
               </div>

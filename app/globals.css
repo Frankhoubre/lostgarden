@@ -2385,6 +2385,28 @@ h3 {
   pointer-events: none;
 }
 
+.webtoon-caption-title {
+  max-width: 90cqw;
+  padding: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display), var(--font-zen), serif;
+  font-weight: 400;
+  font-size: 9cqw;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.1;
+  color: var(--lily, #f6f4ef);
+  text-shadow: 0 0 3cqw rgba(125, 223, 255, 0.35);
+}
+
+.webtoon-title-card {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+}
+
 .webtoon-caption-location,
 .webtoon-caption-time {
   font-family: var(--font-oswald), sans-serif;
