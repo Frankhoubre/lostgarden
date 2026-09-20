@@ -38,7 +38,7 @@ Lost Garden garde son studio privé comme premier client et comme banc d'essai, 
 
 ### 1. Projets et données (fondation)
 
-- Une collection `projects/{projectId}` : propriétaire, titre, style choisi, langues, source (`video`, `screenplay`, `scratch`), état. Sous-collections : `panels` (ou une chaîne JSON comme aujourd'hui tant que la bande reste sous 1 Mo), `published`, `library`, `sources`.
+- Une collection `projects/{projectId}` : propriétaire, titre, style choisi, langues, source (`video`, `screenplay`, `scratch`), état. Sous-collections : `panels` (ou les tranches JSON de 700 Ko d'aujourd'hui, `panels_json` puis `chunks/<n>`), `published`, `library`, `sources`.
 - Règles Firestore et Storage par propriétaire du projet (plus de liste blanche).
 - Les routes `generate`, `continue`, `translate`, `asset` reçoivent `projectId`, vérifient l'appartenance, débitent les crédits avant d'appeler le Gateway (coût réel d'une case en 2k : environ 0,20 $ ; d'une fiche : 0,20 $ ; d'un appel écrivain : 0,05 à 0,30 $ selon le nombre d'images du film envoyées). Comptes, abonnement et crédits : Firebase Auth et Stripe, sur le modèle d'Imaginode.
 - Le registre de scripts en code (`scripts.ts`) disparaît : un projet est ses données.
