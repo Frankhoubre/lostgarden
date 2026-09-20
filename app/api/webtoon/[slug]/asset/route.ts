@@ -3,6 +3,7 @@ import path from "node:path";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { libraryWith } from "@/lib/webtoon/references";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { recordCost } from "@/lib/webtoon/cost-server";
 import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import { STYLE_BIBLE } from "@/lib/webtoon/style-bible";
@@ -100,6 +101,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       },
       { resolveReference: referenceAsDataUrl },
     );
+    void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "sheets" });
     const safe = asset.id.replace(/[^a-z0-9._-]/gi, "_");
     const src = await storeGeneratedImage({
       idToken: identity.idToken,

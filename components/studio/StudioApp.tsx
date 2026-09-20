@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n/config";
@@ -11,7 +12,7 @@ import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioLocations } from "@/components/studio/StudioLocations";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
-import { getFirebaseAuth } from "@/lib/firebase";
+import { getDb, getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
 import { appendFromFrame } from "@/lib/webtoon/editor-ops";
 import { computeLayout } from "@/lib/webtoon/layout";
@@ -26,6 +27,11 @@ const PREVIEW_LOCALES: { id: Locale; label: string }[] = [
   { id: "ja", label: "日本語" },
   { id: "ko", label: "한국어" },
 ];
+
+/** Running cost of the strip's generations, as the routes record it in Firestore. */
+type StripCost = { total_usd: number; images_usd?: number; sheets_usd?: number; writer_usd?: number; translate_usd?: number; count?: number; images_count?: number; sheets_count?: number; writer_count?: number; translate_count?: number };
+
+const usd = (value: number | undefined) => `${(value ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
 
 /** What the editor reports about its running job, shown in the bar from every tab. */
 export type JobSummary = { label: string; done: number; total: number; deadline: number } | null;
@@ -77,6 +83,17 @@ export function StudioApp({ script }: StudioAppProps) {
     return () => window.clearTimeout(handle);
   }, [script.panels]);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  // The cost of the strip so far, live: every generation adds what the gateway billed.
+  const [cost, setCost] = useState<StripCost | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(
+      doc(getDb(), "webtoon_costs", script.slug),
+      (snapshot) => setCost(snapshot.exists() ? (snapshot.data() as StripCost) : null),
+      () => setCost(null),
+    );
+    return unsubscribe;
+  }, [user, script.slug]);
   /** Language of the lettering shown in the editor and the strip preview. */
   const [previewLocale, setPreviewLocale] = useState<Locale>(locale);
   const [job, setJob] = useState<JobSummary>(null);
@@ -301,6 +318,14 @@ export function StudioApp({ script }: StudioAppProps) {
           <span className="anime-label text-xs text-cyan-pale">Studio webtoon</span>
           <span className="studio-bar-sep">/</span>
           <span className="text-sm text-ivory/85">{localizedText(script.title, locale)} · {localizedText(script.subtitle, locale)}</span>
+          {cost ? (
+            <span
+              className="studio-cost"
+              title={`Coût des générations de ce webtoon, tel que facturé par le Gateway.\nImages : ${usd(cost.images_usd)} (${cost.images_count ?? 0})\nFiches : ${usd(cost.sheets_usd)} (${cost.sheets_count ?? 0})\nÉcriture de la suite : ${usd(cost.writer_usd)} (${cost.writer_count ?? 0} lots)\nTraductions : ${usd(cost.translate_usd)} (${cost.translate_count ?? 0})`}
+            >
+              {usd(cost.total_usd)}
+            </span>
+          ) : null}
         </div>
         <div className="studio-bar-actions">
           <div className="studio-langswitch" role="group" aria-label="Langue d'affichage">

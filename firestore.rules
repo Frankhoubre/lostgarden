@@ -24,6 +24,11 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // Running cost of the generations of a strip: studio only.
+    match /webtoon_costs/{slug} {
+      allow read, write: if isStudio();
+    }
+
     // The version the public reader shows: anyone reads, the studio writes.
     match /webtoon_published/{slug} {
       allow read: if true;

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
+import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson, type UserPart } from "@/lib/webtoon/providers/gateway-text";
 import { libraryCharacters, libraryLocations, libraryWith } from "@/lib/webtoon/references";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
@@ -53,7 +54,9 @@ type FrameNote = {
  * line it matches. The writer then plans from these notes, so the state of
  * the characters is read from the image and not guessed.
  */
-async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; screenplay: string; frames: { seconds: number; label: string; src: string }[]; characters: string[] }): Promise<FrameNote[]> {
+type CostMeter = { usd: number };
+
+async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; screenplay: string; frames: { seconds: number; label: string; src: string }[]; characters: string[]; meter: CostMeter }): Promise<FrameNote[]> {
   const system = [
     `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, an original anime being adapted into a webtoon. You receive frames of the finished episode taken every five seconds, each labelled with its timecode, and the screenplay in French. The film and the screenplay match.`,
     `Characters: ${input.characters.join(" | ")}.`,
@@ -74,7 +77,7 @@ async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getW
     ...frameParts.flat(),
     { type: "text", text: `Describe each of the ${input.frames.length} frames now, as JSON.` },
   ];
-  const result = await completeJson<{ frames?: FrameNote[] }>({ system, user, maxTokens: 16000, reasoning: "none" });
+  const result = await completeJson<{ frames?: FrameNote[] }>({ system, user, maxTokens: 16000, reasoning: "none", onCost: (usd) => { input.meter.usd += usd; } });
   return (result.frames ?? []).filter((f) => f && Number.isFinite(Number(f.seconds)));
 }
 
@@ -83,7 +86,7 @@ async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getW
  * A single image and a yes/no question read far better than a sheet of
  * sixteen, and the answer overrides the supervisor's `helmet` note.
  */
-async function helmetChecks(frames: { seconds: number; src: string }[]): Promise<Map<number, "on" | "off" | "absent">> {
+async function helmetChecks(frames: { seconds: number; src: string }[], meter: CostMeter): Promise<Map<number, "on" | "off" | "absent">> {
   const results = await Promise.all(
     frames.map(async (frame) => {
       try {
@@ -96,6 +99,7 @@ async function helmetChecks(frames: { seconds: number; src: string }[]): Promise
           ],
           maxTokens: 200,
           reasoning: "none",
+          onCost: (usd) => { meter.usd += usd; },
         });
         const state: "on" | "off" | "absent" = !answer.lanterne_visible ? "absent" : answer.helmet_on_head ? "on" : "off";
         return [frame.seconds, state, answer.helmet_elsewhere ?? ""] as const;
@@ -169,6 +173,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const created: WebtoonPanel[] = [];
   let current = start;
   let lastNotes: FrameNote[] = [];
+  const meter: CostMeter = { usd: 0 };
   try {
     while (created.length < Math.min(count, BATCH)) {
       const batch = Math.min(BATCH, count - created.length);
@@ -190,7 +195,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         dialogue: p.dialogue.map((d) => `${d.speaker}: ${d.text.en}`),
       }));
       const system = writerSystem({ script, batch, characters, locations });
-      const [notes, helmet] = await Promise.all([analyzeFrames({ script, screenplay, frames, characters }), helmetChecks(frames)]);
+      const [notes, helmet] = await Promise.all([analyzeFrames({ script, screenplay, frames, characters, meter }), helmetChecks(frames, meter)]);
       for (const note of notes) {
         const check = helmet.get(Number(note.seconds));
         if (check === "on") note.helmet = "on his head";
@@ -214,7 +219,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         ...frameParts.flat(),
         { type: "text", text: `Write the next ${batch} panels now, as JSON, consistent with the notes.` },
       ];
-      const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 24000, reasoning: "none" });
+      const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 24000, reasoning: "none", onCost: (usd) => { meter.usd += usd; } });
       const intents = (result.panels ?? []).slice(0, batch);
       const panels = panelsFromIntents(current, intents, frames, script, overlay);
       if (!panels.length) {
@@ -224,8 +229,10 @@ export async function POST(request: Request, { params }: RouteContext) {
       created.push(...panels);
       current = [...current, ...panels];
     }
-    return Response.json({ panels: created, notes: lastNotes, adapted_until: Math.max(0, ...start.map((p) => p.source_time_end ?? 0)), batch: BATCH, remaining: Math.max(0, count - created.length) });
+    void recordCost({ idToken: identity.idToken, slug, usd: meter.usd, kind: "writer" });
+    return Response.json({ panels: created, notes: lastNotes, adapted_until: Math.max(0, ...start.map((p) => p.source_time_end ?? 0)), batch: BATCH, remaining: Math.max(0, count - created.length), cost_usd: meter.usd });
   } catch (error) {
+    void recordCost({ idToken: identity.idToken, slug, usd: meter.usd, kind: "writer" });
     const message = error instanceof Error ? error.message : "writing failed";
     if (created.length) return Response.json({ panels: created, partial: true, error: message });
     return Response.json({ error: message }, { status: 502 });

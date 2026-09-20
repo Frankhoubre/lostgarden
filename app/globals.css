@@ -3498,6 +3498,19 @@ h3 {
   z-index: 5;
 }
 
+.studio-cost {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid rgba(125, 223, 255, 0.35);
+  border-radius: 999px;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(125, 223, 255, 0.95);
+  cursor: help;
+  white-space: nowrap;
+}
+
 .studio-langswitch {
   display: inline-flex;
   gap: 0.15rem;
