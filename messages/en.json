@@ -65,6 +65,10 @@
     "game": {
       "title": "Play: The Lantern's Oath | Lost Garden",
       "description": "A free retro browser game in the Lost Garden universe: guide Lanterne through the blue mushroom forest, the world of chains and the leaning castle, Ghouls'n Ghosts style."
+    },
+    "webtoon": {
+      "title": "Webtoon | Lost Garden",
+      "description": "Lost Garden adapted as a vertical webtoon: the opening of episode 1, panel by panel, with the storyboard and the adaptation engine behind it."
     }
   },
   "episode": {
@@ -110,7 +114,8 @@
     "home": "Home",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "game": "Game"
+    "game": "Game",
+    "webtoon": "Webtoon"
   },
   "notFound": {
     "title": "Page not found",
@@ -773,5 +778,88 @@
       "welcome": "Welcome, {name}. The blue mushroom forest is waiting."
     },
     "options": "Options"
+  },
+  "webtoon": {
+    "breadcrumbHome": "Home",
+    "breadcrumbWebtoon": "Webtoon",
+    "headline": "Webtoon",
+    "lead": "Lost Garden read vertically. Each strip is produced by the adaptation engine from the episode and the screenplay: same story, same shots, a mise en scène made for scrolling.",
+    "indexEmpty": "No strip yet.",
+    "read": "Read",
+    "openEditor": "Open the editor",
+    "backToReader": "Back to the reader",
+    "backToIndex": "All strips",
+    "panels": "{count} panels",
+    "height": "{px} px tall",
+    "source": "Source: episode {episode}, {start} to {end}",
+    "storyboardTitle": "Why each panel exists",
+    "storyboardLead": "The adaptation notes of the engine: the shot of the film each panel comes from, and what it is for.",
+    "beat": "Beat",
+    "panel": "Panel",
+    "shot": "Shot",
+    "fidelityDirect": "Matches a shot of the film",
+    "fidelityReframe": "Same moment, new framing",
+    "fidelityBridge": "Bridges two shots",
+    "imagePending": "Image pending",
+    "jsonLink": "Download the storyboard JSON",
+    "pipelineTitle": "How it is made",
+    "pipelineSteps": [
+      "Source: the episode, its screenplay, the character and location sheets.",
+      "Narrative analysis: shots, dialogue, sounds, continuity.",
+      "Segmentation into beats.",
+      "Adaptation engine: panels, heights, spacing, dialogue, transitions.",
+      "Reference resolution: the right sheets for each panel.",
+      "Panel prompts, then generation.",
+      "Vertical layout, then this reader and its editor."
+    ],
+    "editor": {
+      "title": "Webtoon editor",
+      "lead": "Edits are kept in this browser. Export the JSON to hand it back to the pipeline.",
+      "panelsList": "Panels",
+      "selected": "Selected panel",
+      "height": "Height (px)",
+      "spacingBefore": "Space before (px)",
+      "spacingAfter": "Space after (px)",
+      "background": "Background",
+      "border": "Border",
+      "focal": "Focal point (x, y %)",
+      "shotType": "Shot type",
+      "transition": "Transition",
+      "purpose": "Purpose",
+      "description": "Description",
+      "prompt": "Generation prompt",
+      "dialogue": "Dialogue",
+      "caption": "Captions",
+      "sfx": "Sound effects",
+      "speaker": "Speaker",
+      "text": "Text",
+      "style": "Style",
+      "anchor": "Position (x, y %)",
+      "add": "Add",
+      "remove": "Remove",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "delete": "Delete panel",
+      "insertAfter": "Insert a panel after",
+      "merge": "Merge with next",
+      "split": "Split in two",
+      "reset": "Reset to the engine version",
+      "exportJson": "Export JSON",
+      "importJson": "Import JSON",
+      "copyPrompt": "Copy the prompt",
+      "copied": "Copied",
+      "regenerate": "Mark for regeneration",
+      "stale": "Image out of date with the prompt",
+      "missing": "No image yet",
+      "generated": "Image generated",
+      "preview": "Preview",
+      "showIds": "Show panel ids",
+      "saved": "Saved in this browser",
+      "references": "Visual references",
+      "total": "Total height: {px} px, {count} panels",
+      "white": "White",
+      "black": "Black",
+      "abyss": "Abyss blue"
+    }
   }
 }

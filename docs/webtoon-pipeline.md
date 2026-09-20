@@ -1,0 +1,73 @@
+# Lost Garden · pipeline webtoon
+
+Le moteur transforme une source (épisode monté, scénario ScreenWeaver, ou les deux) en une bande verticale 1080 px lisible sur téléphone. Première application : la première minute de l'épisode 1 (0:00 à 1:04), lisibles sur `/webtoon/ep1-opening`, éditables sur `/webtoon/ep1-opening/editor`, exportées sur `/api/webtoon/ep1-opening` et dans `public/webtoon/ep1-opening/webtoon.json`.
+
+## Étapes et fichiers
+
+| Étape | Rôle | Fichier |
+|---|---|---|
+| Source | Vidéo proxy, scénario, fiches, sous-titres | dépôt `lost-garden` (`12_Episodes`, `02_Scenario`, `09_Fiches_modeles`, `07_Soustitres`) |
+| Analyse narrative | Plans horodatés, dialogues, sons, continuité | `lib/webtoon/sources/ep1-opening.analysis.ts` |
+| Segmentation | Beats | `lib/webtoon/sources/ep1-opening.plan.ts` (`EP1_OPENING_BEATS`) |
+| Moteur d'adaptation | Intentions de case → cases complètes (temps, format, hauteur, espacement, références, prompt) | `lib/webtoon/adaptation.ts`, intentions dans `ep1-opening.plan.ts` |
+| Références | Bibliothèque personnages, lieux, objets, images du film, et résolution automatique | `lib/webtoon/references.ts` |
+| Bible de style | Fragments de prompt et interdits communs | `lib/webtoon/style-bible.ts` |
+| Prompts | Un prompt structuré par case | `lib/webtoon/prompts.ts` |
+| Génération | Requête neutre par case (modèle, ratio, prompt, références) | `lib/webtoon/generation.ts`, images enregistrées par `scripts/webtoon-images.py` |
+| Layout | Empilement vertical, fonds, gaps | `lib/webtoon/layout.ts` |
+| Rendu | Lecteur mobile first, lettrage HTML | `components/webtoon/WebtoonReader.tsx`, `PanelLettering.tsx` |
+| Éditeur | Modifier, déplacer, fusionner, scinder, régénérer, exporter | `components/webtoon/WebtoonEditor.tsx`, opérations pures dans `lib/webtoon/editor-ops.ts` |
+| Export | JSON source de vérité | `scripts/webtoon-export.mjs`, route `app/api/webtoon/[slug]/route.ts` |
+
+## Le contrat : `webtoon.json`
+
+Un script contient `source` (l'analyse), `beats`, `panels`, `references` et `layout`. Chaque case porte les champs du brief : `panel_id`, `source_time_start`, `source_time_end`, `narrative_role`, `description`, `characters`, `location`, `action`, `emotion`, `shot_type`, `camera_angle`, `composition`, `panel_height`, `transition_type`, `spacing_before`, `spacing_after`, `dialogue`, `caption`, `sfx`, `visual_references`, `generation_prompt`, `negative_constraints`, plus `fidelity` (`direct`, `reframe`, `bridge`), `background`, `focal_point`, `aspect_ratio` et `image`.
+
+Le frontend ne décide rien : il empile ce que le moteur a décidé. La distance avant une case prend le fond de cette case, ce qui fait basculer la page du blanc au noir au début du gap, là où le lecteur tombe.
+
+## Grammaires du moteur
+
+- Valeur de plan → ratio par défaut (`ASPECT_BY_SHOT`) : très large 9:16, large et moyen 4:5, détail 3:2, très gros plan 16:9.
+- Transition → espace avant (`SPACING_BY_TRANSITION`) : continu 40, cut 90, beat 170, respiration 280, chute 1100, fondu au noir 900.
+- Une intention peut surcharger ratio, hauteur, espacements, références et notes de prompt.
+
+## Ajouter une séquence
+
+1. Écrire l'analyse (`*.analysis.ts`) : plans avec temps, description, personnages, lieu, dialogues, sons, images de référence. Depuis une vidéo : `ffmpeg` avec détection de coupes puis frames à 2 i/s. Depuis un scénario seul : mêmes champs, temps à `null`, images vides.
+2. Écrire le plan (`*.plan.ts`) : beats, palettes par lieu, une intention par case avec sa raison d'être.
+3. Enregistrer le script dans `lib/webtoon/scripts.ts`.
+4. `node scripts/webtoon-export.mjs <slug> --prompts` : vérifie le JSON et imprime les prompts.
+5. Générer les cases avec les références listées, dans l'ordre, puis `python3 scripts/webtoon-images.py <slug> jobs.json`.
+6. Relancer l'export. La page et l'API lisent le même code.
+
+## Génération : Vercel AI Gateway et les fiches personnages
+
+- Fournisseur de référence : **Vercel AI Gateway**, modèle `openai/gpt-image-2.5-sunburst` (`lib/webtoon/providers/vercel-gateway.ts`). Clé `AI_GATEWAY_API_KEY` côté serveur, jamais côté client.
+- En lot : `AI_GATEWAY_API_KEY=… node scripts/webtoon-generate.mjs ep1-opening [p03 p07]` génère, écrit `public/webtoon/<slug>/panels/*.png` et met à jour `<slug>.images.ts`. `--dry-run` imprime les requêtes.
+- À la demande : `POST /api/webtoon/<slug>/generate` avec `{ panel_id }` renvoie l'image en data URL ; le bouton « Régénérer » de l'éditeur l'appelle et remplace l'image dans le navigateur.
+- Références **toujours** jointes, dans cet ordre : les fiches du personnage (planche modèle d'abord, puis still du film), la fiche du lieu, l'image du plan source. La résolution se fait par `subject` dans `lib/webtoon/references.ts` : chaque personnage présent dans une case attache toutes ses fiches.
+- Fiches disponibles dans `lost-garden/09_Fiches_modeles` : Lanterne, Serrure, Bourdon, Barrik, le Roi Voûte, le Décrocheur, le Chevalier Sombre, le Colosse, le Reptilien. **Rose n'a pas de planche modèle** : ses références sont deux stills du film (visage, corps entier). Une planche générée depuis ces stills renforcerait la cohérence.
+- Tailles : GPT Image produit 1024x1024, 1024x1536 ou 1536x1024 ; `sizeForAspect` choisit l'orientation et la mise en page recadre au point focal. Un plan peut demander `2:3` ou `3:2` pour éviter tout recadrage.
+
+## Ce que la première passe a établi
+
+- La suite, de 0:31 à 1:04, ajoute onze plans (coupes à 36.3, 39.8, 41.3, 43.8, 45.5, 48.3, 52.0, 54.0, 56.0, 59.8 s, dont un second noir de deux secondes) et dix cases : l'autel vu du sol, la rosace qui se réveille, le premier faisceau, les faisceaux sur l'autel, le corps sous la lumière, la lumière dans les jointures, le redressement (un seul son dur, « KLANG »), l'immobilité, la main levée, le corps penché. Aucune réplique. Le second noir est un espace long de 900 px, sans case.
+- Les 30 s de l'épisode 1 font onze plans (coupes à 4.4, 6.3, 11.2, 12.9, 13.9, 16.9, 20.6, 22.6, 25.5, 27.6 s) et une seule réplique, « Find me. » à 17.9 s.
+- Dix cases, 16 028 px de haut, cinq beats. Le noir du film (20.6 à 22.6 s) n'est pas une case : c'est un gap de 1 400 px et le changement de fond.
+- Aucune case n'invente d'action : chaque case est marquée `direct` et pointe le plan dont elle vient.
+- Quatre passes : Nano Banana (`panels-v1-nano-banana/`), GPT Image 2.5 Sunburst en rendu détaillé (`panels-v2-sunburst-rendered/`), GPT Image 2.5 Sunburst en premier rendu à aplats (bible v3, `panels-v3-sunburst-flat/`), puis GPT Image 2.5 Sunburst en 1k avec la bible v4 : trois à cinq tons par élément, décors réduits à quelques silhouettes, un tiers du détail des images de référence (`panels/`, celle qui est en ligne). Fiches personnages jointes en premier sur chaque case à chaque passe.
+- Cinquième passe, celle qui est en ligne : GPT Image 2.5 Sunburst en 2k, avec deux nouvelles fiches personnages dessinées dans le style final (`public/webtoon/references/lanterne-webtoon-sheet.png`, `rose-webtoon-sheet.png`, tour complet plus expressions pour Rose) jointes en premier, la fiche anime de Lanterne et le still de Rose derrière comme autorité de design, puis une case d'ancrage de style par palette (`style-white.jpg`, `style-blue.jpg`, une case approuvée de la passe précédente) avant le lieu et l'image source. Deux fiches par personnage au maximum. La passe 1k est gardée dans `panels-v4-sunburst-flat-1k/`.
+- Cinq cases pont s'intercalent entre les plans du film (`p01b`, `p03b`, `p06b`, `p07b`, `p09b`) : un détail, un contre-champ, une respiration, une chute. Elles portent `fidelity: "bridge"` ou `"reframe"` et n'ajoutent aucune action, seulement un regard plus proche ou de dos sur le même instant. Le noir de deux secondes devient une case haute presque vide, la page bascule au noir dans l'espace qui la précède.
+- Les bulles sont des ovales blancs à contour encre avec une queue mesurée sur la vraie boîte de la bulle, dessinée en deux couches SVG pour que le contour s'efface à la jonction. Le chuchotement garde le même ovale avec un contour gris fin.
+
+## Studio privé : `/convert-video-to-webtoon`
+
+Un espace de travail réservé, en français, pour continuer le webtoon sans passer par le dépôt : `https://lostgarden.world/fr/convert-video-to-webtoon` (la locale est ajoutée automatiquement). Il n'est ni indexé ni lié depuis le site.
+
+- **Accès.** Connexion Google (Firebase Auth, déjà en place pour le jeu), puis liste blanche d'adresses : `frank.houbre@gmail.com` dans `lib/webtoon/studio.ts`, `lib/webtoon/studio-server.ts`, `firestore.rules` et `storage.rules`. Une adresse en plus se met dans les quatre endroits (`NEXT_PUBLIC_WEBTOON_STUDIO_EMAILS` couvre le code, pas les règles). En local, `?dev=1` sur le serveur de dev passe la porte sans compte, sans rien enregistrer.
+- **Onglets.** Webtoon (l'éditeur), Scénario (le PDF de l'épisode 1 page par page et le découpage plan par plan avec les cases correspondantes), Personnages (fiches webtoon, fiches anime, stills, planches modèles de production, verrous de design, fiches Dreamina et fiches de jeu), Décors (lieux du moteur, ancres de style, fiches lieux de production, bible des lieux), Images du film (les images de référence de chaque plan et une image toutes les 5 s sur tout l'épisode, la partie déjà adaptée marquée).
+- **Éditeur.** À gauche la liste des cases en vignettes, au centre la case sélectionnée à taille de travail avec des poignées à glisser (rond = bulle, losange = pointe de la bulle, carré = son, cible = point focal, barre du bas = hauteur), à droite l'inspecteur : texte des bulles, sons et cartouches dans les quatre langues, style, taille et rotation des sons, hauteur, pleine largeur, bordure, fond, transition et espaces, type de plan, angle, fidélité, description, prompt, références jointes, regénération, remplacement de l'image par un fichier, ordre des cases, insertion, coupe, fusion, suppression. `Ctrl+S` ou `Cmd+S` enregistre.
+- **Enregistrement.** Le brouillon va dans Firestore, document `webtoon_drafts/<slug>` (les cases en une seule chaîne JSON, `panels_json`). « Publier » écrit aussi `webtoon_published/<slug>`, que le lecteur public et `/api/webtoon/<slug>` lisent par l'API REST de Firestore et servent à la place de la version du moteur, avec une revalidation à la minute. « Version du moteur » revient à ce que produit `lib/webtoon`. Export et import JSON restent là pour repasser par le dépôt (`scripts/webtoon-images.py` et le plan) quand une version doit devenir la référence du code.
+- **Images.** Une image regénérée (route `/api/webtoon/<slug>/generate`, qui exige maintenant le jeton Firebase d'un compte du studio et `AI_GATEWAY_API_KEY` côté serveur) ou remplacée par un fichier est envoyée dans Firebase Storage sous `webtoon/<slug>/<case>/<horodatage>.<ext>` et la case garde son URL publique. Rien de lourd n'entre dans Firestore.
+- **À faire dans la console Firebase, une fois.** Déployer `firestore.rules` et `storage.rules` (`firebase deploy --only firestore:rules,storage`), vérifier que le fournisseur Google est actif et que `lostgarden.world` est dans les domaines autorisés, activer Storage si ce n'est pas fait. Sur Vercel, poser `AI_GATEWAY_API_KEY` pour que la regénération marche depuis l'interface.
+

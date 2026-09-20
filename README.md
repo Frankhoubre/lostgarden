@@ -35,6 +35,18 @@ Open [http://localhost:3000](http://localhost:3000).
 - `components/game/GameShell.tsx`: canvas host, keyboard and touch controls
 - `lib/game/engine.ts`, `actors.ts`, `levels.ts`, `sprites.ts`, `text.ts`: the earlier three-stage engine, still reachable with `?engine=full`
 
+## Webtoon
+
+`/[locale]/webtoon` hosts the vertical webtoon adaptation of the series, produced by an adaptation engine rather than drawn by hand. The first strip covers the start of episode 1 (0:00 to 1:04): the white memory, the sanctuary and the awakening. `/[locale]/convert-video-to-webtoon` is the private studio where the strip is edited and published (Google sign-in, allowlisted account, see `docs/webtoon-pipeline.md`).
+
+- `lib/webtoon/`: the engine. `types.ts` (panel schema shared with ScreenWeaver), `adaptation.ts` (panel intents → fully specified panels: timing, aspect, height, spacing, references, prompt), `references.ts` (character, location and source-frame library with automatic resolution), `style-bible.ts`, `prompts.ts`, `layout.ts`, `editor-ops.ts`, `generation.ts`
+- `lib/webtoon/sources/`: per-sequence data. `*.analysis.ts` is the narrative analysis of the source (shots, dialogue, sounds, continuity), `*.plan.ts` the beats and panel intents, `*.images.ts` the generated panels
+- `components/webtoon/`: mobile-first reader (1080 px canvas, HTML lettering), storyboard notes, editor (resize, respace, move, merge, split, edit dialogue and prompts, export or import JSON)
+- `app/api/webtoon/[slug]`: the storyboard JSON with its layout, also written to `public/webtoon/<slug>/webtoon.json` by `node scripts/webtoon-export.mjs`
+- `scripts/webtoon-images.py`: registers generated images for a script
+
+The full pipeline, and how to add a sequence or start from a screenplay only, is described in `docs/webtoon-pipeline.md`.
+
 ## Environment variables
 
 See `.env.local.example` for required `NEXT_PUBLIC_FIREBASE_*` values.
