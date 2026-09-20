@@ -176,12 +176,13 @@ function helmetTrack(notes: FrameNote[], previous: WebtoonPanel[]): Map<number, 
     const r = readings[i];
     if (r === "off") off = true;
     else if (r === "on") {
-      // "on" needs the next Lanterne frame to agree, or a note that says he puts it back.
-      const next = readings.slice(i + 1).find((x) => x !== "absent" && x !== "unknown");
-      const putsBack = /(puts|putting|raises|raising|lifts|lifting).*(helmet).*(neck|head|shoulders)|helmet back on/i.test(`${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""}`);
-      // The helmet only goes back on through a visible gesture: a reading of "on" after "off" without it is a misread.
-      if (!off || putsBack) off = false;
-      void next;
+      // The helmet goes back on through a visible gesture (both hands placing it), or when three
+      // consecutive readings of Lanterne say "on": one or two isolated "on" after "off" are misreads.
+      const text = `${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""} ${sorted[i].posture ?? ""}`;
+      const putsBack = /helmet/i.test(text) && /(put|puts|putting|place|places|placing|set|sets|setting|lift|lifts|lifting|rais|lower|lowers|lowering|slide|slides|press|presses).*(on|onto|over|back|head|neck|shoulders)|helmet (is )?back on|back on his head/i.test(text);
+      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 2);
+      const stable = following.length === 2 && following.every((x) => x === "on");
+      if (!off || putsBack || stable) off = false;
     }
     track.set(Number(sorted[i].seconds), off ? "off" : "on");
   }
