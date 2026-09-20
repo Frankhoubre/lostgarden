@@ -3498,6 +3498,97 @@ h3 {
   z-index: 5;
 }
 
+/* Actions on the image, right under it. */
+.studio-stage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.7rem 0 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(125, 223, 255, 0.2);
+  border-radius: 0.7rem;
+  background: rgba(6, 22, 47, 0.55);
+}
+
+.studio-status-chip {
+  margin-right: auto;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(125, 223, 255, 0.12);
+  font-size: 0.7rem;
+  color: rgba(216, 210, 194, 0.9);
+  white-space: nowrap;
+}
+
+.studio-status-chip.is-stale {
+  background: rgba(255, 196, 80, 0.16);
+  color: #ffd98a;
+}
+
+.studio-status-chip.is-missing {
+  background: rgba(255, 120, 120, 0.14);
+  color: #ffb3b3;
+}
+
+/* Inspector tabs: one concern at a time. */
+.studio-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid rgba(125, 223, 255, 0.2);
+  border-radius: 0.7rem;
+  background: #061018;
+}
+
+.studio-tab {
+  padding: 0.45rem 0.3rem;
+  border-radius: 0.5rem;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(216, 210, 194, 0.7);
+}
+
+.studio-tab:hover {
+  color: rgba(216, 210, 194, 0.95);
+}
+
+.studio-tab.is-active {
+  background: rgba(125, 223, 255, 0.18);
+  color: #fff;
+}
+
+.studio-gear-menu button.is-danger b {
+  color: #ffb3b3;
+}
+
+.studio-gear-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.studio-gear-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(216, 210, 194, 0.95);
+}
+
+.studio-gear-select select {
+  width: 100%;
+  font-weight: 400;
+}
+
 .studio-inpaint {
   width: min(96vw, 1400px);
 }

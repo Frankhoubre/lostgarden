@@ -67,6 +67,7 @@ type GeneratePayload = {
   /** Public URL when the server stored the image itself. */
   src?: string;
   data_url?: string;
+  cost_usd?: number;
   model?: string;
   error?: string;
   generation_prompt?: string;
@@ -162,6 +163,17 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
   const [inpaintOpen, setInpaintOpen] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState<"scene" | "text" | "layout">("scene");
+  const [panelMenuOpen, setPanelMenuOpen] = useState(false);
+  const panelMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!panelMenuOpen) return;
+    const close = (event: MouseEvent) => {
+      if (panelMenuRef.current && !panelMenuRef.current.contains(event.target as Node)) setPanelMenuOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [panelMenuOpen]);
   /** Panels ticked in the list for a batch action (regenerate, translate, delete). */
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const lastChecked = useRef<string | null>(null);
@@ -198,7 +210,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /** Store an image on a panel: uploaded to Storage when signed in, kept in the session otherwise. */
-  const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}) => {
+  const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}, cost?: number) => {
     let src = dataUrl;
     if (user && dataUrl.startsWith("data:")) {
       try {
@@ -211,7 +223,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     setPanels((current) =>
       current.map((p) =>
         p.panel_id === panel.panel_id
-          ? { ...p, ...extra, image: { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" } }
+          ? { ...p, ...extra, image: { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated", ...(cost ? { cost_usd: cost } : {}) } }
           : p,
       ),
     );
@@ -236,7 +248,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         needsComposition(panel) && payload.generation_prompt
           ? { generation_prompt: payload.generation_prompt, negative_constraints: payload.negative_constraints ?? panel.negative_constraints, visual_references: payload.visual_references ?? panel.visual_references, prompt_auto: true }
           : {};
-      await applyImage(panel, received, payload.model, composed);
+      await applyImage(panel, received, payload.model, composed, payload.cost_usd);
       return true;
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de génération");
@@ -527,6 +539,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   if (!selected) return <p className="text-sm text-ivory/70">Aucune case.</p>;
 
   const pending = pendingPanels(panels).length;
+  const isTitleCard = selected.caption.some((c) => c.style === "title") && !selected.image.src;
   const preview = panelForGeneration(selected, script, library);
   const frames = attachedFrames(selected);
 
@@ -592,7 +605,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={panel.image.src} alt="" loading="lazy" style={{ objectPosition: `${panel.focal_point.x}% ${panel.focal_point.y}%` }} />
                 ) : (
-                  <span className="studio-thumb-empty">sans image</span>
+                  <span className="studio-thumb-empty">{panel.caption.some((c) => c.style === "title") ? panel.caption[0].text.en : "sans image"}</span>
                 )}
                 {job?.current === panel.panel_id ? (
                   <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />Génération…</span>
@@ -602,7 +615,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <span className="studio-thumb-meta">
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
-                  {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" ? <i> · à générer</i> : null}
+                  {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
                 </span>
               </button>
             </li>
@@ -637,16 +650,56 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       <section className="studio-stage">
         <div className="studio-stage-bar">
           <div className="flex items-center gap-2">
-            <button type="button" className="webtoon-mini" onClick={() => step(-1)} disabled={index <= 0}>← Précédente</button>
+            <button type="button" className="webtoon-mini" onClick={() => step(-1)} disabled={index <= 0} title="Case précédente">←</button>
             <span className="anime-label text-xs text-cyan-pale">{selected.panel_id} · case {selected.order}/{panels.length}</span>
-            <button type="button" className="webtoon-mini" onClick={() => step(1)} disabled={index >= panels.length - 1}>Suivante →</button>
+            <button type="button" className="webtoon-mini" onClick={() => step(1)} disabled={index >= panels.length - 1} title="Case suivante">→</button>
           </div>
           <div className="flex items-center gap-3 text-xs text-ivory/70">
             <label className="flex items-center gap-2"><input type="checkbox" checked={showFocal} onChange={(e) => setShowFocal(e.target.checked)} /> Point focal</label>
             <label className="flex items-center gap-2"><input type="checkbox" checked={showStrip} onChange={(e) => setShowStrip(e.target.checked)} /> Bande complète</label>
+            <div className="studio-gear" ref={panelMenuRef}>
+              <button type="button" className={`webtoon-mini ${panelMenuOpen ? "is-active" : ""}`} onClick={() => setPanelMenuOpen((open) => !open)} aria-haspopup="menu" aria-expanded={panelMenuOpen} title="Déplacer, insérer, couper, fusionner ou supprimer cette case">
+                Case ▾
+              </button>
+              {panelMenuOpen ? (
+                <div className="studio-gear-menu" role="menu">
+                  <p className="studio-gear-title">Ordre</p>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => movePanel(c, selected.panel_id, -1)); }} disabled={index <= 0}><b>Monter</b><small>Échange avec la case précédente.</small></button>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => movePanel(c, selected.panel_id, 1)); }} disabled={index >= panels.length - 1}><b>Descendre</b><small>Échange avec la case suivante.</small></button>
+                  <p className="studio-gear-title">Ajouter</p>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => insertAfter(c, selected.panel_id)); }}><b>Insérer une case vide après</b><small>Même monde que celle-ci, à décrire puis à générer.</small></button>
+                  <label className="studio-gear-select">
+                    <b>Nouvelle case après, depuis une image du film</b>
+                    <select value="" onChange={(e) => { if (e.target.value) { setPanelMenuOpen(false); addFromFrame(e.target.value); } }}>
+                      <option value="">Choisir une image…</option>
+                      {FILM_FRAMES.map((f) => <option key={f.src} value={f.src}>{f.label}{selected.source_time_end !== null && f.seconds > selected.source_time_end ? "" : " (déjà adapté)"}</option>)}
+                    </select>
+                  </label>
+                  <p className="studio-gear-title">Découper</p>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => splitPanel(c, selected.panel_id)); }}><b>Couper en deux</b><small>Deux cases de moitié de hauteur, même image.</small></button>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => mergeWithNext(c, selected.panel_id)); }} disabled={index >= panels.length - 1}><b>Fusionner avec la suivante</b><small>Une seule case plus haute, textes réunis.</small></button>
+                  <p className="studio-gear-title">Retirer</p>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="is-danger"
+                    onClick={() => {
+                      setPanelMenuOpen(false);
+                      if (!window.confirm(`Supprimer la case ${selected.panel_id} ?`)) return;
+                      const next = deletePanel(panels, selected.panel_id);
+                      setPanels(next);
+                      select(next[Math.min(index, next.length - 1)]?.panel_id ?? null);
+                    }}
+                  >
+                    <b>Supprimer la case</b>
+                    <small>Pour plusieurs cases à la fois, coche-les dans la liste.</small>
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
-        <p className="studio-hint">Glisse les poignées : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.</p>
+
         <div className="studio-stage-wrap">
           <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
           {job?.current === selected.panel_id ? (
@@ -657,6 +710,41 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             </div>
           ) : null}
         </div>
+
+        <div className="studio-stage-actions" role="toolbar" aria-label="Actions sur l'image">
+          <span className={`studio-status-chip ${selected.image.status === "stale" ? "is-stale" : selected.image.status === "missing" ? "is-missing" : ""}`}>
+            {isTitleCard ? "Carte-titre, sans image" : selected.image.status === "generated" ? "Image générée" : selected.image.status === "stale" ? "Le texte a changé depuis l'image" : "Pas encore d'image"}
+            {selected.image.cost_usd ? ` · ${selected.image.cost_usd.toFixed(3)} $` : ""}
+            {selected.source_time_start !== null ? ` · film ${selected.source_time_start.toFixed(0)} s` : ""}
+          </span>
+          {!isTitleCard ? (
+            <>
+              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références" : "Dessine la case à partir de sa description et de ses références"}>
+                {busy ? "…" : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Peins une zone de l'image et dis ce qui doit y apparaître : seule cette zone change">Retoucher une zone</button>
+              <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
+              <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
+            </>
+          ) : null}
+          <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
+        </div>
+        <p className="studio-hint">Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.</p>
+
+        {inpaintOpen && selected.image.src ? (
+          <PanelInpaint
+            slug={script.slug}
+            panel={selected}
+            library={library}
+            notify={notify}
+            onClose={() => setInpaintOpen(false)}
+            onDone={async (dataUrl) => {
+              await applyImage(selected, dataUrl, "inpaint");
+              onAutosave?.();
+            }}
+          />
+        ) : null}
+
         {showStrip ? (
           <div className="studio-strip-preview">
             <LocaleProvider locale={locale} dict={dict}>
@@ -667,8 +755,118 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       </section>
 
       <aside className="studio-inspector">
-        <details open>
-          <summary>Texte</summary>
+        <nav className="studio-tabs" aria-label="Réglages de la case">
+          {(
+            [
+              ["scene", "Scène", "Ce que montre la case"],
+              ["text", "Texte", "Bulles, sons, cartouches"],
+              ["layout", "Mise en page", "Taille, rythme, cadrage"],
+            ] as const
+          ).map(([id, name, hint]) => (
+            <button key={id} type="button" className={`studio-tab ${inspectorTab === id ? "is-active" : ""}`} onClick={() => setInspectorTab(id)} title={hint}>
+              {name}
+            </button>
+          ))}
+        </nav>
+
+        {inspectorTab === "scene" ? (
+          <div className="studio-section">
+            <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
+            <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="webtoon-field"><span>Émotion</span><input value={selected.emotion} onChange={(e) => patch({ emotion: e.target.value })} /></label>
+              <label className="webtoon-field"><span>Rôle narratif</span>
+                <select value={selected.narrative_role} onChange={(e) => patch({ narrative_role: e.target.value as NarrativeRole })}>{ROLES.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select>
+              </label>
+            </div>
+            <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
+            <div>
+              <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
+              <div className="studio-checks">
+                {CHARACTERS.map((c) => (
+                  <label key={c.id}><input type="checkbox" checked={selected.characters.includes(c.id)} onChange={(e) => setCharacters(c.id, e.target.checked)} /> {c.name}</label>
+                ))}
+              </div>
+              <input
+                className="mt-1"
+                placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
+                value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
+                onChange={(e) => {
+                  const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
+                  const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
+                  patch({ characters: [...known, ...others] });
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="webtoon-field"><span>Lieu (sa fiche est jointe)</span>
+                <select value={LOCATIONS.some((l) => l.id === selected.location) ? selected.location : "__other"} onChange={(e) => { if (e.target.value !== "__other") patch({ location: e.target.value }); }}>
+                  {LOCATIONS.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                  <option value="__other">Autre lieu…</option>
+                </select>
+              </label>
+              <label className="webtoon-field"><span>Identifiant du lieu</span><input value={selected.location} onChange={(e) => patch({ location: e.target.value.trim() })} /></label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="webtoon-field"><span>Type de plan</span>
+                <select value={selected.shot_type} onChange={(e) => patch({ shot_type: e.target.value as ShotType })}>{SHOT_TYPES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
+              </label>
+              <label className="webtoon-field"><span>Angle</span>
+                <select value={selected.camera_angle} onChange={(e) => patch({ camera_angle: e.target.value as CameraAngle })}>{ANGLES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
+              </label>
+            </div>
+            <div>
+              <div className="studio-section-head">
+                <span className="webtoon-field-label">Images du film jointes</span>
+                <select value="" onChange={(e) => { if (e.target.value) setPanels((c) => toggleFrame(c, selected.panel_id, e.target.value)); }}>
+                  <option value="">+ Joindre une image du film…</option>
+                  {FILM_FRAMES.filter((f) => !frames.includes(f.src)).map((f) => <option key={f.src} value={f.src}>{f.label}</option>)}
+                </select>
+              </div>
+              {frames.length ? (
+                <ul className="mt-1 flex flex-wrap gap-2">
+                  {frames.map((src) => (
+                    <li key={src} className="webtoon-ref">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt="" loading="lazy" />
+                      <span>{FILM_FRAMES.find((f) => f.src === src)?.label ?? src.split("/").pop()}</span>
+                      <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => setPanels((c) => toggleFrame(c, selected.panel_id, src))}>Retirer</button>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-xs text-ivory/50">Aucune image du film jointe à cette case.</p>}
+            </div>
+            <details className="studio-details">
+              <summary>Prompt envoyé au modèle et références jointes</summary>
+              <div className="studio-section">
+                <div className="studio-section-head">
+                  <label className="flex items-center gap-1 text-xs text-ivory/70" title="Le prompt est recomposé depuis les champs ci-dessus à chaque génération">
+                    <input type="checkbox" checked={selected.prompt_auto === true} onChange={(e) => (e.target.checked ? recompose() : patch({ prompt_auto: false }))} /> Composé depuis les champs
+                  </label>
+                  <button type="button" className="webtoon-mini" onClick={recompose}>Recomposer</button>
+                </div>
+                <textarea
+                  rows={12}
+                  value={needsComposition(selected) ? preview.generation_prompt : selected.generation_prompt}
+                  onChange={(e) => patch({ generation_prompt: e.target.value, prompt_auto: false })}
+                />
+                {needsComposition(selected) ? <p className="text-xs text-ivory/50">Aperçu du prompt composé. Le modifier à la main fige le texte ; « Recomposer » repart des champs.</p> : null}
+                <span className="webtoon-field-label">Références jointes, dans l&apos;ordre</span>
+                <ul className="mt-1 flex flex-wrap gap-2">
+                  {referencesForPanel(preview, library).map((ref) => (
+                    <li key={ref.id} className="webtoon-ref">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={ref.image} alt={ref.name} loading="lazy" />
+                      <span>{ref.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          </div>
+        ) : null}
+
+        {inspectorTab === "text" ? (
           <div className="studio-section">
             <div className="flex flex-wrap gap-2">
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels([selected], false)} disabled={busy} title="Écris dans une langue, les trois autres sont remplies en langage parlé">
@@ -733,10 +931,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </div>
             ))}
           </div>
-        </details>
+        ) : null}
 
-        <details open>
-          <summary>Cadre et rythme</summary>
+        {inspectorTab === "layout" ? (
           <div className="studio-section">
             <label className="webtoon-field">
               <span>Hauteur : {selected.panel_height} px (ratio {selected.aspect_ratio})</span>
@@ -759,169 +956,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   {TRANSITIONS.map((v) => <option key={v} value={v}>{label(v)} · {SPACING_BY_TRANSITION[v]} px</option>)}
                 </select>
               </label>
-              <label className="webtoon-field"><span>Espace avant (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_before} onChange={(e) => patch({ spacing_before: Number(e.target.value) })} /></label>
-              <label className="webtoon-field"><span>Espace après (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_after} onChange={(e) => patch({ spacing_after: Number(e.target.value) })} /></label>
-              <label className="webtoon-field"><span>Type de plan</span>
-                <select value={selected.shot_type} onChange={(e) => patch({ shot_type: e.target.value as ShotType })}>{SHOT_TYPES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
-              </label>
-              <label className="webtoon-field"><span>Angle</span>
-                <select value={selected.camera_angle} onChange={(e) => patch({ camera_angle: e.target.value as CameraAngle })}>{ANGLES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
-              </label>
-              <label className="webtoon-field"><span>Fidélité</span>
+              <label className="webtoon-field"><span>Fidélité au film</span>
                 <select value={selected.fidelity} onChange={(e) => patch({ fidelity: e.target.value as Fidelity })}>{FIDELITIES.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select>
               </label>
+              <label className="webtoon-field"><span>Espace avant (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_before} onChange={(e) => patch({ spacing_before: Number(e.target.value) })} /></label>
+              <label className="webtoon-field"><span>Espace après (px)</span><input type="number" min={0} max={4000} step={10} value={selected.spacing_after} onChange={(e) => patch({ spacing_after: Number(e.target.value) })} /></label>
             </div>
+            <p className="text-xs text-ivory/60">Temps {selected.beat_id} · plans {selected.source_shots.join(", ") || "aucun"}{selected.source_time_start !== null ? ` · film ${selected.source_time_start.toFixed(1)} s à ${selected.source_time_end?.toFixed(1)} s` : ""}{selected.image.model ? ` · ${selected.image.model}` : ""}</p>
           </div>
-        </details>
-
-        <details open>
-          <summary>Image et prompt</summary>
-          <div className="studio-section">
-            <p className="text-xs text-ivory/60">
-              {selected.image.status === "generated" ? "Image générée" : selected.image.status === "stale" ? "Le prompt a changé depuis l'image" : "Pas d'image"}
-              {selected.image.model ? ` · ${selected.image.model}` : ""}
-              {selected.source_time_start !== null ? ` · film ${selected.source_time_start.toFixed(1)} s à ${selected.source_time_end?.toFixed(1)} s` : ""}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy}>
-                {busy ? "…" : selected.image.src ? "Regénérer (GPT Image 2.5)" : "Générer (GPT Image 2.5)"}
-              </button>
-              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Peins une zone de l'image et dis ce qui doit y apparaître : seule cette zone change">Retoucher une zone (IA)</button>
-              <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy}>Remplacer par un fichier</button>
-              <button type="button" className="webtoon-mini" onClick={copyPrompt}>Copier la requête</button>
-              <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
-            </div>
-            {inpaintOpen && selected.image.src ? (
-              <PanelInpaint
-                slug={script.slug}
-                panel={selected}
-                library={library}
-                notify={notify}
-                onClose={() => setInpaintOpen(false)}
-                onDone={async (dataUrl) => {
-                  await applyImage(selected, dataUrl, "inpaint");
-                  onAutosave?.();
-                }}
-              />
-            ) : null}
-            <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
-            <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="webtoon-field"><span>Émotion</span><input value={selected.emotion} onChange={(e) => patch({ emotion: e.target.value })} /></label>
-              <label className="webtoon-field"><span>Rôle narratif</span>
-                <select value={selected.narrative_role} onChange={(e) => patch({ narrative_role: e.target.value as NarrativeRole })}>{ROLES.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select>
-              </label>
-            </div>
-            <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
-            <div>
-              <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
-              <div className="studio-checks">
-                {CHARACTERS.map((c) => (
-                  <label key={c.id}><input type="checkbox" checked={selected.characters.includes(c.id)} onChange={(e) => setCharacters(c.id, e.target.checked)} /> {c.name}</label>
-                ))}
-              </div>
-              <input
-                className="mt-1"
-                placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
-                value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
-                onChange={(e) => {
-                  const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
-                  const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
-                  patch({ characters: [...known, ...others] });
-                }}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="webtoon-field"><span>Lieu (sa fiche est jointe)</span>
-                <select value={LOCATIONS.some((l) => l.id === selected.location) ? selected.location : "__other"} onChange={(e) => { if (e.target.value !== "__other") patch({ location: e.target.value }); }}>
-                  {LOCATIONS.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  <option value="__other">Autre lieu…</option>
-                </select>
-              </label>
-              <label className="webtoon-field"><span>Identifiant du lieu</span><input value={selected.location} onChange={(e) => patch({ location: e.target.value.trim() })} /></label>
-            </div>
-            <div>
-              <div className="studio-section-head">
-                <span className="webtoon-field-label">Images du film jointes</span>
-                <select value="" onChange={(e) => { if (e.target.value) setPanels((c) => toggleFrame(c, selected.panel_id, e.target.value)); }}>
-                  <option value="">+ Joindre une image du film…</option>
-                  {FILM_FRAMES.filter((f) => !frames.includes(f.src)).map((f) => <option key={f.src} value={f.src}>{f.label}</option>)}
-                </select>
-              </div>
-              {frames.length ? (
-                <ul className="mt-1 flex flex-wrap gap-2">
-                  {frames.map((src) => (
-                    <li key={src} className="webtoon-ref">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={src} alt="" loading="lazy" />
-                      <span>{FILM_FRAMES.find((f) => f.src === src)?.label ?? src.split("/").pop()}</span>
-                      <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => setPanels((c) => toggleFrame(c, selected.panel_id, src))}>Retirer</button>
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className="text-xs text-ivory/50">Aucune image du film jointe à cette case.</p>}
-            </div>
-            <div>
-              <div className="studio-section-head">
-                <span className="webtoon-field-label">Prompt de génération</span>
-                <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-1 text-xs text-ivory/70" title="Le prompt est recomposé depuis les champs ci-dessus à chaque génération">
-                    <input type="checkbox" checked={selected.prompt_auto === true} onChange={(e) => (e.target.checked ? recompose() : patch({ prompt_auto: false }))} /> Composé depuis les champs
-                  </label>
-                  <button type="button" className="webtoon-mini" onClick={recompose}>Recomposer</button>
-                </div>
-              </div>
-              <textarea
-                rows={12}
-                value={needsComposition(selected) ? preview.generation_prompt : selected.generation_prompt}
-                onChange={(e) => patch({ generation_prompt: e.target.value, prompt_auto: false })}
-              />
-              {needsComposition(selected) ? <p className="text-xs text-ivory/50">Aperçu du prompt composé. Le modifier à la main fige le texte ; « Recomposer » repart des champs.</p> : null}
-            </div>
-            <div>
-              <span className="webtoon-field-label">Références jointes, dans l&apos;ordre</span>
-              <ul className="mt-1 flex flex-wrap gap-2">
-                {referencesForPanel(preview, library).map((ref) => (
-                  <li key={ref.id} className="webtoon-ref">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ref.image} alt={ref.name} loading="lazy" />
-                    <span>{ref.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </details>
-
-        <details>
-          <summary>Structure</summary>
-          <div className="studio-section">
-            <div className="flex flex-wrap gap-2">
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => movePanel(c, selected.panel_id, -1))}>Monter</button>
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => movePanel(c, selected.panel_id, 1))}>Descendre</button>
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => insertAfter(c, selected.panel_id))}>Insérer une case après</button>
-              <select value="" onChange={(e) => { if (e.target.value) addFromFrame(e.target.value); }} title="Continue le webtoon : une case après celle-ci, à partir d'une image du film">
-                <option value="">Nouvelle case après, depuis une image du film…</option>
-                {FILM_FRAMES.map((f) => <option key={f.src} value={f.src}>{f.label}{selected.source_time_end !== null && f.seconds > selected.source_time_end ? "" : " (déjà adapté)"}</option>)}
-              </select>
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => splitPanel(c, selected.panel_id))}>Couper en deux</button>
-              <button type="button" className="webtoon-mini" onClick={() => setPanels((c) => mergeWithNext(c, selected.panel_id))}>Fusionner avec la suivante</button>
-              <button
-                type="button"
-                className="webtoon-mini webtoon-mini-danger"
-                onClick={() => {
-                  if (!window.confirm(`Supprimer la case ${selected.panel_id} ?`)) return;
-                  const next = deletePanel(panels, selected.panel_id);
-                  setPanels(next);
-                  select(next[Math.min(index, next.length - 1)]?.panel_id ?? null);
-                }}
-              >
-                Supprimer la case
-              </button>
-            </div>
-            <p className="text-xs text-ivory/60">Temps {selected.beat_id} · plans {selected.source_shots.join(", ") || "aucun"} · rôle {selected.narrative_role}</p>
-          </div>
-        </details>
+        ) : null}
       </aside>
     </div>
   );
