@@ -89,6 +89,23 @@ export function StudioApp({ script }: StudioAppProps) {
 
   const [working, setWorking] = useState<"save" | "publish" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [menuOpen]);
   const [loaded, setLoaded] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -273,7 +290,7 @@ export function StudioApp({ script }: StudioAppProps) {
     });
   };
 
-  const status = working === "save" ? "Enregistrement…" : working === "publish" ? "Publication…" : dirty ? "Modifications non enregistrées" : savedAt ? `Brouillon enregistré le ${formatTime(savedAt)}` : loaded || !user ? "Version du moteur" : "Chargement…";
+  const status = working === "save" ? "Enregistrement…" : working === "publish" ? "Publication…" : dirty ? "Modifications non enregistrées" : savedAt ? `Brouillon enregistré le ${formatTime(savedAt)}` : loaded || !user ? "Version du code, rien d'enregistré" : "Chargement…";
 
   return (
     <div className="studio">
@@ -303,28 +320,55 @@ export function StudioApp({ script }: StudioAppProps) {
           <span className={`studio-status ${dirty ? "is-dirty" : ""}`}>{status}</span>
           {publishedAt ? <span className="studio-status">Publié le {formatTime(publishedAt)}</span> : null}
           {notice ? <span className="studio-notice">{notice}</span> : null}
-          <button type="button" className="webtoon-mini" onClick={() => void save()} disabled={working !== null}>Enregistrer</button>
-          <button type="button" className="webtoon-mini studio-primary" onClick={() => void publish()} disabled={working !== null}>Publier</button>
-          <button type="button" className="webtoon-mini" onClick={exportJson}>Exporter JSON</button>
-          <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()}>Importer JSON</button>
-          <input ref={fileInput} type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importJson(f); e.target.value = ""; }} />
-          <button
-            type="button"
-            className="webtoon-mini"
-            onClick={() => {
-              if (!window.confirm("Revenir à la version du moteur ? Le brouillon en cours est remplacé (il reste enregistré tant que tu n'enregistres pas).")) return;
-              setPanels(script.panels);
-              setSelectedId(script.panels[0]?.panel_id ?? null);
-            }}
-          >
-            Version du moteur
-          </button>
+          <button type="button" className="webtoon-mini" onClick={() => void save()} disabled={working !== null} title="Enregistre le brouillon (Cmd+S)">Enregistrer</button>
+          <button type="button" className="webtoon-mini studio-primary" onClick={() => void publish()} disabled={working !== null} title="Met cette version en ligne pour les lecteurs">Publier</button>
           <Link href={localePath(locale, `/webtoon/${script.slug}`)} className="webtoon-mini" target="_blank">Voir en ligne</Link>
-          {user ? (
-            <button type="button" className="webtoon-mini" title={user.email ?? ""} onClick={() => signOut(getFirebaseAuth())}>
-              Déconnexion
+          <div className="studio-gear" ref={menuRef}>
+            <button type="button" className={`webtoon-mini studio-gear-button ${menuOpen ? "is-active" : ""}`} onClick={() => setMenuOpen((open) => !open)} aria-haspopup="menu" aria-expanded={menuOpen} title="Autres actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+              </svg>
+              <span className="sr-only">Autres actions</span>
             </button>
-          ) : null}
+            {menuOpen ? (
+              <div className="studio-gear-menu" role="menu">
+                <p className="studio-gear-title">Fichier</p>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); exportJson(); }}>
+                  <b>Exporter la bande en JSON</b>
+                  <small>Télécharge toutes les cases, textes et réglages : pour une sauvegarde ou pour repasser par le dépôt.</small>
+                </button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); fileInput.current?.click(); }}>
+                  <b>Importer un JSON</b>
+                  <small>Remplace la bande en cours par le contenu d&apos;un fichier exporté.</small>
+                </button>
+                <p className="studio-gear-title">Bande</p>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    if (!window.confirm(`Repartir des ${script.panels.length} cases écrites dans le code ? Tout ce qui a été fait dans le studio disparaît de l'écran (le brouillon enregistré reste tant que tu n'enregistres pas par-dessus).`)) return;
+                    setPanels(script.panels);
+                    setSelectedId(script.panels[0]?.panel_id ?? null);
+                  }}
+                >
+                  <b>Repartir de la version du code</b>
+                  <small>Les {script.panels.length} cases d&apos;origine, telles que le moteur les produit depuis le dépôt, sans les modifications du studio.</small>
+                </button>
+                {user ? (
+                  <>
+                    <p className="studio-gear-title">Compte</p>
+                    <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); void signOut(getFirebaseAuth()); }}>
+                      <b>Déconnexion</b>
+                      <small>{user.email}</small>
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          <input ref={fileInput} type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importJson(f); e.target.value = ""; }} />
         </div>
       </header>
 

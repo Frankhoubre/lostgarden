@@ -3503,6 +3503,73 @@ h3 {
   white-space: nowrap;
 }
 
+.studio-gear {
+  position: relative;
+}
+
+.studio-gear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.45rem;
+}
+
+.studio-gear-button.is-active {
+  background: rgba(125, 223, 255, 0.22);
+  border-color: rgba(125, 223, 255, 0.7);
+}
+
+.studio-gear-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.5rem;
+  border: 1px solid rgba(125, 223, 255, 0.3);
+  border-radius: 0.8rem;
+  background: #061018;
+  box-shadow: 0 14px 40px rgba(2, 4, 9, 0.75);
+}
+
+.studio-gear-title {
+  margin: 0.35rem 0.6rem 0.2rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(125, 223, 255, 0.7);
+}
+
+.studio-gear-menu button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  text-align: left;
+  color: rgba(216, 210, 194, 0.95);
+}
+
+.studio-gear-menu button:hover,
+.studio-gear-menu button:focus-visible {
+  background: rgba(125, 223, 255, 0.1);
+  outline: none;
+}
+
+.studio-gear-menu b {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.studio-gear-menu small {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: rgba(216, 210, 194, 0.6);
+}
+
 .studio-library-head {
   display: flex;
   flex-wrap: wrap;
