@@ -214,6 +214,29 @@ function momentsOf(notes: FrameNote[]): Moment[] {
   return moments;
 }
 
+/**
+ * The mirror of the coverage check: panels that show a gesture, an object or
+ * a posture that the moments do not contain (a walk, a helmet raised, an
+ * object thrown at the wrong time). The writer rewrites them to the moment.
+ */
+async function inventedPanels(input: { moments: Moment[]; intents: NextPanelIntent[]; meter: CostMeter }): Promise<{ index: number; problem: string }[]> {
+  if (!input.moments.length || !input.intents.length) return [];
+  try {
+    const answer = await completeJson<{ invented?: { index: number; problem: string }[] }>({
+      system:
+        'You check a webtoon sequence against the film. You get the moments of a film window (what is literally visible, consecutive identical frames merged) and the panels written for it, numbered by index. List the panels that show something the moments at their seconds do NOT contain: a different posture (walking when he kneels), a gesture that is not there (raising the helmet, throwing, striking), an object that is not in the hands, a character who is not visible, a place that changes. A closer or wider framing of the same thing, a reaction, a detail of the surroundings are fine. Answer with JSON only: {"invented": [{"index": <panel index>, "problem": "<what contradicts the moment, and what the moment shows instead>"}]}, an empty list when all is consistent.',
+      user: `MOMENTS:\n${JSON.stringify(input.moments.map((m) => ({ from: m.from, to: m.to, characters: m.characters, helmet: String(m.helmet ?? "").slice(0, 3), posture: m.posture, in_hands: m.in_hands, action: m.action, others: m.others_visible })), null, 1)}\n\nPANELS:\n${JSON.stringify(input.intents.map((i, index) => ({ index, seconds: i.seconds, description: i.description, action: i.action })), null, 1)}`,
+      maxTokens: 4000,
+      reasoning: "none",
+      temperature: 0,
+      onCost: (usd) => { input.meter.usd += usd; },
+    });
+    return (answer.invented ?? []).filter((m) => m && Number.isInteger(Number(m.index)) && typeof m.problem === "string").slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
 function nearestSecond(track: Map<number, "off" | "on">, seconds: number): number {
   let best = Number.NaN;
   for (const key of track.keys()) if (Number.isNaN(best) || Math.abs(key - seconds) < Math.abs(best - seconds)) best = key;
@@ -374,6 +397,28 @@ export async function POST(request: Request, { params }: RouteContext) {
         });
         const added = (extra.panels ?? []).filter((i) => i && typeof i.description === "string");
         intents = [...intents, ...added].sort((a, b) => Number(a.seconds) - Number(b.seconds));
+      }
+      // Invention check: panels that contradict the moments are rewritten to them.
+      const invented = await inventedPanels({ moments, intents, meter });
+      if (invented.length) {
+        const fixed = await completeJson<{ panels?: NextPanelIntent[] }>({
+          system,
+          user: [
+            ...user,
+            {
+              type: "text",
+              text: `Some of the panels you wrote contradict the film:\n${JSON.stringify(invented.map((m) => ({ ...m, panel: intents[m.index] })), null, 1)}\n\nRewrite ONLY these panels so that each shows exactly what the moment at its seconds shows (same seconds, same JSON shape, keep the framing idea when it is compatible). Answer with JSON only: {"panels": [...]} in the same order as the problems listed.`,
+            },
+          ],
+          maxTokens: 12000,
+          reasoning: "none",
+          onCost: (usd) => { meter.usd += usd; },
+        });
+        const replacements = fixed.panels ?? [];
+        invented.forEach((m, k) => {
+          const replacement = replacements[k];
+          if (replacement && typeof replacement.description === "string" && replacement.description.trim()) intents[m.index] = { ...intents[m.index], ...replacement };
+        });
       }
       const panels = panelsFromIntents(current, intents, frames, script, overlay).map((panel) => {
         const state = panel.source_time_start === null ? undefined : track.get(nearestSecond(track, panel.source_time_start));
