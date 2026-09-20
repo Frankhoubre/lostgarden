@@ -113,8 +113,8 @@ async function helmetChecks(frames: { seconds: number; src: string }[], meter: C
   return map;
 }
 
-function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; batch: number; characters: string[]; locations: string[] }): string {
-  const { script, batch, characters, locations } = input;
+function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; batch: number; characters: string[]; locations: string[]; pace?: "calm" | "normal" | "action" }): string {
+  const { script, batch, characters, locations, pace = "normal" } = input;
   return [
     `You are the adaptation engine of "${script.series}", an original poetic dark fantasy anime by Frank Houbre, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${batch} panels of the strip, continuing exactly where it stops.`,
     "You receive: the last panels already made (for continuity), frames of the finished episode taken every five seconds after the adapted segment (each labelled with its timecode), and the screenplay of the episode in French.",
@@ -126,6 +126,12 @@ function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonS
     "Rhythm of a webtoon: a wide establishing panel each time the place changes, close-ups on gestures, details on objects, an almost empty panel for a silence, a tall panel for a fall or a vertical space.",
     "Never lose the reader. Between two panels the reader must always know where we are and how we got there: when the place, the subject or the direction changes, add a connective panel (an establishing view, an insert on what the character looks at, a reaction, a step, a hand, a sound in the dark). Aim for one and a half to two and a half panels per frame, more around an event, and use `screenplay_line` to check that no beat of the screenplay is skipped.",
     "Layout, like a real webtoon. Break the stack of full-width rectangles with `frame`: `width` in percent (40 to 100), `align` (left, center, right), `shape` (rect, rounded, slant, slant-reverse, wedge, wedge-reverse), `overlap` (px, the panel rides over the one above, 60 to 300), `tilt` (degrees, -6 to 6), `shadow`. Rules of thumb: a landscape or a reveal is full width (100, shape rect or wedge); a detail or a reaction is narrow (50 to 72) pushed left or right, often overlapping the big panel above it by 100 to 200 px, rounded or slanted; two or three narrow panels in a row alternate sides like a zigzag; an impact gets slant edges and a small tilt; a quiet moment gets a centered rounded panel with margins; keep full width for at most half of the panels.",
+    "Action and threat: make the reader feel it. When something threatens or attacks (a machine that wakes, a chase, a fall, a blow), stop following the frames one panel each and tell every second in three to five panels: the threat rising in the background while the character does not see it yet; a detail of the threat (a leg, a claw, an eye) huge in the foreground with the character tiny behind; the character turning, backing away, the first step of the run; extreme close-ups of the eyes, the hands, the feet hitting the moss; the threat from below, low angle, dutch angle; the character from above, small; a wide shot of the two together with the distance closing; the impact panel with a giant sound effect; then the breath after. Alternate mini panels in rapid succession (3:1 and 16:9, 300 to 450 px, continuous or hard_cut, no gap) with one very tall panel for the peak. Compositions on diagonals, tilted horizon (`tilt` 3 to 6, shape slant), cape and limbs stretched by motion, sharp light from the threat's eyes. Never a calm medium shot in the middle of a chase.",
+    pace === "action"
+      ? `THIS BATCH IS AN ACTION SEQUENCE: ${batch} panels for the few frames given, three to five per frame, dense, dynamic, no calm panel except the last breath. Every panel must add a beat of threat or motion.`
+      : pace === "calm"
+        ? "This batch is a calm sequence: one to two panels per frame, wide and quiet, silence between them."
+        : "",
     "Scale, and make it spectacular. A phone strip lives on contrast of size. Vary the panels strongly and say it in `aspect_ratio` (and `panel_height` up to 2600 when you want it taller than the ratio gives): mini panels in quick succession for details and beats (`3:1` or `16:9`, 300 to 500 px: a foot on moss, a mushroom, a glance, a sound), standard panels (`4:5`) for the action, and very tall full-bleed panels (`9:16`, or `panel_height` 2200 to 2600) for what must feel immense: a landscape, a fall, the reveal of something huge. The reveal of a colossal thing (a sleeping machine, a chasm, a giant) is the tallest panel of the sequence, low angle, the character tiny in it, preceded by a build-up of two to four quiet transition panels (walking deeper, forest details, mist, a first shadow or fragment glimpsed between the trunks, a sound) and a long silence before it (`transition_type` `fall` or `time_skip`, or `hard_cut` for a shock). An impact or a shock gets a big sound effect: `sfx.size` 180 to 320 for a BAAM, with a `rotate`. Use `focal_point` (percent) to say what must stay in frame when the panel crops the image.",
     "Location, strict: look at each frame and name the place actually visible. The sheet of the location you name is attached to the prompt and its design is copied into the background, so a wrong location paints the wrong place (an altar in a forest). Use `altar-sanctuary` only when the altar or the rose window is visible; use `blue-forest` for the cavern forest of black trunks, roots and glowing mushrooms; use `white-lily-field` for the white memory; otherwise create a short new id in lower case with hyphens and describe the place in the panel description. Never copy the location of the previous panel without checking the frame.",
     `Characters with a design sheet (use these exact ids in "characters"): ${characters.join(" | ")}. Lanterne never speaks, never stumbles, emits no light and has no face inside the helmet. Rose is a small calm child. Other characters may be named in lower case (e.g. "unhooker", "vault-king") and must then be described in the panel description.`,
@@ -154,7 +160,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay };
+  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "calm" | "normal" | "action"; until_seconds?: number };
+  const pace: "calm" | "normal" | "action" = body.pace === "calm" || body.pace === "action" ? body.pace : "normal";
+  const until = Number.isFinite(Number(body.until_seconds)) ? Number(body.until_seconds) : null;
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
   const library = libraryWith(overlay);
   const count = Math.max(1, Math.min(MAX_COUNT, Math.round(Number(body.count) || 10)));
@@ -182,7 +190,11 @@ export async function POST(request: Request, { params }: RouteContext) {
       const batch = Math.min(BATCH, count - created.length);
       const adaptedUntil = Math.max(0, ...current.map((p) => p.source_time_end ?? 0));
       // Fewer frames than panels: the writer must have room to decompose an event into several panels.
-      const frames = studioFilmFrames().filter((f) => f.seconds > adaptedUntil).slice(0, Math.min(MAX_FRAMES, Math.max(3, Math.ceil(batch * 0.75))));
+      // An action sequence gets far fewer frames per batch, so every second of it is told in several panels.
+      const perPanel = pace === "action" ? 0.4 : pace === "calm" ? 1 : 0.75;
+      const frames = studioFilmFrames()
+        .filter((f) => f.seconds > adaptedUntil && (until === null || f.seconds <= until))
+        .slice(0, Math.min(MAX_FRAMES, Math.max(2, Math.ceil(batch * perPanel))));
       if (!frames.length) {
         if (!created.length) return Response.json({ error: "Fin de l'épisode : il n'y a plus d'image du film après la dernière case" }, { status: 400 });
         break;
@@ -197,7 +209,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         background: p.background,
         dialogue: p.dialogue.map((d) => `${d.speaker}: ${d.text.en}`),
       }));
-      const system = writerSystem({ script, batch, characters, locations });
+      const system = writerSystem({ script, batch, characters, locations, pace });
       const [notes, helmet] = await Promise.all([analyzeFrames({ script, screenplay, frames, characters, meter }), helmetChecks(frames, meter)]);
       for (const note of notes) {
         const check = helmet.get(Number(note.seconds));
