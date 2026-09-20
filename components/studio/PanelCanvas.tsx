@@ -17,6 +17,11 @@ type PanelCanvasProps = {
   onChange: (changes: Partial<WebtoonPanel>) => void;
   /** Show the focal point handle (the crop centre of the image). */
   showFocal?: boolean;
+  /** `strip`: one panel of the full strip, edge to edge, no frame around it. */
+  variant?: "single" | "strip";
+  selected?: boolean;
+  /** A click on the panel (not on a handle) selects it. */
+  onSelect?: () => void;
 };
 
 const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black: "#020409", abyss: "#020817" };
@@ -29,7 +34,7 @@ const round1 = (value: number) => Math.round(value * 10) / 10;
  * handle on every movable thing: bubble, tail tip, SFX, caption, focal point.
  * Drag a handle to move it; drag the bottom edge to change the panel height.
  */
-export function PanelCanvas({ panel, locale, onChange, showFocal = false }: PanelCanvasProps) {
+export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect }: PanelCanvasProps) {
   const surface = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
 
@@ -77,15 +82,17 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false }: Pane
 
   return (
     <div
-      className={`studio-canvas ${bubbleFont.variable} ${sfxFont.variable}`}
+      className={`studio-canvas ${variant === "strip" ? "studio-canvas-strip" : ""} ${selected ? "is-selected" : ""} ${bubbleFont.variable} ${sfxFont.variable}`}
       style={{ background: BG[panel.background] }}
       onPointerMove={move}
       onPointerUp={end}
       onPointerCancel={end}
+      onClick={onSelect}
+      data-panel-id={panel.panel_id}
     >
       <div
         ref={surface}
-        className={`webtoon-panel webtoon-panel-bleed studio-canvas-panel ${panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"}`}
+        className={`webtoon-panel ${variant === "strip" && !panel.bleed ? "webtoon-panel-framed" : "webtoon-panel-bleed"} studio-canvas-panel ${panel.background === "white" ? "webtoon-panel-on-light" : "webtoon-panel-on-dark"} ${variant === "strip" && panel.border ? "webtoon-panel-bordered" : ""}`}
         style={{ aspectRatio: `${WEBTOON_WIDTH} / ${panel.panel_height}` }}
       >
         {panel.image.src && panel.image.status !== "missing" ? (
@@ -98,6 +105,8 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false }: Pane
             draggable={false}
             style={{ objectPosition: `${panel.focal_point.x}% ${panel.focal_point.y}%` }}
           />
+        ) : panel.caption.some((c) => c.style === "title") ? (
+          <div className="webtoon-title-card" aria-hidden="true" />
         ) : (
           <div className={`webtoon-placeholder ${panel.background === "white" ? "webtoon-placeholder-light" : ""}`}>
             <span className="anime-label">{panel.panel_id}</span>
