@@ -174,8 +174,15 @@ function helmetTrack(notes: FrameNote[], previous: WebtoonPanel[]): Map<number, 
   const track = new Map<number, "off" | "on">();
   for (let i = 0; i < sorted.length; i += 1) {
     const r = readings[i];
-    if (r === "off") off = true;
-    else if (r === "on") {
+    if (r === "off") {
+      // Symmetric: after "on", the helmet only comes off through a visible event (knocked off,
+      // falls, rolls, taken off) or three consecutive readings; a head cut by the frame reads "off" wrongly.
+      const text = `${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""} ${sorted[i].others_visible ?? ""}`;
+      const comesOff = /helmet/i.test(text) && /(knock|fall|falls|falling|roll|rolls|drop|drops|slip|slips|comes off|flies|take|takes|taking|remove|removes|pull)/i.test(text);
+      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 2);
+      const stableOff = following.length === 2 && following.every((x) => x === "off");
+      if (off || comesOff || stableOff) off = true;
+    } else if (r === "on") {
       // The helmet goes back on through a visible gesture (both hands placing it), or when three
       // consecutive readings of Lanterne say "on": one or two isolated "on" after "off" are misreads.
       const text = `${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""} ${sorted[i].posture ?? ""}`;
