@@ -1,6 +1,6 @@
 "use client";
 
-import { Bangers, Nunito } from "next/font/google";
+import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { computeLayout } from "@/lib/webtoon/layout";
@@ -11,10 +11,6 @@ const BG: Record<PanelBackground, string> = {
   black: "#020409",
   abyss: "#020817",
 };
-
-/** Webtoon lettering faces: a rounded sans for bubbles, a display face for SFX. */
-const bubbleFont = Nunito({ subsets: ["latin", "latin-ext"], weight: ["600", "800"], variable: "--font-bubble", display: "swap" });
-const sfxFont = Bangers({ subsets: ["latin"], weight: "400", variable: "--font-sfx", display: "swap" });
 
 type WebtoonReaderProps = {
   panels: WebtoonPanel[];

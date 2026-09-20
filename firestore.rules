@@ -2,9 +2,27 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Accounts allowed into the private webtoon studio (/convert-video-to-webtoon).
+    function isStudio() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['frank.houbre@gmail.com'];
+    }
+
     match /users/{userId} {
       allow read, update, delete: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Working drafts of the webtoon strips: studio only.
+    match /webtoon_drafts/{slug} {
+      allow read, write: if isStudio();
+    }
+
+    // The version the public reader shows: anyone reads, the studio writes.
+    match /webtoon_published/{slug} {
+      allow read: if true;
+      allow write: if isStudio();
     }
   }
 }

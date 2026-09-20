@@ -3,6 +3,7 @@ import path from "node:path";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
 
 /**
@@ -13,7 +14,8 @@ import type { WebtoonPanel } from "@/lib/webtoon/types";
  * default) with the panel's reference sheets attached, and returns the image
  * as a data URL. The editor shows it in place; persisting it into the strip
  * is done by `scripts/webtoon-generate.mjs`, which writes the file and
- * registers it. Needs AI_GATEWAY_API_KEY on the server.
+ * registers it. Needs AI_GATEWAY_API_KEY on the server, and a Firebase ID
+ * token of a studio account in the Authorization header.
  */
 
 type RouteContext = { params: Promise<{ slug: string }> };
@@ -30,6 +32,8 @@ async function referenceAsDataUrl(image: string): Promise<string> {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
+  const identity = await verifyStudioRequest(request);
+  if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
   const script = getWebtoonScript(slug);
   if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
 

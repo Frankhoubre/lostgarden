@@ -10,10 +10,13 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 import { computeLayout } from "@/lib/webtoon/layout";
+import { withPublishedPanels } from "@/lib/webtoon/published";
 import { getWebtoonScript, WEBTOON_SLUGS } from "@/lib/webtoon/scripts";
 import { fill, localizedText } from "@/lib/webtoon/text";
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => WEBTOON_SLUGS.map((slug) => ({ locale, slug })));
@@ -39,8 +42,10 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
   const { locale: localeParam, slug } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
-  const script = getWebtoonScript(slug);
-  if (!script) notFound();
+  const engineScript = getWebtoonScript(slug);
+  if (!engineScript) notFound();
+  // The studio can publish an edited version; the reader shows it when it exists.
+  const script = await withPublishedPanels(engineScript);
   const dict = await getDictionary(locale);
   const w = dict.webtoon;
   const layout = computeLayout(script.panels);
