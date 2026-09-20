@@ -418,6 +418,7 @@ export function StudioApp({ script }: StudioAppProps) {
               notify={notify}
               onAutosave={requestAutosave}
               library={library}
+              setLibrary={setLibrary}
               previewLocale={previewLocale}
               onJob={setJob}
             />
