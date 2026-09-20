@@ -12,7 +12,18 @@ const GATEWAY_BASE_URL = "https://ai-gateway.vercel.sh/v1";
 export type UserPart = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 export type UserContent = string | UserPart[];
 
-export async function completeJson<T>(input: { system: string; user: UserContent; model?: string; maxTokens?: number }): Promise<T> {
+export async function completeJson<T>(input: {
+  system: string;
+  user: UserContent;
+  model?: string;
+  maxTokens?: number;
+  /**
+   * Reasoning budget. The writer runs with "none": on a long task with many
+   * images the model otherwise spends the whole output budget thinking and
+   * the answer comes back empty or cut ("length" with 0 chars observed).
+   */
+  reasoning?: "none" | "low" | "medium" | "high";
+}): Promise<T> {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error("AI_GATEWAY_API_KEY is not set");
   const baseUrl = process.env.AI_GATEWAY_BASE_OPENAI_COMPAT_URL ?? GATEWAY_BASE_URL;
@@ -24,6 +35,7 @@ export async function completeJson<T>(input: { system: string; user: UserContent
       temperature: 0.3,
       max_tokens: input.maxTokens ?? 4000,
       max_completion_tokens: input.maxTokens ?? 4000,
+      ...(input.reasoning ? { reasoning_effort: input.reasoning } : {}),
       messages: [
         { role: "system", content: input.system },
         { role: "user", content: input.user },
