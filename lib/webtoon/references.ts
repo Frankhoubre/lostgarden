@@ -18,6 +18,7 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     priority: 1,
     name: "Lanterne, webtoon model sheet",
     image: "/webtoon/references/lanterne-webtoon-sheet.png",
+    avatar: { x: 12, y: 9, zoom: 6.5 },
     must_keep:
       "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons with a simple scroll motif. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
     description:
@@ -56,6 +57,7 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     priority: 1,
     name: "Rose, webtoon model sheet",
     image: "/webtoon/references/rose-webtoon-sheet.png",
+    avatar: { x: 12, y: 8, zoom: 7 },
     must_keep:
       "Rose is a small young child. Short pink bob hair with a single small ahoge, a white flower tucked in her hair above her left temple, which reads on the viewer's right. Large soft brown eyes, small calm mouth. A pale cream long dress with wide sleeves and a lace hem, and a grey-green hooded short cloak fastened at the collar. Small, slight, gentle silhouette.",
     description:
@@ -440,20 +442,29 @@ export function referencesForPanel(panel: WebtoonPanel, overlay?: LibraryOverlay
     .filter((asset): asset is ReferenceAsset => Boolean(asset && asset.image));
 }
 
-/** Character ids that have at least one sheet in the library, with a display name. */
-export function libraryCharacters(overlay?: LibraryOverlay | null): { id: string; name: string }[] {
-  const seen = new Map<string, string>();
-  for (const asset of libraryWith(overlay)) {
-    if (asset.kind === "character" && asset.subject && !seen.has(asset.subject)) {
-      seen.set(asset.subject, asset.name.split(",")[0]);
+export type LibraryEntry = { id: string; name: string; image?: string; avatar?: ReferenceAsset["avatar"] };
+
+/** The face crop to use for a character sheet: the asset's own, or the turnaround default. */
+export const DEFAULT_AVATAR = { x: 12, y: 9, zoom: 6.5 };
+
+/** Character ids that have at least one sheet in the library, with a display name and the image of their first sheet. */
+export function libraryCharacters(overlay?: LibraryOverlay | null): LibraryEntry[] {
+  const seen = new Map<string, LibraryEntry>();
+  for (const asset of [...libraryWith(overlay)].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99))) {
+    if (asset.kind !== "character" || !asset.subject) continue;
+    const entry = seen.get(asset.subject);
+    if (!entry) seen.set(asset.subject, { id: asset.subject, name: asset.name.split(",")[0], image: asset.image || undefined, avatar: asset.avatar });
+    else if (!entry.image && asset.image) {
+      entry.image = asset.image;
+      entry.avatar = asset.avatar;
     }
   }
-  return [...seen].map(([id, name]) => ({ id, name }));
+  return [...seen.values()];
 }
 
-/** Location ids (without the `loc.` prefix) that have a sheet in the library. */
-export function libraryLocations(overlay?: LibraryOverlay | null): { id: string; name: string }[] {
+/** Location ids (without the `loc.` prefix) that have a sheet in the library, with their image. */
+export function libraryLocations(overlay?: LibraryOverlay | null): LibraryEntry[] {
   return libraryWith(overlay)
     .filter((asset) => asset.kind === "location")
-    .map((asset) => ({ id: asset.id.replace(/^loc\./, ""), name: asset.name }));
+    .map((asset) => ({ id: asset.id.replace(/^loc\./, ""), name: asset.name, image: asset.image || undefined }));
 }

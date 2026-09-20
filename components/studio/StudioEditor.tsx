@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { Avatar } from "@/components/studio/Avatar";
 import { PanelInpaint } from "@/components/studio/PanelInpaint";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -633,6 +634,19 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
                 </span>
               </button>
+              <button
+                type="button"
+                className="studio-thumb-insert"
+                title="Insérer une case vide ici"
+                onClick={() => {
+                  const next = insertAfter(panels, panel.panel_id);
+                  setPanels(next);
+                  const created = next.find((p) => !panels.some((q) => q.panel_id === p.panel_id));
+                  if (created) select(created.panel_id);
+                }}
+              >
+                +
+              </button>
             </li>
           ))}
           {job?.phase === "writing"
@@ -727,6 +741,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               onSelect={select}
               showFocal={showFocal}
               onChange={(id, changes) => setPanels((current) => updatePanel(current, id, changes))}
+              frames={FILM_FRAMES}
+              onInsertAfter={(id) => {
+                const next = insertAfter(panels, id);
+                setPanels(next);
+                const created = next.find((p) => !panels.some((q) => q.panel_id === p.panel_id));
+                if (created) select(created.panel_id);
+              }}
+              onInsertFrameAfter={(id, src) => {
+                const frame = FILM_FRAMES.find((f) => f.src === src);
+                if (!frame) return;
+                const next = appendFromFrame(panels, frame, id);
+                setPanels(next);
+                const created = next.find((p) => !panels.some((q) => q.panel_id === p.panel_id));
+                if (created) select(created.panel_id);
+              }}
             />
           ) : (
             <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
@@ -807,10 +836,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
             <div>
               <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
-              <div className="studio-checks">
-                {CHARACTERS.map((c) => (
-                  <label key={c.id}><input type="checkbox" checked={selected.characters.includes(c.id)} onChange={(e) => setCharacters(c.id, e.target.checked)} /> {c.name}</label>
-                ))}
+              <div className="studio-chips">
+                {CHARACTERS.map((c) => {
+                  const on = selected.characters.includes(c.id);
+                  return (
+                    <button key={c.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => setCharacters(c.id, !on)} aria-pressed={on} title={on ? `${c.name} est dans la case` : `Ajouter ${c.name} à la case`}>
+                      <Avatar image={c.image} name={c.name} crop={c.avatar} />
+                      <span>{c.name}</span>
+                    </button>
+                  );
+                })}
               </div>
               <input
                 className="mt-1"
@@ -823,14 +858,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 }}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="webtoon-field"><span>Lieu (sa fiche est jointe)</span>
-                <select value={LOCATIONS.some((l) => l.id === selected.location) ? selected.location : "__other"} onChange={(e) => { if (e.target.value !== "__other") patch({ location: e.target.value }); }}>
-                  {LOCATIONS.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  <option value="__other">Autre lieu…</option>
-                </select>
-              </label>
-              <label className="webtoon-field"><span>Identifiant du lieu</span><input value={selected.location} onChange={(e) => patch({ location: e.target.value.trim() })} /></label>
+            <div>
+              <span className="webtoon-field-label">Lieu (sa fiche est jointe)</span>
+              <div className="studio-chips">
+                {LOCATIONS.map((l) => {
+                  const on = selected.location === l.id;
+                  return (
+                    <button key={l.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ location: l.id })} aria-pressed={on} title={l.name}>
+                      <Avatar image={l.image} name={l.name} mode="cover" />
+                      <span>{l.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <input className="mt-1" placeholder="Autre lieu : un identifiant en minuscules avec des tirets, décrit dans la case" value={LOCATIONS.some((l) => l.id === selected.location) ? "" : selected.location} onChange={(e) => patch({ location: e.target.value.trim().toLowerCase() })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <label className="webtoon-field"><span>Type de plan</span>
