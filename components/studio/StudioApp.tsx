@@ -118,6 +118,32 @@ export function StudioApp({ script }: StudioAppProps) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
+  // Automatic save asked by the editor after each panel written or generated,
+  // so a reload in the middle of a long job loses nothing. The flag is read
+  // once the new panels are rendered, then the draft is written silently.
+  const wantAutosave = useRef(false);
+  const requestAutosave = useCallback(() => {
+    wantAutosave.current = true;
+  }, []);
+  useEffect(() => {
+    if (!wantAutosave.current) return;
+    wantAutosave.current = false;
+    if (!user) return;
+    let cancelled = false;
+    saveStrip(DRAFTS_COLLECTION, script.slug, panels, user)
+      .then((at) => {
+        if (cancelled) return;
+        setSavedAt(at);
+        setBaseline(panels);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) notify(`Enregistrement automatique impossible : ${error instanceof Error ? error.message : "erreur"}`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [panels, user, script.slug, notify]);
+
   const save = useCallback(async () => {
     if (!user) {
       notify("Pas de compte connecté : rien n'est enregistré (mode local).");
@@ -257,7 +283,7 @@ export function StudioApp({ script }: StudioAppProps) {
         </nav>
         <main className="studio-main">
           {tab === "webtoon" ? (
-            <StudioEditor script={script} panels={panels} setPanels={setPanels} selectedId={selectedId} setSelectedId={setSelectedId} notify={notify} />
+            <StudioEditor script={script} panels={panels} setPanels={setPanels} selectedId={selectedId} setSelectedId={setSelectedId} notify={notify} onAutosave={requestAutosave} />
           ) : null}
           {tab === "scenario" ? <StudioScreenplay panels={panels} /> : null}
           {tab === "personnages" ? <StudioCharacters /> : null}
