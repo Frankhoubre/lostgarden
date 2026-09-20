@@ -406,7 +406,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-          body: JSON.stringify({ count: ask, panels: current, library, pace, until_seconds: until }),
+          // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
+          body: JSON.stringify({ count: count - created.length, panels: current, library, pace, until_seconds: until }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
