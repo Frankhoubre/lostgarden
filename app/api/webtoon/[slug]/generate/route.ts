@@ -22,6 +22,8 @@ import type { WebtoonPanel } from "@/lib/webtoon/types";
  * token of a studio account in the Authorization header.
  */
 
+export const maxDuration = 120;
+
 type RouteContext = { params: Promise<{ slug: string }> };
 
 const MIME: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };

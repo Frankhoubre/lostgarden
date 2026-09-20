@@ -109,6 +109,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
+  const [nextCount, setNextCount] = useState(10);
+  const [phase, setPhase] = useState<string | null>(null);
   const stopBatch = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -213,6 +215,58 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify(`${ok}/${todo.length} image${todo.length > 1 ? "s" : ""} générée${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
     } finally {
       setBatch(null);
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Continue the story: the writer model drafts the next N panels from the
+   * frames that follow the last one, the engine composes them, then the
+   * images are generated one by one and the lettering is translated.
+   */
+  const continueStory = async () => {
+    if (busy) return;
+    const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
+    if (!window.confirm(`Écrire et générer les ${count} cases suivantes à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film ?`)) return;
+    setBusy(true);
+    stopBatch.current = false;
+    setPhase(`Lecture du film et écriture de ${count} cases…`);
+    try {
+      const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+        body: JSON.stringify({ count, panels }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
+      if (!response.ok || !payload.panels?.length) {
+        notify(payload.error ?? `Erreur ${response.status}`);
+        return;
+      }
+      const created = payload.panels;
+      setPanels((current) => [...current, ...created].map((p, i) => ({ ...p, order: i + 1 })));
+      select(created[0].panel_id);
+      notify(`${created.length} cases écrites. Génération des images…`);
+      let ok = 0;
+      setBatch({ done: 0, total: created.length });
+      for (const [i, panel] of created.entries()) {
+        if (stopBatch.current) break;
+        setPhase(`Image ${i + 1}/${created.length} · ${panel.panel_id}`);
+        select(panel.panel_id);
+        if (await generateOne(panel)) ok += 1;
+        setBatch({ done: i + 1, total: created.length });
+      }
+      setBatch(null);
+      if (!stopBatch.current) {
+        setPhase("Traduction des textes…");
+        setBusy(false);
+        await translatePanels(created, false);
+      }
+      notify(`Suite écrite : ${created.length} cases, ${ok} image${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Erreur");
+    } finally {
+      setBatch(null);
+      setPhase(null);
       setBusy(false);
     }
   };
@@ -323,9 +377,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       <aside className="studio-list">
         <p className="studio-list-total">{panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px</p>
         <div className="studio-list-actions">
-          {batch ? (
+          {batch || phase ? (
             <>
-              <span className="text-xs text-ivory/70">Génération {batch.done}/{batch.total}…</span>
+              <span className="text-xs text-ivory/70">{phase ?? `Génération ${batch?.done}/${batch?.total}…`}</span>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => { stopBatch.current = true; }}>Arrêter</button>
             </>
           ) : (
@@ -362,6 +416,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </button>
             </li>
           ))}
+          <li>
+            <div className="studio-next">
+              <span className="studio-thumb-empty">Suite de l&apos;histoire</span>
+              <p>
+                Adapté jusqu&apos;à {Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film. Le studio lit les images suivantes et le scénario, écrit les cases, génère les images et traduit les textes.
+              </p>
+              <label>
+                <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
+                <span>cases</span>
+              </label>
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
+                {busy ? "…" : `Générer les ${Math.max(1, Math.min(30, Math.round(nextCount) || 1))} cases suivantes`}
+              </button>
+            </div>
+          </li>
         </ol>
       </aside>
 
