@@ -3290,6 +3290,29 @@ h3 {
   filter: grayscale(0.6) brightness(0.7);
 }
 
+.studio-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0.6rem;
+}
+
+.studio-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: rgba(216, 210, 194, 0.85);
+}
+
+.studio-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .studio-lightbox {
   border: 0;
   padding: 0;

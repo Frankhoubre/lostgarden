@@ -172,6 +172,12 @@ export type WebtoonPanel = {
   visual_references: string[];
   generation_prompt: string;
   negative_constraints: string[];
+  /**
+   * `true` when the studio composes the prompt from the panel's fields
+   * (description, action, characters, location, shot) before each
+   * generation. Engine panels leave it unset: their prompt is the engine's.
+   */
+  prompt_auto?: boolean;
   image: PanelImage;
 };
 
@@ -242,6 +248,10 @@ export type WebtoonScript = {
   panels: WebtoonPanel[];
   /** Reference assets used by at least one panel. */
   references: ReferenceAsset[];
+  /** Location id → bible palette key, so the studio can compose new panels. */
+  palettes?: Record<string, string>;
+  /** Bible palette key → style anchor reference id. */
+  style_anchors?: Record<string, string>;
   generated_at: string;
 };
 

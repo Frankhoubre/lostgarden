@@ -392,8 +392,50 @@ export function resolveReferences(input: {
   return [...picked.values()];
 }
 
+export function isReferenceId(id: string): boolean {
+  return byId.has(id);
+}
+
+/**
+ * A film frame picked in the studio that has no library entry: any public
+ * image path (or https URL) listed in `visual_references` becomes a
+ * source-frame reference on the fly, attached last like the others.
+ */
+export function frameReference(image: string): ReferenceAsset {
+  const match = /(\d{2})m(\d{2})s/.exec(image);
+  const label = match ? `${Number(match[1])}:${match[2]}` : image.split("/").pop() ?? image;
+  return {
+    id: image,
+    kind: "source_frame",
+    name: `Episode frame at ${label}`,
+    image,
+    must_keep: "Framing, light and palette of the shot.",
+    description: `Frame of the finished episode at ${label}, picked in the studio.`,
+    tags: ["source_frame", "studio"],
+  };
+}
+
 export function referencesForPanel(panel: WebtoonPanel): ReferenceAsset[] {
   return panel.visual_references
-    .map((id) => byId.get(id))
+    .map((id) => byId.get(id) ?? (id.startsWith("/") || id.startsWith("http") ? frameReference(id) : undefined))
     .filter((asset): asset is ReferenceAsset => Boolean(asset));
+}
+
+/** Character ids that have at least one sheet in the library. */
+export function libraryCharacters(): { id: string; name: string }[] {
+  const seen = new Map<string, string>();
+  for (const asset of REFERENCE_LIBRARY) {
+    if (asset.kind === "character" && asset.subject && !seen.has(asset.subject)) {
+      seen.set(asset.subject, asset.name.split(",")[0]);
+    }
+  }
+  return [...seen].map(([id, name]) => ({ id, name }));
+}
+
+/** Location ids (without the `loc.` prefix) that have a sheet in the library. */
+export function libraryLocations(): { id: string; name: string }[] {
+  return REFERENCE_LIBRARY.filter((asset) => asset.kind === "location").map((asset) => ({
+    id: asset.id.replace(/^loc\./, ""),
+    name: asset.name,
+  }));
 }

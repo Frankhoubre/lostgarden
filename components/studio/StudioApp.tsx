@@ -12,6 +12,7 @@ import { StudioLocations } from "@/components/studio/StudioLocations";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
+import { appendFromFrame } from "@/lib/webtoon/editor-ops";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, loadStrip, saveStrip } from "@/lib/webtoon/studio";
 import { localizedText } from "@/lib/webtoon/text";
@@ -167,6 +168,16 @@ export function StudioApp({ script }: StudioAppProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [save]);
 
+  /** From the film tab: a new panel at the end of the strip, then straight to the editor on it. */
+  const createFromFrame = (frame: { src: string; seconds: number }) => {
+    const next = appendFromFrame(panels, frame, null);
+    const created = next[next.length - 1];
+    setPanels(next);
+    setSelectedId(created.panel_id);
+    setTab("webtoon");
+    notify(`Case ${created.panel_id} créée. Écris sa description, puis Générer.`);
+  };
+
   const exportJson = () => {
     const payload = { ...script, panels, layout: computeLayout(panels), generated_at: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -251,7 +262,7 @@ export function StudioApp({ script }: StudioAppProps) {
           {tab === "scenario" ? <StudioScreenplay panels={panels} /> : null}
           {tab === "personnages" ? <StudioCharacters /> : null}
           {tab === "decors" ? <StudioLocations /> : null}
-          {tab === "film" ? <StudioFrames panels={panels} /> : null}
+          {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} /> : null}
         </main>
       </div>
     </div>

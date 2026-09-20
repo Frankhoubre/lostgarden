@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "check:copy": "node scripts/check-no-em-dash.mjs",
-    "playtest": "node scripts/playtest.mjs"
+    "playtest": "node scripts/playtest.mjs",
+    "webtoon:export": "node --experimental-strip-types scripts/webtoon-export.mjs",
+    "webtoon:generate": "node --experimental-strip-types scripts/webtoon-generate.mjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

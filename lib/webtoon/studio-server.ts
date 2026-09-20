@@ -20,6 +20,11 @@ type LookupResponse = { users?: { email?: string; emailVerified?: boolean }[] };
 export type StudioIdentity = { email: string };
 
 export async function verifyStudioRequest(request: Request): Promise<StudioIdentity | null> {
+  // Local work behind ?dev=1: the gate is open in the browser, so the route
+  // opens too, on the dev server only, when the editor says so.
+  if (process.env.NODE_ENV === "development" && request.headers.get("x-studio-dev") === "1") {
+    return { email: "dev@localhost" };
+  }
   const header = request.headers.get("authorization") ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
