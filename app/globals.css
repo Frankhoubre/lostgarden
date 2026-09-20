@@ -3313,6 +3313,33 @@ h3 {
   gap: 0.35rem;
 }
 
+.studio-next {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.9rem 0.8rem;
+  border: 1px dashed rgba(125, 223, 255, 0.35);
+  border-radius: 0.6rem;
+  background: rgba(125, 223, 255, 0.04);
+  font-size: 0.75rem;
+  color: rgba(216, 210, 194, 0.8);
+}
+
+.studio-next p {
+  line-height: 1.35;
+}
+
+.studio-next label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.studio-next input {
+  width: 4.5rem;
+}
+
 .studio-lightbox {
   border: 0;
   padding: 0;

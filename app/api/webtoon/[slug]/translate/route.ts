@@ -14,6 +14,8 @@ import type { Locale } from "@/lib/i18n/config";
  * short enough for a bubble, sound effects adapted rather than transcribed.
  */
 
+export const maxDuration = 120;
+
 type RouteContext = { params: Promise<{ slug: string }> };
 
 const LANGUAGE: Record<Locale, string> = { fr: "French", en: "English", ja: "Japanese", ko: "Korean" };
