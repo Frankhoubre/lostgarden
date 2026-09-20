@@ -15,8 +15,12 @@ service cloud.firestore {
     }
 
     // Working drafts of the webtoon strips: studio only.
+    // A long strip is sliced into a `chunks` subcollection (see lib/webtoon/studio.ts).
     match /webtoon_drafts/{slug} {
       allow read, write: if isStudio();
+      match /chunks/{chunk} {
+        allow read, write: if isStudio();
+      }
     }
 
     // The studio's library of characters and locations: studio only.
@@ -33,6 +37,10 @@ service cloud.firestore {
     match /webtoon_published/{slug} {
       allow read: if true;
       allow write: if isStudio();
+      match /chunks/{chunk} {
+        allow read: if true;
+        allow write: if isStudio();
+      }
     }
   }
 }
