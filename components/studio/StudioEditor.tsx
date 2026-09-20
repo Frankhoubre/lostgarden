@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -70,6 +70,41 @@ type GeneratePayload = {
   visual_references?: string[];
 };
 
+/**
+ * A running job of the studio: writing the next panels, generating images
+ * one by one, or translating. Drives the progress bar, the skeleton cards,
+ * the spinner on the panel being made and the time estimate.
+ */
+type Job = {
+  phase: "writing" | "images" | "translating";
+  label: string;
+  done: number;
+  total: number;
+  /** Panels waiting for their image, in order. */
+  queue: string[];
+  /** Panel whose image is being generated right now. */
+  current: string | null;
+  /** Skeleton cards shown while the writer drafts the panels. */
+  placeholders: number;
+  /** When the current estimate says the job ends. */
+  deadline: number;
+};
+
+const ESTIMATE = { writeBase: 25_000, writePer: 5_000, image: 50_000, translateBase: 10_000, translatePer: 1_000 };
+
+/** A deadline `ms` from now, kept out of the component so the lint knows it is not render work. */
+function deadlineIn(ms: number): number {
+  return Date.now() + ms;
+}
+
+function remaining(ms: number): string {
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s < 60) return `${s} s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r >= 15 ? `${m} min ${r} s` : `${m} min`;
+}
+
 /** Panels that still need an image: none yet, or the prompt changed since. */
 function pendingPanels(panels: WebtoonPanel[]): WebtoonPanel[] {
   return panels.filter((p) => p.image.status !== "generated" && (p.description.trim() || p.generation_prompt.trim()));
@@ -108,10 +143,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [showStrip, setShowStrip] = useState(false);
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
+  const [job, setJob] = useState<Job | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
-  const [phase, setPhase] = useState<string | null>(null);
   const stopBatch = useRef(false);
+  /** Measured image durations, so the estimate learns from the real speed. */
+  const imageTimes = useRef<number[]>([]);
+
+  useEffect(() => {
+    if (!job) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [job]);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => panels.find((p) => p.panel_id === selectedId) ?? panels[0] ?? null, [panels, selectedId]);
@@ -185,9 +228,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       return;
     }
     setBusy(true);
+    stopBatch.current = false;
     try {
-      if (await generateOne(selected)) notify(selected.image.src ? "Image regénérée" : "Image générée");
+      if (await runImages([selected])) notify(selected.image.src ? "Image regénérée" : "Image générée");
     } finally {
+      setJob(null);
       setBusy(false);
     }
   };
@@ -203,20 +248,44 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (!window.confirm(`Générer ${todo.length} case${todo.length > 1 ? "s" : ""} (${todo.map((p) => p.panel_id).join(", ")}) ?`)) return;
     setBusy(true);
     stopBatch.current = false;
-    setBatch({ done: 0, total: todo.length });
-    let ok = 0;
     try {
-      for (const [i, panel] of todo.entries()) {
-        if (stopBatch.current) break;
-        select(panel.panel_id);
-        if (await generateOne(panel)) ok += 1;
-        setBatch({ done: i + 1, total: todo.length });
-      }
+      const ok = await runImages(todo);
       notify(`${ok}/${todo.length} image${todo.length > 1 ? "s" : ""} générée${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
     } finally {
-      setBatch(null);
+      setJob(null);
       setBusy(false);
     }
+  };
+
+  const imageEstimate = () => {
+    const times = imageTimes.current.slice(-5);
+    return times.length ? times.reduce((a, b) => a + b, 0) / times.length : ESTIMATE.image;
+  };
+
+  /** Generate the images of these panels one after the other, feeding the job display. */
+  const runImages = async (list: WebtoonPanel[]): Promise<number> => {
+    let ok = 0;
+    for (const [i, panel] of list.entries()) {
+      if (stopBatch.current) break;
+      const left = list.length - i;
+      setJob({
+        phase: "images",
+        label: `Image ${i + 1}/${list.length} · ${panel.panel_id}`,
+        done: i,
+        total: list.length,
+        queue: list.slice(i + 1).map((p) => p.panel_id),
+        current: panel.panel_id,
+        placeholders: 0,
+        deadline: deadlineIn(left * imageEstimate()),
+      });
+      select(panel.panel_id);
+      const started = Date.now();
+      if (await generateOne(panel)) {
+        ok += 1;
+        imageTimes.current.push(Date.now() - started);
+      }
+    }
+    return ok;
   };
 
   /**
@@ -227,10 +296,19 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const continueStory = async () => {
     if (busy) return;
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
-    if (!window.confirm(`Écrire et générer les ${count} cases suivantes à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film ?`)) return;
+    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film ?`)) return;
     setBusy(true);
     stopBatch.current = false;
-    setPhase(`Lecture du film et écriture de ${count} cases…`);
+    setJob({
+      phase: "writing",
+      label: count === 1 ? "Lecture du film et écriture de la case suivante…" : `Lecture du film et écriture de ${count} cases…`,
+      done: 0,
+      total: count,
+      queue: [],
+      current: null,
+      placeholders: count,
+      deadline: deadlineIn(ESTIMATE.writeBase + ESTIMATE.writePer * count + count * imageEstimate() + ESTIMATE.translateBase + ESTIMATE.translatePer * count),
+    });
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
         method: "POST",
@@ -246,18 +324,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       setPanels((current) => [...current, ...created].map((p, i) => ({ ...p, order: i + 1 })));
       select(created[0].panel_id);
       notify(`${created.length} cases écrites. Génération des images…`);
-      let ok = 0;
-      setBatch({ done: 0, total: created.length });
-      for (const [i, panel] of created.entries()) {
-        if (stopBatch.current) break;
-        setPhase(`Image ${i + 1}/${created.length} · ${panel.panel_id}`);
-        select(panel.panel_id);
-        if (await generateOne(panel)) ok += 1;
-        setBatch({ done: i + 1, total: created.length });
-      }
-      setBatch(null);
+      const ok = await runImages(created);
       if (!stopBatch.current) {
-        setPhase("Traduction des textes…");
+        setJob({ phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
         setBusy(false);
         await translatePanels(created, false);
       }
@@ -265,8 +334,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur");
     } finally {
-      setBatch(null);
-      setPhase(null);
+      setJob(null);
       setBusy(false);
     }
   };
@@ -377,11 +445,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       <aside className="studio-list">
         <p className="studio-list-total">{panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px</p>
         <div className="studio-list-actions">
-          {batch || phase ? (
-            <>
-              <span className="text-xs text-ivory/70">{phase ?? `Génération ${batch?.done}/${batch?.total}…`}</span>
-              <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => { stopBatch.current = true; }}>Arrêter</button>
-            </>
+          {job ? (
+            <div className="studio-job" role="status" aria-live="polite">
+              <div className="studio-job-head">
+                <span className="studio-spinner" aria-hidden />
+                <span className="studio-job-label">{job.label}</span>
+                <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => { stopBatch.current = true; }} disabled={job.phase !== "images"}>Arrêter</button>
+              </div>
+              <div className="studio-progress" aria-hidden>
+                <i style={{ width: `${job.phase === "writing" ? 6 : job.phase === "translating" ? 96 : Math.round(8 + (88 * job.done) / Math.max(1, job.total))}%` }} />
+              </div>
+              <span className="studio-job-eta">
+                {job.phase === "images" ? `${job.done}/${job.total} images faites · ` : ""}
+                {job.deadline > now ? `≈ ${remaining(job.deadline - now)} restantes` : "encore quelques secondes…"}
+              </span>
+            </div>
           ) : (
             <>
               <button type="button" className="webtoon-mini" onClick={generatePending} disabled={busy || !pending} title="Génère chaque case sans image ou dont le prompt a changé">
@@ -398,7 +476,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <li key={panel.panel_id}>
               <button
                 type="button"
-                className={`studio-thumb ${panel.panel_id === selected.panel_id ? "is-active" : ""}`}
+                className={`studio-thumb ${panel.panel_id === selected.panel_id ? "is-active" : ""} ${job?.current === panel.panel_id ? "is-generating" : ""} ${job?.queue.includes(panel.panel_id) ? "is-queued" : ""}`}
                 onClick={() => select(panel.panel_id)}
                 style={{ background: panel.background === "white" ? "#f6f4ef" : "#020409" }}
               >
@@ -408,6 +486,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 ) : (
                   <span className="studio-thumb-empty">sans image</span>
                 )}
+                {job?.current === panel.panel_id ? (
+                  <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />Génération…</span>
+                ) : job?.queue.includes(panel.panel_id) ? (
+                  <span className="studio-thumb-overlay studio-thumb-overlay-soft">en attente</span>
+                ) : null}
                 <span className="studio-thumb-meta">
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
@@ -416,6 +499,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </button>
             </li>
           ))}
+          {job?.phase === "writing"
+            ? Array.from({ length: job.placeholders }, (_, i) => (
+                <li key={`skeleton-${i}`}>
+                  <div className="studio-thumb studio-thumb-skeleton" aria-hidden>
+                    <span className="studio-thumb-empty">écriture de la case {panels.length + i + 1}…</span>
+                  </div>
+                </li>
+              ))
+            : null}
           <li>
             <div className="studio-next">
               <span className="studio-thumb-empty">Suite de l&apos;histoire</span>
@@ -427,7 +519,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <span>cases</span>
               </label>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
-                {busy ? "…" : `Générer les ${Math.max(1, Math.min(30, Math.round(nextCount) || 1))} cases suivantes`}
+                {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
             </div>
           </li>
@@ -447,7 +539,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </div>
         </div>
         <p className="studio-hint">Glisse les poignées : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.</p>
-        <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
+        <div className="studio-stage-wrap">
+          <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
+          {job?.current === selected.panel_id ? (
+            <div className="studio-stage-overlay" role="status">
+              <span className="studio-spinner studio-spinner-lg" aria-hidden />
+              <span>Génération de l&apos;image…</span>
+              <small>{job.deadline > now ? `≈ ${remaining(job.deadline - now)}` : "presque fini"}</small>
+            </div>
+          ) : null}
+        </div>
         {showStrip ? (
           <div className="studio-strip-preview">
             <WebtoonReader panels={panels} showIds onSelect={select} selectedId={selected.panel_id} />

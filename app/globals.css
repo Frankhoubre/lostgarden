@@ -3340,6 +3340,149 @@ h3 {
   width: 4.5rem;
 }
 
+/* Running job: spinner, progress bar, estimate. */
+.studio-spinner {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid rgba(125, 223, 255, 0.25);
+  border-top-color: rgba(125, 223, 255, 0.95);
+  border-radius: 50%;
+  animation: studio-spin 0.9s linear infinite;
+  vertical-align: -0.15em;
+}
+
+.studio-spinner-lg {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-width: 3px;
+}
+
+@keyframes studio-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.studio-job {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 0.6rem;
+  background: #061018;
+  box-shadow: 0 0 0 1px rgba(125, 223, 255, 0.06), 0 8px 18px rgba(2, 4, 9, 0.6);
+  font-size: 0.72rem;
+  color: rgba(216, 210, 194, 0.85);
+}
+
+.studio-job-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-job-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-job-eta {
+  color: rgba(125, 223, 255, 0.9);
+}
+
+.studio-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(125, 223, 255, 0.15);
+  overflow: hidden;
+}
+
+.studio-progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(125, 223, 255, 0.6), rgba(125, 223, 255, 1));
+  transition: width 0.6s ease;
+}
+
+.studio-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(2, 4, 9, 0.62);
+  color: rgba(216, 210, 194, 0.95);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.studio-thumb-overlay-soft {
+  background: rgba(2, 4, 9, 0.35);
+  color: rgba(216, 210, 194, 0.7);
+}
+
+.studio-thumb.is-generating {
+  outline: 2px solid rgba(125, 223, 255, 0.8);
+  outline-offset: 1px;
+}
+
+.studio-thumb-skeleton {
+  min-height: 5.5rem;
+  border: 1px dashed rgba(125, 223, 255, 0.3);
+  background: linear-gradient(100deg, rgba(125, 223, 255, 0.05) 30%, rgba(125, 223, 255, 0.16) 50%, rgba(125, 223, 255, 0.05) 70%);
+  background-size: 220% 100%;
+  animation: studio-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes studio-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+.studio-stage-wrap {
+  position: relative;
+}
+
+.studio-stage-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: rgba(2, 4, 9, 0.7);
+  color: rgba(216, 210, 194, 0.95);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 5;
+}
+
+.studio-stage-overlay small {
+  font-size: 0.75rem;
+  color: rgba(125, 223, 255, 0.9);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .studio-lightbox {
   border: 0;
   padding: 0;
