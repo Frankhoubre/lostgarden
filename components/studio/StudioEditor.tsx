@@ -129,6 +129,8 @@ type StudioEditorProps = {
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
   notify: (message: string) => void;
+  /** Ask the studio to write the draft once the current panels are rendered. */
+  onAutosave?: () => void;
 };
 
 /**
@@ -137,7 +139,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave }: StudioEditorProps) {
   const { locale } = useLocale();
   const { user } = useAuth();
   const [showStrip, setShowStrip] = useState(false);
@@ -283,6 +285,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       if (await generateOne(panel)) {
         ok += 1;
         imageTimes.current.push(Date.now() - started);
+        onAutosave?.();
       }
     }
     return ok;
@@ -322,6 +325,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       }
       const created = payload.panels;
       setPanels((current) => [...current, ...created].map((p, i) => ({ ...p, order: i + 1 })));
+      onAutosave?.();
       select(created[0].panel_id);
       notify(`${created.length} cases écrites. Génération des images…`);
       const ok = await runImages(created);
@@ -344,6 +348,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     setBusy(true);
     try {
       await applyImage(selected, await readFileAsDataUrl(file), "manual-upload");
+      onAutosave?.();
       notify("Image remplacée");
     } finally {
       setBusy(false);
@@ -404,6 +409,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         byPanel.set(panelId, bucket);
       }
       setPanels((current) => current.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p)));
+      onAutosave?.();
       notify(`${batchItems.length} texte${batchItems.length > 1 ? "s" : ""} traduit${batchItems.length > 1 ? "s" : ""} en fr, en, ja, ko`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de traduction");
