@@ -2,11 +2,11 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import { completeJson, type UserPart } from "@/lib/webtoon/providers/gateway-text";
-import { libraryCharacters, libraryLocations, REFERENCE_LIBRARY } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryLocations, libraryWith } from "@/lib/webtoon/references";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
 import { STUDIO_SCREENPLAY, studioFilmFrames } from "@/lib/webtoon/studio-assets";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
-import type { WebtoonPanel } from "@/lib/webtoon/types";
+import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
 /**
  * POST /api/webtoon/<slug>/continue
@@ -42,7 +42,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[] };
+  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay };
+  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
+  const library = libraryWith(overlay);
   const count = Math.max(1, Math.min(MAX_COUNT, Math.round(Number(body.count) || 10)));
   const current = Array.isArray(body.panels) && body.panels.length ? body.panels : script.panels;
   const adaptedUntil = Math.max(0, ...current.map((p) => p.source_time_end ?? 0));
@@ -59,16 +61,20 @@ export async function POST(request: Request, { params }: RouteContext) {
     background: p.background,
     dialogue: p.dialogue.map((d) => `${d.speaker}: ${d.text.en}`),
   }));
-  const locations = libraryLocations().map((l) => {
-    const asset = REFERENCE_LIBRARY.find((a) => a.id === `loc.${l.id}`);
+  const locations = libraryLocations(overlay).map((l) => {
+    const asset = library.find((a) => a.id === `loc.${l.id}`);
     return `${l.id}: ${asset?.must_keep ?? l.name}`;
+  });
+  const characters = libraryCharacters(overlay).map((c) => {
+    const sheet = library.find((a) => a.kind === "character" && a.subject === c.id);
+    return `${c.id} (${c.name}): ${sheet?.must_keep ?? ""}`;
   });
 
   const system = [
     `You are the adaptation engine of "${script.series}", an original poetic dark fantasy anime by Frank Houbre, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${count} panels of the strip, continuing exactly where it stops.`,
     "You receive: the last panels already made (for continuity), frames of the finished episode taken every five seconds after the adapted segment (each labelled with its timecode), and the screenplay of the episode in French.",
     "Method: read the frames in order and follow the film. Each panel draws from one frame: give its timecode in `seconds`. Do not invent actions that are not in the film or the screenplay; a panel may be a closer look, a reverse angle or a breath on the same moment (fidelity reframe or bridge), at most one in four. Follow the rhythm of a webtoon: a wide establishing panel when the place changes, close-ups on gestures, details on objects, an empty panel for silence. Cover the film continuously: the panels must run forward in time, without going back, and the last panel must land on the frame where the next call should continue.",
-    `Characters with a design sheet (use these exact ids in "characters"): ${libraryCharacters().map((c) => `${c.id} (${c.name})`).join(", ")}. Lanterne never speaks, never stumbles, emits no light and has no face inside the helmet. Rose is a small calm child. Other characters may be named in lower case (e.g. "unhooker", "vault-king") and must then be described in the panel description.`,
+    `Characters with a design sheet (use these exact ids in "characters"): ${characters.join(" | ")}. Lanterne never speaks, never stumbles, emits no light and has no face inside the helmet. Rose is a small calm child. Other characters may be named in lower case (e.g. "unhooker", "vault-king") and must then be described in the panel description.`,
     `Locations with a sheet (use the id in "location" when the scene is there, otherwise a short new id in lower case with hyphens, described in the panel): ${locations.join(" | ")}.`,
     `Continuity of the series: ${script.source.continuity.join(" ")}`,
     "Page background: `white` for the white memory world, `black` for the underground; `abyss` only for a fall into the deep.",
@@ -96,7 +102,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   try {
     const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 16000 });
     const intents = (result.panels ?? []).slice(0, count);
-    const panels = panelsFromIntents(current, intents, frames, script);
+    const panels = panelsFromIntents(current, intents, frames, script, overlay);
     if (!panels.length) return Response.json({ error: "Le modèle n'a renvoyé aucune case exploitable" }, { status: 502 });
     return Response.json({ panels, adapted_until: adaptedUntil, frames: frames.length });
   } catch (error) {

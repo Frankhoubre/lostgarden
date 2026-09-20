@@ -5,7 +5,7 @@ import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
-import type { WebtoonPanel } from "@/lib/webtoon/types";
+import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
 /**
  * POST /api/webtoon/<slug>/generate
@@ -47,10 +47,13 @@ export async function POST(request: Request, { params }: RouteContext) {
     panel_id?: string;
     panel?: WebtoonPanel;
     model?: string;
+    /** The studio's library changes, so its characters and locations are attached. */
+    library?: LibraryOverlay;
   };
+  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
   const requested = body.panel ?? script.panels.find((p) => p.panel_id === body.panel_id);
   if (!requested) return Response.json({ error: "unknown panel" }, { status: 400 });
-  const panel = panelForGeneration(requested, script);
+  const panel = panelForGeneration(requested, script, overlay);
   if (!panel.description.trim() && !panel.generation_prompt.trim()) {
     return Response.json({ error: "Écris d'abord une description de la case" }, { status: 400 });
   }
@@ -63,7 +66,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const generation = buildGenerationRequest(panel, body.model);
+    const generation = buildGenerationRequest(panel, body.model, overlay);
     const image = await generateWithGateway(generation, {
       model: body.model,
       resolveReference: referenceAsDataUrl,

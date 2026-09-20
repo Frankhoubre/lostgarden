@@ -212,6 +212,31 @@ export function studioFilmFrames(): StudioFrame[] {
   return (filmFrames as { src: string; seconds: number }[]).map((frame) => ({ ...frame, label: tc(frame.seconds) }));
 }
 
+/** Production documentation by character id, for the editable library. */
+export function characterDocs(): Record<string, { role?: string; blocks: StudioTextBlock[]; extra?: StudioImage[] }> {
+  const docs: Record<string, { role?: string; blocks: StudioTextBlock[]; extra?: StudioImage[] }> = {};
+  for (const character of studioCharacters()) {
+    docs[character.id] = {
+      role: character.role,
+      blocks: character.blocks.filter((block) => !block.title.startsWith("Verrou de design")),
+      extra: character.images.filter((image) => !REFERENCE_LIBRARY.some((asset) => asset.image === image.src)),
+    };
+  }
+  return docs;
+}
+
+/** Production documentation by location id, for the editable library. */
+export function locationDocs(): Record<string, { role?: string; blocks: StudioTextBlock[]; extra?: StudioImage[] }> {
+  const docs: Record<string, { role?: string; blocks: StudioTextBlock[]; extra?: StudioImage[] }> = {};
+  for (const location of studioLocations()) {
+    docs[location.id] = {
+      blocks: location.blocks.filter((block) => !block.title.startsWith("Verrou de design")),
+      extra: location.images.filter((image) => !REFERENCE_LIBRARY.some((asset) => asset.image === image.src)),
+    };
+  }
+  return docs;
+}
+
 export const STUDIO_SCREENPLAY = screenplay as {
   title: string;
   source: string;

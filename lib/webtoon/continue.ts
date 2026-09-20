@@ -3,6 +3,7 @@ import { composePanel, panelFromFrame, type FramePick } from "./compose";
 import { heightForAspect } from "./layout";
 import type {
   Anchor,
+  LibraryOverlay,
   BubbleStyle,
   CameraAngle,
   Fidelity,
@@ -72,6 +73,7 @@ export function panelsFromIntents(
   intents: NextPanelIntent[],
   frames: FramePick[],
   script: Pick<WebtoonScript, "palettes" | "style_anchors">,
+  overlay?: LibraryOverlay | null,
 ): WebtoonPanel[] {
   const panels: WebtoonPanel[] = [...current];
   const created: WebtoonPanel[] = [];
@@ -131,7 +133,7 @@ export function panelsFromIntents(
           size: 96,
         })),
     };
-    const panel = composePanel(draft, script);
+    const panel = composePanel(draft, script, overlay);
     panels.push(panel);
     created.push(panel);
   }

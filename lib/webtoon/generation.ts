@@ -1,5 +1,5 @@
 import { referencesForPanel } from "./references";
-import type { WebtoonPanel } from "./types";
+import type { LibraryOverlay, WebtoonPanel } from "./types";
 
 /**
  * GENERATION REQUEST: the provider-neutral bundle for one panel. The
@@ -23,6 +23,7 @@ export const DEFAULT_IMAGE_MODEL = "nano_banana_pro";
 export function buildGenerationRequest(
   panel: WebtoonPanel,
   model = DEFAULT_IMAGE_MODEL,
+  overlay?: LibraryOverlay | null,
 ): GenerationRequest {
   return {
     panel_id: panel.panel_id,
@@ -32,7 +33,7 @@ export function buildGenerationRequest(
     height: panel.panel_height,
     prompt: panel.generation_prompt,
     negative_constraints: panel.negative_constraints,
-    references: referencesForPanel(panel).map((r) => ({
+    references: referencesForPanel(panel, overlay).map((r) => ({
       id: r.id,
       name: r.name,
       image: r.image,

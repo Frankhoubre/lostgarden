@@ -3476,6 +3476,83 @@ h3 {
   z-index: 5;
 }
 
+.studio-langswitch {
+  display: inline-flex;
+  gap: 0.15rem;
+}
+
+.studio-langswitch .webtoon-mini.is-active {
+  background: rgba(125, 223, 255, 0.22);
+  border-color: rgba(125, 223, 255, 0.7);
+  color: #fff;
+}
+
+.studio-jobpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(125, 223, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(125, 223, 255, 0.1);
+  font-size: 0.7rem;
+  color: rgba(216, 210, 194, 0.95);
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-library-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.studio-library-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(100%, 28rem);
+}
+
+.studio-library-name {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  padding: 0.1rem 0.3rem;
+}
+
+.studio-library-name:hover,
+.studio-library-name:focus {
+  border-color: rgba(125, 223, 255, 0.35);
+  outline: none;
+}
+
+.studio-library-image button {
+  display: block;
+  width: 100%;
+}
+
+.studio-library-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed rgba(125, 223, 255, 0.3);
+  border-radius: 0.5rem;
+  color: rgba(216, 210, 194, 0.5);
+  font-size: 0.7rem;
+}
+
+.studio-character.is-hidden {
+  opacity: 0.55;
+}
+
 .studio-stage-overlay small {
   font-size: 0.75rem;
   color: rgba(125, 223, 255, 0.9);

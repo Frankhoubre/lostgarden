@@ -19,6 +19,11 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // The studio's library of characters and locations: studio only.
+    match /webtoon_library/{slug} {
+      allow read, write: if isStudio();
+    }
+
     // The version the public reader shows: anyone reads, the studio writes.
     match /webtoon_published/{slug} {
       allow read: if true;

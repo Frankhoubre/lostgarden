@@ -1,4 +1,4 @@
-import type { ReferenceAsset, WebtoonPanel } from "./types";
+import type { LibraryOverlay, ReferenceAsset, WebtoonPanel } from "./types";
 
 /**
  * Reference library: the character sheets, location sheets and objects the
@@ -397,6 +397,25 @@ export function isReferenceId(id: string): boolean {
 }
 
 /**
+ * The library the studio works with: the code library, minus the ids the
+ * studio hid, each built-in replaced by the studio's version when one has
+ * the same id, plus the assets written in the studio. Assets without an
+ * image stay listed (to be generated) but are never attached to a prompt.
+ */
+export function libraryWith(overlay?: LibraryOverlay | null): ReferenceAsset[] {
+  if (!overlay) return REFERENCE_LIBRARY;
+  const hidden = new Set(overlay.hidden);
+  const custom = new Map(overlay.assets.map((asset) => [asset.id, { ...asset, custom: true }]));
+  const merged = REFERENCE_LIBRARY.filter((asset) => !hidden.has(asset.id)).map((asset) => custom.get(asset.id) ?? asset);
+  const known = new Set(merged.map((asset) => asset.id));
+  return [...merged, ...overlay.assets.filter((asset) => !known.has(asset.id) && !hidden.has(asset.id)).map((asset) => ({ ...asset, custom: true }))];
+}
+
+export function findReference(id: string, overlay?: LibraryOverlay | null): ReferenceAsset | undefined {
+  return overlay ? libraryWith(overlay).find((asset) => asset.id === id) : byId.get(id);
+}
+
+/**
  * A film frame picked in the studio that has no library entry: any public
  * image path (or https URL) listed in `visual_references` becomes a
  * source-frame reference on the fly, attached last like the others.
@@ -415,16 +434,16 @@ export function frameReference(image: string): ReferenceAsset {
   };
 }
 
-export function referencesForPanel(panel: WebtoonPanel): ReferenceAsset[] {
+export function referencesForPanel(panel: WebtoonPanel, overlay?: LibraryOverlay | null): ReferenceAsset[] {
   return panel.visual_references
-    .map((id) => byId.get(id) ?? (id.startsWith("/") || id.startsWith("http") ? frameReference(id) : undefined))
-    .filter((asset): asset is ReferenceAsset => Boolean(asset));
+    .map((id) => findReference(id, overlay) ?? (id.startsWith("/") || id.startsWith("http") ? frameReference(id) : undefined))
+    .filter((asset): asset is ReferenceAsset => Boolean(asset && asset.image));
 }
 
-/** Character ids that have at least one sheet in the library. */
-export function libraryCharacters(): { id: string; name: string }[] {
+/** Character ids that have at least one sheet in the library, with a display name. */
+export function libraryCharacters(overlay?: LibraryOverlay | null): { id: string; name: string }[] {
   const seen = new Map<string, string>();
-  for (const asset of REFERENCE_LIBRARY) {
+  for (const asset of libraryWith(overlay)) {
     if (asset.kind === "character" && asset.subject && !seen.has(asset.subject)) {
       seen.set(asset.subject, asset.name.split(",")[0]);
     }
@@ -433,9 +452,8 @@ export function libraryCharacters(): { id: string; name: string }[] {
 }
 
 /** Location ids (without the `loc.` prefix) that have a sheet in the library. */
-export function libraryLocations(): { id: string; name: string }[] {
-  return REFERENCE_LIBRARY.filter((asset) => asset.kind === "location").map((asset) => ({
-    id: asset.id.replace(/^loc\./, ""),
-    name: asset.name,
-  }));
+export function libraryLocations(overlay?: LibraryOverlay | null): { id: string; name: string }[] {
+  return libraryWith(overlay)
+    .filter((asset) => asset.kind === "location")
+    .map((asset) => ({ id: asset.id.replace(/^loc\./, ""), name: asset.name }));
 }
