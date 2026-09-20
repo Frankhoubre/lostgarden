@@ -179,6 +179,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
+  const [pace, setPace] = useState<"calm" | "normal" | "action">("normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
   const [inspectorTab, setInspectorTab] = useState<"scene" | "text" | "layout">("scene");
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
@@ -349,7 +350,34 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const continueStory = async () => {
     if (busy) return;
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
-    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film ?`)) return;
+    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
+    await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
+  };
+
+  /**
+   * Rewrite the checked panels as an action sequence: they are removed and
+   * the span of film they covered is written again, densely, then generated
+   * and translated, in their place.
+   */
+  const rewriteChecked = async (count: number) => {
+    if (busy || !checkedPanels.length) return;
+    const first = panels.findIndex((p) => p.panel_id === checkedPanels[0].panel_id);
+    const before = panels[first - 1] ?? null;
+    const until = Math.max(...checkedPanels.map((p) => p.source_time_end ?? 0));
+    const from = before?.source_time_end ?? 0;
+    if (!(until > from)) {
+      notify("Les cases cochées n'ont pas de temps de film à réécrire");
+      return;
+    }
+    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme action ?`)) return;
+    const kept = panels.filter((p) => !checked.has(p.panel_id));
+    setChecked(new Set());
+    await writeSpan({ base: kept, insertAfter: before?.panel_id ?? null, count, until, label: "la séquence" });
+  };
+
+  /** Write, generate and translate a span of the film into the strip, after `insertAfter` (or at the end). */
+  const writeSpan = async (input: { base: WebtoonPanel[]; insertAfter: string | null; count: number; until: number | null; label: string }) => {
+    const { count, until } = input;
     setBusy(true);
     stopBatch.current = false;
     setJob({
@@ -364,26 +392,31 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     });
     try {
       // The route writes eight panels per call; call again with what it wrote until the count is reached.
+      // The writer only sees the panels up to the insertion point, so the span is continuous with them.
       const created: WebtoonPanel[] = [];
-      let current = panels;
+      const anchorIndex = input.insertAfter ? input.base.findIndex((p) => p.panel_id === input.insertAfter) : input.base.length - 1;
+      const head = input.base.slice(0, anchorIndex + 1);
+      const tail = input.base.slice(anchorIndex + 1);
+      let current = head;
+      const assemble = () => [...current, ...tail].map((p, i) => ({ ...p, order: i + 1 }));
+      setPanels(assemble());
       while (created.length < count && !stopBatch.current) {
         const ask = Math.min(8, count - created.length);
-        setJob((job) => (job ? { ...job, label: `Écriture des cases ${panels.length + created.length + 1} à ${panels.length + created.length + ask}…`, placeholders: count - created.length } : job));
+        setJob((job) => (job ? { ...job, label: `Écriture des cases ${head.length + created.length + 1} à ${head.length + created.length + ask}…`, placeholders: count - created.length } : job));
         const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-          body: JSON.stringify({ count: ask, panels: current, library }),
+          body: JSON.stringify({ count: ask, panels: current, library, pace, until_seconds: until }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
-          notify(payload.error ?? `Erreur ${response.status}`);
-          if (!created.length) return;
+          if (payload.error && !/Fin de l'épisode/.test(payload.error)) notify(payload.error);
+          if (!created.length) { if (!payload.error || !/Fin de l'épisode/.test(payload.error)) return; }
           break;
         }
         created.push(...payload.panels);
-        current = [...current, ...payload.panels].map((p, i) => ({ ...p, order: i + 1 }));
-        const snapshot = current;
-        setPanels(snapshot);
+        current = [...current, ...payload.panels];
+        setPanels(assemble());
         onAutosave?.();
         if (created.length === payload.panels.length) select(created[0].panel_id);
       }
@@ -395,7 +428,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         setBusy(false);
         await translatePanels(created, false);
       }
-      notify(`Suite écrite : ${created.length} cases, ${ok} image${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
+      notify(`${input.label === "la suite" ? "Suite écrite" : "Séquence réécrite"} : ${created.length} cases, ${ok} image${ok > 1 ? "s" : ""}. Pense à enregistrer.`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur");
     } finally {
@@ -635,6 +668,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <span className="text-xs text-ivory/85"><b>{checked.size}</b> case{checked.size > 1 ? "s" : ""} cochée{checked.size > 1 ? "s" : ""}</span>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void regenerateChecked()} disabled={busy} title="Regénère les cases cochées, dans l'ordre de la bande">Regénérer</button>
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(checkedPanels, false)} disabled={busy} title="Remplit les langues vides des cases cochées">Traduire</button>
+              <button type="button" className="webtoon-mini" onClick={() => void rewriteChecked(Math.max(8, checkedPanels.length * 3))} disabled={busy} title="Remplace les cases cochées par une séquence dense et nerveuse sur le même passage du film">Réécrire en action</button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
@@ -721,6 +755,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <label>
                 <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
                 <span>cases</span>
+              </label>
+              <label>
+                <span>Rythme</span>
+                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Action : trois à cinq cases par image du film, nerveuses ; calme : une à deux, larges et silencieuses">
+                  <option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
+                </select>
               </label>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
                 {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
