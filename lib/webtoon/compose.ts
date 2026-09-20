@@ -66,11 +66,18 @@ export function composeReferences(panel: WebtoonPanel, script: ScriptWorld, over
 /** The panel with its references resolved and its prompt composed from its fields. */
 export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?: LibraryOverlay | null): WebtoonPanel {
   const references = composeReferences(panel, script, overlay);
+  const hasFrame = references.some((r) => r.kind === "source_frame");
+  const notes = hasFrame
+    ? [
+        "BACKGROUND: draw only what the film frame shows at this moment, from the framing asked. The location sheet gives the palette and the materials of the place; it never adds elements the frame does not show (no altar, no rose window, no beams, no building unless they are visible in the frame).",
+      ]
+    : [];
   const { prompt, negative } = buildGenerationPrompt({
     panel,
     references,
     bible: STYLE_BIBLE,
     palette: paletteForPanel(panel, script),
+    notes,
   });
   return {
     ...panel,
