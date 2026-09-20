@@ -24,7 +24,15 @@ import type {
  * after, from the same routes the studio already uses.
  */
 
-export type NextText = { en: string; fr?: string; style?: string; speaker?: string; anchor?: Anchor };
+export type NextText = { en: string; fr?: string; style?: string; speaker?: string; anchor?: Anchor; /** Sound effects: size in canvas px (96 normal, up to 320 for a big impact). */ size?: number; rotate?: number };
+
+/**
+ * The series' title cards as real images: the logo on black, drawn once
+ * from the site's logo file, so a title card looks like the film's.
+ */
+const TITLE_CARD_IMAGES: { match: RegExp; src: string; width: number; height: number }[] = [
+  { match: /lost\s*garden/i, src: "/webtoon/ep1-opening/title-card.png", width: 1080, height: 1350 },
+];
 
 export type NextPanelIntent = {
   /** Timecode of the film frame the panel draws from, in seconds. */
@@ -42,6 +50,13 @@ export type NextPanelIntent = {
   shot_type?: ShotType;
   camera_angle?: CameraAngle;
   composition?: string;
+  /** Scale of the panel on the phone: a ratio like "9:16" (tall), "4:5", "3:2", "3:1" (a thin strip) or "9:20" (a very tall reveal). */
+  aspect_ratio?: string;
+  /** Height in canvas px at 1080 wide, when the ratio is not enough: up to 2600. */
+  panel_height?: number;
+  bleed?: boolean;
+  border?: boolean;
+  focal_point?: Anchor;
   narrative_role?: NarrativeRole;
   transition_type?: TransitionType;
   fidelity?: Fidelity;
@@ -90,7 +105,8 @@ export function panelsFromIntents(
     if (!frame) continue;
     const base = panelFromFrame(panels, frame, panels[panels.length - 1]);
     if (title) {
-      // A title card: no image to generate, the lettering carries the title on a plain background.
+      // A title card: the series' logo image when we have it, the lettering on a plain background otherwise.
+      const logo = TITLE_CARD_IMAGES.find((entry) => entry.match.test(title));
       const card: WebtoonPanel = {
         ...base,
         panel_id: base.panel_id.replace(/^f/, "t"),
@@ -110,11 +126,12 @@ export function panelsFromIntents(
         spacing_after: SPACING_BY_TRANSITION.breath,
         background: pick(intent.background, new Set<PanelBackground>(["white", "black", "abyss"]), "black"),
         bleed: true,
-        caption: [{ text: { en: title }, anchor: { x: 50, y: 50 }, style: "title" }],
+        caption: logo ? [] : [{ text: { en: title }, anchor: { x: 50, y: 50 }, style: "title" }],
         visual_references: [],
         generation_prompt: "",
         negative_constraints: [],
         prompt_auto: false,
+        image: logo ? { src: logo.src, width: logo.width, height: logo.height, model: "title-card", status: "generated" } : base.image,
       };
       panels.push(card);
       created.push(card);
@@ -122,7 +139,10 @@ export function panelsFromIntents(
     }
     const state = typeof intent.state === "string" ? intent.state.trim() : "";
     const shot = pick(intent.shot_type, SHOTS, "medium");
-    const aspect = ASPECT_BY_SHOT[shot];
+    const wanted = typeof intent.aspect_ratio === "string" && /^\d+:\d+$/.test(intent.aspect_ratio.trim()) ? intent.aspect_ratio.trim() : null;
+    const aspect = wanted ?? ASPECT_BY_SHOT[shot];
+    const wantedHeight = Number(intent.panel_height);
+    const height = Number.isFinite(wantedHeight) && wantedHeight >= 240 ? Math.min(2600, Math.round(wantedHeight / 10) * 10) : Math.min(2600, heightForAspect(aspect));
     const transition = pick(intent.transition_type, TRANSITIONS, "cut");
     const background = pick(intent.background, new Set<PanelBackground>(["white", "black", "abyss"]), base.background);
     const draft: WebtoonPanel = {
@@ -141,7 +161,10 @@ export function panelsFromIntents(
       camera_angle: pick(intent.camera_angle, ANGLES, "eye_level"),
       composition: (intent.composition ?? "").trim(),
       aspect_ratio: aspect,
-      panel_height: heightForAspect(aspect),
+      panel_height: height,
+      bleed: typeof intent.bleed === "boolean" ? intent.bleed : base.bleed,
+      border: typeof intent.border === "boolean" ? intent.border : base.border,
+      focal_point: anchor(intent.focal_point, { x: 50, y: 50 }),
       transition_type: transition,
       spacing_before: SPACING_BY_TRANSITION[transition],
       background,
@@ -167,8 +190,8 @@ export function panelsFromIntents(
           text: text(effect),
           anchor: anchor(effect.anchor, { x: 62, y: 30 + i * 20 }),
           style: pick(effect.style, new Set(["soft", "hard", "rumble"] as const), "soft"),
-          rotate: -10,
-          size: 96,
+          rotate: Number.isFinite(Number(effect.rotate)) ? Math.max(-90, Math.min(90, Number(effect.rotate))) : -10,
+          size: Number.isFinite(Number(effect.size)) ? Math.max(30, Math.min(320, Number(effect.size))) : 96,
         })),
     };
     const panel = composePanel(draft, script, overlay);
