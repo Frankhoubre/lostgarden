@@ -35,7 +35,7 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     must_keep:
       "Lanterne is a hollow suit of old armour with nobody inside. Head: a pale grey-ivory cylindrical lantern-shaped helmet with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes; no face. Broad ornate bronze-brown pauldrons engraved with scroll patterns. A cream cloth scarf around the neck. Black quilted chest plate with a small pale metal plate and brass buckles. Steel gauntlets over black gloves, steel knee plates, black boots with steel toes. A long beige cape with a torn, ragged hem down to the calves. Modest, compact proportions: not a tall heroic knight.",
     description:
-      "Front, side and back views of the final design (lost-garden/09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon; no medallion is ever visible.",
+      "Front, side and back views of the final design (lost-garden/09_Fiches_modeles/lanterne.png). He never speaks, never stumbles, emits no light, carries no weapon. He carries a silver pendant on a chain under his chest plate, with Rose's portrait inside; it glows blue when she is near (seen in the forest at 2:05 and in the tavern).",
     tags: ["lanterne", "knight", "armour", "protagonist", "model_sheet"],
   },
   {

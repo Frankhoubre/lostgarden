@@ -5,7 +5,7 @@ import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson, type UserPart } from "@/lib/webtoon/providers/gateway-text";
 import { libraryCharacters, libraryLocations, libraryWith } from "@/lib/webtoon/references";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
-import { STUDIO_SCREENPLAY, studioFilmFrames } from "@/lib/webtoon/studio-assets";
+import { STUDIO_SCREENPLAY, studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -32,6 +32,8 @@ const MAX_COUNT = 30;
 const MAX_FRAMES = 32;
 /** Panels asked per model call: a longer answer gets cut by the gateway. */
 const BATCH = 8;
+/** Frames are two seconds apart; these are frames per panel by pace (about 2 s, 4 s and 5 s of film per panel). */
+const FRAMES_PER_PANEL = { action: 1, normal: 2, calm: 2.5 } as const;
 
 
 type FrameNote = {
@@ -58,9 +60,9 @@ type CostMeter = { usd: number };
 
 async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; screenplay: string; frames: { seconds: number; label: string; src: string }[]; characters: string[]; meter: CostMeter }): Promise<FrameNote[]> {
   const system = [
-    `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, an original anime being adapted into a webtoon. You receive frames of the finished episode taken every five seconds, each labelled with its timecode, and the screenplay in French. The film and the screenplay match.`,
+    `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, an original anime being adapted into a webtoon. You receive frames of the finished episode taken every two seconds, each labelled with its timecode, and the screenplay in French. The film and the screenplay match, but the film shows gestures the screenplay does not spell out (a pendant taken out and opened): the frames win for what is visible.`,
     `Characters: ${input.characters.join(" | ")}.`,
-    "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, kneeling, collapsed face down, lying on his back, climbing, sitting), `action` (what the frame shows happening), `in_hands` (an object held: a folded note, a silver medallion on a chain, the helmet, nothing), `others_visible` (a creature, a machine, a branch, a claw), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French).",
+    "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, kneeling, collapsed face down, lying on his back, climbing, sitting), `action` (what the frame shows happening), `in_hands` (an object held, exactly: a folded note, a silver pendant on a chain closed or open with a portrait inside, the helmet, nothing, and what the hand does with it: takes it out, opens it, holds it up, throws it), `others_visible` (a creature, a machine, a branch, a claw), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French).",
     "Be exact about the helmet and the posture: these decide how the character is drawn in the panels. Look above the cream scarf: a pale lantern-shaped helmet with two dark oval holes means \"on his head\"; a dark round opening with nothing above the scarf means the helmet is off (then say where it is: on the ground, in his hands, or not visible). A frame that shows only the armour from behind with an arm reaching out and nothing above the shoulders is headless. Consistency check before answering: from the first frame where the helmet is off until the frame where both his hands hold it up to his neck (he puts it back), every frame with Lanterne is headless; re-examine any frame in between that you were about to mark \"on his head\". If a frame is black or shows only text, say so.",
     `Continuity facts of the series: ${input.script.source.continuity.join(" ")}`,
     'Answer with JSON only: {"frames": [ {seconds, place, characters, helmet, posture, action, in_hands, others_visible, title_card, screenplay_line} ]}, one entry per frame, in the order given. Escape double quotes inside strings.',
@@ -113,6 +115,28 @@ async function helmetChecks(frames: { seconds: number; src: string }[], meter: C
   return map;
 }
 
+/**
+ * Which notes of the window have no panel: a cheap text check that catches a
+ * gesture the writer folded into another action (the pendant opened and
+ * thrown, summarised as "he lifts the helmet").
+ */
+async function uncoveredNotes(input: { notes: FrameNote[]; intents: NextPanelIntent[]; meter: CostMeter }): Promise<{ seconds: number; moment: string }[]> {
+  if (!input.notes.length || !input.intents.length) return [];
+  try {
+    const answer = await completeJson<{ missing?: { seconds: number; moment: string }[] }>({
+      system:
+        'You check the coverage of a webtoon sequence. You get the frame-by-frame notes of a film window (what is literally visible: place, posture, what is in the hands, what happens) and the panels written for that window. List the moments of the notes that NO panel tells: a gesture, an object taken out, opened, held up or thrown, a creature appearing or leaving, a change of posture, a title card. A moment is covered when some panel clearly shows it, even from another angle. Ignore differences of framing. Answer with JSON only: {"missing": [{"seconds": <frame seconds>, "moment": "<what the panels should show>"}]}, an empty list when everything is covered.',
+      user: `NOTES:\n${JSON.stringify(input.notes.map((n) => ({ seconds: n.seconds, characters: n.characters, helmet: n.helmet, posture: n.posture, in_hands: n.in_hands, action: n.action, others: n.others_visible, title_card: n.title_card })), null, 1)}\n\nPANELS:\n${JSON.stringify(input.intents.map((i) => ({ seconds: i.seconds, description: i.description, state: i.state })), null, 1)}`,
+      maxTokens: 4000,
+      reasoning: "none",
+      onCost: (usd) => { input.meter.usd += usd; },
+    });
+    return (answer.missing ?? []).filter((m) => m && Number.isFinite(Number(m.seconds)) && typeof m.moment === "string").slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
 function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; batch: number; characters: string[]; locations: string[]; pace?: "calm" | "normal" | "action" }): string {
   const { script, batch, characters, locations, pace = "normal" } = input;
   return [
@@ -120,6 +144,7 @@ function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonS
     "You receive: the last panels already made (for continuity), frames of the finished episode taken every five seconds after the adapted segment (each labelled with its timecode), and the screenplay of the episode in French.",
     "Two sources, both authoritative, and they match: the film (the frames) and the screenplay. Method: first find the passage of the screenplay that corresponds to the frames you receive (same place, same events). Then cover EVERY beat of that passage and every visible moment of the film, in order: a frame every five seconds misses most gestures, and the screenplay tells you what happens between two frames (he tries to make a sound and only a hollow metallic moan comes out, he falls to his knees, he clutches the helmet, he strikes the ground, he stays on his knees, then he stands). A beat of the screenplay with no frame of its own draws from the nearest frame for light and place (fidelity `bridge`). Each panel gives the timecode of its frame in `seconds` and quotes the screenplay line it comes from in `screenplay_line`. Do not invent actions that are in neither source. Cover the sources continuously and densely: start at the first frame after the last panel made, advance frame by frame, and give each frame the panels its moments need (one to four), then move to the next frame. The frames you receive are the next few frames only: cover all of them, and only them, with the requested number of panels, about one to two per frame, and two or three for a frame where something happens (an impact, a fall, a hand that grabs). Never skip a frame where something changes, never jump ahead. The last panel lands on the last frame given, where the next call continues.",
     "Continuity of state, strict. You receive frame-by-frame notes from a continuity supervisor: they say, for each frame, whether the helmet is on the head or on the ground, the posture, what is in the hands, who is visible and where the title cards are. They win over your own reading of a frame. Carry the state of each character from panel to panel and write it in every `description` and in `state`. Once the helmet is on the ground, Lanterne is drawn WITHOUT his helmet in every panel until the panel where he puts it back: a hollow suit of armour with the cream scarf around an open, empty neck, no head, nothing inside; the helmet lies where it fell and is shown or implied. The same for kneeling, holding an object, an injury, a torn cape, a light that is on or off: a state changes only when the film or the screenplay changes it. Never invent a change of state: no helmet that loosens or falls, no wound, no lost object unless a frame or a screenplay line shows it. A note saying the helmet is \"not visible\" means the frame does not include the head, nothing more: the helmet stays as it was.",
+    "Objects and gestures, strict. Whatever the notes put in a character's hands or show him doing (a pendant taken out from under the chest plate, opened, looked at, thrown away; a note; the helmet) must get its own panels and be followed to its end: taken out, opened, what is inside, the look, the gesture that ends it. A frame that shows a hand holding an object is never summarised into another action. The frames are two seconds apart: a gesture that spans several frames is a small sequence of panels, not one.",
     "Not every panel shows a character. One panel in four or five is an illustration or an atmosphere panel with nobody in it: the place, the light, a detail of the environment (a root, a mushroom, the mist, the sleeping machine), an object on the ground (the fallen helmet alone). The film has such shots and the screenplay describes the world (\"Le monde est beau. Mais il n'est pas sûr.\"). Use them for silences, for a change of place and to let the reader breathe.",
     "Title cards. When the film shows the title of the series or a logo, make a title card panel instead of an image: `title_card` set to the exact text (for this series: \"LOST GARDEN\"), background black, transition fade_to_black, no description needed. Never ask the image model to draw text.",
     "Decompose every physical event. When the film or the screenplay has an impact, a fall, an object that drops or rolls, a door, a hand that grabs, a reveal, never leave it to one panel: tell it in two to four panels so the reader understands what happened without words. Typical breakdown: the cause (a detail: the low branch ahead of him), the impact (an extreme close-up on the point of contact, with one sound effect), the consequence (a detail: the helmet rolling on the ground, coming to rest), the reaction (the character frozen, or a hand reaching). These intermediate panels use fidelity `reframe` or `bridge`, draw from the frame closest to the moment for light and place, and are not limited in number: a reader must be able to say what happened in each of them. Outside such events, a closer look, a reverse angle or a breath on the same moment stays at most one panel in four.",
@@ -193,8 +218,8 @@ export async function POST(request: Request, { params }: RouteContext) {
       // An action sequence gets far fewer frames per batch, so every second of it is told in several panels.
       // Inside a bounded span (a rewrite), the frames left are spread over the panels left to write, so
       // the whole count lands on the span instead of running out of frames after the first batch.
-      const perPanel = pace === "action" ? 0.4 : pace === "calm" ? 1 : 0.75;
-      const available = studioFilmFrames().filter((f) => f.seconds > adaptedUntil && (until === null || f.seconds <= until));
+      const perPanel = FRAMES_PER_PANEL[pace];
+      const available = studioFilmFramesDense().filter((f) => f.seconds > adaptedUntil && (until === null || f.seconds <= until));
       const share = until === null ? Math.max(2, Math.ceil(batch * perPanel)) : Math.max(1, Math.ceil((available.length * batch) / Math.max(batch, count)));
       const frames = available.slice(0, Math.min(MAX_FRAMES, share));
       if (!frames.length) {
@@ -237,7 +262,26 @@ export async function POST(request: Request, { params }: RouteContext) {
         { type: "text", text: `Write the next ${batch} panels now, as JSON, consistent with the notes.` },
       ];
       const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 24000, reasoning: "none", onCost: (usd) => { meter.usd += usd; } });
-      const intents = (result.panels ?? []).slice(0, batch);
+      let intents = (result.panels ?? []).slice(0, batch);
+      // Coverage check: every note of the window must be told by a panel; the writer adds the missing moments.
+      const missing = await uncoveredNotes({ notes, intents, meter });
+      if (missing.length) {
+        const extra = await completeJson<{ panels?: NextPanelIntent[] }>({
+          system,
+          user: [
+            ...user,
+            {
+              type: "text",
+              text: `You wrote these panels:\n${JSON.stringify(intents.map((i) => ({ seconds: i.seconds, description: i.description })), null, 1)}\n\nThese moments of the notes have NO panel yet and the reader would miss them:\n${JSON.stringify(missing, null, 1)}\n\nWrite the panels that tell each of these moments (one to three per moment, same JSON shape, with their seconds). Answer with JSON only: {"panels": [...]}.`,
+            },
+          ],
+          maxTokens: 16000,
+          reasoning: "none",
+          onCost: (usd) => { meter.usd += usd; },
+        });
+        const added = (extra.panels ?? []).filter((i) => i && typeof i.description === "string");
+        intents = [...intents, ...added].sort((a, b) => Number(a.seconds) - Number(b.seconds));
+      }
       const panels = panelsFromIntents(current, intents, frames, script, overlay);
       if (!panels.length) {
         if (!created.length) return Response.json({ error: "Le modèle n'a renvoyé aucune case exploitable" }, { status: 502 });

@@ -2,7 +2,7 @@ import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webto
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
 import { getWebtoonScript } from "@/lib/webtoon/scripts";
-import { studioFilmFrames } from "@/lib/webtoon/studio-assets";
+import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, PanelFrame, WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -87,7 +87,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       const frame = cleanFrame(value);
       if (frame && panels.some((p) => p.panel_id === id)) frames[id] = frame;
     }
-    const filmFrames = studioFilmFrames();
+    const filmFrames = studioFilmFramesDense();
     const inserts: { after: string; panel: WebtoonPanel }[] = [];
     let current = panels;
     for (const intent of (answer.inserts ?? []).slice(0, maxInserts)) {
