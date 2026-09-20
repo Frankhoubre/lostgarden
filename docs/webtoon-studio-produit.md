@@ -15,7 +15,7 @@ Tout `lib/webtoon` de ce dépôt est indépendant de Lost Garden sauf les donné
 
 | Brique | Fichier | État |
 |---|---|---|
-| Schéma de case et de script (contrat partagé avec ScreenWeaver) | `types.ts` | fait |
+| Schéma de case et de script (JSON exportable, champs du brief) | `types.ts` | fait |
 | Bible de style en fragments de prompt, palettes, interdits | `style-bible.ts` | fait, un seul style |
 | Composition d'un prompt depuis les champs d'une case, ordre des références | `prompts.ts`, `compose.ts` | fait |
 | Bibliothèque de références (personnages, lieux, ancres, images du film) avec surcouche utilisateur | `references.ts`, `library.ts` | fait |
