@@ -3778,6 +3778,111 @@ h3 {
   font-weight: 400;
 }
 
+/* The AI director: a floating conversation. */
+/* studio director styles present */
+.studio-director {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.studio-director-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(125, 223, 255, 0.6);
+  border-radius: 999px;
+  background: #061018;
+  color: #fff;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(2, 4, 9, 0.6), 0 0 0 1px rgba(125, 223, 255, 0.15);
+}
+
+.studio-director-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100vh - 6rem));
+  border: 1px solid rgba(125, 223, 255, 0.3);
+  border-radius: 1rem;
+  background: #061018;
+  box-shadow: 0 14px 40px rgba(2, 4, 9, 0.75);
+  overflow: hidden;
+}
+
+.studio-director-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid rgba(125, 223, 255, 0.15);
+}
+
+.studio-director-thread {
+  flex: 1;
+  min-height: 12rem;
+  overflow-y: auto;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.studio-director-hint {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(216, 210, 194, 0.6);
+}
+
+.studio-director-msg {
+  max-width: 92%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.studio-director-msg.is-user {
+  align-self: flex-end;
+  background: rgba(125, 223, 255, 0.16);
+  color: #fff;
+}
+
+.studio-director-msg.is-assistant {
+  align-self: flex-start;
+  background: rgba(6, 22, 47, 0.8);
+  border: 1px solid rgba(125, 223, 255, 0.15);
+  color: rgba(216, 210, 194, 0.95);
+}
+
+.studio-director-msg small {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  color: rgba(125, 223, 255, 0.85);
+}
+
+.studio-director-input {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-top: 1px solid rgba(125, 223, 255, 0.15);
+}
+
+.studio-director-input textarea {
+  flex: 1;
+  resize: none;
+}
+
 .studio-inpaint {
   width: min(96vw, 1400px);
 }

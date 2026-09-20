@@ -5,6 +5,10 @@ import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { Avatar } from "@/components/studio/Avatar";
 import { PanelInpaint } from "@/components/studio/PanelInpaint";
 import { StripCanvas } from "@/components/studio/StripCanvas";
+import { StudioDirector } from "@/components/studio/StudioDirector";
+import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
+import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
+import { uploadLibraryImage, upsertAsset, slugify } from "@/lib/webtoon/library";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import type { JobSummary } from "@/components/studio/StudioApp";
@@ -16,6 +20,7 @@ import {
   appendFromFrame,
   deletePanel,
   deletePanels,
+  renumber,
   insertAfter,
   markForRegeneration,
   mergeWithNext,
@@ -140,6 +145,7 @@ type StudioEditorProps = {
   onAutosave?: () => void;
   /** The studio's characters and locations, attached to every generation. */
   library: LibraryOverlay;
+  setLibrary: (next: LibraryOverlay) => void;
   /** Language of the lettering shown in the canvas and the strip preview. */
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
@@ -152,7 +158,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, previewLocale, onJob }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, setLibrary, previewLocale, onJob }: StudioEditorProps) {
   useLocale();
   const locale = previewLocale;
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
@@ -181,6 +187,13 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [nextCount, setNextCount] = useState(10);
   const [pace, setPace] = useState<"calm" | "normal" | "action">("normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
+  // Latest panels and library, for the director's actions that run one after the other.
+  const panelsRef = useRef(panels);
+  const libraryRef = useRef(library);
+  useEffect(() => {
+    panelsRef.current = panels;
+    libraryRef.current = library;
+  }, [panels, library]);
   const [inspectorTab, setInspectorTab] = useState<"scene" | "text" | "layout">("scene");
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const panelMenuRef = useRef<HTMLDivElement>(null);
@@ -443,9 +456,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    * proposes the connective panels the story is missing; their images are
    * then generated and their lettering translated.
    */
-  const polishStrip = async () => {
+  const polishStrip = async (confirmed = false) => {
     if (busy) return;
-    if (!window.confirm("Peaufiner la bande ? L'IA donne une forme de webtoon à chaque case (largeur, côté, bords, chevauchement) et ajoute les cases de liaison qui manquent, puis génère leurs images.")) return;
+    if (!confirmed && !window.confirm("Peaufiner la bande ? L'IA donne une forme de webtoon à chaque case (largeur, côté, bords, chevauchement) et ajoute les cases de liaison qui manquent, puis génère leurs images.")) return;
     setBusy(true);
     stopBatch.current = false;
     setJob({ phase: "writing", label: "Mise en page et cases de liaison…", done: 0, total: 1, queue: [], current: null, placeholders: 0, deadline: deadlineIn(90_000) });
@@ -485,6 +498,149 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     } finally {
       setJob(null);
       setBusy(false);
+    }
+  };
+
+  /** The AI director: send the thread with the studio's context, then run what it decided. */
+  const askDirector = async (messages: { role: "user" | "assistant"; content: string }[]): Promise<{ reply: string; done: string[] }> => {
+    const summary = panels.map((p) => ({ panel_id: p.panel_id, order: p.order, seconds: p.source_time_start, shot: p.shot_type, description: p.description.split("STATE TO KEEP")[0].slice(0, 140), image: p.image.status }));
+    const response = await fetch(`/api/webtoon/${script.slug}/director`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+      body: JSON.stringify({ messages, panels: summary, selected, library }),
+    });
+    const payload = (await response.json().catch(() => ({}))) as { reply?: string; actions?: DirectorAction[]; error?: string };
+    if (!response.ok) throw new Error(payload.error ?? `Erreur ${response.status}`);
+    const done: string[] = [];
+    for (const action of payload.actions ?? []) {
+      try {
+        const note = await runDirectorAction(action);
+        if (note) done.push(note);
+      } catch (error) {
+        done.push(`${action.type} : ${error instanceof Error ? error.message : "échec"}`);
+      }
+    }
+    if (done.length) onAutosave?.();
+    return { reply: payload.reply ?? "", done };
+  };
+
+  const PANEL_FIELDS = new Set(["description", "action", "emotion", "composition", "purpose", "shot_type", "camera_angle", "narrative_role", "transition_type", "fidelity", "background", "panel_height", "aspect_ratio", "characters", "location", "dialogue", "sfx", "caption", "focal_point", "bleed", "border", "spacing_before", "spacing_after"]);
+
+  const runDirectorAction = async (action: DirectorAction): Promise<string | null> => {
+    const find = (id: string) => panelsRef.current.find((p) => p.panel_id === id);
+    switch (action.type) {
+      case "select_panel": {
+        if (find(action.panel_id)) select(action.panel_id);
+        return null;
+      }
+      case "update_panel": {
+        const panel = find(action.panel_id);
+        if (!panel) return `case ${action.panel_id} introuvable`;
+        const changes: Partial<WebtoonPanel> = {};
+        for (const [key, value] of Object.entries(action.changes ?? {})) if (PANEL_FIELDS.has(key)) (changes as Record<string, unknown>)[key] = value;
+        if (changes.dialogue) changes.dialogue = (changes.dialogue as WebtoonPanel["dialogue"]).map((d) => ({ speaker: d.speaker ?? "", text: d.text ?? { en: "" }, style: d.style ?? "speech", anchor: d.anchor ?? { x: 30, y: 20 }, tail: d.tail ?? { x: 50, y: 50 } }));
+        if (changes.sfx) changes.sfx = (changes.sfx as WebtoonPanel["sfx"]).map((x) => ({ text: x.text ?? { en: "" }, anchor: x.anchor ?? { x: 60, y: 30 }, style: x.style ?? "hard", rotate: x.rotate ?? -10, size: x.size ?? 120 }));
+        if (changes.caption) changes.caption = (changes.caption as WebtoonPanel["caption"]).map((c) => ({ text: c.text ?? { en: "" }, anchor: c.anchor ?? { x: 8, y: 8 }, style: c.style ?? "narration" }));
+        if (typeof changes.panel_height === "number") changes.panel_height = Math.max(240, Math.min(2600, Math.round(changes.panel_height / 10) * 10));
+        const next = updatePanel(panelsRef.current, panel.panel_id, { ...changes, prompt_auto: changes.description ? true : panel.prompt_auto });
+        panelsRef.current = next;
+        setPanels(next);
+        if (action.regenerate) {
+          const updated = next.find((p) => p.panel_id === panel.panel_id)!;
+          await runImages([updated]);
+          setJob(null);
+          return `case ${panel.panel_id} modifiée et regénérée`;
+        }
+        return `case ${panel.panel_id} modifiée`;
+      }
+      case "regenerate_panel": {
+        const panel = find(action.panel_id);
+        if (!panel) return `case ${action.panel_id} introuvable`;
+        await runImages([panel]);
+        setJob(null);
+        return `case ${panel.panel_id} regénérée`;
+      }
+      case "insert_panel": {
+        const base = panelsRef.current;
+        const anchorIndex = action.after ? base.findIndex((p) => p.panel_id === action.after) : base.length - 1;
+        if (anchorIndex < 0) return `case ${action.after} introuvable`;
+        const anchor = base[anchorIndex];
+        const seconds = Number((action.panel as { seconds?: number }).seconds ?? anchor.source_time_end ?? anchor.source_time_start ?? 0);
+        const [created] = panelsFromIntents(base, [{ ...(action.panel as NextPanelIntent), seconds }], FILM_FRAMES, script, library);
+        if (!created) return "case non créée";
+        const next = renumber([...base.slice(0, anchorIndex + 1), created, ...base.slice(anchorIndex + 1)]);
+        panelsRef.current = next;
+        setPanels(next);
+        select(created.panel_id);
+        if (action.generate) {
+          await runImages([created]);
+          setJob(null);
+          return `case ${created.panel_id} insérée et générée`;
+        }
+        return `case ${created.panel_id} insérée`;
+      }
+      case "delete_panels": {
+        const ids = (action.panel_ids ?? []).filter((id) => find(id));
+        if (!ids.length) return "aucune case à supprimer";
+        const next = deletePanels(panelsRef.current, ids);
+        panelsRef.current = next;
+        setPanels(next);
+        return `${ids.length} case${ids.length > 1 ? "s" : ""} supprimée${ids.length > 1 ? "s" : ""}`;
+      }
+      case "set_frame": {
+        const panel = find(action.panel_id);
+        if (!panel) return `case ${action.panel_id} introuvable`;
+        const next = updatePanel(panelsRef.current, panel.panel_id, { frame: cleanFrame(action.frame) });
+        panelsRef.current = next;
+        setPanels(next);
+        return `forme de ${panel.panel_id} changée`;
+      }
+      case "add_character":
+      case "add_location": {
+        const id = slugify(action.name);
+        if (!id) return "nom vide";
+        const isChar = action.type === "add_character";
+        const asset = isChar
+          ? { id: `char.${id}.webtoon`, kind: "character" as const, subject: id, priority: 1, name: `${action.name}, webtoon model sheet`, image: "", must_keep: action.must_keep, description: "Ajouté par le Directeur IA.", tags: [id, "studio"] }
+          : { id: `loc.${id}`, kind: "location" as const, name: action.name, image: "", must_keep: action.must_keep, description: "Ajouté par le Directeur IA.", tags: ["studio"] };
+        let next = upsertAsset(libraryRef.current, asset);
+        libraryRef.current = next;
+        setLibrary(next);
+        if (action.generate_sheet !== false) {
+          const response = await fetch(`/api/webtoon/${script.slug}/asset`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+            body: JSON.stringify({ asset, library: next }),
+          });
+          const payload = (await response.json().catch(() => ({}))) as { src?: string; data_url?: string; error?: string };
+          const received = payload.src ?? payload.data_url;
+          if (!response.ok || !received) return `${action.name} ajouté, fiche non dessinée (${payload.error ?? response.status})`;
+          let src = received;
+          if (user && received.startsWith("data:")) src = await uploadLibraryImage(script.slug, asset.id, received).catch(() => received);
+          next = upsertAsset(next, { ...asset, image: src });
+          libraryRef.current = next;
+          setLibrary(next);
+          return `${action.name} ajouté à la bibliothèque, fiche dessinée`;
+        }
+        return `${action.name} ajouté à la bibliothèque`;
+      }
+      case "translate": {
+        const targets = action.panel_ids === "all" ? panelsRef.current : panelsRef.current.filter((p) => (action.panel_ids ?? []).includes(p.panel_id));
+        await translatePanels(targets, false);
+        return `traduction de ${targets.length} case${targets.length > 1 ? "s" : ""}`;
+      }
+      case "continue": {
+        const count = Math.max(1, Math.min(30, Math.round(action.count) || 8));
+        if (action.pace) setPace(action.pace);
+        await writeSpan({ base: panelsRef.current, insertAfter: null, count, until: null, label: "la suite" });
+        return `${count} cases écrites à la suite`;
+      }
+      case "polish": {
+        await polishStrip(true);
+        return "bande peaufinée";
+      }
+      default:
+        return null;
     }
   };
 
@@ -682,7 +838,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(panels, false)} disabled={busy} title="Remplit les langues vides de toutes les bulles, cartouches et sons">
                 Traduire toute la bande
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => void polishStrip()} disabled={busy} title="Donne une forme de webtoon à chaque case et ajoute les cases de liaison qui manquent">
+              <button type="button" className="webtoon-mini" onClick={() => void polishStrip(false)} disabled={busy} title="Donne une forme de webtoon à chaque case et ajoute les cases de liaison qui manquent">
                 Peaufiner la bande
               </button>
             </>
@@ -1160,6 +1316,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </div>
         ) : null}
       </aside>
+      <StudioDirector ask={askDirector} busy={busy} />
     </div>
   );
 }
