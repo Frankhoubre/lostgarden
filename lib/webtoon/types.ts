@@ -108,6 +108,24 @@ export type Fidelity =
 
 export type PanelBackground = "white" | "black" | "abyss";
 
+/**
+ * How a panel sits on the strip, the way a real webtoon breaks the stack of
+ * rectangles: narrower panels pushed to a side, slanted edges, a panel that
+ * overlaps the one above, a slight tilt. Absent means the plain full-width
+ * or framed panel of before.
+ */
+export type PanelFrame = {
+  /** Width in percent of the strip, 40 to 100 (100 = edge to edge). */
+  width?: number;
+  align?: "left" | "center" | "right";
+  shape?: "rect" | "rounded" | "slant" | "slant-reverse" | "wedge" | "wedge-reverse";
+  /** Overlaps the previous panel by this many canvas px (at 1080 wide). */
+  overlap?: number;
+  /** Tilt in degrees, -6 to 6. */
+  tilt?: number;
+  shadow?: boolean;
+};
+
 /** Anchor inside a panel, in percent of width/height. */
 export type Anchor = { x: number; y: number };
 
@@ -186,6 +204,7 @@ export type WebtoonPanel = {
   background: PanelBackground;
   border: boolean;
   bleed: boolean;
+  frame?: PanelFrame;
   dialogue: Dialogue[];
   caption: Caption[];
   sfx: Sfx[];
