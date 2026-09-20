@@ -34,6 +34,13 @@ export type GatewayOptions = {
   quality?: "low" | "medium" | "high" | "auto";
   /** Turns a public reference path into something the gateway can fetch: an https URL or a data: URL. */
   resolveReference: (image: string) => Promise<string>;
+  /** Inpainting: a PNG data URL, transparent where the first reference image must change. */
+  mask?: string;
+  /** Exact OpenAI size to ask for, instead of the one derived from the aspect ratio. */
+  size?: string;
+  /** Output encoding; JPEG keeps an inpainting answer small enough to travel back to the browser. */
+  outputFormat?: "png" | "jpeg" | "webp";
+  outputCompression?: number;
 };
 
 /**
@@ -68,11 +75,14 @@ export async function generateWithGateway(
     model,
     prompt: request.prompt,
     n: 1,
-    size: sizeForAspect(request.aspect_ratio),
+    size: options.size ?? sizeForAspect(request.aspect_ratio),
     quality: options.quality ?? "high",
     response_format: "b64_json",
   };
   if (images.length) body.images = images;
+  if (options.mask) body.mask = { image_url: options.mask };
+  if (options.outputFormat) body.output_format = options.outputFormat;
+  if (options.outputCompression !== undefined) body.output_compression = options.outputCompression;
 
   const response = await fetch(`${baseUrl}${endpoint}`, {
     method: "POST",
@@ -96,5 +106,6 @@ export async function generateWithGateway(
     throw new Error("AI Gateway returned no image data");
   }
   const cost = Number(json.providerMetadata?.gateway?.cost ?? 0);
-  return { model: json.model ?? model, media_type: "image/png", base64: first.b64_json, cost_usd: Number.isFinite(cost) ? cost : 0 };
+  const mediaType = options.outputFormat === "jpeg" ? "image/jpeg" : options.outputFormat === "webp" ? "image/webp" : "image/png";
+  return { model: json.model ?? model, media_type: mediaType, base64: first.b64_json, cost_usd: Number.isFinite(cost) ? cost : 0 };
 }
