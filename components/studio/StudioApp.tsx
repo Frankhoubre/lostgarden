@@ -94,7 +94,9 @@ export function StudioApp({ script }: StudioAppProps) {
 
   const notify = useCallback((message: string) => {
     setNotice(message);
-    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), 2600);
+    // An error stays long enough to be read; a confirmation goes away quickly.
+    const isError = /erreur|impossible|Storage|Gateway|\d{3}\b|refus|échec/i.test(message);
+    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), isError ? 12000 : 2600);
   }, []);
 
   // The studio's library of characters and locations, saved a moment after

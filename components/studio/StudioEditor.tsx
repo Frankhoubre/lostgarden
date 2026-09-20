@@ -62,6 +62,8 @@ async function studioHeaders(): Promise<Record<string, string>> {
 }
 
 type GeneratePayload = {
+  /** Public URL when the server stored the image itself. */
+  src?: string;
   data_url?: string;
   model?: string;
   error?: string;
@@ -192,7 +194,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   /** Store an image on a panel: uploaded to Storage when signed in, kept in the session otherwise. */
   const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}) => {
     let src = dataUrl;
-    if (user) {
+    if (user && dataUrl.startsWith("data:")) {
       try {
         src = await uploadPanelImage(script.slug, panel.panel_id, dataUrl);
       } catch (error) {
@@ -218,7 +220,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         body: JSON.stringify({ panel_id: panel.panel_id, panel, library }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
-      if (!response.ok || !payload.data_url) {
+      const received = payload.src ?? payload.data_url;
+      if (!response.ok || !received) {
         notify(`${panel.panel_id} : ${payload.error ?? `erreur ${response.status}`}`);
         setPanels((current) => markForRegeneration(current, panel.panel_id));
         return false;
@@ -227,7 +230,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         needsComposition(panel) && payload.generation_prompt
           ? { generation_prompt: payload.generation_prompt, negative_constraints: payload.negative_constraints ?? panel.negative_constraints, visual_references: payload.visual_references ?? panel.visual_references, prompt_auto: true }
           : {};
-      await applyImage(panel, payload.data_url, payload.model, composed);
+      await applyImage(panel, received, payload.model, composed);
       return true;
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de génération");
