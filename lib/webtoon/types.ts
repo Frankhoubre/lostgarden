@@ -140,6 +140,8 @@ export type PanelImage = {
   model?: string;
   job_id?: string;
   generated_at?: string;
+  /** What the gateway billed for this image, in USD. */
+  cost_usd?: number;
   /** `stale` means the prompt changed after the image was made. */
   status: "generated" | "stale" | "missing";
 };
