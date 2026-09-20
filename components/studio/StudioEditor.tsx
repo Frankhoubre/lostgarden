@@ -332,20 +332,30 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       deadline: deadlineIn(ESTIMATE.writeBase + ESTIMATE.writePer * count + count * imageEstimate() + ESTIMATE.translateBase + ESTIMATE.translatePer * count),
     });
     try {
-      const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ count, panels, library }),
-      });
-      const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
-      if (!response.ok || !payload.panels?.length) {
-        notify(payload.error ?? `Erreur ${response.status}`);
-        return;
+      // The route writes eight panels per call; call again with what it wrote until the count is reached.
+      const created: WebtoonPanel[] = [];
+      let current = panels;
+      while (created.length < count && !stopBatch.current) {
+        const ask = Math.min(8, count - created.length);
+        setJob((job) => (job ? { ...job, label: `Écriture des cases ${panels.length + created.length + 1} à ${panels.length + created.length + ask}…`, placeholders: count - created.length } : job));
+        const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+          body: JSON.stringify({ count: ask, panels: current, library }),
+        });
+        const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
+        if (!response.ok || !payload.panels?.length) {
+          notify(payload.error ?? `Erreur ${response.status}`);
+          if (!created.length) return;
+          break;
+        }
+        created.push(...payload.panels);
+        current = [...current, ...payload.panels].map((p, i) => ({ ...p, order: i + 1 }));
+        const snapshot = current;
+        setPanels(snapshot);
+        onAutosave?.();
+        if (created.length === payload.panels.length) select(created[0].panel_id);
       }
-      const created = payload.panels;
-      setPanels((current) => [...current, ...created].map((p, i) => ({ ...p, order: i + 1 })));
-      onAutosave?.();
-      select(created[0].panel_id);
       notify(`${created.length} cases écrites. Génération des images…`);
       // A title card has no image to make.
       const ok = await runImages(created.filter((p) => p.description.trim() || p.generation_prompt.trim()));

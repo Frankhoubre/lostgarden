@@ -10,7 +10,10 @@ import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
 /**
  * POST /api/webtoon/<slug>/continue
- * Body: { count: number, panels: WebtoonPanel[] }
+ * Body: { count: number, panels: WebtoonPanel[], library?: LibraryOverlay }
+ * Writes at most eight panels per call (`batch`); `remaining` says how many
+ * of `count` are still to write, and the caller calls again with the panels
+ * it now has.
  *
  * Writes the next `count` panels of the strip. The writer model (Claude
  * Sonnet 5 through Vercel AI Gateway) sees the frames of the film that
@@ -84,12 +87,13 @@ export async function POST(request: Request, { params }: RouteContext) {
   });
   const screenplay = STUDIO_SCREENPLAY.pages.map((page) => `[page ${page.page}]\n${page.text}`).join("\n\n");
 
-  // The writer works in batches: a long answer gets cut by the gateway, and
-  // each batch sees the panels just written, so the story stays continuous.
+  // One batch per call: a long answer gets cut by the gateway and a long call
+  // by the platform, so the studio asks for eight panels at a time and calls
+  // again with the panels just written, which keeps the story continuous.
   const created: WebtoonPanel[] = [];
   let current = start;
   try {
-    while (created.length < count) {
+    while (created.length < Math.min(count, BATCH)) {
       const batch = Math.min(BATCH, count - created.length);
       const adaptedUntil = Math.max(0, ...current.map((p) => p.source_time_end ?? 0));
       const frames = studioFilmFrames().filter((f) => f.seconds > adaptedUntil).slice(0, Math.min(MAX_FRAMES, Math.max(8, batch * 2)));
@@ -131,7 +135,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       created.push(...panels);
       current = [...current, ...panels];
     }
-    return Response.json({ panels: created, adapted_until: Math.max(0, ...start.map((p) => p.source_time_end ?? 0)), batches: Math.ceil(created.length / BATCH) });
+    return Response.json({ panels: created, adapted_until: Math.max(0, ...start.map((p) => p.source_time_end ?? 0)), batch: BATCH, remaining: Math.max(0, count - created.length) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "writing failed";
     if (created.length) return Response.json({ panels: created, partial: true, error: message });
