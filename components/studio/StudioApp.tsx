@@ -3,6 +3,7 @@
 import { signOut } from "firebase/auth";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Locale } from "@/lib/i18n/config";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { StudioCharacters } from "@/components/studio/StudioCharacters";
@@ -14,9 +15,20 @@ import { getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
 import { appendFromFrame } from "@/lib/webtoon/editor-ops";
 import { computeLayout } from "@/lib/webtoon/layout";
+import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, loadStrip, saveStrip } from "@/lib/webtoon/studio";
 import { localizedText } from "@/lib/webtoon/text";
-import type { WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
+import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
+
+const PREVIEW_LOCALES: { id: Locale; label: string }[] = [
+  { id: "fr", label: "FR" },
+  { id: "en", label: "EN" },
+  { id: "ja", label: "日本語" },
+  { id: "ko", label: "한국어" },
+];
+
+/** What the editor reports about its running job, shown in the bar from every tab. */
+export type JobSummary = { label: string; done: number; total: number; deadline: number } | null;
 
 type Tab = "webtoon" | "scenario" | "personnages" | "decors" | "film";
 
@@ -65,6 +77,16 @@ export function StudioApp({ script }: StudioAppProps) {
     return () => window.clearTimeout(handle);
   }, [script.panels]);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  /** Language of the lettering shown in the editor and the strip preview. */
+  const [previewLocale, setPreviewLocale] = useState<Locale>(locale);
+  const [job, setJob] = useState<JobSummary>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!job) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [job]);
+
   const [working, setWorking] = useState<"save" | "publish" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -74,6 +96,22 @@ export function StudioApp({ script }: StudioAppProps) {
     setNotice(message);
     window.setTimeout(() => setNotice((current) => (current === message ? null : current)), 2600);
   }, []);
+
+  // The studio's library of characters and locations, saved a moment after
+  // each change so a sheet edit or a new character never needs a click.
+  const [library, setLibraryState] = useState<LibraryOverlay>(EMPTY_LIBRARY);
+  const librarySave = useRef<number | null>(null);
+  const setLibrary = useCallback(
+    (next: LibraryOverlay) => {
+      setLibraryState(next);
+      if (!user) return;
+      if (librarySave.current) window.clearTimeout(librarySave.current);
+      librarySave.current = window.setTimeout(() => {
+        saveLibrary(script.slug, next, user).catch((error: unknown) => notify(`Bibliothèque non enregistrée : ${error instanceof Error ? error.message : "erreur"}`));
+      }, 800);
+    },
+    [user, script.slug, notify],
+  );
 
   // Load the draft and the published state once a studio account is signed
   // in. Without an account (local work behind ?dev=1) the engine version is
@@ -85,11 +123,13 @@ export function StudioApp({ script }: StudioAppProps) {
       Promise.race([promise, new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error("timeout")), 8000))]);
     const run = async () => {
       try {
-        const [draft, published] = await Promise.all([
+        const [draft, published, storedLibrary] = await Promise.all([
           withTimeout(loadStrip(DRAFTS_COLLECTION, script.slug)),
           withTimeout(loadStrip(PUBLISHED_COLLECTION, script.slug)),
+          withTimeout(loadLibrary(script.slug)).catch(() => null),
         ]);
         if (cancelled) return;
+        if (storedLibrary) setLibraryState(storedLibrary);
         if (draft) {
           setPanels(draft.panels);
           setBaseline(draft.panels);
@@ -244,6 +284,20 @@ export function StudioApp({ script }: StudioAppProps) {
           <span className="text-sm text-ivory/85">{localizedText(script.title, locale)} · {localizedText(script.subtitle, locale)}</span>
         </div>
         <div className="studio-bar-actions">
+          <div className="studio-langswitch" role="group" aria-label="Langue d'affichage">
+            {PREVIEW_LOCALES.map((entry) => (
+              <button key={entry.id} type="button" className={`webtoon-mini ${previewLocale === entry.id ? "is-active" : ""}`} onClick={() => setPreviewLocale(entry.id)} title="Langue des bulles affichées dans l'éditeur et l'aperçu">
+                {entry.label}
+              </button>
+            ))}
+          </div>
+          {job ? (
+            <button type="button" className="studio-jobpill" onClick={() => setTab("webtoon")} title="Revenir à l'éditeur">
+              <span className="studio-spinner" aria-hidden />
+              {job.label}
+              {job.deadline > now ? ` · ≈ ${Math.max(1, Math.round((job.deadline - now) / 60000))} min` : ""}
+            </button>
+          ) : null}
           <span className={`studio-status ${dirty ? "is-dirty" : ""}`}>{status}</span>
           {publishedAt ? <span className="studio-status">Publié le {formatTime(publishedAt)}</span> : null}
           {notice ? <span className="studio-notice">{notice}</span> : null}
@@ -282,12 +336,24 @@ export function StudioApp({ script }: StudioAppProps) {
           ))}
         </nav>
         <main className="studio-main">
-          {tab === "webtoon" ? (
-            <StudioEditor script={script} panels={panels} setPanels={setPanels} selectedId={selectedId} setSelectedId={setSelectedId} notify={notify} onAutosave={requestAutosave} />
-          ) : null}
+          {/* The editor stays mounted behind the other tabs: a running generation goes on and its progress is still there when coming back. */}
+          <div className="studio-editor-host" style={{ display: tab === "webtoon" ? "contents" : "none" }} aria-hidden={tab !== "webtoon"}>
+            <StudioEditor
+              script={script}
+              panels={panels}
+              setPanels={setPanels}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
+              notify={notify}
+              onAutosave={requestAutosave}
+              library={library}
+              previewLocale={previewLocale}
+              onJob={setJob}
+            />
+          </div>
           {tab === "scenario" ? <StudioScreenplay panels={panels} /> : null}
-          {tab === "personnages" ? <StudioCharacters /> : null}
-          {tab === "decors" ? <StudioLocations /> : null}
+          {tab === "personnages" ? <StudioCharacters script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
+          {tab === "decors" ? <StudioLocations script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} /> : null}
         </main>
       </div>

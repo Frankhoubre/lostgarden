@@ -1,9 +1,9 @@
 import { SPACING_BY_TRANSITION } from "./adaptation";
 import { heightForAspect } from "./layout";
 import { buildGenerationPrompt } from "./prompts";
-import { frameReference, isReferenceId, REFERENCE_LIBRARY } from "./references";
+import { frameReference, isReferenceId, libraryWith } from "./references";
 import { STYLE_BIBLE } from "./style-bible";
-import type { PanelBackground, ReferenceAsset, WebtoonPanel, WebtoonScript } from "./types";
+import type { LibraryOverlay, PanelBackground, ReferenceAsset, WebtoonPanel, WebtoonScript } from "./types";
 
 /**
  * STUDIO COMPOSITION: the part of the adaptation engine that runs on a panel
@@ -37,15 +37,16 @@ function isFramePath(id: string): boolean {
  * palette, the location sheet, then the film frames (library ids of kind
  * `source_frame` kept from the panel, plus any frame picked in the studio).
  */
-export function composeReferences(panel: WebtoonPanel, script: ScriptWorld): ReferenceAsset[] {
+export function composeReferences(panel: WebtoonPanel, script: ScriptWorld, overlay?: LibraryOverlay | null): ReferenceAsset[] {
   const picked = new Map<string, ReferenceAsset>();
   const add = (asset: ReferenceAsset | undefined) => {
-    if (asset && !picked.has(asset.id)) picked.set(asset.id, asset);
+    if (asset && asset.image && !picked.has(asset.id)) picked.set(asset.id, asset);
   };
-  const byId = new Map(REFERENCE_LIBRARY.map((asset) => [asset.id, asset]));
+  const library = libraryWith(overlay);
+  const byId = new Map(library.map((asset) => [asset.id, asset]));
 
   for (const character of panel.characters) {
-    const sheets = REFERENCE_LIBRARY.filter((asset) => asset.kind === "character" && asset.subject === character).sort(
+    const sheets = library.filter((asset) => asset.kind === "character" && asset.subject === character && asset.image).sort(
       (a, b) => (a.priority ?? 99) - (b.priority ?? 99),
     );
     for (const sheet of sheets.slice(0, 2)) add(sheet);
@@ -57,14 +58,14 @@ export function composeReferences(panel: WebtoonPanel, script: ScriptWorld): Ref
   for (const id of panel.visual_references) {
     const asset = byId.get(id);
     if (asset?.kind === "source_frame") add(asset);
-    else if (!asset && isFramePath(id)) add(frameReference(id));
+    else if (!asset && !isReferenceId(id) && isFramePath(id)) add(frameReference(id));
   }
   return [...picked.values()];
 }
 
 /** The panel with its references resolved and its prompt composed from its fields. */
-export function composePanel(panel: WebtoonPanel, script: ScriptWorld): WebtoonPanel {
-  const references = composeReferences(panel, script);
+export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?: LibraryOverlay | null): WebtoonPanel {
+  const references = composeReferences(panel, script, overlay);
   const { prompt, negative } = buildGenerationPrompt({
     panel,
     references,
@@ -86,8 +87,8 @@ export function needsComposition(panel: WebtoonPanel): boolean {
 }
 
 /** The panel as it must be sent to a generator: composed when it asks for it, as written otherwise. */
-export function panelForGeneration(panel: WebtoonPanel, script: ScriptWorld): WebtoonPanel {
-  return needsComposition(panel) ? composePanel(panel, script) : panel;
+export function panelForGeneration(panel: WebtoonPanel, script: ScriptWorld, overlay?: LibraryOverlay | null): WebtoonPanel {
+  return needsComposition(panel) ? composePanel(panel, script, overlay) : panel;
 }
 
 export type FramePick = { src: string; seconds: number };

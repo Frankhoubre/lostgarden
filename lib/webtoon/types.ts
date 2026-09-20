@@ -34,6 +34,17 @@ export type ReferenceAsset = {
   subject?: string;
   /** Order among a character's sheets: 1 is the model sheet. */
   priority?: number;
+  /** Written or changed in the studio rather than in the code library. */
+  custom?: boolean;
+};
+
+/**
+ * What the studio adds to the code library: assets written there (a custom
+ * asset with the id of a built-in one replaces it) and built-in ids hidden.
+ */
+export type LibraryOverlay = {
+  assets: ReferenceAsset[];
+  hidden: string[];
 };
 
 export type ShotType =

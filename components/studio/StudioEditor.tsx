@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useLocale } from "@/components/providers/LocaleProvider";
+import { LocaleProvider, useLocale } from "@/components/providers/LocaleProvider";
+import type { JobSummary } from "@/components/studio/StudioApp";
 import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import { getFirebaseAuth } from "@/lib/firebase";
 import type { Locale } from "@/lib/i18n/config";
@@ -31,6 +32,7 @@ import type {
   BubbleStyle,
   CameraAngle,
   Fidelity,
+  LibraryOverlay,
   LocalizedText,
   NarrativeRole,
   PanelBackground,
@@ -47,8 +49,6 @@ const BACKGROUNDS: PanelBackground[] = ["white", "black", "abyss"];
 const BUBBLES: BubbleStyle[] = ["speech", "whisper", "thought", "shout", "off"];
 const FIDELITIES: Fidelity[] = ["direct", "reframe", "bridge"];
 const ROLES: NarrativeRole[] = ["breath", "establishing", "character_intro", "action", "reaction", "dialogue", "detail", "reveal", "transition", "tension", "cliffhanger"];
-const CHARACTERS = libraryCharacters();
-const LOCATIONS = libraryLocations();
 const FILM_FRAMES = studioFilmFrames();
 
 /** Headers of a generation call: the Firebase token, or the local bypass on the dev server. */
@@ -131,6 +131,12 @@ type StudioEditorProps = {
   notify: (message: string) => void;
   /** Ask the studio to write the draft once the current panels are rendered. */
   onAutosave?: () => void;
+  /** The studio's characters and locations, attached to every generation. */
+  library: LibraryOverlay;
+  /** Language of the lettering shown in the canvas and the strip preview. */
+  previewLocale: Locale;
+  /** Reports the running job so the bar can show it from every tab. */
+  onJob?: (job: JobSummary) => void;
 };
 
 /**
@@ -139,8 +145,11 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave }: StudioEditorProps) {
-  const { locale } = useLocale();
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, previewLocale, onJob }: StudioEditorProps) {
+  const { dict } = useLocale();
+  const locale = previewLocale;
+  const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
+  const LOCATIONS = useMemo(() => libraryLocations(library), [library]);
   const { user } = useAuth();
   const [showStrip, setShowStrip] = useState(false);
   const [showFocal, setShowFocal] = useState(false);
@@ -157,6 +166,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, [job]);
+  useEffect(() => {
+    onJob?.(job ? { label: job.label, done: job.done, total: job.total, deadline: job.deadline } : null);
+  }, [job, onJob]);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => panels.find((p) => p.panel_id === selectedId) ?? panels[0] ?? null, [panels, selectedId]);
@@ -203,7 +215,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel_id: panel.panel_id, panel }),
+        body: JSON.stringify({ panel_id: panel.panel_id, panel, library }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
       if (!response.ok || !payload.data_url) {
@@ -316,7 +328,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ count, panels }),
+        body: JSON.stringify({ count, panels, library }),
       });
       const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
       if (!response.ok || !payload.panels?.length) {
@@ -358,7 +370,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   /** Rebuild the prompt and references from the panel's fields, right now, in the browser. */
   const recompose = () => {
     if (!selected) return;
-    const next = composePanel(selected, script);
+    const next = composePanel(selected, script, library);
     patch({ generation_prompt: next.generation_prompt, negative_constraints: next.negative_constraints, visual_references: next.visual_references, prompt_auto: true });
     notify("Prompt recomposé depuis les champs");
   };
@@ -426,7 +438,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const copyPrompt = () => {
     if (!selected) return;
-    navigator.clipboard.writeText(JSON.stringify(buildGenerationRequest(panelForGeneration(selected, script)), null, 2)).then(() => notify("Requête copiée"));
+    navigator.clipboard.writeText(JSON.stringify(buildGenerationRequest(panelForGeneration(selected, script), "openai/gpt-image-2.5-sunburst", library), null, 2)).then(() => notify("Requête copiée"));
   };
 
   const textInputs = (value: LocalizedText, onText: (next: LocalizedText) => void) => (
@@ -443,7 +455,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   if (!selected) return <p className="text-sm text-ivory/70">Aucune case.</p>;
 
   const pending = pendingPanels(panels).length;
-  const preview = panelForGeneration(selected, script);
+  const preview = panelForGeneration(selected, script, library);
   const frames = attachedFrames(selected);
 
   return (
@@ -557,7 +569,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
         {showStrip ? (
           <div className="studio-strip-preview">
-            <WebtoonReader panels={panels} showIds onSelect={select} selectedId={selected.panel_id} />
+            <LocaleProvider locale={locale} dict={dict}>
+              <WebtoonReader panels={panels} showIds onSelect={select} selectedId={selected.panel_id} />
+            </LocaleProvider>
           </div>
         ) : null}
       </section>
@@ -763,7 +777,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div>
               <span className="webtoon-field-label">Références jointes, dans l&apos;ordre</span>
               <ul className="mt-1 flex flex-wrap gap-2">
-                {referencesForPanel(preview).map((ref) => (
+                {referencesForPanel(preview, library).map((ref) => (
                   <li key={ref.id} className="webtoon-ref">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ref.image} alt={ref.name} loading="lazy" />
