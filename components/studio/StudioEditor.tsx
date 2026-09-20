@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { PanelInpaint } from "@/components/studio/PanelInpaint";
+import { StripCanvas } from "@/components/studio/StripCanvas";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { LocaleProvider, useLocale } from "@/components/providers/LocaleProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import type { JobSummary } from "@/components/studio/StudioApp";
-import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import { getFirebaseAuth } from "@/lib/firebase";
 import type { Locale } from "@/lib/i18n/config";
 import { SPACING_BY_TRANSITION } from "@/lib/webtoon/adaptation";
@@ -151,12 +151,27 @@ type StudioEditorProps = {
  * public reader renders exactly what is edited here.
  */
 export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, previewLocale, onJob }: StudioEditorProps) {
-  const { dict } = useLocale();
+  useLocale();
   const locale = previewLocale;
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
   const LOCATIONS = useMemo(() => libraryLocations(library), [library]);
   const { user } = useAuth();
-  const [showStrip, setShowStrip] = useState(false);
+  /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it, editable in place. */
+  const [view, setView] = useState<"panel" | "strip">(() => {
+    try {
+      return window.localStorage.getItem("studio.view") === "strip" ? "strip" : "panel";
+    } catch {
+      return "panel";
+    }
+  });
+  const chooseView = (next: "panel" | "strip") => {
+    setView(next);
+    try {
+      window.localStorage.setItem("studio.view", next);
+    } catch {
+      // Storage may be unavailable; the choice just does not persist.
+    }
+  };
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
@@ -655,8 +670,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <button type="button" className="webtoon-mini" onClick={() => step(1)} disabled={index >= panels.length - 1} title="Case suivante">→</button>
           </div>
           <div className="flex items-center gap-3 text-xs text-ivory/70">
+            <div className="studio-viewswitch" role="group" aria-label="Vue">
+              <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
+              <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
+            </div>
             <label className="flex items-center gap-2"><input type="checkbox" checked={showFocal} onChange={(e) => setShowFocal(e.target.checked)} /> Point focal</label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={showStrip} onChange={(e) => setShowStrip(e.target.checked)} /> Bande complète</label>
             <div className="studio-gear" ref={panelMenuRef}>
               <button type="button" className={`webtoon-mini ${panelMenuOpen ? "is-active" : ""}`} onClick={() => setPanelMenuOpen((open) => !open)} aria-haspopup="menu" aria-expanded={panelMenuOpen} title="Déplacer, insérer, couper, fusionner ou supprimer cette case">
                 Case ▾
@@ -700,9 +718,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </div>
         </div>
 
-        <div className="studio-stage-wrap">
-          <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
-          {job?.current === selected.panel_id ? (
+        <div className={`studio-stage-wrap ${view === "strip" ? "is-strip" : ""}`}>
+          {view === "strip" ? (
+            <StripCanvas
+              panels={panels}
+              locale={locale}
+              selectedId={selected.panel_id}
+              onSelect={select}
+              showFocal={showFocal}
+              onChange={(id, changes) => setPanels((current) => updatePanel(current, id, changes))}
+            />
+          ) : (
+            <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
+          )}
+          {view === "panel" && job?.current === selected.panel_id ? (
             <div className="studio-stage-overlay" role="status">
               <span className="studio-spinner studio-spinner-lg" aria-hidden />
               <span>Génération de l&apos;image…</span>
@@ -711,7 +740,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ) : null}
         </div>
 
-        <div className="studio-stage-actions" role="toolbar" aria-label="Actions sur l'image">
+        <div className={`studio-stage-actions ${view === "strip" ? "is-sticky" : ""}`} role="toolbar" aria-label="Actions sur l'image">
           <span className={`studio-status-chip ${selected.image.status === "stale" ? "is-stale" : selected.image.status === "missing" ? "is-missing" : ""}`}>
             {isTitleCard ? "Carte-titre, sans image" : selected.image.status === "generated" ? "Image générée" : selected.image.status === "stale" ? "Le texte a changé depuis l'image" : "Pas encore d'image"}
             {selected.image.cost_usd ? ` · ${selected.image.cost_usd.toFixed(3)} $` : ""}
@@ -729,7 +758,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ) : null}
           <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
         </div>
-        <p className="studio-hint">Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.</p>
+        <p className="studio-hint">
+          {view === "strip" ? "Clique une case pour la sélectionner. " : ""}
+          Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.
+        </p>
 
         {inpaintOpen && selected.image.src ? (
           <PanelInpaint
@@ -745,13 +777,6 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           />
         ) : null}
 
-        {showStrip ? (
-          <div className="studio-strip-preview">
-            <LocaleProvider locale={locale} dict={dict}>
-              <WebtoonReader panels={panels} showIds onSelect={select} selectedId={selected.panel_id} />
-            </LocaleProvider>
-          </div>
-        ) : null}
       </section>
 
       <aside className="studio-inspector">
