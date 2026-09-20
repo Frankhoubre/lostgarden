@@ -29,7 +29,7 @@ const PREVIEW_LOCALES: { id: Locale; label: string }[] = [
 ];
 
 /** Running cost of the strip's generations, as the routes record it in Firestore. */
-type StripCost = { total_usd: number; images_usd?: number; sheets_usd?: number; writer_usd?: number; translate_usd?: number; count?: number; images_count?: number; sheets_count?: number; writer_count?: number; translate_count?: number };
+type StripCost = { total_usd: number; images_usd?: number; sheets_usd?: number; writer_usd?: number; translate_usd?: number; count?: number; images_count?: number; sheets_count?: number; writer_count?: number; translate_count?: number; /** Part of the total estimated for what was generated before the counter existed. */ estimated_usd?: number };
 
 const usd = (value: number | undefined) => `${(value ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
 
@@ -321,7 +321,7 @@ export function StudioApp({ script }: StudioAppProps) {
           {cost ? (
             <span
               className="studio-cost"
-              title={`Coût des générations de ce webtoon, tel que facturé par le Gateway.\nImages : ${usd(cost.images_usd)} (${cost.images_count ?? 0})\nFiches : ${usd(cost.sheets_usd)} (${cost.sheets_count ?? 0})\nÉcriture de la suite : ${usd(cost.writer_usd)} (${cost.writer_count ?? 0} lots)\nTraductions : ${usd(cost.translate_usd)} (${cost.translate_count ?? 0})`}
+              title={`Coût des générations de ce webtoon, tel que facturé par le Gateway.\nImages : ${usd(cost.images_usd)} (${cost.images_count ?? 0})\nFiches : ${usd(cost.sheets_usd)} (${cost.sheets_count ?? 0})\nÉcriture de la suite : ${usd(cost.writer_usd)} (${cost.writer_count ?? 0} lots)\nTraductions : ${usd(cost.translate_usd)} (${cost.translate_count ?? 0})${cost.estimated_usd ? `\nDont ${usd(cost.estimated_usd)} estimés pour ce qui a été généré avant le compteur (20 septembre 2026).` : ""}`}
             >
               {usd(cost.total_usd)}
             </span>

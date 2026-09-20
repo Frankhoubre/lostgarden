@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { PanelInpaint } from "@/components/studio/PanelInpaint";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { LocaleProvider, useLocale } from "@/components/providers/LocaleProvider";
 import type { JobSummary } from "@/components/studio/StudioApp";
@@ -160,6 +161,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
+  const [inpaintOpen, setInpaintOpen] = useState(false);
   /** Panels ticked in the list for a batch action (regenerate, translate, delete). */
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const lastChecked = useRef<string | null>(null);
@@ -784,10 +786,24 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy}>
                 {busy ? "…" : selected.image.src ? "Regénérer (GPT Image 2.5)" : "Générer (GPT Image 2.5)"}
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Peins une zone de l'image et dis ce qui doit y apparaître : seule cette zone change">Retoucher une zone (IA)</button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy}>Remplacer par un fichier</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt}>Copier la requête</button>
               <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
             </div>
+            {inpaintOpen && selected.image.src ? (
+              <PanelInpaint
+                slug={script.slug}
+                panel={selected}
+                library={library}
+                notify={notify}
+                onClose={() => setInpaintOpen(false)}
+                onDone={async (dataUrl) => {
+                  await applyImage(selected, dataUrl, "inpaint");
+                  onAutosave?.();
+                }}
+              />
+            ) : null}
             <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
             <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
             <div className="grid grid-cols-2 gap-3">
