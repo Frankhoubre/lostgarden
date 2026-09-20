@@ -62,7 +62,7 @@ async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getW
   const system = [
     `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, an original anime being adapted into a webtoon. You receive frames of the finished episode taken every two seconds, each labelled with its timecode, and the screenplay in French. The film and the screenplay match, but the film shows gestures the screenplay does not spell out (a pendant taken out and opened): the frames win for what is visible.`,
     `Characters: ${input.characters.join(" | ")}.`,
-    "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, kneeling, collapsed face down, lying on his back, climbing, sitting), `action` (what the frame shows happening), `in_hands` (an object held, exactly: a folded note, a silver pendant on a chain closed or open with a portrait inside, the helmet, nothing, and what the hand does with it: takes it out, opens it, holds it up, throws it), `others_visible` (a creature, a machine, a branch, a claw), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French).",
+    "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, kneeling, collapsed face down, lying on his back, climbing, sitting), `action` (what the frame shows happening), `in_hands` (an object held, exactly: a folded note, a silver pendant on a chain closed or open with a portrait inside, the helmet, nothing, and what the hand does with it: takes it out, opens it, holds it up, throws it; an arm swept out wide with the object gone from the hand right after is a throw, not a reach), `others_visible` (a creature, a machine, a branch, a claw), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French).",
     "Be exact about the helmet and the posture: these decide how the character is drawn in the panels. Look above the cream scarf: a pale lantern-shaped helmet with two dark oval holes means \"on his head\"; a dark round opening with nothing above the scarf means the helmet is off (then say where it is: on the ground, in his hands, or not visible). A frame that shows only the armour from behind with an arm reaching out and nothing above the shoulders is headless. Consistency check before answering: from the first frame where the helmet is off until the frame where both his hands hold it up to his neck (he puts it back), every frame with Lanterne is headless; re-examine any frame in between that you were about to mark \"on his head\". If a frame is black or shows only text, say so.",
     `Continuity facts of the series: ${input.script.source.continuity.join(" ")}`,
     'Answer with JSON only: {"frames": [ {seconds, place, characters, helmet, posture, action, in_hands, others_visible, title_card, screenplay_line} ]}, one entry per frame, in the order given. Escape double quotes inside strings.',
@@ -88,15 +88,23 @@ async function analyzeFrames(input: { script: NonNullable<ReturnType<typeof getW
  * A single image and a yes/no question read far better than a sheet of
  * sixteen, and the answer overrides the supervisor's `helmet` note.
  */
+/** Two frames the checker compares against: the helmet on (1:25) and the hollow neck (2:25). */
+const HELMET_EXAMPLES = { on: "/webtoon/ep1-opening/film/01m25s.jpg", off: "/webtoon/ep1-opening/film/02m25s.jpg" };
+
 async function helmetChecks(frames: { seconds: number; src: string }[], meter: CostMeter): Promise<Map<number, "on" | "off" | "absent">> {
+  const [exampleOn, exampleOff] = await Promise.all([frameAsDataUrl(HELMET_EXAMPLES.on), frameAsDataUrl(HELMET_EXAMPLES.off)]);
   const results = await Promise.all(
     frames.map(async (frame) => {
       try {
         const answer = await completeJson<{ lanterne_visible?: boolean; helmet_on_head?: boolean; helmet_elsewhere?: string }>({
           system:
-            'You check one frame of an anime. Lanterne is a hollow suit of armour with a cream scarf around the neck; his head is a pale cylindrical lantern-shaped helmet with two dark oval holes. Answer with JSON only: {"lanterne_visible": true|false, "helmet_on_head": true|false, "helmet_elsewhere": "on the ground" | "in his hands" | "not visible"}. helmet_on_head is true only if the pale helmet sits above the scarf; a dark empty opening above the scarf, or shoulders with nothing above them, means false.',
+            'You check one frame of an anime. Lanterne is a hollow suit of armour with a cream scarf around the neck. Image A shows him WITH his head: a pale cylindrical lantern-shaped helmet with two dark oval holes sits above the scarf. Image B shows him WITHOUT his head: above the scarf there is only a dark round opening into the empty armour, nothing else; the helmet may lie on the ground beside him. Compare the third image to A and B. Answer with JSON only: {"lanterne_visible": true|false, "helmet_on_head": true|false, "helmet_elsewhere": "on the ground" | "in his hands" | "not visible"}. helmet_on_head is true only when the pale helmet with its eye holes sits above the scarf as in A. A dark opening above the scarf as in B, or shoulders with nothing above them, means false.',
           user: [
-            { type: "text", text: "Is the helmet on his head in this frame?" },
+            { type: "text", text: "Image A, helmet ON his head:" },
+            { type: "image_url", image_url: { url: exampleOn } },
+            { type: "text", text: "Image B, WITHOUT his head, the neck open and empty:" },
+            { type: "image_url", image_url: { url: exampleOff } },
+            { type: "text", text: "The frame to check: is the helmet on his head here, as in A, or is the neck open as in B?" },
             { type: "image_url", image_url: { url: await frameAsDataUrl(frame.src) } },
           ],
           maxTokens: 200,
@@ -242,6 +250,26 @@ export async function POST(request: Request, { params }: RouteContext) {
         const check = helmet.get(Number(note.seconds));
         if (check === "on") note.helmet = "on his head";
         else if (check === "off" && (note.helmet ?? "").includes("on his head")) note.helmet = "off his head (on the ground, in his hands or out of frame)";
+      }
+      // Smoothing: the helmet comes off once and goes back once; a lone "on" between two "off" is a misread.
+      const withLanterne = notes.filter((n) => (n.characters ?? []).includes("lanterne"));
+      for (let i = 1; i < withLanterne.length - 1; i += 1) {
+        const prev = withLanterne[i - 1].helmet ?? "";
+        const next = withLanterne[i + 1].helmet ?? "";
+        const isOn = (v: string) => v.includes("on his head");
+        if (isOn(withLanterne[i].helmet ?? "") && !isOn(prev) && !isOn(next) && prev !== "not visible" && next !== "not visible") {
+          withLanterne[i].helmet = "off his head (on the ground, in his hands or out of frame)";
+        }
+      }
+      // The previous panels carry the state in: if the strip arrives headless, the first frames stay headless until a frame shows both hands raising the helmet to the neck.
+      const lastPanel = current[current.length - 1];
+      const arrivesHeadless = lastPanel ? /headless|without his helmet|helmet (on the ground|lying|in his hands)|no head/i.test(`${lastPanel.description} ${lastPanel.purpose}`) : false;
+      if (arrivesHeadless) {
+        for (const note of withLanterne) {
+          const raising = /(puts|putting|raises|raising|lifts|lifting).*(helmet).*(neck|head|shoulders)|helmet back on/i.test(`${note.action ?? ""} ${note.in_hands ?? ""}`);
+          if (raising) break;
+          if ((note.helmet ?? "").includes("on his head")) note.helmet = "off his head (on the ground, in his hands or out of frame)";
+        }
       }
       lastNotes = notes;
       const frameParts: UserPart[][] = await Promise.all(
