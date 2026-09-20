@@ -125,7 +125,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         ...frameParts.flat(),
         { type: "text", text: `Write the next ${batch} panels now, as JSON.` },
       ];
-      const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 16000 });
+      const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 24000, reasoning: "none" });
       const intents = (result.panels ?? []).slice(0, batch);
       const panels = panelsFromIntents(current, intents, frames, script, overlay);
       if (!panels.length) {
