@@ -301,7 +301,8 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "calm" | "normal" | "action"; until_seconds?: number };
   const pace: "calm" | "normal" | "action" = body.pace === "calm" || body.pace === "action" ? body.pace : "normal";
-  const until = Number.isFinite(Number(body.until_seconds)) ? Number(body.until_seconds) : null;
+  // `until_seconds: null` (the open-ended "next panels" of the studio) must stay open: Number(null) is 0.
+  const until = body.until_seconds !== null && body.until_seconds !== undefined && Number.isFinite(Number(body.until_seconds)) ? Number(body.until_seconds) : null;
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
   const library = libraryWith(overlay);
   const count = Math.max(1, Math.min(MAX_COUNT, Math.round(Number(body.count) || 10)));
