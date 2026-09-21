@@ -424,8 +424,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
+          // Nothing written at all: say why and stop. The end of the film after some panels is not an error.
+          if (!created.length) {
+            notify(payload.error ?? `Le studio n'a pas pu écrire la suite (réponse ${response.status}).`);
+            return;
+          }
           if (payload.error && !/Fin de l'épisode/.test(payload.error)) notify(payload.error);
-          if (!created.length) { if (!payload.error || !/Fin de l'épisode/.test(payload.error)) return; }
           break;
         }
         created.push(...payload.panels);
