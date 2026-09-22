@@ -31,9 +31,17 @@ export function loadVideo(file: File): Promise<{ video: HTMLVideoElement; info: 
       resolve({ video, info: { duration: video.duration, width: video.videoWidth, height: video.videoHeight }, release });
     };
     video.onerror = () => {
+      window.clearTimeout(slow);
       release();
       reject(new Error("Cette vidéo ne se lit pas dans le navigateur. Exportez-la en MP4 (H.264) et réessayez."));
     };
+    // Chrome does not load a video in a tab that has never been shown: say so rather than wait forever.
+    const slow = window.setTimeout(() => {
+      if (video.readyState > 0) return;
+      release();
+      reject(new Error(document.hidden ? "Le navigateur ne lit pas la vidéo tant que cet onglet est en arrière-plan : affichez l'onglet, puis choisissez à nouveau la vidéo." : "La vidéo ne se charge pas. Exportez-la en MP4 (H.264) et réessayez."));
+    }, 15000);
+    video.addEventListener("loadedmetadata", () => window.clearTimeout(slow), { once: true });
     video.src = url;
   });
 }
