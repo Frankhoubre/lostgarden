@@ -18,7 +18,7 @@ import { localePath } from "@/lib/i18n/navigation";
 import { appendFromFrame } from "@/lib/webtoon/editor-ops";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
-import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, loadStrip, saveStrip } from "@/lib/webtoon/studio";
+import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
@@ -126,6 +126,15 @@ export function StudioApp({ script }: StudioAppProps) {
     };
   }, [menuOpen]);
   const [loaded, setLoaded] = useState(false);
+  /**
+   * The version of the stored draft this tab last loaded or saved. When
+   * another tab (or another session) saves after it, this tab stops saving
+   * on its own and asks which version to keep: two tabs on the same strip
+   * used to overwrite each other in silence, and a generation made in one
+   * of them vanished.
+   */
+  const syncedAt = useRef<string | null>(null);
+  const [conflict, setConflict] = useState<DraftMeta | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const notify = useCallback((message: string) => {
@@ -173,6 +182,7 @@ export function StudioApp({ script }: StudioAppProps) {
           setBaseline(draft.panels);
           setSelectedId((current) => (draft.panels.some((p) => p.panel_id === current) ? current : draft.panels[0]?.panel_id ?? null));
           setSavedAt(draft.updated_at);
+          syncedAt.current = draft.updated_at;
         }
         if (published) setPublishedAt(published.updated_at);
       } catch {
@@ -188,6 +198,14 @@ export function StudioApp({ script }: StudioAppProps) {
   }, [script.slug, user]);
 
   useEffect(() => {
+    if (!user) return;
+    return watchDraftMeta(DRAFTS_COLLECTION, script.slug, (meta) => {
+      if (!meta?.updated_at || meta.session_id === STUDIO_SESSION_ID) return;
+      if (syncedAt.current && meta.updated_at > syncedAt.current) setConflict(meta);
+    });
+  }, [user, script.slug]);
+
+  useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -197,39 +215,61 @@ export function StudioApp({ script }: StudioAppProps) {
   }, [dirty]);
 
   // Automatic save asked by the editor after each panel written or generated,
-  // so a reload in the middle of a long job loses nothing. The flag is read
-  // once the new panels are rendered, then the draft is written silently.
-  const wantAutosave = useRef(false);
-  const requestAutosave = useCallback(() => {
-    wantAutosave.current = true;
-  }, []);
+  // so a reload in the middle of a long job loses nothing. Requests are
+  // gathered for a second and a half and only one save runs at a time: with
+  // several images landing together, one save per image queued more writes
+  // than Firestore accepts ("Write stream exhausted").
+  const panelsRef = useRef(panels);
+  const conflictRef = useRef<DraftMeta | null>(null);
   useEffect(() => {
-    if (!wantAutosave.current) return;
-    wantAutosave.current = false;
-    if (!user) return;
-    let cancelled = false;
-    saveStrip(DRAFTS_COLLECTION, script.slug, panels, user)
-      .then((at) => {
-        if (cancelled) return;
-        setSavedAt(at);
-        setBaseline(panels);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) notify(`Enregistrement automatique impossible : ${error instanceof Error ? error.message : "erreur"}`);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [panels, user, script.slug, notify]);
+    panelsRef.current = panels;
+    conflictRef.current = conflict;
+  }, [panels, conflict]);
+  const autosaveTimer = useRef<number | null>(null);
+  const autosaving = useRef(false);
+  const autosaveAgain = useRef(false);
+  const runAutosave = useCallback(async () => {
+    if (!user || conflictRef.current) return;
+    if (autosaving.current) {
+      autosaveAgain.current = true;
+      return;
+    }
+    autosaving.current = true;
+    const snapshot = panelsRef.current;
+    try {
+      const at = await saveStrip(DRAFTS_COLLECTION, script.slug, snapshot, user);
+      syncedAt.current = at;
+      setSavedAt(at);
+      setBaseline(snapshot);
+    } catch (error) {
+      notify(`Enregistrement automatique impossible : ${error instanceof Error ? error.message : "erreur"}`);
+    } finally {
+      autosaving.current = false;
+      if (autosaveAgain.current) {
+        autosaveAgain.current = false;
+        void runAutosave();
+      }
+    }
+  }, [user, script.slug, notify]);
+  const requestAutosave = useCallback(() => {
+    if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = window.setTimeout(() => void runAutosave(), 1500);
+  }, [runAutosave]);
+  useEffect(() => () => {
+    if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+  }, []);
 
   const save = useCallback(async () => {
     if (!user) {
       notify("Pas de compte connecté : rien n'est enregistré (mode local).");
       return;
     }
+    if (conflict && !window.confirm(`Un autre onglet a enregistré le brouillon à ${formatTime(conflict.updated_at)}. L'écraser avec la version de cet onglet ?`)) return;
     setWorking("save");
     try {
       const at = await saveStrip(DRAFTS_COLLECTION, script.slug, panels, user);
+      syncedAt.current = at;
+      setConflict(null);
       setSavedAt(at);
       setBaseline(panels);
       notify("Brouillon enregistré");
@@ -238,17 +278,42 @@ export function StudioApp({ script }: StudioAppProps) {
     } finally {
       setWorking(null);
     }
-  }, [user, panels, script.slug, notify]);
+  }, [user, panels, script.slug, notify, conflict]);
+
+  /** The other tab's version replaces this one's. */
+  const loadLatest = useCallback(async () => {
+    if (job) {
+      notify("Un travail tourne dans cet onglet : attendez sa fin ou arrêtez-le avant de charger l'autre version.");
+      return;
+    }
+    try {
+      const draft = await loadStrip(DRAFTS_COLLECTION, script.slug);
+      if (!draft) return;
+      setPanels(draft.panels);
+      setBaseline(draft.panels);
+      setSavedAt(draft.updated_at);
+      syncedAt.current = draft.updated_at;
+      setConflict(null);
+      notify(`Version de ${formatTime(draft.updated_at)} chargée (${draft.panels.length} cases)`);
+    } catch (error) {
+      notify(`Chargement impossible : ${error instanceof Error ? error.message : "erreur"}`);
+    }
+  }, [job, script.slug, notify]);
 
   const publish = async () => {
     if (!user) {
       notify("Pas de compte connecté : publication impossible.");
       return;
     }
+    if (conflict) {
+      notify("Un autre onglet a enregistré une autre version : choisissez d'abord laquelle garder.");
+      return;
+    }
     if (!window.confirm("Publier cette version sur lostgarden.world/webtoon ? Elle remplace la version en ligne.")) return;
     setWorking("publish");
     try {
       const at = await saveStrip(DRAFTS_COLLECTION, script.slug, panels, user);
+      syncedAt.current = at;
       await saveStrip(PUBLISHED_COLLECTION, script.slug, panels, user);
       setSavedAt(at);
       setPublishedAt(at);
@@ -398,6 +463,19 @@ export function StudioApp({ script }: StudioAppProps) {
           <input ref={fileInput} type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importJson(f); e.target.value = ""; }} />
         </div>
       </header>
+      {conflict ? (
+        <div className="studio-conflict" role="alert">
+          <p>
+            <b>Un autre onglet a enregistré ce webtoon</b> le {formatTime(conflict.updated_at)}
+            {conflict.updated_by ? ` (${conflict.updated_by})` : ""}. Cet onglet n&apos;enregistre plus rien tout seul, pour ne pas écraser ce travail.
+            {job ? " Un travail tourne ici : ses cases restent dans cet onglet jusqu'à votre choix." : ""}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="webtoon-mini studio-primary" onClick={() => void loadLatest()} disabled={Boolean(job)}>Charger la version de l&apos;autre onglet</button>
+            <button type="button" className="webtoon-mini" onClick={() => void save()}>Garder la version de cet onglet</button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="studio-body">
         <nav className="studio-nav" aria-label="Sections du studio">

@@ -63,6 +63,8 @@ const BUBBLES: BubbleStyle[] = ["speech", "whisper", "thought", "shout", "off"];
 const FIDELITIES: Fidelity[] = ["direct", "reframe", "bridge"];
 const ROLES: NarrativeRole[] = ["breath", "establishing", "character_intro", "action", "reaction", "dialogue", "detail", "reveal", "transition", "tension", "cliffhanger"];
 const FILM_FRAMES = studioFilmFrames();
+/** Images generated at the same time by a batch. */
+const IMAGE_CONCURRENCY = 3;
 
 /** Headers of a generation call: the Firebase token, or the local bypass on the dev server. */
 async function studioHeaders(): Promise<Record<string, string>> {
@@ -98,8 +100,10 @@ type Job = {
   total: number;
   /** Panels waiting for their image, in order. */
   queue: string[];
-  /** Panel whose image is being generated right now. */
+  /** Panel whose image is being generated right now (the first of `running`). */
   current: string | null;
+  /** Every panel whose image is being generated right now: several run at once. */
+  running?: string[];
   /** Skeleton cards shown while the writer drafts the panels. */
   placeholders: number;
   /** When the current estimate says the job ends. */
@@ -335,28 +339,43 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   /** Generate the images of these panels one after the other, feeding the job display. */
   const runImages = async (list: WebtoonPanel[]): Promise<number> => {
+    // Several images at once: each call waits most of its minute on the image model,
+    // so three in flight make a long batch about three times shorter.
     let ok = 0;
-    for (const [i, panel] of list.entries()) {
-      if (stopBatch.current) break;
-      const left = list.length - i;
+    let next = 0;
+    let done = 0;
+    const running = new Set<string>();
+    const report = () =>
       setJob({
         phase: "images",
-        label: `Image ${i + 1}/${list.length} · ${panel.panel_id}`,
-        done: i,
+        label: `Images ${Math.min(done + running.size, list.length)}/${list.length}${running.size > 1 ? ` · ${running.size} en même temps` : ""}`,
+        done,
         total: list.length,
-        queue: list.slice(i + 1).map((p) => p.panel_id),
-        current: panel.panel_id,
+        queue: list.slice(next).map((p) => p.panel_id),
+        current: [...running][0] ?? null,
+        running: [...running],
         placeholders: 0,
-        deadline: deadlineIn(left * imageEstimate()),
+        deadline: deadlineIn(Math.ceil((list.length - done) / IMAGE_CONCURRENCY) * imageEstimate()),
       });
-      select(panel.panel_id);
-      const started = Date.now();
-      if (await generateOne(panel)) {
-        ok += 1;
-        imageTimes.current.push(Date.now() - started);
-        onAutosave?.();
+    if (list[0]) select(list[0].panel_id);
+    const worker = async () => {
+      while (!stopBatch.current && next < list.length) {
+        const panel = list[next];
+        next += 1;
+        running.add(panel.panel_id);
+        report();
+        const started = Date.now();
+        if (await generateOne(panel)) {
+          ok += 1;
+          imageTimes.current.push(Date.now() - started);
+          onAutosave?.();
+        }
+        running.delete(panel.panel_id);
+        done += 1;
+        report();
       }
-    }
+    };
+    await Promise.all(Array.from({ length: Math.min(IMAGE_CONCURRENCY, list.length) }, worker));
     return ok;
   };
 
@@ -954,7 +973,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
               <button
                 type="button"
-                className={`studio-thumb ${panel.panel_id === selected.panel_id ? "is-active" : ""} ${job?.current === panel.panel_id ? "is-generating" : ""} ${job?.queue.includes(panel.panel_id) ? "is-queued" : ""}`}
+                className={`studio-thumb ${panel.panel_id === selected.panel_id ? "is-active" : ""} ${job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) ? "is-generating" : ""} ${job?.queue.includes(panel.panel_id) ? "is-queued" : ""}`}
                 onClick={(e) => (e.shiftKey ? toggleChecked(panel.panel_id, true) : select(panel.panel_id))}
                 style={{ background: panel.background === "white" ? "#f6f4ef" : "#020409" }}
               >
@@ -964,7 +983,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 ) : (
                   <span className="studio-thumb-empty">{panel.caption.some((c) => c.style === "title") ? panel.caption[0].text.en : "sans image"}</span>
                 )}
-                {job?.current === panel.panel_id ? (
+                {job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) ? (
                   <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />Génération…</span>
                 ) : job?.queue.includes(panel.panel_id) ? (
                   <span className="studio-thumb-overlay studio-thumb-overlay-soft">en attente</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, writeBatch } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, writeBatch } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
 import { getDb, getFirebaseApp } from "@/lib/firebase";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
@@ -51,7 +51,31 @@ type StripDocument = {
   chunk_count?: number;
   updated_by: string | null;
   updated_at_iso: string;
+  /** The browser tab that wrote it: two tabs on the same strip see each other's saves. */
+  session_id?: string;
 };
+
+/**
+ * One id per open tab of the studio. Every save carries it, so a tab can
+ * tell its own saves from another tab's (or another session of the same
+ * account), and stop saving over work it has not seen.
+ */
+export const STUDIO_SESSION_ID = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+export type DraftMeta = { updated_at: string | null; updated_by: string | null; session_id: string | null; chunk_count: number };
+
+/** Follows the header of a stored strip (not its panels): who saved it last, when, from which tab. */
+export function watchDraftMeta(collectionName: string, slug: string, onChange: (meta: DraftMeta | null) => void): () => void {
+  return onSnapshot(
+    doc(getDb(), collectionName, slug),
+    (snapshot) => {
+      if (!snapshot.exists()) return onChange(null);
+      const data = snapshot.data() as Partial<StripDocument>;
+      onChange({ updated_at: data.updated_at_iso ?? null, updated_by: data.updated_by ?? null, session_id: data.session_id ?? null, chunk_count: Math.max(1, Math.floor(data.chunk_count ?? 1)) });
+    },
+    () => onChange(null),
+  );
+}
 
 /** Under the Firestore limit of 1 MiB per document, with room for the other fields. */
 const CHUNK_BYTES = 700_000;
@@ -115,6 +139,7 @@ export async function saveStrip(collectionName: string, slug: string, panels: We
     chunk_count: slices.length,
     updated_by: user.email ?? null,
     updated_at_iso: now,
+    session_id: STUDIO_SESSION_ID,
     touched: serverTimestamp(),
   };
   batch.set(doc(db, collectionName, slug), payload);
