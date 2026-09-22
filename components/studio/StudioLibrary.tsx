@@ -199,6 +199,8 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
   };
 
   const noun = kind === "character" ? "personnage" : kind === "object" ? "objet" : "décor";
+  const newNoun = kind === "object" ? "Nouvel objet" : `Nouveau ${noun}`;
+  const thisNoun = kind === "object" ? "cet objet" : `ce ${noun}`;
 
   return (
     <div className="space-y-4">
@@ -222,7 +224,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
             </div>
           </div>
         ) : (
-          <button type="button" className="webtoon-mini studio-primary" onClick={() => setDraft({ name: "", must_keep: "" })}>+ Nouveau {noun}</button>
+          <button type="button" className="webtoon-mini studio-primary" onClick={() => setDraft({ name: "", must_keep: "" })}>+ {newNoun}</button>
         )}
       </section>
 
@@ -292,7 +294,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
                     ))}
                   </div>
                   <label className="webtoon-field">
-                    <span>Verrou de design (injecté dans chaque prompt qui nomme ce {noun})</span>
+                    <span>Verrou de design (injecté dans chaque prompt qui nomme {thisNoun})</span>
                     <textarea rows={5} value={primary?.must_keep ?? ""} onChange={(e) => updateLock(entry, e.target.value)} />
                   </label>
                   {doc?.blocks.map((block) => (
