@@ -64,5 +64,7 @@ export function slugId(value: string): string {
     .replace(/^(a|an|the|le|la|les|un|une) /, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
+    // The model sometimes writes the library prefix into the id ("loc-forest", "obj.watch"): the asset adds it once.
+    .replace(/^(loc|obj|char|location|object|character)-/, "")
     .slice(0, 40);
 }
