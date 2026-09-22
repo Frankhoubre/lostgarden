@@ -874,7 +874,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <span className="text-xs text-ivory/85"><b>{checked.size}</b> case{checked.size > 1 ? "s" : ""} cochée{checked.size > 1 ? "s" : ""}</span>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void regenerateChecked()} disabled={busy} title="Regénère les cases cochées, dans l'ordre de la bande">Regénérer</button>
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(checkedPanels, false)} disabled={busy} title="Remplit les langues vides des cases cochées">Traduire</button>
-              <button type="button" className="webtoon-mini" onClick={() => void rewriteChecked(Math.max(8, checkedPanels.length * 3))} disabled={busy} title="Remplace les cases cochées par une séquence dense et nerveuse sur le même passage du film">Réécrire en action</button>
+              <button
+                type="button"
+                className="webtoon-mini"
+                onClick={() => {
+                  // The count is asked, with a suggestion by pace: the action pace tells every second in several panels, the others one panel per moment.
+                  const suggested = pace === "action" ? checkedPanels.length * 3 : pace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
+                  const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} : combien de cases écrire ?`, String(suggested));
+                  const n = Math.round(Number(answer));
+                  if (answer !== null && n > 0) void rewriteChecked(Math.min(150, n));
+                }}
+                disabled={busy}
+                title="Remplace les cases cochées par une séquence réécrite sur le même passage du film, au rythme choisi dans « Suite de l'histoire »"
+              >
+                Réécrire
+              </button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
