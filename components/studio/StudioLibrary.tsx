@@ -11,12 +11,12 @@ import { readFileAsDataUrl } from "@/lib/webtoon/studio";
 import type { StudioTextBlock } from "@/lib/webtoon/studio-assets";
 import type { LibraryOverlay, ReferenceAsset, WebtoonScript } from "@/lib/webtoon/types";
 
-type Kind = "character" | "location";
+type Kind = "character" | "location" | "object";
 
 type StudioLibraryProps = {
   kind: Kind;
   script: WebtoonScript;
-  panels: { characters: string[]; location: string }[];
+  panels: { characters: string[]; location: string; objects?: string[] }[];
   library: LibraryOverlay;
   setLibrary: (next: LibraryOverlay) => void;
   notify: (message: string) => void;
@@ -69,6 +69,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     const consider = (asset: ReferenceAsset, isHidden: boolean) => {
       if (kind === "character" && asset.kind === "character" && asset.subject) push(asset.subject, asset.name.split(",")[0], asset, isHidden);
       if (kind === "location" && (asset.kind === "location" || asset.kind === "style")) push(asset.id, asset.name, asset, isHidden);
+      if (kind === "object" && asset.kind === "object") push(asset.id, asset.name.split(",")[0], asset, isHidden);
     };
     for (const asset of all) consider(asset, false);
     for (const asset of REFERENCE_LIBRARY) if (hidden.has(asset.id)) consider(asset, true);
@@ -77,7 +78,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
   }, [kind, library]);
 
   const inStrip = (entry: Entry) =>
-    kind === "character" ? panels.some((p) => p.characters.includes(entry.id)) : panels.some((p) => `loc.${p.location}` === entry.id);
+    kind === "character" ? panels.some((p) => p.characters.includes(entry.id)) : kind === "object" ? panels.some((p) => (p.objects ?? []).some((o) => `obj.${o}` === entry.id)) : panels.some((p) => `loc.${p.location}` === entry.id);
 
   const persist = (next: LibraryOverlay) => setLibrary(next);
 
@@ -91,7 +92,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     let next = library;
     for (const asset of entry.assets) {
       const suffix = asset.name.includes(",") ? asset.name.slice(asset.name.indexOf(",")) : "";
-      next = upsertAsset(next, { ...asset, name: kind === "character" ? `${name}${suffix}` : name });
+      next = upsertAsset(next, { ...asset, name: kind === "location" ? name : `${name}${suffix}` });
     }
     persist(next);
   };
@@ -142,7 +143,9 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     const asset: ReferenceAsset =
       kind === "character"
         ? { id: `char.${entry.id}.studio-${Date.now().toString(36)}`, kind: "character", subject: entry.id, priority: n, name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: [entry.id, "studio"] }
-        : { id: `loc.${entry.id.replace(/^loc\./, "")}.studio-${Date.now().toString(36)}`, kind: "location", name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: ["studio"] };
+        : kind === "object"
+          ? { id: `${entry.id}.studio-${Date.now().toString(36)}`, kind: "object", name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: ["studio"] }
+          : { id: `loc.${entry.id.replace(/^loc\./, "")}.studio-${Date.now().toString(36)}`, kind: "location", name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: ["studio"] };
     fileTarget.current = { id: asset.id, entryId: entry.id };
     persist(upsertAsset(library, asset));
     fileInput.current?.click();
@@ -167,17 +170,19 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     if (!draft?.name.trim()) return;
     const id = slugify(draft.name);
     if (!id) return;
-    if (entries.some((e) => e.id === id || e.id === `loc.${id}`)) {
+    if (entries.some((e) => e.id === id || e.id === `loc.${id}` || e.id === `obj.${id}`)) {
       notify("Cet identifiant existe déjà");
       return;
     }
     const asset: ReferenceAsset =
       kind === "character"
         ? { id: `char.${id}.webtoon`, kind: "character", subject: id, priority: 1, name: `${draft.name.trim()}, webtoon model sheet`, image: "", must_keep: draft.must_keep.trim(), description: "Personnage ajouté dans le studio.", tags: [id, "studio"] }
-        : { id: `loc.${id}`, kind: "location", name: draft.name.trim(), image: "", must_keep: draft.must_keep.trim(), description: "Décor ajouté dans le studio.", tags: ["studio"] };
+        : kind === "object"
+          ? { id: `obj.${id}`, kind: "object", name: draft.name.trim(), image: "", must_keep: draft.must_keep.trim(), description: "Objet ajouté dans le studio.", tags: ["studio"] }
+          : { id: `loc.${id}`, kind: "location", name: draft.name.trim(), image: "", must_keep: draft.must_keep.trim(), description: "Décor ajouté dans le studio.", tags: ["studio"] };
     persist(upsertAsset(library, asset));
     setDraft(null);
-    notify(`${kind === "character" ? "Personnage" : "Décor"} ajouté : génère sa fiche ou ajoute une image`);
+    notify(`${kind === "character" ? "Personnage" : kind === "object" ? "Objet" : "Décor"} ajouté : génère sa fiche ou ajoute une image`);
   };
 
   const remove = (entry: Entry) => {
@@ -193,7 +198,9 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     persist(next);
   };
 
-  const noun = kind === "character" ? "personnage" : "décor";
+  const noun = kind === "character" ? "personnage" : kind === "object" ? "objet" : "décor";
+  const newNoun = kind === "object" ? "Nouvel objet" : `Nouveau ${noun}`;
+  const thisNoun = kind === "object" ? "cet objet" : `ce ${noun}`;
 
   return (
     <div className="space-y-4">
@@ -202,13 +209,14 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
           <p className="anime-label text-xs text-cyan-pale">Bibliothèque de références</p>
           <h2 className="font-display text-lg text-lily">{entries.filter((e) => !e.hidden).length} {noun}{entries.length > 1 ? "s" : ""}</h2>
           <p className="text-xs text-ivory/60">
-            Tout ce qui est ici est joint aux prompts des cases qui le nomment : les fiches d&apos;un personnage coché, la fiche du lieu choisi. Le verrou de design est le texte injecté dans chaque prompt.
+            Tout ce qui est ici est joint aux prompts des cases qui le nomment : les fiches d&apos;un personnage coché, la fiche du lieu choisi, la fiche d&apos;un objet coché. Le verrou de design est le texte injecté dans chaque prompt.
+            {kind !== "location" ? " La suite de l'histoire ajoute d'elle-même une fiche, dessinée depuis les images du film, à chaque objet, créature ou machine qu'elle rencontre sans fiche." : ""}
             {user ? "" : " Sans compte, les changements restent dans la session."}
           </p>
         </div>
         {draft ? (
           <div className="studio-library-form">
-            <input placeholder={kind === "character" ? "Nom du personnage" : "Nom du décor"} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
+            <input placeholder={kind === "character" ? "Nom du personnage" : kind === "object" ? "Nom de l'objet" : "Nom du décor"} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
             <textarea rows={4} placeholder="Verrou de design : ce que le modèle doit copier exactement (silhouette, couleurs, matières, détails qui ne changent jamais)." value={draft.must_keep} onChange={(e) => setDraft({ ...draft, must_keep: e.target.value })} />
             <div className="flex gap-2">
               <button type="button" className="webtoon-mini studio-primary" onClick={create} disabled={!draft.name.trim()}>Créer</button>
@@ -216,7 +224,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
             </div>
           </div>
         ) : (
-          <button type="button" className="webtoon-mini studio-primary" onClick={() => setDraft({ name: "", must_keep: "" })}>+ Nouveau {noun}</button>
+          <button type="button" className="webtoon-mini studio-primary" onClick={() => setDraft({ name: "", must_keep: "" })}>+ {newNoun}</button>
         )}
       </section>
 
@@ -227,7 +235,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
           return (
             <article key={entry.id} className={`studio-card studio-character ${inStrip(entry) ? "is-in-strip" : ""} ${entry.hidden ? "is-hidden" : ""}`}>
               <header className="studio-card-head">
-                {kind === "character" ? <Avatar image={entry.assets.find((a) => a.image)?.image} name={entry.name} crop={entry.assets.find((a) => a.image)?.avatar} size={56} /> : null}
+                {kind === "character" ? <Avatar image={entry.assets.find((a) => a.image)?.image} name={entry.name} crop={entry.assets.find((a) => a.image)?.avatar} size={56} /> : kind === "object" ? <Avatar image={entry.assets.find((a) => a.image)?.image} name={entry.name} mode="cover" size={56} /> : null}
                 <div className="min-w-0 flex-1">
                   <p className="anime-label text-xs text-cyan-pale">
                     {entry.hidden ? "Retiré" : inStrip(entry) ? "Dans la bande" : entry.builtIn ? "Bibliothèque du moteur" : "Ajouté dans le studio"}
@@ -286,7 +294,7 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
                     ))}
                   </div>
                   <label className="webtoon-field">
-                    <span>Verrou de design (injecté dans chaque prompt qui nomme ce {noun})</span>
+                    <span>Verrou de design (injecté dans chaque prompt qui nomme {thisNoun})</span>
                     <textarea rows={5} value={primary?.must_keep ?? ""} onChange={(e) => updateLock(entry, e.target.value)} />
                   </label>
                   {doc?.blocks.map((block) => (

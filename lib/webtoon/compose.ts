@@ -124,7 +124,8 @@ export function panelFromFrame(panels: readonly WebtoonPanel[], frame: FramePick
     beat_id: from?.beat_id ?? "studio",
     order: panels.length + 1,
     source_time_start: frame.seconds,
-    source_time_end: frame.seconds + 5,
+    // One frame is one second of film (frames are extracted at 1 fps).
+    source_time_end: frame.seconds + 1,
     source_shots: [],
     fidelity: "direct",
     narrative_role: "action",

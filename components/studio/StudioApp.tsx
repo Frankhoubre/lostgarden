@@ -11,6 +11,7 @@ import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioLocations } from "@/components/studio/StudioLocations";
+import { StudioObjects } from "@/components/studio/StudioObjects";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { getDb, getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
@@ -36,12 +37,13 @@ const usd = (value: number | undefined) => `${(value ?? 0).toLocaleString("fr-FR
 /** What the editor reports about its running job, shown in the bar from every tab. */
 export type JobSummary = { label: string; done: number; total: number; deadline: number } | null;
 
-type Tab = "webtoon" | "scenario" | "personnages" | "decors" | "film";
+type Tab = "webtoon" | "scenario" | "personnages" | "objets" | "decors" | "film";
 
 const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "webtoon", label: "Webtoon", hint: "Cases, bulles, sons, tailles" },
   { id: "scenario", label: "Scénario", hint: "Le PDF et le découpage du film" },
   { id: "personnages", label: "Personnages", hint: "Fiches et planches modèles" },
+  { id: "objets", label: "Objets", hint: "Pendentif, casque, ce que la main tient" },
   { id: "decors", label: "Décors", hint: "Lieux, ancres de style, bible" },
   { id: "film", label: "Images du film", hint: "Une image toutes les 5 s" },
 ];
@@ -425,6 +427,7 @@ export function StudioApp({ script }: StudioAppProps) {
           </div>
           {tab === "scenario" ? <StudioScreenplay panels={panels} /> : null}
           {tab === "personnages" ? <StudioCharacters script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
+          {tab === "objets" ? <StudioObjects script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "decors" ? <StudioLocations script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} /> : null}
         </main>

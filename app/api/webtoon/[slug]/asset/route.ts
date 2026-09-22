@@ -14,11 +14,15 @@ import type { LibraryOverlay, ReferenceAsset } from "@/lib/webtoon/types";
  * Body: { asset: ReferenceAsset, library?: LibraryOverlay, palette?: string }
  *
  * Draws a reference sheet for the studio's library: a character turnaround
- * in the webtoon style of the strip, or a location design illustration.
- * The design lock of the asset (`must_keep`) drives the prompt; the other
- * images of the same subject and the style anchor are attached so the
- * sheet matches what the strip already shows. Returns the image as a data
- * URL; the studio stores it and points the asset to it.
+ * in the webtoon style of the strip, a creature or machine sheet with
+ * Lanterne beside it for scale, an object sheet with its states (closed,
+ * open), or a location design illustration. The design lock of the asset
+ * (`must_keep`) drives the prompt; the other images of the same subject,
+ * the frames of the film given in `frames` (where the thing is seen best,
+ * the design authority for something detected in the film) and the style
+ * anchor are attached so the sheet matches what the film and the strip
+ * already show. Returns the image as a data URL; the studio stores it and
+ * points the asset to it.
  */
 
 export const maxDuration = 120;
@@ -44,7 +48,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { asset?: ReferenceAsset; library?: LibraryOverlay; palette?: string };
+  const body = (await request.json().catch(() => ({}))) as { asset?: ReferenceAsset; library?: LibraryOverlay; palette?: string; frames?: string[] };
   const asset = body.asset;
   if (!asset?.id || !asset.must_keep?.trim()) return Response.json({ error: "Décris d'abord l'élément (verrou de design)" }, { status: 400 });
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
@@ -52,22 +56,48 @@ export async function POST(request: Request, { params }: RouteContext) {
   const palette = body.palette && STYLE_BIBLE.palettes[body.palette] ? body.palette : asset.kind === "character" ? "white_memory" : "blue_sanctuary";
   const anchorId = script.style_anchors?.[palette];
 
+  const creature = asset.kind === "character" && (asset.tags ?? []).some((t) => /creature|machine|monster/i.test(t));
+  const scaleNote = /scale:\s*([^.]+)\./i.exec(asset.description ?? "")?.[1]?.trim() ?? "";
+  const frames = (Array.isArray(body.frames) ? body.frames : []).map((f) => String(f).trim()).filter((f) => /^\/[a-z0-9._\/-]+\.(jpe?g|png|webp)$/i.test(f)).slice(0, 3);
+
   const references: ReferenceAsset[] = [];
   if (asset.kind === "character") {
     for (const sheet of library.filter((a) => a.kind === "character" && a.subject === asset.subject && a.id !== asset.id && a.image).slice(0, 3)) references.push(sheet);
+  } else if (asset.kind === "object") {
+    for (const sheet of library.filter((a) => a.kind === "object" && a.id !== asset.id && a.id.startsWith(asset.id) && a.image).slice(0, 2)) references.push(sheet);
   } else if (asset.image) {
     references.push(asset);
   }
+  // Frames of the film where the thing is seen: the design authority for what was detected in the film.
+  frames.forEach((src, i) => {
+    const at = /(\d{2})m(\d{2})s/.exec(src);
+    references.push({ id: src, kind: "source_frame", name: `film frame ${at ? `${Number(at[1])}:${at[2]}` : i + 1} showing ${asset.name.split(",")[0]}`, image: src, must_keep: "The exact design of the subject as the film shows it.", description: "", tags: ["film"] });
+  });
+  // A creature or a machine is drawn next to Lanterne at true scale: his sheet gives his size.
+  const lanterne = creature && scaleNote ? library.find((a) => a.kind === "character" && a.subject === "lanterne" && a.image) : undefined;
+  if (lanterne) references.push(lanterne);
   const anchor = library.find((a) => a.id === anchorId);
   if (anchor?.image) references.push(anchor);
 
   const subjectName = asset.name.split(",")[0];
   const lines = [STYLE_BIBLE.base];
-  if (asset.kind === "character") {
+  if (creature) {
+    lines.push(
+      `CREATURE OR MACHINE DESIGN SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: its whole body seen from the front, from three-quarter and from the side, in one row at the same scale, exactly as the film frames show it; below, a large detail of its most striking part (an eye, a claw, a lens, a mouth)${lanterne ? `; at the bottom left, the small silhouette of Lanterne standing next to it, drawn at TRUE relative scale (${scaleNote}), so the sheet shows how big it is` : ""}. Single sheet, no text, no labels, no arrows, no frames.`,
+    );
+    lines.push(`DESIGN LOCKED, copy exactly from the film frames: ${asset.must_keep}`);
+    if (asset.description) lines.push(`NOTES: ${asset.description}`);
+  } else if (asset.kind === "character") {
     lines.push(
       `CHARACTER MODEL SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: a full-body turnaround in one row (front view, three-quarter view, side view, back view), standing in the same neutral pose at the same scale, and below it three head-and-shoulders expressions in a row (calm, gentle smile, eyes closed). Single sheet, no text, no labels, no arrows, no frames.`,
     );
     lines.push(`DESIGN LOCKED, copy exactly: ${asset.must_keep}`);
+    if (asset.description) lines.push(`NOTES: ${asset.description}`);
+  } else if (asset.kind === "object") {
+    lines.push(
+      `OBJECT DESIGN SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: the object large and centred, seen from the front and from three-quarter, and, when it opens or changes state, each state side by side (closed, open, with what is inside drawn exactly as the film shows it); below, a small detail of its most important part. Exactly the design of the film frames: same shape, same materials, same colours, same size in a hand. No hand unless needed to show how it is held, no text, no labels, no arrows, no frames.`,
+    );
+    lines.push(`DESIGN LOCKED, copy exactly from the film frames: ${asset.must_keep}`);
     if (asset.description) lines.push(`NOTES: ${asset.description}`);
   } else if (asset.kind === "location") {
     lines.push(`LOCATION DESIGN SHEET of ${subjectName}: one wide establishing illustration of the place, empty of characters, drawn in the flat webtoon style of the strip, composed as a reference for future panels (main volumes, light sources, palette).`);
@@ -80,7 +110,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   if (references.length) {
     lines.push(
       "REFERENCE IMAGES, in order: " +
-        references.map((r, i) => `image ${i + 1} is ${r.name} (${r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : "design to keep"})`).join("; ") +
+        references.map((r, i) => `image ${i + 1} is ${r.name} (${r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.kind === "source_frame" ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.subject === "lanterne" && asset.subject !== "lanterne" ? "Lanterne, for the scale silhouette only" : "design to keep"})`).join("; ") +
         ".",
     );
   }

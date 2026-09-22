@@ -51,6 +51,52 @@ export const REFERENCE_LIBRARY: ReferenceAsset[] = [
     tags: ["lanterne", "still"],
   },
   {
+    id: "obj.pendant",
+    kind: "object",
+    name: "Silver pendant, film sheet",
+    image: "/webtoon/references/pendant-film-sheet.jpg",
+    must_keep:
+      "Lanterne's pendant: a small round silver locket the size of a pocket watch, flat, with a plain polished rim and a small loop at the top for a thin silver chain. Closed, it is a smooth silver disc. Open, the lid hinges up and the inside shows a round portrait of Rose, a small pink-haired girl in a pale hooded cloak, against a blue forest, drawn like a painted miniature with a faint blue glow. Kept under the black chest plate; it fits in a gauntlet. Never a paper, a letter or a note.",
+    description: "Three frames of the finished episode: taken out on its chain (2:09), open with Rose's portrait (2:13), closed on the moss where it landed (3:12). The design authority for the object; the studio can redraw it as a webtoon sheet from here.",
+    tags: ["pendant", "object", "film"],
+  },
+  {
+    id: "obj.helmet",
+    kind: "object",
+    name: "Fallen helmet, film sheet",
+    image: "/webtoon/references/helmet-film-sheet.jpg",
+    must_keep:
+      "Lanterne's helmet alone, off his head: a pale grey-ivory cylinder shaped like a lantern, slightly wider at the base, with a small metal carrying ring on top, a thin decorative rim, and two small dark oval eye holes on the front; hollow, open at the bottom, nothing inside. On the ground it lies on its side among the mushrooms; in his hands both gauntlets hold it by the sides.",
+    description: "Three frames of the finished episode: the helmet on the moss (1:31), held in both gauntlets (2:55), lifted to the open neck (2:57). Attached whenever the helmet is drawn away from the body.",
+    tags: ["helmet", "lanterne", "object", "film"],
+  },
+  {
+    id: "char.alien-machine",
+    kind: "character",
+    subject: "alien-machine",
+    priority: 1,
+    avatar: { x: 16, y: 45, zoom: 2.2 },
+    name: "Alien machine, film sheet",
+    image: "/webtoon/references/alien-machine-film-sheet.jpg",
+    must_keep:
+      "The sleeping machine of the blue forest: a colossal round body of dark rusted metal plates half buried in the ground, covered with moss, small blue flowers and cables, with one enormous round lens in a red-brown riveted rim in the middle; the lens is a closed shutter of petal-shaped plates when it sleeps and a giant orange-brown eye with a black pupil when it wakes. Around the body, many long segmented metal legs like black tubes with ball joints, and two huge dark red pincer claws. Scale: its body alone is about ten times Lanterne's height; one claw is as big as he is; standing on its legs it towers over the trees. Lanterne is the size of one of its rivets.",
+    description: "Three frames of the finished episode: asleep between the trunks with Lanterne tiny before it (3:33), the closed lens and the claws (4:05), risen on its legs with the eye open (4:27). A creature sheet: attached like a character sheet whenever the machine is in a panel, with its scale.",
+    tags: ["alien-machine", "machine", "creature", "film"],
+  },
+  {
+    id: "char.ghost-rabbit",
+    kind: "character",
+    subject: "ghost-rabbit",
+    priority: 1,
+    avatar: { x: 16, y: 45, zoom: 2.2 },
+    name: "Ghost rabbit, film sheet",
+    image: "/webtoon/references/ghost-rabbit-film-sheet.jpg",
+    must_keep:
+      "A small translucent rabbit made of pale blue-white light, glowing, with long upright ears, a round body, two small dark eyes and a tiny mouth; its edges are soft, the forest shows through it. The size of a real rabbit, it sits on roots and vanishes into the mist. Never solid, never furry, never coloured.",
+    description: "Three frames of the finished episode: its face (1:59), its whole body on a root (2:03), behind Lanterne (1:53). A creature sheet attached whenever the rabbit is in a panel.",
+    tags: ["ghost-rabbit", "creature", "film"],
+  },
+  {
     id: "char.rose.webtoon",
     kind: "character",
     subject: "rose",
@@ -460,6 +506,13 @@ export function libraryCharacters(overlay?: LibraryOverlay | null): LibraryEntry
     }
   }
   return [...seen.values()];
+}
+
+/** Object ids (without the `obj.` prefix) that have a sheet in the library, with their image. */
+export function libraryObjects(overlay?: LibraryOverlay | null): LibraryEntry[] {
+  return libraryWith(overlay)
+    .filter((asset) => asset.kind === "object")
+    .map((asset) => ({ id: asset.id.replace(/^obj\./, ""), name: asset.name.split(",")[0], image: asset.image || undefined }));
 }
 
 /** Location ids (without the `loc.` prefix) that have a sheet in the library, with their image. */
