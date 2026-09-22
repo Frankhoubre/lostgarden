@@ -66,8 +66,8 @@ const MAX_FRAMES = 32;
 const BATCH = 8;
 /** The batch grows to this when the events of the window need more panels than asked. */
 const BATCH_MAX = 11;
-/** Frames are one second apart; these are frames per panel by pace (about 2 s, 3 s and 4 s of film per panel). */
-const FRAMES_PER_PANEL = { action: 2, normal: 3, calm: 4 } as const;
+/** Frames are one second apart; these are frames per panel by pace (about 2 s, 4 s and 6 s of film per panel). */
+const FRAMES_PER_PANEL = { action: 2, normal: 4, calm: 6 } as const;
 
 type CostMeter = { usd: number };
 
@@ -352,7 +352,8 @@ function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonS
   return [
     `You are the adaptation engine of "${script.series}", an original poetic dark fantasy anime by Frank Houbre, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${batch} panels of the strip, continuing exactly where it stops.`,
     "You receive: the last panels already made (for continuity), the MOMENTS of the next seconds of the film as noted by a continuity supervisor (frames taken every second, identical consecutive frames merged), the EVENTS of those seconds with the beats each must be told in, the ENTITIES visible (objects, creatures, machines, with the ids to use), the frames themselves, and the screenplay of the episode in French.",
-    "Two sources, both authoritative, and they match: the film (the frames and the notes) and the screenplay. Method: first find the passage of the screenplay that corresponds to the frames. Then cover EVERY moment and EVERY event beat, in order, and only the seconds given: the window is cut so that your panels fit it; the last panel lands on the last moment, where the next call continues. Each panel gives the timecode of its frame in `seconds` and quotes the screenplay line it comes from in `screenplay_line`. Never skip a moment where something changes, never jump ahead, never invent an action that is in neither source. Make ONE panel per moment where nothing moves, however long it lasts; two to four for a moment whose action changes; and the beats of each event exactly as listed.",
+    "Two sources, both authoritative, and they match: the film (the frames and the notes) and the screenplay. Method: first find the passage of the screenplay that corresponds to the frames. Then cover EVERY moment and EVERY event beat, in order, and only the seconds given: the window is cut so that your panels fit it; the last panel lands on the last moment, where the next call continues. Each panel gives the timecode of its frame in `seconds` and quotes the screenplay line it comes from in `screenplay_line`. Never skip a moment where something changes, never jump ahead, never invent an action that is in neither source.",
+    "How many panels a moment gets. A moment is a stretch of film where the same thing is true (`from` to `to` in seconds, `frames` how many). ONE panel per moment, whatever its length: a character who walks for eight seconds is one panel, not eight. A second panel only when the moment lasts more than six seconds and deserves another angle (a wide one then a detail), or when its action changes inside it. The beats of an EVENT are the exception: each one is its own panel, always. Two panels of the same moment must never describe the same thing twice: if you cannot say what the second one adds, do not write it.",
     "Events are told in pieces, always. An impact, a fall, an object that drops or rolls, a blow on the ground, a hand that grabs, a machine that rises, a reveal: never one panel. The EVENTS block gives the beats: the cause (a detail of what is about to hit), the impact (an extreme close-up on the point of contact with ONE big sound effect, `sfx.size` 180 to 320, with a `rotate`), the consequence (the helmet rolling, the dirt thrown up, the object flying), the reaction (the character frozen, the body bent). Each beat is its own panel with fidelity `reframe` or `bridge`, drawing from the nearest frame for light and place. A reader must be able to say what happened from the pictures alone.",
     "Sound. Every impact, blow, fall, roar, crack and run carries sound effects in the lettering (`sfx`): one giant one on an impact, and in a run or a chase two or three smaller ones scattered across the panel (footsteps on moss, roots cracking, his own metal rattling, the roar behind) with different rotations. Also fill `sound` with what would be heard in the panel, in words, even when you letter nothing (\"silence\" when nothing). A panel of an action sequence without any sound effect is a mistake.",
     "Movement. A panel is a still image: say in `motion` how much moves (none, slow, fast, violent) and in `effects` what must be drawn to show it (speed lines, debris, dust, electric arcs, sparks). When a machine or a creature rises, unfolds, leans or strikes, the panel BEFORE shows it as it was, the panel of the movement shows the limbs mid-movement with debris falling and motion lines, the panel AFTER shows its new height against the character. Never describe a movement with a static standing pose.",
@@ -462,7 +463,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     const notes = rawNotes.filter((n) => Number(n.seconds) <= cut.end);
     const moments = allMoments.filter((m) => m.from <= cut.end);
     const events = allEvents.filter((e) => e.from <= cut.end);
-    const asked = Math.max(batch, Math.min(BATCH_MAX, cut.needed));
+    // What the window actually needs, not a fixed eight: asking for more than the moments
+    // hold is what padded the strip with several panels of the same motionless second.
+    const asked = Math.max(3, Math.min(BATCH_MAX, cut.needed));
     lastNotes = notes;
     lastEvents = events;
 

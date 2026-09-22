@@ -450,6 +450,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // The route writes eight panels per call; call again with what it wrote until the count is reached.
       // The writer only sees the panels up to the insertion point, so the span is continuous with them.
       const created: WebtoonPanel[] = [];
+      let failures = 0;
       const anchorIndex = input.insertAfter ? input.base.findIndex((p) => p.panel_id === input.insertAfter) : input.base.length - 1;
       const head = input.base.slice(0, anchorIndex + 1);
       const tail = input.base.slice(anchorIndex + 1);
@@ -467,14 +468,24 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
-          // Nothing written at all: say why and stop. The end of the film after some panels is not an error.
+          const reason = payload.error ?? `réponse ${response.status}`;
+          const done = /Fin de l'épisode/.test(reason);
+          // One batch failing used to end the whole run in silence, which left a hole in the
+          // middle of the strip: retry once, and say why when it fails again.
+          if (!done && failures < 1) {
+            failures += 1;
+            notify(`Lot non écrit (${reason}). Nouvelle tentative…`);
+            await new Promise((resolve) => window.setTimeout(resolve, 3000));
+            continue;
+          }
           if (!created.length) {
             notify(payload.error ?? `Le studio n'a pas pu écrire la suite (réponse ${response.status}).`);
             return;
           }
-          if (payload.error && !/Fin de l'épisode/.test(payload.error)) notify(payload.error);
+          if (!done) notify(`Écriture arrêtée à ${created.length} cases sur ${count} : ${reason}`);
           break;
         }
+        failures = 0;
         created.push(...payload.panels);
         current = [...current, ...payload.panels];
         setPanels(assemble());

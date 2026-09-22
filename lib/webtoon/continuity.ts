@@ -84,29 +84,6 @@ export type IntentLike = { seconds: number; description?: string; action?: strin
 const has = (text: string | undefined, pattern: RegExp) => pattern.test(text ?? "");
 const words = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(" ");
 
-/** Consecutive frames that show the same thing collapse into one moment with a duration. */
-export function momentsOf(notes: FrameNote[]): Moment[] {
-  const sorted = [...notes].sort((a, b) => Number(a.seconds) - Number(b.seconds));
-  const key = (n: Omit<FrameNote, "seconds">) =>
-    [String(n.place ?? "").slice(0, 24), (n.characters ?? []).join(","), String(n.helmet ?? "").slice(0, 3), n.posture ?? "", String(n.in_hands ?? "").slice(0, 40), String(n.others_visible ?? "").slice(0, 30), n.title_card ?? ""].join("|");
-  const moments: Moment[] = [];
-  for (const n of sorted) {
-    const last = moments[moments.length - 1];
-    if (last && key(last) === key(n)) {
-      last.to = Number(n.seconds);
-      last.frames += 1;
-      if (n.action && !String(last.action ?? "").includes(String(n.action).slice(0, 30))) last.action = `${last.action ?? ""} Then: ${n.action}`.trim();
-      if (n.motion && !String(last.motion ?? "").includes(String(n.motion).slice(0, 30))) last.motion = words(last.motion, n.motion);
-      if (n.sound && !String(last.sound ?? "").includes(String(n.sound).slice(0, 30))) last.sound = words(last.sound, n.sound);
-      if (n.scale && !last.scale) last.scale = n.scale;
-    } else {
-      const { seconds, ...rest } = n;
-      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest });
-    }
-  }
-  return moments;
-}
-
 const helmetState = (value: string | undefined): "on" | "off" | null => {
   const h = (value ?? "").toLowerCase();
   if (!h) return null;
@@ -129,6 +106,73 @@ const EMPTY_HANDS = /^\s*$|^(nothing|none|empty|no object|nothing held|bare|his 
 const handsHold = (value: string | undefined) => !EMPTY_HANDS.test(value ?? "");
 /** The thing held, without what the hand does with it. */
 const heldThing = (value: string | undefined) => (value ?? "").split(/[,;:(]| and | which | that /)[0].trim().replace(/^(a|an|the) /i, "");
+
+/**
+ * What a frame shows, reduced to the signals that decide a panel: the place,
+ * who is there, the helmet, the posture as a category, whether a hand holds
+ * something and what, and the creatures or machines visible (terrain is not
+ * a signal). The supervisor rewords the scenery every second, so comparing
+ * its raw text made every second its own moment, and the strip came out at
+ * one panel per second of film, several of them identical.
+ */
+const POSTURE_CLASSES: [RegExp, string][] = [
+  [/run|sprint|flee|dash|bolt/i, "run"],
+  [/kneel|knees/i, "kneel"],
+  [/lying|lies|collapsed|face down|on his back|prone|sprawled|flat on/i, "down"],
+  [/climb|scrambl/i, "climb"],
+  [/sit/i, "sit"],
+  [/fall/i, "fall"],
+  [/crouch|bend|bent|lean|stoop/i, "bend"],
+  [/walk|step|advanc|moving forward|approach/i, "walk"],
+  [/stand|still|frozen|motionless|upright/i, "stand"],
+];
+
+function postureClass(value: string | undefined): string {
+  const text = (value ?? "").toLowerCase();
+  for (const [pattern, name] of POSTURE_CLASSES) if (pattern.test(text)) return name;
+  return text.slice(0, 8);
+}
+
+/** The things in `others_visible` that are not scenery, as head nouns: a creature, a machine, a claw, an eye. */
+function significantNouns(value: string | undefined): string[] {
+  const parts = String(value ?? "")
+    .split(/[,;.]| and /)
+    .map((part) => part.trim())
+    .filter((part) => part && !TERRAIN.test(part));
+  const nouns = parts.map(headNoun).filter((noun) => noun.length > 2 && !/^(none|nothing|nobody|null)$/.test(noun));
+  return [...new Set(nouns)].sort();
+}
+
+/** Consecutive frames that show the same thing collapse into one moment with a duration. */
+export function momentsOf(notes: FrameNote[]): Moment[] {
+  const sorted = [...notes].sort((a, b) => Number(a.seconds) - Number(b.seconds));
+  const key = (n: Omit<FrameNote, "seconds">) =>
+    [
+      headNoun(String(n.place ?? "").split(/[,;.]/)[0]),
+      (n.characters ?? []).map((c) => String(c).toLowerCase()).sort().join(","),
+      helmetState(n.helmet) ?? "?",
+      postureClass(n.posture),
+      handsHold(n.in_hands) ? headNoun(heldThing(n.in_hands)) : "",
+      significantNouns(n.others_visible).join(","),
+      n.title_card ? "title" : "",
+    ].join("|");
+  const moments: Moment[] = [];
+  for (const n of sorted) {
+    const last = moments[moments.length - 1];
+    if (last && key(last) === key(n)) {
+      last.to = Number(n.seconds);
+      last.frames += 1;
+      if (n.action && !String(last.action ?? "").includes(String(n.action).slice(0, 30))) last.action = `${last.action ?? ""} Then: ${n.action}`.trim();
+      if (n.motion && !String(last.motion ?? "").includes(String(n.motion).slice(0, 30))) last.motion = words(last.motion, n.motion);
+      if (n.sound && !String(last.sound ?? "").includes(String(n.sound).slice(0, 30))) last.sound = words(last.sound, n.sound);
+      if (n.scale && !last.scale) last.scale = n.scale;
+    } else {
+      const { seconds, ...rest } = n;
+      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest });
+    }
+  }
+  return moments;
+}
 
 const POSTURE_DOWN = /kneel|knees/i;
 const POSTURE_FLAT = /lying|lies|collapsed|face down|on his back|prone|sprawled|flat on/i;
@@ -371,15 +415,41 @@ export function inHelmetEvent(events: StoryEvent[], seconds: number): boolean {
   return events.some((e) => (e.kind === "helmet_off" || e.kind === "helmet_on") && within(e, seconds));
 }
 
-/** The events the written panels do not tell in enough panels, in the shape of the coverage check. */
+const STOP_WORDS = new Set(["the", "a", "an", "of", "in", "on", "at", "to", "and", "with", "his", "her", "its", "into", "from", "then", "that", "this", "one", "out", "up", "down", "for", "him", "she", "over", "under", "close", "shot", "panel", "frame", "detail", "view", "angle"]);
+
+/** The distinctive words of a beat: what a panel that tells it would almost certainly contain. */
+function beatWords(beat: string): string[] {
+  return [...new Set(beat.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP_WORDS.has(w)))];
+}
+
+/** The beats of an event that no panel of its span seems to tell. */
+export function missingBeats(event: StoryEvent, intents: IntentLike[]): string[] {
+  const texts = intents.filter((i) => within(event, Number(i.seconds))).map((i) => `${i.description ?? ""} ${i.action ?? ""}`.toLowerCase());
+  if (!texts.length) return event.beats;
+  return event.beats.filter((beat) => {
+    const wanted = beatWords(beat);
+    if (!wanted.length) return false;
+    // A beat is told when some panel shares a third of its distinctive words.
+    return !texts.some((text) => wanted.filter((w) => text.includes(w)).length >= Math.max(2, Math.ceil(wanted.length / 3)));
+  });
+}
+
+/**
+ * The events the written panels do not tell: too few panels, or a required
+ * beat (the cause, the impact, the consequence) that no panel shows. Feeds
+ * the coverage check, so the fix call writes the beats that are missing
+ * rather than more panels of the same moment.
+ */
 export function eventGaps(events: StoryEvent[], intents: IntentLike[]): { seconds: number; moment: string }[] {
   const gaps: { seconds: number; moment: string }[] = [];
   for (const event of events) {
     const written = intents.filter((i) => within(event, Number(i.seconds)));
-    if (written.length >= event.min_panels) continue;
+    const absent = missingBeats(event, intents);
+    if (written.length >= event.min_panels && !absent.length) continue;
+    const beats = absent.length ? absent : event.beats;
     gaps.push({
       seconds: event.to,
-      moment: `${event.what} (${event.from}-${event.to} s) needs ${event.min_panels} panels and has ${written.length}. Missing beats, in order: ${event.beats.map((b, i) => `(${i + 1}) ${b}`).join("; ")}.${event.sfx ? ` The impact panel carries the sound effect ${event.sfx.en}.` : ""}`,
+      moment: `${event.what} (${event.from}-${event.to} s): ${written.length} panel${written.length === 1 ? "" : "s"} written, ${event.min_panels} needed. These beats are NOT told and the reader cannot follow what happens: ${beats.map((b, i) => `(${i + 1}) ${b}`).join("; ")}.${event.sfx ? ` The panel of the impact carries the sound effect ${event.sfx.en}, size ${event.sfx.size}.` : ""}`,
     });
   }
   return gaps;
@@ -389,12 +459,19 @@ type Sfx = WebtoonPanel["sfx"][number];
 
 const soundEffect = (sfx: SoundEffect, anchor: { x: number; y: number }, rotate = -12): Sfx => ({ text: { en: sfx.en, fr: sfx.fr }, anchor, style: sfx.style, rotate, size: sfx.size });
 
-/** A sound effect guessed from what the writer said would be heard. */
+/**
+ * Ambient sound: what a place makes all the time (steps on moss, a breeze, a
+ * rustle, the hum of the cavern). Lettering it in every panel is noise, and
+ * the strip came back with TAP TAP TAP on panels where nobody moves; these
+ * only get a sound inside a run.
+ */
+const RE_AMBIENT = /^\s*(a |an |the )?(soft|faint|quiet|distant|low|gentle)?\s*(footstep|step|rustl|breeze|wind|hum|drip|whisper|murmur|echo|ambien|silence|nothing|quiet|calm|moss|cloth|fabric|cape)/i;
+
+/** A sound effect guessed from what the writer said would be heard, for a panel that letters none. */
 export function sfxForSound(sound: string | undefined): SoundEffect | null {
-  if (!sound || RE_SILENT.test(sound)) return null;
+  if (!sound || RE_SILENT.test(sound) || RE_AMBIENT.test(sound)) return null;
   if (RE_ROAR.test(sound)) return SFX.roar;
   if (RE_ELECTRIC.test(sound)) return SFX.bzzt;
-  if (RE_FOOTSTEPS.test(sound) || /steps?|moss|running/i.test(sound)) return SFX.steps;
   if (/metal|clang|armour|armor|helmet/i.test(sound)) return SFX.clang;
   if (/rumble|mechanical|grind|engine|hydraulic|creak|groan/i.test(sound)) return SFX.rumble;
   if (/click|clasp|latch/i.test(sound)) return SFX.click;
