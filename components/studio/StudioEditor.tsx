@@ -898,7 +898,33 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     </div>
   );
 
-  if (!selected) return <p className="text-sm text-ivory/70">Aucune case.</p>;
+  if (!selected) {
+    // A new project: nothing in the strip yet, the first panels are written from the start of the film.
+    return (
+      <section className="studio-card studio-start space-y-3">
+        <p className="anime-label text-xs text-cyan-pale">Premières cases</p>
+        <h2 className="font-display text-xl text-lily">La bande est vide</h2>
+        <p className="text-sm text-ivory/75">
+          Le studio lit le film depuis le début avec le scénario et la bible du projet, écrit les cases, joint à chacune les fiches de ce qu&apos;elle montre, puis dessine les images et traduit les textes.
+        </p>
+        {job ? (
+          <p className="text-sm text-lily"><span className="studio-spinner" aria-hidden /> {job.label}</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} className="studio-input" style={{ width: "5rem" }} aria-label="Nombre de cases" />
+            <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} className="studio-input" aria-label="Rythme">
+              <option value="normal">Normal</option>
+              <option value="action">Action</option>
+              <option value="calm">Calme</option>
+            </select>
+            <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
+              Générer les {Math.max(1, Math.min(30, Math.round(nextCount) || 1))} premières cases
+            </button>
+          </div>
+        )}
+      </section>
+    );
+  }
 
   const pending = pendingPanels(panels).length;
   const isTitleCard = selected.caption.some((c) => c.style === "title") && !selected.image.src;
