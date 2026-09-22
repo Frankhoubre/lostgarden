@@ -61,7 +61,10 @@ export const maxDuration = 300;
 type RouteContext = { params: Promise<{ slug: string }> };
 
 const MAX_COUNT = 30;
-const MAX_FRAMES = 32;
+/** Frames read per batch. A wider window made one call of the writer too long for the platform. */
+const MAX_FRAMES = 20;
+/** Frames per call of the supervisor: several small calls in parallel read faster than one long one. */
+const NOTES_CHUNK = 7;
 /** Panels asked per model call: a longer answer gets cut by the gateway. */
 const BATCH = 8;
 /** The batch grows to this when the events of the window need more panels than asked. */
@@ -113,6 +116,20 @@ async function analyzeFrames(input: {
   ];
   const result = await completeJson<{ frames?: FrameNote[] }>({ system, user, maxTokens: 16000, reasoning: "none", onCost: (usd) => { input.meter.usd += usd; } });
   return (result.frames ?? []).filter((f) => f && Number.isFinite(Number(f.seconds)));
+}
+
+/**
+ * The window read by the supervisor, in parallel chunks. One call carrying
+ * twenty frames and their twenty answers ran past the five minutes a
+ * function is given, and the batch came back empty, which left a hole in
+ * the middle of the strip; three short calls answer in the time one long
+ * one took.
+ */
+async function analyzeWindow(input: Parameters<typeof analyzeFrames>[0]): Promise<FrameNote[]> {
+  const chunks: (typeof input.frames)[] = [];
+  for (let i = 0; i < input.frames.length; i += NOTES_CHUNK) chunks.push(input.frames.slice(i, i + NOTES_CHUNK));
+  const notes = await Promise.all(chunks.map((frames) => analyzeFrames({ ...input, frames }).catch(() => [] as FrameNote[])));
+  return notes.flat().sort((a, b) => Number(a.seconds) - Number(b.seconds));
 }
 
 /**
@@ -441,7 +458,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     const window = available.slice(0, Math.min(MAX_FRAMES, share));
     if (!window.length) return Response.json({ error: "Fin de l'épisode : il n'y a plus d'image du film après la dernière case" }, { status: 400 });
 
-    const [rawNotes, helmet] = await Promise.all([analyzeFrames({ script, screenplay, frames: window, characters, objects: objectEntries.map((o) => o.name), meter }), helmetChecks(window, meter)]);
+    const [rawNotes, helmet] = await Promise.all([analyzeWindow({ script, screenplay, frames: window, characters, objects: objectEntries.map((o) => o.name), meter }), helmetChecks(window, meter)]);
+    if (!rawNotes.length) return Response.json({ error: "Le superviseur n'a rien lu sur ces images du film" }, { status: 502 });
     for (const note of rawNotes) {
       const check = helmet.get(Number(note.seconds));
       if (check === "on") note.helmet = "on his head";

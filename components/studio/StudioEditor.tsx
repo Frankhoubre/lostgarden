@@ -472,7 +472,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           const done = /Fin de l'épisode/.test(reason);
           // One batch failing used to end the whole run in silence, which left a hole in the
           // middle of the strip: retry once, and say why when it fails again.
-          if (!done && failures < 1) {
+          if (!done && failures < 2) {
             failures += 1;
             notify(`Lot non écrit (${reason}). Nouvelle tentative…`);
             await new Promise((resolve) => window.setTimeout(resolve, 3000));
