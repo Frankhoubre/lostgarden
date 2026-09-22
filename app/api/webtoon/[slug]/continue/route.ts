@@ -13,6 +13,7 @@ import {
   eventsBrief,
   eventsOf,
   momentsOf,
+  normalizeNotes,
   type Entity,
   type FrameNote,
   type Moment,
@@ -114,8 +115,8 @@ async function analyzeFrames(input: {
     ...frameParts.flat(),
     { type: "text", text: `Describe each of the ${input.frames.length} frames now, as JSON.` },
   ];
-  const result = await completeJson<{ frames?: FrameNote[] }>({ system, user, maxTokens: 16000, reasoning: "none", onCost: (usd) => { input.meter.usd += usd; } });
-  return (result.frames ?? []).filter((f) => f && Number.isFinite(Number(f.seconds)));
+  const result = await completeJson<{ frames?: unknown[] }>({ system, user, maxTokens: 16000, reasoning: "none", onCost: (usd) => { input.meter.usd += usd; } });
+  return normalizeNotes(result.frames ?? []);
 }
 
 /**
