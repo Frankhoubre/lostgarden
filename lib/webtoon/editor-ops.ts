@@ -63,6 +63,24 @@ export function movePanel(panels: WebtoonPanel[], id: string, delta: -1 | 1): We
   return renumber(next);
 }
 
+/**
+ * Moves one panel, or a block of panels, before or after another one. The
+ * block keeps its own order (the order of the strip), whatever the order of
+ * `ids`. Dropping a panel on itself or inside the block changes nothing.
+ */
+export function movePanelsTo(panels: WebtoonPanel[], ids: readonly string[], targetId: string, after: boolean): WebtoonPanel[] {
+  const moving = new Set(ids);
+  if (!moving.size || moving.has(targetId)) return panels;
+  const block = panels.filter((p) => moving.has(p.panel_id));
+  const rest = panels.filter((p) => !moving.has(p.panel_id));
+  const at = rest.findIndex((p) => p.panel_id === targetId);
+  if (!block.length || at < 0) return panels;
+  const insertAt = after ? at + 1 : at;
+  const next = [...rest.slice(0, insertAt), ...block, ...rest.slice(insertAt)];
+  if (next.every((p, i) => p.panel_id === panels[i].panel_id)) return panels;
+  return renumber(next);
+}
+
 export function deletePanel(panels: WebtoonPanel[], id: string): WebtoonPanel[] {
   if (panels.length <= 1) return panels;
   return renumber(panels.filter((p) => p.panel_id !== id));
