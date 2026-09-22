@@ -140,6 +140,10 @@ export function panelsFromIntents(
     if (!frame) continue;
     const base = panelFromFrame(panels, frame, panels[panels.length - 1]);
     if (title) {
+      // The logo animates over several seconds and every frame of it reads as a title card: one card is
+      // enough, so a title right after a title card is dropped.
+      const previous = panels[panels.length - 1];
+      if (previous && (previous.image?.model === "title-card" || previous.caption.some((c) => c.style === "title"))) continue;
       // A title card: the series' logo image when we have it, the lettering on a plain background otherwise.
       const logo = TITLE_CARD_IMAGES.find((entry) => entry.match.test(title));
       const card: WebtoonPanel = {
