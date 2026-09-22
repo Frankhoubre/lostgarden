@@ -420,6 +420,7 @@ function FramesStep({
               {progress.read} lues · {progress.sent} envoyées sur {progress.total}
               {eta ? ` · ≈ ${formatDuration(eta / 1000)} restantes` : ""}
             </p>
+            <p className="text-xs text-amber-200/80">Gardez cet onglet au premier plan : le navigateur ralentit la lecture de la vidéo dans un onglet caché.</p>
             <button type="button" className="webtoon-mini" onClick={() => { stop.current = true; }}>Arrêter (reprendra ici)</button>
           </div>
         ) : (

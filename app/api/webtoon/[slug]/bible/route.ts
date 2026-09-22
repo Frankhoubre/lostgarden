@@ -29,7 +29,7 @@ const WHAT: Record<BibleStep, string> = {
   characters:
     "every CHARACTER: a person, an animal, a creature, a monster, a robot or a machine that moves or acts. Kind `character` for a person, `creature` for an animal, a creature, a monster or a machine. Several appearances of the same one are one entry (same clothes, same face, same shape).",
   objects:
-    "every IMPORTANT OBJECT: a thing a character holds, uses, opens, wears as a meaningful item (a pendant, a key, a weapon, a book, a lantern), throws or loses, or that the story shows in close-up. Not scenery (trees, rocks, furniture), not the ordinary clothes of a character, not a body part. Kind `object`.",
+    "every IMPORTANT OBJECT: a separate thing a character holds, uses, opens, throws, loses or finds (a pendant, a key, a weapon, a book, a lantern, a letter), or that the story shows alone in close-up. NEVER a part of a character or a creature: not its clothes, cape, scarf, armour, helmet while worn, shoulder pads, gloves; not a limb, a claw, a pincer, an eye, a lens of a machine; those are drawn with their owner's sheet. A worn item becomes an object only when it leaves its owner (a helmet lying on the ground, a cape left behind). Not scenery either (trees, rocks, furniture, a forest). Kind `object`.",
   locations:
     "every LOCATION or BIOME: each distinct place where the story happens (a forest, a cave, a sanctuary, a room, a street, a desert, a sky). Frames of the same place from other angles are one entry. Kind `location`.",
 };
@@ -110,7 +110,7 @@ export async function POST(request: Request, { params }: RouteContext) {
           : "There is no film: read the screenplay and the synopsis.",
         "For each entry write: `id` (english, lower case with hyphens, short), `name` (a short name to show the author, in French when the thing has no proper name in the story, the proper name otherwise), `kind`, `must_keep` (a precise DESIGN LOCK in English that an illustrator can draw from without the images: overall shape, proportions, colours, materials, clothes, distinctive details; for a creature, a machine or a place, its size against a person), `description` (what it is in the story, one short sentence in French), `seconds` (all the seconds where it was seen), `best_seconds` (two or three seconds where it is seen best: large, clear, its whole shape), `importance` (main, secondary or minor), `scale` (for a creature, a machine or a structure: its size against a person, in English; else empty).",
         known.length ? `Already in the bible, never propose them again: ${JSON.stringify(known)}.` : "",
-        "Order the entries by importance, the main ones first. Answer with JSON only: {\"candidates\": [...]}. Escape double quotes inside strings.",
+        `Only entries of this step: ${step === "characters" ? "`kind` character or creature" : step === "objects" ? "`kind` object" : "`kind` location"}; leave out everything else, it has its own step. Order the entries by importance, the main ones first. Answer with JSON only: {"candidates": [...]}. Escape double quotes inside strings.`,
       ]
         .filter(Boolean)
         .join("\n\n"),
@@ -140,7 +140,10 @@ export async function POST(request: Request, { params }: RouteContext) {
       if (!raw || typeof raw.name !== "string" || !raw.name.trim()) continue;
       const id = slugId(raw.id || raw.name);
       if (!id || knownIds.has(id) || candidates.some((c) => c.id === id)) continue;
-      const kind = (kinds.includes(String(raw.kind)) ? raw.kind : kinds[0]) as BibleCandidate["kind"];
+      // An entry of another step (a pendant among the characters, a forest among the objects) waits for its own step.
+      const rawKind = String(raw.kind ?? "").toLowerCase();
+      if (rawKind && !kinds.includes(rawKind) && ["character", "creature", "object", "location"].includes(rawKind)) continue;
+      const kind = (kinds.includes(rawKind) ? rawKind : kinds[0]) as BibleCandidate["kind"];
       const seconds = [...new Set((Array.isArray(raw.seconds) ? raw.seconds : []).map(Number).filter(Number.isFinite).map(nearest))].sort((a, b) => a - b);
       const best = [...new Set((Array.isArray(raw.best_seconds) ? raw.best_seconds : []).map(Number).filter(Number.isFinite).map(nearest))].slice(0, 3);
       candidates.push({
