@@ -558,6 +558,14 @@ export function ensureSoundEffects(panels: WebtoonPanel[], intents: IntentLike[]
     const guess = sfxForSound(intents[index]?.sound);
     if (guess) panel.sfx.push(soundEffect(guess, { x: 64, y: 30 }));
   });
+  // The same onomatopoeia on three panels in a row reads as a stutter, not as a sound:
+  // keep the first, drop the repeats until something else is heard.
+  let previous = "";
+  for (const panel of out) {
+    const first = panel.sfx[0]?.text.en ?? "";
+    if (first && first.toLowerCase() === previous.toLowerCase()) panel.sfx = panel.sfx.slice(1);
+    if (first) previous = first;
+  }
   return out;
 }
 
