@@ -81,6 +81,52 @@ export type StoryEvent = {
 /** A panel written for the strip, as the writer answers it: only what the checks read. */
 export type IntentLike = { seconds: number; description?: string; action?: string; sfx?: unknown[]; sound?: string; characters?: string[]; objects?: string[] };
 
+/**
+ * The supervisor answers in JSON, and a model does not always keep the shape
+ * asked for: `others_visible` comes back as a list of things, `characters`
+ * as one string, `scale` as an object. Every field is brought back to the
+ * type the engine reads before anything touches it; a batch died on
+ * `others_visible.toLowerCase is not a function` and left a hole in the strip.
+ */
+function asText(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(asText).filter(Boolean).join(", ");
+  if (typeof value === "object") return Object.values(value as Record<string, unknown>).map(asText).filter(Boolean).join(", ");
+  return String(value);
+}
+
+/** Frame notes with every field in the shape the engine expects, whatever the model answered. */
+export function normalizeNotes(notes: readonly unknown[]): FrameNote[] {
+  return (notes ?? [])
+    .map((raw) => {
+      const n = (raw ?? {}) as Record<string, unknown>;
+      const characters = Array.isArray(n.characters)
+        ? n.characters.map((c) => asText(c).trim().toLowerCase()).filter(Boolean)
+        : asText(n.characters)
+            .split(/[,;]/)
+            .map((c) => c.trim().toLowerCase())
+            .filter(Boolean);
+      const title = asText(n.title_card).trim();
+      return {
+        seconds: Number(n.seconds),
+        place: asText(n.place),
+        characters,
+        helmet: asText(n.helmet),
+        posture: asText(n.posture),
+        action: asText(n.action),
+        in_hands: asText(n.in_hands),
+        others_visible: asText(n.others_visible),
+        scale: asText(n.scale),
+        motion: asText(n.motion),
+        sound: asText(n.sound),
+        title_card: title || null,
+        screenplay_line: asText(n.screenplay_line),
+      } satisfies FrameNote;
+    })
+    .filter((n) => Number.isFinite(n.seconds));
+}
+
 const has = (text: string | undefined, pattern: RegExp) => pattern.test(text ?? "");
 const words = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(" ");
 
@@ -145,7 +191,7 @@ function significantNouns(value: string | undefined): string[] {
 
 /** Consecutive frames that show the same thing collapse into one moment with a duration. */
 export function momentsOf(notes: FrameNote[]): Moment[] {
-  const sorted = [...notes].sort((a, b) => Number(a.seconds) - Number(b.seconds));
+  const sorted = normalizeNotes(notes).sort((a, b) => Number(a.seconds) - Number(b.seconds));
   const key = (n: Omit<FrameNote, "seconds">) =>
     [
       headNoun(String(n.place ?? "").split(/[,;.]/)[0]),
