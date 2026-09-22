@@ -9,6 +9,8 @@ import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
 import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import { coveredUntil } from "@/lib/webtoon/continuity";
+import { PanelDragGhost } from "@/components/studio/PanelDragGhost";
+import { usePanelDrag, type DropTarget } from "@/components/studio/usePanelDrag";
 import { uploadLibraryImage, upsertAsset, slugify } from "@/lib/webtoon/library";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -26,6 +28,7 @@ import {
   markForRegeneration,
   mergeWithNext,
   movePanel,
+  movePanelsTo,
   setTransition,
   splitPanel,
   toggleFrame,
@@ -356,6 +359,25 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     }
     return ok;
   };
+
+  /**
+   * Drag and drop: the panel dragged moves before or after the panel it is
+   * dropped on; when it is checked, every checked panel moves with it, in
+   * the order of the strip. Not while a job writes or generates, because
+   * the job puts back the order it started from.
+   */
+  const dropPanels = (dragId: string, target: DropTarget) => {
+    const ids = checked.has(dragId) ? panels.filter((p) => checked.has(p.panel_id)).map((p) => p.panel_id) : [dragId];
+    const next = movePanelsTo(panels, ids, target.id, target.after);
+    if (next === panels) return;
+    setPanels(next);
+    select(dragId);
+    notify(ids.length > 1 ? `${ids.length} cases déplacées` : `Case déplacée en position ${next.findIndex((p) => p.panel_id === dragId) + 1}`);
+  };
+  const listDrag = usePanelDrag({ onDrop: dropPanels, holdMs: 250, moveStartPx: 6, disabled: busy });
+  const dragCount = (id: string | null) => (id && checked.has(id) ? checked.size : 1);
+  const dropClass = (drag: { dragId: string | null; target: DropTarget | null }, id: string) =>
+    `${drag.dragId === id || (drag.dragId && checked.has(drag.dragId) && checked.has(id)) ? "is-dragging" : ""} ${drag.target?.id === id && drag.dragId !== id ? (drag.target.after ? "is-drop-after" : "is-drop-before") + (drag.target.axis === "x" ? " is-drop-x" : "") : ""}`;
 
   /**
    * Continue the story: the writer model drafts the next N panels from the
@@ -920,7 +942,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
         <ol>
           {panels.map((panel) => (
-            <li key={panel.panel_id} className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""}`}>
+            <li key={panel.panel_id} className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""} ${dropClass(listDrag, panel.panel_id)}`} {...listDrag.bind(panel.panel_id, "list")} title={busy ? undefined : "Maintenir le clic et glisser pour déplacer la case"}>
               <label className="studio-thumb-check" title="Cocher pour une action en lot (Maj+clic : plage)" onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
@@ -981,7 +1003,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div className="studio-next">
               <span className="studio-thumb-empty">Suite de l&apos;histoire</span>
               <p>
-                Adapté jusqu&apos;à {Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film. Le studio lit les images suivantes et le scénario, écrit les cases, génère les images et traduit les textes.
+                Adapté jusqu&apos;à {coveredUntil(panels).toFixed(0)} s du film. Le studio lit les images suivantes et le scénario, écrit les cases, génère les images et traduit les textes.
               </p>
               <label>
                 <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
@@ -999,6 +1021,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             </div>
           </li>
         </ol>
+              <PanelDragGhost panel={panels.find((p) => p.panel_id === listDrag.dragId)} count={dragCount(listDrag.dragId)} pointer={listDrag.pointer} />
       </aside>
 
       <section className="studio-stage">
@@ -1066,6 +1089,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               onSelect={select}
               showFocal={showFocal}
               onChange={(id, changes) => setPanels((current) => updatePanel(current, id, changes))}
+              onMove={dropPanels}
+              dragDisabled={busy}
+              checkedIds={checked}
               frames={FILM_FRAMES}
               onInsertAfter={(id) => {
                 const next = insertAfter(panels, id);

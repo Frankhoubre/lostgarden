@@ -4190,3 +4190,116 @@ h3 {
   font-size: 0.75rem;
   color: rgba(216, 210, 194, 0.85);
 }
+
+/* Drag and drop of panels, in the list and in the strip. */
+body.studio-dragging,
+body.studio-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.studio-thumb-item,
+.studio-strip-item {
+  position: relative;
+}
+
+.studio-thumb-item.is-dragging,
+.studio-strip-item.is-dragging {
+  opacity: 0.35;
+}
+
+.studio-thumb-item.is-drop-before::before,
+.studio-thumb-item.is-drop-after::after,
+.studio-strip-item.is-drop-before::before,
+.studio-strip-item.is-drop-after::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  z-index: 20;
+  height: 4px;
+  border-radius: 4px;
+  background: #7ddfff;
+  box-shadow: 0 0 12px rgba(125, 223, 255, 0.9);
+  pointer-events: none;
+}
+
+.studio-thumb-item.is-drop-before::before,
+.studio-strip-item.is-drop-before::before {
+  top: -4px;
+}
+
+.studio-thumb-item.is-drop-after::after,
+.studio-strip-item.is-drop-after::after {
+  bottom: -4px;
+}
+
+.studio-drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  width: 120px;
+  overflow: hidden;
+  border: 2px solid #7ddfff;
+  border-radius: 0.5rem;
+  background: #061018;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  transform: rotate(-3deg);
+}
+
+.studio-drag-ghost img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.studio-drag-ghost-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  font-size: 0.7rem;
+  color: rgba(216, 210, 194, 0.6);
+}
+
+.studio-drag-ghost-label {
+  display: block;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.68rem;
+  color: #7ddfff;
+}
+
+/* In a grid the panels sit side by side: the insertion mark is a vertical line. */
+.studio-thumb-item.is-drop-x.is-drop-before::before,
+.studio-thumb-item.is-drop-x.is-drop-after::after {
+  top: -2px;
+  bottom: -2px;
+  left: auto;
+  right: auto;
+  width: 4px;
+  height: auto;
+}
+
+.studio-thumb-item.is-drop-x.is-drop-before::before {
+  left: -5px;
+}
+
+.studio-thumb-item.is-drop-x.is-drop-after::after {
+  right: -5px;
+}
+
+.studio-thumb img,
+.studio-strip-item img {
+  -webkit-user-drag: none;
+}
+
+/* The title of the "next panels" card is not a thumbnail: without a positioned parent its
+   absolute box covered the upper half of the panel list, and swallowed pointer events there. */
+.studio-next .studio-thumb-empty {
+  position: static;
+  inset: auto;
+  display: block;
+  padding: 0;
+  font-weight: 600;
+  color: #7ddfff;
+}

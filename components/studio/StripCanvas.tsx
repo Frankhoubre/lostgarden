@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { PanelDragGhost } from "@/components/studio/PanelDragGhost";
+import { usePanelDrag, type DropTarget } from "@/components/studio/usePanelDrag";
 import type { Locale } from "@/lib/i18n/config";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { WEBTOON_WIDTH, type WebtoonPanel } from "@/lib/webtoon/types";
@@ -17,6 +19,11 @@ type StripCanvasProps = {
   frames?: { src: string; seconds: number; label: string }[];
   onInsertAfter?: (id: string) => void;
   onInsertFrameAfter?: (id: string, src: string) => void;
+  /** Press and hold a panel, drag it, drop it before or after another one. */
+  onMove?: (dragId: string, target: DropTarget) => void;
+  dragDisabled?: boolean;
+  /** Checked panels move together with the one dragged. */
+  checkedIds?: ReadonlySet<string>;
 };
 
 const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black: "#020409", abyss: "#020817" };
@@ -27,7 +34,10 @@ const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black
  * bubbles, sounds, captions, focal point, bottom edge for the height). A
  * click selects a panel; the inspector and the image actions follow.
  */
-export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, showFocal, frames = [], onInsertAfter, onInsertFrameAfter }: StripCanvasProps) {
+export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, showFocal, frames = [], onInsertAfter, onInsertFrameAfter, onMove, dragDisabled, checkedIds }: StripCanvasProps) {
+  // In the strip a press is often a scroll or the start of a handle drag: the panel lifts only after a hold.
+  const drag = usePanelDrag({ onDrop: (id, target) => onMove?.(id, target), holdMs: 350, disabled: dragDisabled || !onMove });
+  const together = (id: string) => Boolean(drag.dragId && checkedIds?.has(drag.dragId) && checkedIds.has(id));
   const layout = useMemo(() => computeLayout(panels), [panels]);
   const host = useRef<HTMLDivElement>(null);
   const lastScrolled = useRef<string | null>(null);
@@ -48,7 +58,12 @@ export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, sh
         const panel = panels[index];
         if (!panel) return null;
         return (
-          <div key={panel.panel_id} className="studio-strip-item" style={{ background: BG[placement.background] }}>
+          <div
+            key={panel.panel_id}
+            className={`studio-strip-item ${drag.dragId === panel.panel_id || together(panel.panel_id) ? "is-dragging" : ""} ${drag.target?.id === panel.panel_id && drag.dragId !== panel.panel_id ? (drag.target.after ? "is-drop-after" : "is-drop-before") : ""}`}
+            style={{ background: BG[placement.background] }}
+            {...drag.bind(panel.panel_id, "strip")}
+          >
             <div style={{ paddingTop: pct(placement.gap_before) }} aria-hidden="true" />
             <PanelCanvas
               variant="strip"
@@ -77,6 +92,7 @@ export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, sh
           </div>
         );
       })}
+      <PanelDragGhost panel={panels.find((p) => p.panel_id === drag.dragId)} count={drag.dragId && checkedIds?.has(drag.dragId) ? checkedIds.size : 1} pointer={drag.pointer} />
     </div>
   );
 }
