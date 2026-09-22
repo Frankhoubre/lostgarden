@@ -12,12 +12,14 @@ import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioLocations } from "@/components/studio/StudioLocations";
 import { StudioObjects } from "@/components/studio/StudioObjects";
+import { StudioProjectText } from "@/components/studio/StudioProjectText";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { getDb, getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
 import { appendFromFrame } from "@/lib/webtoon/editor-ops";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
+import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/webtoon/project";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
@@ -48,7 +50,13 @@ const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "film", label: "Images du film", hint: "Une image toutes les 5 s" },
 ];
 
-type StudioAppProps = { script: WebtoonScript };
+type StudioAppProps = {
+  script: WebtoonScript;
+  /** A project of its own (not Lost Garden): its film, its screenplay, its own empty library to start. */
+  project?: StudioProject | null;
+  /** The project's film, one frame per second. */
+  frames?: { src: string; seconds: number; label: string }[];
+};
 
 function formatTime(iso: string | null): string {
   if (!iso) return "";
@@ -61,7 +69,8 @@ function formatTime(iso: string | null): string {
  * saves it in Firestore, publishes it for the public reader, and hosts the
  * reference tabs. Everything else is delegated to the tab components.
  */
-export function StudioApp({ script }: StudioAppProps) {
+export function StudioApp({ script, project = null, frames }: StudioAppProps) {
+  const isProject = project !== null;
   const { locale } = useLocale();
   const { user } = useAuth();
   const [tab, setTabState] = useState<Tab>("webtoon");
@@ -146,7 +155,7 @@ export function StudioApp({ script }: StudioAppProps) {
 
   // The studio's library of characters and locations, saved a moment after
   // each change so a sheet edit or a new character never needs a click.
-  const [library, setLibraryState] = useState<LibraryOverlay>(EMPTY_LIBRARY);
+  const [library, setLibraryState] = useState<LibraryOverlay>(project ? EMPTY_PROJECT_LIBRARY : EMPTY_LIBRARY);
   const librarySave = useRef<number | null>(null);
   const setLibrary = useCallback(
     (next: LibraryOverlay) => {
@@ -176,7 +185,8 @@ export function StudioApp({ script }: StudioAppProps) {
           withTimeout(loadLibrary(script.slug)).catch(() => null),
         ]);
         if (cancelled) return;
-        if (storedLibrary) setLibraryState(storedLibrary);
+        // A project never sits on the Lost Garden library, even if its document says nothing about it.
+        if (storedLibrary) setLibraryState(isProject ? { ...storedLibrary, base: "none" } : storedLibrary);
         if (draft) {
           setPanels(draft.panels);
           setBaseline(draft.panels);
@@ -195,7 +205,7 @@ export function StudioApp({ script }: StudioAppProps) {
     return () => {
       cancelled = true;
     };
-  }, [script.slug, user]);
+  }, [script.slug, user, isProject]);
 
   useEffect(() => {
     if (!user) return;
@@ -382,9 +392,12 @@ export function StudioApp({ script }: StudioAppProps) {
         <div className="studio-bar-title">
           <Link href={localePath(locale, "/")} className="anime-heading font-display text-base text-lily hover:text-magic">Lost Garden</Link>
           <span className="studio-bar-sep">/</span>
-          <span className="anime-label text-xs text-cyan-pale">Studio webtoon</span>
+          <Link href={localePath(locale, "/convert-video-to-webtoon")} className="anime-label text-xs text-cyan-pale hover:text-magic" title="Tous les projets">Studio webtoon</Link>
           <span className="studio-bar-sep">/</span>
-          <span className="text-sm text-ivory/85">{localizedText(script.title, locale)} · {localizedText(script.subtitle, locale)}</span>
+          <span className="text-sm text-ivory/85">{project ? project.title : `${localizedText(script.title, locale)} · ${localizedText(script.subtitle, locale)}`}</span>
+          {project ? (
+            <Link href={`${localePath(locale, `/convert-video-to-webtoon/${project.id}`)}?bible=1`} className="webtoon-mini" title="Personnages, objets et lieux du projet, les images du film">Bible du projet</Link>
+          ) : null}
           {cost ? (
             <span
               className="studio-cost"
@@ -413,8 +426,12 @@ export function StudioApp({ script }: StudioAppProps) {
           {publishedAt ? <span className="studio-status">Publié le {formatTime(publishedAt)}</span> : null}
           {notice ? <span className="studio-notice">{notice}</span> : null}
           <button type="button" className="webtoon-mini" onClick={() => void save()} disabled={working !== null} title="Enregistre le brouillon (Cmd+S)">Enregistrer</button>
-          <button type="button" className="webtoon-mini studio-primary" onClick={() => void publish()} disabled={working !== null} title="Met cette version en ligne pour les lecteurs">Publier</button>
-          <Link href={localePath(locale, `/webtoon/${script.slug}`)} className="webtoon-mini" target="_blank">Voir en ligne</Link>
+          {project ? null : (
+            <>
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void publish()} disabled={working !== null} title="Met cette version en ligne pour les lecteurs">Publier</button>
+              <Link href={localePath(locale, `/webtoon/${script.slug}`)} className="webtoon-mini" target="_blank">Voir en ligne</Link>
+            </>
+          )}
           <div className="studio-gear" ref={menuRef}>
             <button type="button" className={`webtoon-mini studio-gear-button ${menuOpen ? "is-active" : ""}`} onClick={() => setMenuOpen((open) => !open)} aria-haspopup="menu" aria-expanded={menuOpen} title="Autres actions">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -501,13 +518,14 @@ export function StudioApp({ script }: StudioAppProps) {
               setLibrary={setLibrary}
               previewLocale={previewLocale}
               onJob={setJob}
+              filmFrames={frames ? sparseFrames(frames) : undefined}
             />
           </div>
-          {tab === "scenario" ? <StudioScreenplay panels={panels} /> : null}
-          {tab === "personnages" ? <StudioCharacters script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
+          {tab === "scenario" ? (project ? <StudioProjectText project={project} notify={notify} /> : <StudioScreenplay panels={panels} />) : null}
+          {tab === "personnages" ? <StudioCharacters script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} withDocs={!project} /> : null}
           {tab === "objets" ? <StudioObjects script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
-          {tab === "decors" ? <StudioLocations script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
-          {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} /> : null}
+          {tab === "decors" ? <StudioLocations script={script} panels={panels} library={library} setLibrary={setLibrary} notify={notify} withDocs={!project} /> : null}
+          {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} frames={frames} /> : null}
         </main>
       </div>
     </div>

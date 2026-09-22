@@ -454,7 +454,9 @@ export function libraryWith(overlay?: LibraryOverlay | null): ReferenceAsset[] {
   if (!overlay) return REFERENCE_LIBRARY;
   const hidden = new Set(overlay.hidden);
   const custom = new Map(overlay.assets.map((asset) => [asset.id, { ...asset, custom: true }]));
-  const merged = REFERENCE_LIBRARY.filter((asset) => !hidden.has(asset.id)).map((asset) => custom.get(asset.id) ?? asset);
+  // A project of its own starts from nothing: the Lost Garden library never leaks into it.
+  const base = overlay.base === "none" ? [] : REFERENCE_LIBRARY;
+  const merged = base.filter((asset) => !hidden.has(asset.id)).map((asset) => custom.get(asset.id) ?? asset);
   const known = new Set(merged.map((asset) => asset.id));
   return [...merged, ...overlay.assets.filter((asset) => !known.has(asset.id) && !hidden.has(asset.id)).map((asset) => ({ ...asset, custom: true }))];
 }

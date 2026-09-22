@@ -3,7 +3,7 @@ import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { getProjectContext } from "@/lib/webtoon/project-server";
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
@@ -43,8 +43,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const { script } = context;
 
   const body = (await request.json().catch(() => ({}))) as {
     panel_id?: string;

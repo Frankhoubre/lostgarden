@@ -1,146 +1,207 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import sharp from "sharp";
+import { recordCost } from "@/lib/webtoon/cost-server";
+import { imageAsDataUrl, getProjectContext } from "@/lib/webtoon/project-server";
+import { completeJson } from "@/lib/webtoon/providers/gateway-text";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { libraryWith } from "@/lib/webtoon/references";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
-import { recordCost } from "@/lib/webtoon/cost-server";
+import { sheetKind, sheetPrompt } from "@/lib/webtoon/sheet-prompt";
 import { storeGeneratedImage } from "@/lib/webtoon/storage-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
-import { STYLE_BIBLE } from "@/lib/webtoon/style-bible";
+import { bibleFor } from "@/lib/webtoon/style-bible";
 import type { LibraryOverlay, ReferenceAsset } from "@/lib/webtoon/types";
 
 /**
  * POST /api/webtoon/<slug>/asset
- * Body: { asset: ReferenceAsset, library?: LibraryOverlay, palette?: string }
+ * Body: {
+ *   asset: ReferenceAsset,            the entry of the bible (character, object, location)
+ *   library?: LibraryOverlay,
+ *   frames?: string[],                frames of the film where the thing is seen (detected)
+ *   references?: string[],            images the author gave (Storage URLs)
+ *   prompt?: string,                  the prepared prompt, as the author edited it
+ *   palette?: string,
+ * }
  *
- * Draws a reference sheet for the studio's library: a character turnaround
- * in the webtoon style of the strip, a creature or machine sheet with
- * Lanterne beside it for scale, an object sheet with its states (closed,
- * open), or a location design illustration. The design lock of the asset
- * (`must_keep`) drives the prompt; the other images of the same subject,
- * the frames of the film given in `frames` (where the thing is seen best,
- * the design authority for something detected in the film) and the style
- * anchor are attached so the sheet matches what the film and the strip
- * already show. Returns the image as a data URL; the studio stores it and
- * points the asset to it.
+ * Draws a reference sheet for the bible of the project: a character
+ * turnaround with expressions, a creature or machine sheet with a figure
+ * for scale, an object sheet with its states, or a location illustration.
+ * The prompt is the one `sheetPrompt` prepares (and the studio shows), or the
+ * author's version of it; the images attached are the author's references,
+ * then the frames of the film, then the other sheets of the same subject,
+ * then the style anchor.
+ *
+ * Then the sheet is checked: a vision model reads it for any text (labels,
+ * names, swatches) and, except for a location, for a background that is not
+ * plain white. A sheet that fails is drawn again once with the fault named.
+ * The white is then cleaned (near-white pixels set to pure white), so the
+ * sheet sits clean on the page and in every prompt it is attached to.
  */
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
-const MIME: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
+const MAX_REFERENCES = 8;
+const IMAGE_SRC = /^(\/[\w./%-]+\.(jpe?g|png|webp)|https:\/\/firebasestorage\.googleapis\.com\/[^\s]+)$/i;
 
-async function referenceAsDataUrl(image: string): Promise<string> {
-  if (image.startsWith("http")) return image;
-  const file = path.join(process.cwd(), "public", image);
-  const bytes = await readFile(file);
-  return `data:${MIME[path.extname(file).toLowerCase()] ?? "application/octet-stream"};base64,${bytes.toString("base64")}`;
+type SheetCheck = { has_text?: boolean; text_seen?: string; background_plain_white?: boolean; problems?: string };
+
+/** A small JPEG of the sheet for the check: the model reads it as well, and the request stays light. */
+async function preview(base64: string): Promise<string> {
+  const bytes = await sharp(Buffer.from(base64, "base64")).resize({ width: 900, withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
+  return `data:image/jpeg;base64,${bytes.toString("base64")}`;
+}
+
+async function checkSheet(base64: string, location: boolean, onCost: (usd: number) => void): Promise<SheetCheck> {
+  try {
+    return await completeJson<SheetCheck>({
+      system:
+        'You check a reference sheet drawn for a webtoon. Look at the whole image carefully, corners included. Answer with JSON only: {"has_text": true|false, "text_seen": "<the words, letters, numbers or labels you see, empty if none>", "background_plain_white": true|false, "problems": "<one short sentence, empty if none>"}. has_text is true for any letter, word, number, label (FRONT, SIDE...), caption, signature, logo or colour swatch. background_plain_white is true when everything around the drawings is plain white, with no floor, shadow, gradient, texture or frame.' +
+        (location ? " This sheet is a location illustration: its background is the place itself, so answer background_plain_white true." : ""),
+      user: [
+        { type: "text", text: "The sheet:" },
+        { type: "image_url", image_url: { url: await preview(base64) } },
+      ],
+      maxTokens: 300,
+      reasoning: "none",
+      temperature: 0,
+      onCost,
+    });
+  } catch {
+    return {};
+  }
+}
+
+/** Near-white pixels to pure white: the model's off-white paper and faint floor shadow go away, the drawing stays. */
+async function cleanWhite(base64: string): Promise<string> {
+  const image = sharp(Buffer.from(base64, "base64")).removeAlpha();
+  const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
+  for (let i = 0; i < data.length; i += info.channels) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const min = Math.min(r, g, b);
+    const max = Math.max(r, g, b);
+    if (min >= 232 && max - min <= 14) {
+      data[i] = 255;
+      data[i + 1] = 255;
+      data[i + 2] = 255;
+    }
+  }
+  const png = await sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).png().toBuffer();
+  return png.toString("base64");
 }
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
   if (!process.env.AI_GATEWAY_API_KEY) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { asset?: ReferenceAsset; library?: LibraryOverlay; palette?: string; frames?: string[] };
+  const body = (await request.json().catch(() => ({}))) as { asset?: ReferenceAsset; library?: LibraryOverlay; palette?: string; frames?: string[]; references?: string[]; prompt?: string };
   const asset = body.asset;
   if (!asset?.id || !asset.must_keep?.trim()) return Response.json({ error: "Décris d'abord l'élément (verrou de design)" }, { status: 400 });
-  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
+  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [], ...(body.library.base ? { base: body.library.base } : {}) } : null;
   const library = libraryWith(overlay);
-  const palette = body.palette && STYLE_BIBLE.palettes[body.palette] ? body.palette : asset.kind === "character" ? "white_memory" : "blue_sanctuary";
-  const anchorId = script.style_anchors?.[palette];
+  const bible = bibleFor(context.script.style_bible_id);
+  const kind = sheetKind(asset);
+  const clean = (list: unknown) => (Array.isArray(list) ? list.map((f) => String(f).trim()).filter((f) => IMAGE_SRC.test(f)) : []);
+  const own = clean(body.references);
+  const frames = clean(body.frames);
+  const name = asset.name.split(",")[0];
+  const scale = /scale:\s*([^.]+)\./i.exec(asset.description ?? "")?.[1]?.trim() ?? "";
 
-  const creature = asset.kind === "character" && (asset.tags ?? []).some((t) => /creature|machine|monster/i.test(t));
-  const scaleNote = /scale:\s*([^.]+)\./i.exec(asset.description ?? "")?.[1]?.trim() ?? "";
-  const frames = (Array.isArray(body.frames) ? body.frames : []).map((f) => String(f).trim()).filter((f) => /^\/[a-z0-9._\/-]+\.(jpe?g|png|webp)$/i.test(f)).slice(0, 3);
-
+  // Reference images, strongest intent first: the author's own, the film, the sheets already drawn, the style.
   const references: ReferenceAsset[] = [];
-  if (asset.kind === "character") {
-    for (const sheet of library.filter((a) => a.kind === "character" && a.subject === asset.subject && a.id !== asset.id && a.image).slice(0, 3)) references.push(sheet);
-  } else if (asset.kind === "object") {
-    for (const sheet of library.filter((a) => a.kind === "object" && a.id !== asset.id && a.id.startsWith(asset.id) && a.image).slice(0, 2)) references.push(sheet);
-  } else if (asset.image) {
-    references.push(asset);
-  }
-  // Frames of the film where the thing is seen: the design authority for what was detected in the film.
-  frames.forEach((src, i) => {
-    const at = /(\d{2})m(\d{2})s/.exec(src);
-    references.push({ id: src, kind: "source_frame", name: `film frame ${at ? `${Number(at[1])}:${at[2]}` : i + 1} showing ${asset.name.split(",")[0]}`, image: src, must_keep: "The exact design of the subject as the film shows it.", description: "", tags: ["film"] });
+  const add = (item: ReferenceAsset) => {
+    if (references.length < MAX_REFERENCES && item.image && !references.some((r) => r.image === item.image)) references.push(item);
+  };
+  own.forEach((src, i) => add({ id: `own-${i}`, kind: "source_frame", name: `reference image ${i + 1} given by the author for ${name}`, image: src, must_keep: "", description: "", tags: ["own"] }));
+  frames.forEach((src) => {
+    const at = /(\d{2})m(\d{2})s/.exec(decodeURIComponent(src));
+    add({ id: src, kind: "source_frame", name: `film frame ${at ? `${Number(at[1])}:${at[2]}` : ""} showing ${name}`.replace(/\s+/g, " "), image: src, must_keep: "", description: "", tags: ["film"] });
   });
-  // A creature or a machine is drawn next to Lanterne at true scale: his sheet gives his size.
-  const lanterne = creature && scaleNote ? library.find((a) => a.kind === "character" && a.subject === "lanterne" && a.image) : undefined;
-  if (lanterne) references.push(lanterne);
-  const anchor = library.find((a) => a.id === anchorId);
-  if (anchor?.image) references.push(anchor);
+  const sameSubject = asset.kind === "character"
+    ? library.filter((a) => a.kind === "character" && a.subject === asset.subject && a.id !== asset.id)
+    : library.filter((a) => a.kind === asset.kind && a.id !== asset.id && a.id.startsWith(asset.id));
+  sameSubject.slice(0, 2).forEach(add);
+  if (asset.kind === "location" && asset.image) add(asset);
+  // A creature of Lost Garden is drawn next to Lanterne, whose size the series knows.
+  const hero = context.lostGarden && kind === "creature" && scale ? library.find((a) => a.kind === "character" && a.subject === "lanterne" && a.image) : undefined;
+  if (hero) add(hero);
+  const palette = body.palette && bible.palettes[body.palette] ? body.palette : kind === "location" ? "blue_sanctuary" : "white_memory";
+  const anchor = library.find((a) => a.id === context.script.style_anchors?.[palette]);
+  if (anchor?.image) add(anchor);
 
-  const subjectName = asset.name.split(",")[0];
-  const lines = [STYLE_BIBLE.base];
-  if (creature) {
-    lines.push(
-      `CREATURE OR MACHINE DESIGN SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: its whole body seen from the front, from three-quarter and from the side, in one row at the same scale, exactly as the film frames show it; below, a large detail of its most striking part (an eye, a claw, a lens, a mouth)${lanterne ? `; at the bottom left, the small silhouette of Lanterne standing next to it, drawn at TRUE relative scale (${scaleNote}), so the sheet shows how big it is` : ""}. Single sheet, no text, no labels, no arrows, no frames.`,
-    );
-    lines.push(`DESIGN LOCKED, copy exactly from the film frames: ${asset.must_keep}`);
-    if (asset.description) lines.push(`NOTES: ${asset.description}`);
-  } else if (asset.kind === "character") {
-    lines.push(
-      `CHARACTER MODEL SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: a full-body turnaround in one row (front view, three-quarter view, side view, back view), standing in the same neutral pose at the same scale, and below it three head-and-shoulders expressions in a row (calm, gentle smile, eyes closed). Single sheet, no text, no labels, no arrows, no frames.`,
-    );
-    lines.push(`DESIGN LOCKED, copy exactly: ${asset.must_keep}`);
-    if (asset.description) lines.push(`NOTES: ${asset.description}`);
-  } else if (asset.kind === "object") {
-    lines.push(
-      `OBJECT DESIGN SHEET of ${subjectName}, drawn in the webtoon style of the strip on a plain flat white background: the object large and centred, seen from the front and from three-quarter, and, when it opens or changes state, each state side by side (closed, open, with what is inside drawn exactly as the film shows it); below, a small detail of its most important part. Exactly the design of the film frames: same shape, same materials, same colours, same size in a hand. No hand unless needed to show how it is held, no text, no labels, no arrows, no frames.`,
-    );
-    lines.push(`DESIGN LOCKED, copy exactly from the film frames: ${asset.must_keep}`);
-    if (asset.description) lines.push(`NOTES: ${asset.description}`);
-  } else if (asset.kind === "location") {
-    lines.push(`LOCATION DESIGN SHEET of ${subjectName}: one wide establishing illustration of the place, empty of characters, drawn in the flat webtoon style of the strip, composed as a reference for future panels (main volumes, light sources, palette).`);
-    lines.push(`DESIGN LOCKED, copy exactly: ${asset.must_keep}`);
-    if (STYLE_BIBLE.palettes[palette]) lines.push(STYLE_BIBLE.palettes[palette]);
-    if (asset.description) lines.push(`NOTES: ${asset.description}`);
-  } else {
-    lines.push(`REFERENCE ILLUSTRATION of ${subjectName}, drawn in the flat webtoon style of the strip. ${asset.must_keep}`);
-  }
-  if (references.length) {
-    lines.push(
-      "REFERENCE IMAGES, in order: " +
-        references.map((r, i) => `image ${i + 1} is ${r.name} (${r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.kind === "source_frame" ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.subject === "lanterne" && asset.subject !== "lanterne" ? "Lanterne, for the scale silhouette only" : "design to keep"})`).join("; ") +
-        ".",
-    );
-  }
-  lines.push(STYLE_BIBLE.rendering.filter((rule) => !rule.startsWith("Composition designed")).join(" "));
-  lines.push("DO NOT: " + STYLE_BIBLE.negative.join(" "));
+  const prepared = sheetPrompt({ asset, bible, scale, palette, scaleFigure: hero ? "Lanterne, the small armoured knight of image " + (references.indexOf(hero) + 1) : undefined });
+  const base = body.prompt?.trim() ? body.prompt.trim() : prepared;
+  const roles = references.map((r, i) => {
+    const role = r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r === hero ? "for the scale silhouette only" : "design to keep";
+    return `image ${i + 1} is ${r.name} (${role})`;
+  });
+  const promptFor = (fix?: string) => [base, roles.length ? `REFERENCE IMAGES, in order: ${roles.join("; ")}.` : "", fix ?? ""].filter(Boolean).join("\n\n");
 
+  let usd = 0;
+  const meter = (value: number) => {
+    usd += value;
+  };
   try {
-    const image = await generateWithGateway(
-      {
-        panel_id: asset.id,
-        model: "openai/gpt-image-2.5-sunburst",
-        aspect_ratio: "3:2",
-        width: 1536,
-        height: 1024,
-        prompt: lines.join("\n\n"),
-        negative_constraints: STYLE_BIBLE.negative,
-        references: references.map((r) => ({ id: r.id, name: r.name, image: r.image, role: r.kind })),
-      },
-      { resolveReference: referenceAsDataUrl },
-    );
-    void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "sheets" });
+    const draw = async (prompt: string) =>
+      generateWithGateway(
+        {
+          panel_id: asset.id,
+          model: "openai/gpt-image-2.5-sunburst",
+          aspect_ratio: "3:2",
+          width: 1536,
+          height: 1024,
+          prompt,
+          negative_constraints: bible.negative,
+          references: references.map((r) => ({ id: r.id, name: r.name, image: r.image, role: r.kind })),
+        },
+        { resolveReference: imageAsDataUrl },
+      );
+    let image = await draw(promptFor());
+    meter(image.cost_usd);
+    let check = await checkSheet(image.base64, kind === "location", meter);
+    let attempts = 1;
+    const failed = (c: SheetCheck) => c.has_text === true || (kind !== "location" && c.background_plain_white === false);
+    if (failed(check)) {
+      const fault = [check.has_text ? `it contained text (${check.text_seen || "labels"})` : "", check.background_plain_white === false ? "its background was not plain white" : "", check.problems ?? ""].filter(Boolean).join("; ");
+      const second = await draw(promptFor(`CORRECTION: the previous attempt was rejected because ${fault}. This time: absolutely no text or label anywhere${kind !== "location" ? ", and nothing but plain white around the drawings" : ""}.`));
+      meter(second.cost_usd);
+      const secondCheck = await checkSheet(second.base64, kind === "location", meter);
+      attempts = 2;
+      if (!failed(secondCheck) || failed(check)) {
+        image = second;
+        check = secondCheck;
+      }
+    }
+    const base64 = kind === "location" ? image.base64 : await cleanWhite(image.base64);
+    const mediaType = kind === "location" ? image.media_type : "image/png";
+    void recordCost({ idToken: identity.idToken, slug, usd, kind: "sheets" });
     const safe = asset.id.replace(/[^a-z0-9._-]/gi, "_");
     const src = await storeGeneratedImage({
       idToken: identity.idToken,
-      path: `webtoon/${slug}/library/${safe}/${Date.now()}.png`,
-      base64: image.base64,
-      mediaType: image.media_type,
+      path: `webtoon/${slug}/library/${safe}/${Date.now()}.${mediaType === "image/png" ? "png" : "jpg"}`,
+      base64,
+      mediaType,
     });
-    return Response.json({ id: asset.id, model: image.model, ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }), prompt: lines.join("\n\n") });
+    return Response.json({
+      id: asset.id,
+      model: image.model,
+      ...(src ? { src } : { data_url: `data:${mediaType};base64,${base64}` }),
+      prompt: promptFor(),
+      prepared,
+      attempts,
+      check,
+      references: references.map((r) => r.image),
+      cost_usd: usd,
+    });
   } catch (error) {
+    void recordCost({ idToken: identity.idToken, slug, usd, kind: "sheets" });
     const message = error instanceof Error ? error.message : "generation failed";
     return Response.json({ error: message }, { status: 502 });
   }

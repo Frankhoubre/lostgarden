@@ -3,9 +3,9 @@ import path from "node:path";
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { libraryWith } from "@/lib/webtoon/references";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { getProjectContext } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
-import { STYLE_BIBLE } from "@/lib/webtoon/style-bible";
+import { bibleFor } from "@/lib/webtoon/style-bible";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
 /**
@@ -38,8 +38,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const bible = bibleFor(context.script.style_bible_id);
   if (!process.env.AI_GATEWAY_API_KEY) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
@@ -62,19 +63,19 @@ export async function POST(request: Request, { params }: RouteContext) {
   const locks = references.slice(1).map((r) => library.find((a) => a.id === r.id)?.must_keep).filter(Boolean);
 
   const prompt = [
-    STYLE_BIBLE.base,
+    bible.base,
     `RETOUCH of an existing webtoon panel. Image 1 is the panel; the mask marks one zone of it. Inside that zone, and only there: ${instruction}. Everything outside the zone stays exactly as drawn in image 1: same composition, same lines, same flat colours, same light. The new content matches the flatness, the line weight and the palette of the rest of the panel and connects seamlessly at the edge of the zone.`,
     locks.length ? `CHARACTERS, design locked: ${locks.join(" ")}` : "",
     references.length > 1 ? `REFERENCE IMAGES: image 1 is the panel to retouch; ${references.slice(1).map((r, i) => `image ${i + 2} is ${r.name} (character design to copy exactly)`).join("; ")}.` : "",
-    STYLE_BIBLE.rendering.filter((rule) => !rule.startsWith("Composition designed")).join(" "),
-    "DO NOT: " + STYLE_BIBLE.negative.join(" "),
+    bible.rendering.filter((rule) => !rule.startsWith("Composition designed")).join(" "),
+    "DO NOT: " + bible.negative.join(" "),
   ]
     .filter(Boolean)
     .join("\n\n");
 
   try {
     const image = await generateWithGateway(
-      { panel_id: panel?.panel_id ?? "panel", model: "openai/gpt-image-2.5-sunburst", aspect_ratio: "4:5", width: 1080, height: 1350, prompt, negative_constraints: STYLE_BIBLE.negative, references },
+      { panel_id: panel?.panel_id ?? "panel", model: "openai/gpt-image-2.5-sunburst", aspect_ratio: "4:5", width: 1080, height: 1350, prompt, negative_constraints: bible.negative, references },
       { resolveReference: referenceAsDataUrl, mask: body.mask, size, outputFormat: "jpeg", outputCompression: 92 },
     );
     void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "images" });

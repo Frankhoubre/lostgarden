@@ -62,7 +62,8 @@ const BACKGROUNDS: PanelBackground[] = ["white", "black", "abyss"];
 const BUBBLES: BubbleStyle[] = ["speech", "whisper", "thought", "shout", "off"];
 const FIDELITIES: Fidelity[] = ["direct", "reframe", "bridge"];
 const ROLES: NarrativeRole[] = ["breath", "establishing", "character_intro", "action", "reaction", "dialogue", "detail", "reveal", "transition", "tension", "cliffhanger"];
-const FILM_FRAMES = studioFilmFrames();
+/** Lost Garden episode 1: one frame every five seconds, the pickers of the editor. */
+const LOST_GARDEN_FRAMES = studioFilmFrames();
 /** Images generated at the same time by a batch. */
 const IMAGE_CONCURRENCY = 3;
 
@@ -158,6 +159,8 @@ type StudioEditorProps = {
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
   onJob?: (job: JobSummary) => void;
+  /** Frames of the project's film offered by the pickers (every five seconds); Lost Garden's when unset. */
+  filmFrames?: { src: string; seconds: number; label: string }[];
 };
 
 /**
@@ -166,8 +169,9 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, setLibrary, previewLocale, onJob }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames }: StudioEditorProps) {
   useLocale();
+  const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const locale = previewLocale;
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
   const LOCATIONS = useMemo(() => libraryLocations(library), [library]);

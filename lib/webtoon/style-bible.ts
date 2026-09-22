@@ -50,3 +50,34 @@ export const STYLE_BIBLE: StyleBible = {
     "No painterly or semi-realistic rendering, no dense detail, no complex textures, no volumetric rendering, no crowds of small elements drawn individually: flat colours and clean lines only.",
   ],
 };
+
+/**
+ * The same flat webtoon rendering as the Lost Garden bible, without anything
+ * of the series: no name, no palette of its own, no rule about its hero. It
+ * is the style a new project starts with; the project's own character,
+ * object and location sheets carry its identity.
+ */
+export const FLAT_WEBTOON_BIBLE: StyleBible = {
+  id: "flat-webtoon-v1",
+  base:
+    "A Korean webtoon (manhwa) panel in a deliberately simple, flat, graphic style, adapted from a finished animated film. Keep the identity of the source: the same character designs, the same mood, the same palette, strong readable silhouettes. Rendering rules, strict: every element is built from large flat colour shapes, three to five tones per element at most (base colour, one hard cel shadow, one small highlight); clean digital ink outlines of varied weight on characters and props; backgrounds are simplified into a few big flat shapes and silhouettes with at most one soft gradient, drawn with far less detail than the characters; light, mist and glow are flat translucent shapes; small repeated details are suggested by a handful of simple marks, never drawn one by one; lots of empty space. The result looks like a weekly webtoon page coloured with bucket fills, not like a painting and not like a film frame.",
+  rendering: STYLE_BIBLE.rendering,
+  palettes: {},
+  negative: [
+    "No text, letters, numbers, logo, signature, watermark or caption anywhere in the image.",
+    "No speech bubbles and no panel borders drawn in the artwork.",
+    "No extra characters, animals or creatures unless named in the prompt.",
+    "No photographic realism, no 3D CGI look, no chibi proportions unless the character sheets show them.",
+    "No painterly or semi-realistic rendering, no dense detail, no complex textures, no volumetric rendering, no crowds of small elements drawn individually: flat colours and clean lines only.",
+  ],
+};
+
+export const STYLE_BIBLES: Record<string, StyleBible> = {
+  [STYLE_BIBLE.id]: STYLE_BIBLE,
+  [FLAT_WEBTOON_BIBLE.id]: FLAT_WEBTOON_BIBLE,
+};
+
+/** The bible of a script or project; the Lost Garden one when the id is unknown. */
+export function bibleFor(id: string | undefined | null): StyleBible {
+  return (id && STYLE_BIBLES[id]) || STYLE_BIBLE;
+}
