@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
@@ -22,10 +20,9 @@ import {
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson, type UserPart } from "@/lib/webtoon/providers/gateway-text";
 import { libraryCharacters, libraryLocations, libraryObjects, libraryWith } from "@/lib/webtoon/references";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
-import { STUDIO_SCREENPLAY, studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
+import { getProjectContext, imageAsDataUrl } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
-import type { LibraryOverlay, ReferenceAsset, WebtoonPanel } from "@/lib/webtoon/types";
+import type { LibraryOverlay, ReferenceAsset, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
 /**
  * POST /api/webtoon/<slug>/continue
@@ -83,7 +80,9 @@ type CostMeter = { usd: number };
  * the image and not guessed.
  */
 async function analyzeFrames(input: {
-  script: NonNullable<ReturnType<typeof getWebtoonScript>>;
+  script: WebtoonScript;
+  /** Lost Garden carries rules of its own: the helmet of Lanterne, the places and objects of the series. */
+  lostGarden: boolean;
   screenplay: string;
   frames: { seconds: number; label: string; src: string }[];
   characters: string[];
@@ -91,12 +90,16 @@ async function analyzeFrames(input: {
   meter: CostMeter;
 }): Promise<FrameNote[]> {
   const system = [
-    `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, an original anime being adapted into a webtoon. You receive frames of the finished episode taken every second, each labelled with its timecode, and the screenplay in French. The film and the screenplay match, but the film shows gestures the screenplay does not spell out: the frames win for what is visible.`,
+    `You are the continuity supervisor of "${input.script.series}", episode ${input.script.episode}, ${input.lostGarden ? "an original anime" : "an animated film"} being adapted into a webtoon. You receive frames of the finished episode taken every second, each labelled with its timecode, and the screenplay when there is one. The film and the screenplay match, but the film shows gestures the screenplay does not spell out: the frames win for what is visible.`,
     `Characters of the series: ${input.characters.join(" | ")}.`,
     input.objects.length ? `Objects of the series already on file: ${input.objects.join(" | ")}. Name them by these names when you see them.` : "",
-    "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, running, kneeling, collapsed face down, lying on his back, climbing, sitting, falling), `action` (what the frame shows happening), `in_hands` (what a hand actually holds, described by its real shape, material and colour as seen, and what the hand does with it: takes it out, opens it, holds it up, throws it; an arm swept out wide with the object gone from the hand right after is a throw; \"nothing\" when the hands are empty), `others_visible` (anything else in the frame that matters: a creature, a machine, a branch, a claw, an eye; named the same way from frame to frame), `scale` (when a creature, a machine or a structure is visible with a character: its size compared to him, in words, e.g. \"the machine's body alone is ten times his height; one claw is as big as he is\"; empty otherwise), `motion` (what moves and how: nothing moves; slow; fast; violent; and what exactly: \"the machine lifts its body on its legs, debris falls\"), `sound` (what would be heard at this instant: silence; a metallic clang; footsteps on moss; a deep mechanical roar; roots cracking; electricity crackling), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French).",
-    "Objects, strict. Never name an object you do not clearly see; never guess a paper, a letter, a note, a map or a book: this series has none in this episode. The small pale rectangular plate on Lanterne's chest is a metal plate of his armour, riveted on, not a paper. A round silver disc on a thin chain, that opens like a watch, is his pendant. When a hand covers the chest, write \"a hand pressed on the chest plate\", not an object. If you are not sure what is held, describe only its shape and colour and add \"(unclear)\".",
-    "Be exact about the helmet and the posture: these decide how the character is drawn in the panels. Look above the cream scarf: a pale lantern-shaped helmet with two dark oval holes means \"on his head\"; a dark round opening with nothing above the scarf means the helmet is off (then say where it is: on the ground, in his hands, or not visible). A frame that shows only the armour from behind with an arm reaching out and nothing above the shoulders is headless. Consistency check before answering: from the first frame where the helmet is off until the frame where both his hands hold it up to his neck (he puts it back), every frame with Lanterne is headless; re-examine any frame in between that you were about to mark \"on his head\". If a frame is black or shows only text, say so.",
+    input.lostGarden
+      ? "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location: underground blue forest, altar sanctuary, white lily field, or a short description), `characters` (ids of the characters visible, empty if nobody), `helmet` (for Lanterne: \"on his head\", \"on the ground\", \"in his hands\", \"not visible\"; for other characters, ignore), `posture` (standing, walking, running, kneeling, collapsed face down, lying on his back, climbing, sitting, falling), `action` (what the frame shows happening), `in_hands` (what a hand actually holds, described by its real shape, material and colour as seen, and what the hand does with it: takes it out, opens it, holds it up, throws it; an arm swept out wide with the object gone from the hand right after is a throw; \"nothing\" when the hands are empty), `others_visible` (anything else in the frame that matters: a creature, a machine, a branch, a claw, an eye; named the same way from frame to frame), `scale` (when a creature, a machine or a structure is visible with a character: its size compared to him, in words, e.g. \"the machine's body alone is ten times his height; one claw is as big as he is\"; empty otherwise), `motion` (what moves and how: nothing moves; slow; fast; violent; and what exactly: \"the machine lifts its body on its legs, debris falls\"), `sound` (what would be heard at this instant: silence; a metallic clang; footsteps on moss; a deep mechanical roar; roots cracking; electricity crackling), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted in French)."
+      : "For EACH frame, in order, write what is literally visible, without interpretation: `place` (the location, named with the same words every time it comes back: \"dark forest\", \"castle hall\", or a short description), `characters` (ids of the characters of the series visible, or a short description of anyone else, empty if nobody), `helmet` (leave empty), `posture` (standing, walking, running, kneeling, lying, climbing, sitting, falling), `action` (what the frame shows happening), `in_hands` (what a hand actually holds, described by its real shape, material and colour as seen, and what the hand does with it: takes it out, opens it, holds it up, throws it; \"nothing\" when the hands are empty), `others_visible` (anything else in the frame that matters: a creature, a machine, a vehicle, an important object; named the same way from frame to frame), `scale` (when a creature, a machine or a structure is visible with a character: its size compared to him, in words; empty otherwise), `motion` (what moves and how: nothing moves; slow; fast; violent; and what exactly), `sound` (what would be heard at this instant), `title_card` (the exact text when the frame is a title or logo card on a plain background, else null), `screenplay_line` (the line of the screenplay this moment corresponds to, quoted, when there is a screenplay).",
+    input.lostGarden
+      ? "Objects, strict. Never name an object you do not clearly see; never guess a paper, a letter, a note, a map or a book: this series has none in this episode. The small pale rectangular plate on Lanterne's chest is a metal plate of his armour, riveted on, not a paper. A round silver disc on a thin chain, that opens like a watch, is his pendant. When a hand covers the chest, write \"a hand pressed on the chest plate\", not an object. If you are not sure what is held, describe only its shape and colour and add \"(unclear)\"."
+      : "Objects, strict. Never name an object you do not clearly see. When a hand covers something, say so, not an object. If you are not sure what is held, describe only its shape and colour and add \"(unclear)\".",
+    input.lostGarden ? "Be exact about the helmet and the posture: these decide how the character is drawn in the panels. Look above the cream scarf: a pale lantern-shaped helmet with two dark oval holes means \"on his head\"; a dark round opening with nothing above the scarf means the helmet is off (then say where it is: on the ground, in his hands, or not visible). A frame that shows only the armour from behind with an arm reaching out and nothing above the shoulders is headless. Consistency check before answering: from the first frame where the helmet is off until the frame where both his hands hold it up to his neck (he puts it back), every frame with Lanterne is headless; re-examine any frame in between that you were about to mark \"on his head\". If a frame is black or shows only text, say so." : "",
     "Be exact about size and movement: a colossal thing must be written as colossal with a comparison to the character, every frame it is visible; a thing that rises, unfolds, leans, strikes or runs must have that movement in `motion` and its sound in `sound`, because the panels will be still images and the reader must see the movement and hear the sound.",
     `Continuity facts of the series: ${input.script.source.continuity.join(" ")}`,
     'Answer with JSON only: {"frames": [ {seconds, place, characters, helmet, posture, action, in_hands, others_visible, scale, motion, sound, title_card, screenplay_line} ]}, one entry per frame, in the order given. Escape double quotes inside strings.',
@@ -106,7 +109,7 @@ async function analyzeFrames(input: {
   const frameParts: UserPart[][] = await Promise.all(
     input.frames.map(async (frame): Promise<UserPart[]> => [
       { type: "text", text: `Frame at ${frame.label} (${frame.seconds} s)` },
-      { type: "image_url", image_url: { url: await frameAsDataUrl(frame.src) } },
+      { type: "image_url", image_url: { url: await imageAsDataUrl(frame.src) } },
     ]),
   );
   const user: UserPart[] = [
@@ -142,7 +145,7 @@ async function analyzeWindow(input: Parameters<typeof analyzeFrames>[0]): Promis
 const HELMET_EXAMPLES = { on: "/webtoon/ep1-opening/film/01m25s.jpg", off: "/webtoon/ep1-opening/film/02m25s.jpg" };
 
 async function helmetChecks(frames: { seconds: number; src: string }[], meter: CostMeter): Promise<Map<number, "on" | "off" | "absent">> {
-  const [exampleOn, exampleOff] = await Promise.all([frameAsDataUrl(HELMET_EXAMPLES.on), frameAsDataUrl(HELMET_EXAMPLES.off)]);
+  const [exampleOn, exampleOff] = await Promise.all([imageAsDataUrl(HELMET_EXAMPLES.on), imageAsDataUrl(HELMET_EXAMPLES.off)]);
   const results = await Promise.all(
     frames.map(async (frame) => {
       try {
@@ -155,7 +158,7 @@ async function helmetChecks(frames: { seconds: number; src: string }[], meter: C
             { type: "text", text: "Image B, WITHOUT his head, the neck open and empty:" },
             { type: "image_url", image_url: { url: exampleOff } },
             { type: "text", text: "The frame to check: is the helmet on his head here, as in A, or is the neck open as in B?" },
-            { type: "image_url", image_url: { url: await frameAsDataUrl(frame.src) } },
+            { type: "image_url", image_url: { url: await imageAsDataUrl(frame.src) } },
           ],
           maxTokens: 200,
           reasoning: "none",
@@ -197,14 +200,14 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
   const frameParts: UserPart[][] = await Promise.all(
     sample.map(async (frame): Promise<UserPart[]> => [
       { type: "text", text: `Frame at ${frame.seconds} s` },
-      { type: "image_url", image_url: { url: await frameAsDataUrl(frame.src) } },
+      { type: "image_url", image_url: { url: await imageAsDataUrl(frame.src) } },
     ]),
   );
   try {
     const answer = await completeJson<{ entities?: { ref?: string | null; kind?: string; name?: string; must_keep?: string; seconds?: number[]; best_seconds?: number[]; scale?: string; creature?: boolean }[] }>({
       system: [
         "You keep the registry of everything that appears in a film being adapted into a webtoon, so that each thing is drawn the same way in every panel. You get the continuity notes of a window of frames (who is visible, what is in the hands, what else is there, how big), some of the frames, and the library of things that already have a design sheet.",
-        "List every ENTITY of the window: a character, a creature, a machine, or an object that is held, used, thrown or that the story follows. Not an entity: terrain and scenery (a branch, a root, a mushroom, mist, trunks, stones, flowers, light), body parts, clothing that belongs to a character, and Lanterne's helmet while it is on his head (the fallen helmet alone on the ground IS an object entity, id `helmet`).",
+        "List every ENTITY of the window: a character, a creature, a machine, or an object that is held, used, thrown or that the story follows. Not an entity: terrain and scenery (a branch, a root, a mushroom, mist, trunks, stones, flowers, light), body parts, clothing that belongs to a character, and a helmet or a hat while it is worn (a helmet lying alone on the ground IS an object entity).",
         "For each entity: `ref` is the id of the library entry when it is the same thing (the library ids are given; match on meaning: \"a silver pendant on a chain\" is the library's pendant), else null. `kind` is `character` for anything alive or any creature, monster or machine, `object` for a thing. `name` is short in English. `must_keep` is a precise DESIGN LOCK in English written from the frames: overall shape, proportions, materials, colours, distinctive parts, how it opens or moves, and for a creature or machine its size compared to Lanterne. `seconds` lists every second where it is visible; `best_seconds` the two or three seconds where it is seen best (largest, clearest, its whole shape). `scale` is its size compared to Lanterne, in words, for a creature, machine or structure. `creature` is true for a creature, monster or machine.",
         'Answer with JSON only: {"entities": [ {ref, kind, name, must_keep, seconds, best_seconds, scale, creature} ]}. Escape double quotes inside strings.',
       ].join("\n\n"),
@@ -369,21 +372,23 @@ function cutWindow(moments: Moment[], events: StoryEvent[], budget: number): { e
   return { end, needed: Math.max(1, needed) };
 }
 
-function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonScript>>; batch: number; characters: string[]; locations: string[]; objects: string[]; pace?: "calm" | "normal" | "action" }): string {
-  const { script, batch, characters, locations, objects, pace = "normal" } = input;
+function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch: number; characters: string[]; locations: string[]; objects: string[]; pace?: "calm" | "normal" | "action" }): string {
+  const { script, lostGarden, batch, characters, locations, objects, pace = "normal" } = input;
   return [
-    `You are the adaptation engine of "${script.series}", an original poetic dark fantasy anime by Frank Houbre, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${batch} panels of the strip, continuing exactly where it stops.`,
+    `You are the adaptation engine of "${script.series}", ${lostGarden ? "an original poetic dark fantasy anime by Frank Houbre" : "an animated film"}, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${batch} panels of the strip, continuing exactly where it stops.`,
     "You receive: the last panels already made (for continuity), the MOMENTS of the next seconds of the film as noted by a continuity supervisor (frames taken every second, identical consecutive frames merged), the EVENTS of those seconds with the beats each must be told in, the ENTITIES visible (objects, creatures, machines, with the ids to use), the frames themselves, and the screenplay of the episode in French.",
     "Two sources, both authoritative, and they match: the film (the frames and the notes) and the screenplay. Method: first find the passage of the screenplay that corresponds to the frames. Then cover EVERY moment and EVERY event beat, in order, and only the seconds given: the window is cut so that your panels fit it; the last panel lands on the last moment, where the next call continues. Each panel gives the timecode of its frame in `seconds` and quotes the screenplay line it comes from in `screenplay_line`. Never skip a moment where something changes, never jump ahead, never invent an action that is in neither source.",
     "How many panels a moment gets. A moment is a stretch of film where the same thing is true (`from` to `to` in seconds, `frames` how many). ONE panel per moment, whatever its length: a character who walks for eight seconds is one panel, not eight. A second panel only when the moment lasts more than six seconds and deserves another angle (a wide one then a detail), or when its action changes inside it. The beats of an EVENT are the exception: each one is its own panel, always. Two panels of the same moment must never describe the same thing twice: if you cannot say what the second one adds, do not write it.",
     "Events are told in pieces, always. An impact, a fall, an object that drops or rolls, a blow on the ground, a hand that grabs, a machine that rises, a reveal: never one panel. The EVENTS block gives the beats: the cause (a detail of what is about to hit), the impact (an extreme close-up on the point of contact with ONE big sound effect, `sfx.size` 180 to 320, with a `rotate`), the consequence (the helmet rolling, the dirt thrown up, the object flying), the reaction (the character frozen, the body bent). Each beat is its own panel with fidelity `reframe` or `bridge`, drawing from the nearest frame for light and place. A reader must be able to say what happened from the pictures alone.",
     "Sound. Every impact, blow, fall, roar, crack and run carries sound effects in the lettering (`sfx`): one giant one on an impact, and in a run or a chase two or three smaller ones scattered across the panel (footsteps on moss, roots cracking, his own metal rattling, the roar behind) with different rotations. Also fill `sound` with what would be heard in the panel, in words, even when you letter nothing (\"silence\" when nothing). A panel of an action sequence without any sound effect is a mistake.",
     "Movement. A panel is a still image: say in `motion` how much moves (none, slow, fast, violent) and in `effects` what must be drawn to show it (speed lines, debris, dust, electric arcs, sparks). When a machine or a creature rises, unfolds, leans or strikes, the panel BEFORE shows it as it was, the panel of the movement shows the limbs mid-movement with debris falling and motion lines, the panel AFTER shows its new height against the character. Never describe a movement with a static standing pose.",
-    "Scale. When something colossal is in the panel (a machine, a giant, a chasm), write its size against the character in `scale_note` (\"the machine: twenty times his height, one leg thicker than a trunk; Lanterne the size of one of its rivets\") and compose for it: the character tiny at the bottom, low angle, the thing overflowing the frame. The reveal of a colossal thing is the tallest panel of the sequence (`aspect_ratio` `9:16` or `panel_height` 2200 to 2600, full width), preceded by a fragment glimpsed first (a leg, a claw, an eye huge in the foreground, the character small behind) and followed by the reaction.",
+    "Scale. When something colossal is in the panel (a machine, a giant, a chasm), write its size against the character in `scale_note` (\"the machine: twenty times his height, one leg thicker than a trunk; the hero the size of one of its rivets\") and compose for it: the character tiny at the bottom, low angle, the thing overflowing the frame. The reveal of a colossal thing is the tallest panel of the sequence (`aspect_ratio` `9:16` or `panel_height` 2200 to 2600, full width), preceded by a fragment glimpsed first (a leg, a claw, an eye huge in the foreground, the character small behind) and followed by the reaction.",
     "Objects and creatures, strict. Every object in a hand and every creature or machine named in ENTITIES has a design sheet attached to the panel when you put its id in `objects` (objects) or in `characters` (creatures, machines): always do it, in every panel where it is visible, even partly. Draw what the notes say is there and nothing else: no paper, letter, note or map exists in this episode; the pale plate on Lanterne's chest is armour. An object taken out, opened, looked at, thrown gets its own panels, followed to the end.",
-    "Continuity of state, strict. The `helmet` field of the moments is computed from the whole sequence and is the truth: when it says OFF, Lanterne is headless in that panel, whatever the character sheet shows and even if the head is out of frame; never write \"helmet on\" or \"helmet back on\" for a moment marked OFF. Carry the state of each character from panel to panel and write it in every `description` and in `state`. Once the helmet is on the ground, Lanterne is drawn WITHOUT his helmet in every panel until the panel where he puts it back: a hollow suit of armour with the cream scarf around an open, empty neck, no head, nothing inside; the helmet lies where it fell and is shown or implied. The same for kneeling, holding an object, an injury, a torn cape: a state changes only when the film or the screenplay changes it. A note saying the helmet is \"not visible\" means the frame does not include the head, nothing more.",
+    lostGarden
+      ? "Continuity of state, strict. The `helmet` field of the moments is computed from the whole sequence and is the truth: when it says OFF, Lanterne is headless in that panel, whatever the character sheet shows and even if the head is out of frame; never write \"helmet on\" or \"helmet back on\" for a moment marked OFF. Carry the state of each character from panel to panel and write it in every `description` and in `state`. Once the helmet is on the ground, Lanterne is drawn WITHOUT his helmet in every panel until the panel where he puts it back: a hollow suit of armour with the cream scarf around an open, empty neck, no head, nothing inside; the helmet lies where it fell and is shown or implied. The same for kneeling, holding an object, an injury, a torn cape: a state changes only when the film or the screenplay changes it. A note saying the helmet is \"not visible\" means the frame does not include the head, nothing more."
+      : "Continuity of state, strict. Carry the state of each character from panel to panel and write it in every `description` and in `state`: an injury, a torn cloth, something held, kneeling, a light on or off. A state changes only when the film or the screenplay changes it; never invent a change of state.",
     "Not every panel shows a character. One panel in four or five is an illustration or an atmosphere panel with nobody in it: the place, the light, a detail of the environment, an object on the ground (the fallen helmet alone, the pendant where it landed). Use them for silences, for a change of place and to let the reader breathe.",
-    "Title cards. When the film shows the title of the series or a logo, make a title card panel instead of an image: `title_card` set to the exact text (for this series: \"LOST GARDEN\"), background black, transition fade_to_black, no description needed. Never ask the image model to draw text.",
+    `Title cards. When the film shows the title of the series or a logo, make a title card panel instead of an image: \`title_card\` set to the exact text ${lostGarden ? '(for this series: "LOST GARDEN")' : "(the words on the card, as they are written)"}, background black, transition fade_to_black, no description needed. Never ask the image model to draw text.`,
     "Rhythm of a webtoon: a wide establishing panel each time the place changes, close-ups on gestures, details on objects, an almost empty panel for a silence, a tall panel for a fall or a vertical space. Never lose the reader: when the place, the subject or the direction changes, add a connective panel (an establishing view, an insert on what the character looks at, a reaction, a step, a hand, a sound in the dark).",
     "Layout, like a real webtoon. Break the stack of full-width rectangles with `frame`: `width` in percent (40 to 100), `align` (left, center, right), `shape` (rect, rounded, slant, slant-reverse, wedge, wedge-reverse), `overlap` (px, the panel rides over the one above, 60 to 300), `tilt` (degrees, -6 to 6), `shadow`. A landscape or a reveal is full width (100, shape rect or wedge); a detail or a reaction is narrow (50 to 72) pushed left or right, often overlapping the big panel above by 100 to 200 px, rounded or slanted; two or three narrow panels in a row alternate sides like a zigzag; an impact gets slant edges and a small tilt; a quiet moment gets a centered rounded panel with margins; keep full width for at most half of the panels.",
     "Action and threat: make the reader feel it. When something threatens or attacks (a machine that wakes, a chase, a fall, a blow), tell every second in three to five panels: the threat rising in the background while the character does not see it yet; a detail of the threat huge in the foreground with the character tiny behind; the character turning, backing away, the first step of the run; extreme close-ups of the eye holes, the hands, the feet hitting the moss; the threat from below, low angle, dutch angle; the character from above, small; a wide shot of the two with the distance closing; the impact panel with a giant sound effect; then the breath after. Mini panels in rapid succession (`3:1` and `16:9`, 300 to 450 px, continuous or hard_cut, no gap) with one very tall panel for the peak. Diagonals, tilted horizon (`tilt` 3 to 6, shape slant), cape and limbs stretched by motion. Never a calm medium shot in the middle of a chase.",
@@ -393,12 +398,14 @@ function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonS
         ? "This batch is a calm sequence: one to two panels per moment, wide and quiet, silence between them."
         : "",
     "Scale of the panels. Vary them strongly and say it in `aspect_ratio` (and `panel_height` up to 2600 when you want it taller than the ratio gives): mini panels in quick succession for details and beats (`3:1` or `16:9`, 300 to 500 px), standard panels (`4:5`) for the action, very tall full-bleed panels (`9:16`, or `panel_height` 2200 to 2600) for what must feel immense. Use `focal_point` (percent) to say what must stay in frame when the panel crops the image.",
-    "Location, strict: look at each frame and name the place actually visible. The sheet of the location you name is attached to the prompt and its design is copied into the background, so a wrong location paints the wrong place. Use `altar-sanctuary` only when the altar or the rose window is visible; use `blue-forest` for the cavern forest of black trunks, roots and glowing mushrooms; use `white-lily-field` for the white memory; otherwise create a short new id in lower case with hyphens and describe the place in the panel description. Never copy the location of the previous panel without checking the frame.",
-    `Characters with a design sheet (use these exact ids in "characters"): ${characters.join(" | ")}. Lanterne never speaks, never stumbles, emits no light and has no face inside the helmet. Rose is a small calm child. Other characters may be named in lower case and must then be described in the panel description.`,
+    lostGarden
+      ? "Location, strict: look at each frame and name the place actually visible. The sheet of the location you name is attached to the prompt and its design is copied into the background, so a wrong location paints the wrong place. Use `altar-sanctuary` only when the altar or the rose window is visible; use `blue-forest` for the cavern forest of black trunks, roots and glowing mushrooms; use `white-lily-field` for the white memory; otherwise create a short new id in lower case with hyphens and describe the place in the panel description. Never copy the location of the previous panel without checking the frame."
+      : "Location, strict: look at each frame and name the place actually visible. The sheet of the location you name is attached to the prompt and its design is copied into the background, so a wrong location paints the wrong place. Use the id of a location with a sheet only when the frame shows that place; otherwise create a short new id in lower case with hyphens and describe the place in the panel description. Never copy the location of the previous panel without checking the frame.",
+    `Characters with a design sheet (use these exact ids in "characters"): ${characters.join(" | ")}. ${lostGarden ? "Lanterne never speaks, never stumbles, emits no light and has no face inside the helmet. Rose is a small calm child. " : ""}Other characters may be named in lower case and must then be described in the panel description.`,
     objects.length ? `Objects with a design sheet (use these ids in "objects", without prefix): ${objects.join(" | ")}.` : "",
     `Locations with a sheet (use the id in "location" when the scene is there, otherwise a short new id in lower case with hyphens, described in the panel): ${locations.join(" | ")}.`,
     `Continuity of the series: ${script.source.continuity.join(" ")}`,
-    "Page background: `white` for the white memory world, `black` for the underground; `abyss` only for a fall into the deep.",
+    lostGarden ? "Page background: `white` for the white memory world, `black` for the underground; `abyss` only for a fall into the deep." : "Page background: `white` for a bright scene, `black` for a dark or night scene; `abyss` only for a fall into the deep.",
     "Shot types: extreme_wide, wide, full, medium, medium_close_up, close_up, extreme_close_up, detail, void. Angles: eye_level, low, high, top_down, dutch, over_the_shoulder, worm. Narrative roles: breath, establishing, character_intro, action, reaction, dialogue, detail, reveal, transition, tension, cliffhanger. Transitions (the space before the panel): continuous, cut, beat, breath, hard_cut, fall, fade_to_black, fade_to_white, time_skip.",
     "Lettering: dialogue only when the screenplay has a line at that moment, written in English in `en` and in French in `fr`, spoken and short; `style` speech, whisper, thought, shout or off; `speaker` is the character's name. Captions are rare (narration, a place, a time). Sound effects (`sfx`, style soft, hard or rumble) as an English onomatopoeia in `en` and a French one in `fr`, with `size` (96 normal, 180 to 320 for an impact) and `rotate`. Anchors are percentages of the panel: `anchor: {x, y}`.",
     "Write `description` as one or two precise sentences of what the panel shows (subject, pose, framing, light, what is in the background, what is in the hands), `action` as the movement or its absence, `emotion` in a few words, `composition` as where the eye goes, `purpose` as why the panel exists. Each panel must be understandable on its own from the image and its sound effects. Never use an em dash.",
@@ -408,10 +415,6 @@ function writerSystem(input: { script: NonNullable<ReturnType<typeof getWebtoonS
     .join("\n\n");
 }
 
-async function frameAsDataUrl(src: string): Promise<string> {
-  const bytes = await readFile(path.join(process.cwd(), "public", src));
-  return `data:image/jpeg;base64,${bytes.toString("base64")}`;
-}
 
 const isUsable = (i: NextPanelIntent | undefined): i is NextPanelIntent => Boolean(i && ((typeof i.title_card === "string" && i.title_card.trim()) || (typeof i.description === "string" && i.description.trim())));
 
@@ -419,17 +422,19 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const { script, lostGarden } = context;
   if (!process.env.AI_GATEWAY_API_KEY) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
+  if (!context.frames.length) return Response.json({ error: "Ce projet n'a pas encore d'images du film : importez la vidéo dans l'accueil du projet." }, { status: 400 });
 
   const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "calm" | "normal" | "action"; until_seconds?: number };
   const pace: "calm" | "normal" | "action" = body.pace === "calm" || body.pace === "action" ? body.pace : "normal";
   // `until_seconds: null` (the open-ended "next panels" of the studio) must stay open: Number(null) is 0.
   const until = body.until_seconds !== null && body.until_seconds !== undefined && Number.isFinite(Number(body.until_seconds)) ? Number(body.until_seconds) : null;
-  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
+  const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [], ...(body.library.base ? { base: body.library.base } : {}) } : null;
   const library = libraryWith(overlay);
   const count = Math.max(1, Math.min(MAX_COUNT, Math.round(Number(body.count) || 10)));
   const start = Array.isArray(body.panels) && body.panels.length ? body.panels : script.panels;
@@ -443,8 +448,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     return `${c.id} (${c.name}): ${sheet?.must_keep ?? ""}`;
   });
   const objectEntries = libraryObjects(overlay);
-  const screenplay = STUDIO_SCREENPLAY.pages.map((page) => `[page ${page.page}]\n${page.text}`).join("\n\n");
-  const allFrames = studioFilmFramesDense();
+  const screenplay = context.screenplay;
+  const allFrames = context.frames;
   const frameSrc = (seconds: number) => allFrames.find((f) => f.seconds === Math.round(seconds))?.src;
 
   const created: WebtoonPanel[] = [];
@@ -463,7 +468,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const window = available.slice(0, Math.min(MAX_FRAMES, share));
     if (!window.length) return Response.json({ error: "Fin de l'épisode : il n'y a plus d'image du film après la dernière case" }, { status: 400 });
 
-    const [rawNotes, helmet] = await Promise.all([analyzeWindow({ script, screenplay, frames: window, characters, objects: objectEntries.map((o) => o.name), meter }), helmetChecks(window, meter)]);
+    const [rawNotes, helmet] = await Promise.all([analyzeWindow({ script, lostGarden, screenplay, frames: window, characters, objects: objectEntries.map((o) => o.name), meter }), lostGarden ? helmetChecks(window, meter) : Promise.resolve(new Map<number, "on" | "off" | "absent">())]);
     if (!rawNotes.length) return Response.json({ error: "Le superviseur n'a rien lu sur ces images du film" }, { status: 502 });
     for (const note of rawNotes) {
       const check = helmet.get(Number(note.seconds));
@@ -473,7 +478,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     // Helmet track, deterministic: the state arrives from the panels already made, then each
     // frame can only change it with a clear reading; a close-up where the head is out of frame
     // keeps the state. The writer receives it as truth and the panels are forced to it afterwards.
-    const track = helmetTrack(rawNotes, start);
+    // Only Lost Garden has a hero who loses his head: elsewhere there is no track to impose.
+    const track = lostGarden ? helmetTrack(rawNotes, start) : new Map<number, "off" | "on">();
     for (const note of rawNotes) {
       const state = track.get(Number(note.seconds));
       if (state) note.helmet = state === "off" ? "OFF: headless, the neck is a dark empty opening above the scarf (the helmet lies on the ground or is out of frame)" : "ON: the helmet is on his head";
@@ -508,11 +514,11 @@ export async function POST(request: Request, { params }: RouteContext) {
       background: p.background,
       dialogue: p.dialogue.map((d) => `${d.speaker}: ${d.text.en}`),
     }));
-    const system = writerSystem({ script, batch: asked, characters, locations, objects: entities.filter((e) => e.kind === "object").map((e) => e.id).concat(objectEntries.map((o) => o.id)).filter((id, i, all) => all.indexOf(id) === i), pace });
+    const system = writerSystem({ script, lostGarden, batch: asked, characters, locations, objects: entities.filter((e) => e.kind === "object").map((e) => e.id).concat(objectEntries.map((o) => o.id)).filter((id, i, all) => all.indexOf(id) === i), pace });
     const frameParts: UserPart[][] = await Promise.all(
       frames.map(async (frame): Promise<UserPart[]> => [
         { type: "text", text: `Frame at ${frame.label} (${frame.seconds} s)` },
-        { type: "image_url", image_url: { url: await frameAsDataUrl(frame.src) } },
+        { type: "image_url", image_url: { url: await imageAsDataUrl(frame.src) } },
       ]),
     );
     const user: UserPart[] = [

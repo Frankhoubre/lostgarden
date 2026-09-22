@@ -2,7 +2,7 @@ import { SPACING_BY_TRANSITION } from "./adaptation";
 import { heightForAspect } from "./layout";
 import { buildGenerationPrompt } from "./prompts";
 import { frameReference, isReferenceId, libraryWith } from "./references";
-import { STYLE_BIBLE } from "./style-bible";
+import { bibleFor } from "./style-bible";
 import type { LibraryOverlay, PanelBackground, ReferenceAsset, WebtoonPanel, WebtoonScript } from "./types";
 
 /**
@@ -14,7 +14,7 @@ import type { LibraryOverlay, PanelBackground, ReferenceAsset, WebtoonPanel, Web
  * (generate route), so it stays free of Firebase and Node APIs.
  */
 
-type ScriptWorld = Pick<WebtoonScript, "palettes" | "style_anchors">;
+type ScriptWorld = Pick<WebtoonScript, "palettes" | "style_anchors"> & { style_bible_id?: string };
 
 const PALETTE_BY_BACKGROUND: Record<PanelBackground, string> = {
   white: "white_memory",
@@ -75,7 +75,7 @@ export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?:
   const { prompt, negative } = buildGenerationPrompt({
     panel,
     references,
-    bible: STYLE_BIBLE,
+    bible: bibleFor(script.style_bible_id),
     palette: paletteForPanel(panel, script),
     notes,
   });

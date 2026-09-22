@@ -42,6 +42,12 @@ export type ReferenceAsset = {
    * A turnaround sheet has the head of the front view near the top left.
    */
   avatar?: { x: number; y: number; zoom: number };
+  /** Images the sheet is drawn from, chosen by the author: frames of the film and images of their own. */
+  sources?: string[];
+  /** The author's version of the prepared prompt of the sheet; the prepared one when unset. */
+  sheet_prompt?: string;
+  /** Seconds of the film where the thing was detected, to offer more frames as references. */
+  seen_seconds?: number[];
 };
 
 /**
@@ -51,6 +57,12 @@ export type ReferenceAsset = {
 export type LibraryOverlay = {
   assets: ReferenceAsset[];
   hidden: string[];
+  /**
+   * What the overlay sits on. Unset or "lost-garden": the code library of the
+   * series (Lanterne, Rose, the sanctuary). "none": a project of its own,
+   * whose library is only what its owner added in the studio.
+   */
+  base?: "lost-garden" | "none";
 };
 
 export type ShotType =

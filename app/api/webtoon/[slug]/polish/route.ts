@@ -1,8 +1,7 @@
 import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
-import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
+import { getProjectContext } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, PanelFrame, WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -32,8 +31,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const { script } = context;
   if (!process.env.AI_GATEWAY_API_KEY) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
@@ -87,7 +87,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       const frame = cleanFrame(value);
       if (frame && panels.some((p) => p.panel_id === id)) frames[id] = frame;
     }
-    const filmFrames = studioFilmFramesDense();
+    const filmFrames = context.frames;
     const inserts: { after: string; panel: WebtoonPanel }[] = [];
     let current = panels;
     for (const intent of (answer.inserts ?? []).slice(0, maxInserts)) {

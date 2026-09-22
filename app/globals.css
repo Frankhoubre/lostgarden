@@ -4323,3 +4323,344 @@ body.studio-dragging * {
 .studio-conflict b {
   color: #fff0d4;
 }
+
+/* Projects: the studio's front page, the onboarding, the bible. */
+.studio-input,
+.studio-textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(125, 223, 255, 0.22);
+  border-radius: 0.5rem;
+  background: rgba(2, 8, 20, 0.6);
+  color: #eae4d6;
+  font-size: 0.85rem;
+}
+
+select.studio-input {
+  width: auto;
+}
+
+.studio-textarea {
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.studio-textarea-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+}
+
+.studio-home-main,
+.studio-onboarding-main {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.studio-home-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.studio-home-new {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.studio-home-new .studio-input {
+  width: 18rem;
+  max-width: 100%;
+}
+
+.studio-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.studio-project {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.studio-project:hover {
+  border-color: rgba(125, 223, 255, 0.55);
+  transform: translateY(-2px);
+}
+
+.studio-project-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.studio-project img,
+.studio-project-empty {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.studio-project-empty {
+  display: grid;
+  place-items: center;
+  background: rgba(125, 223, 255, 0.08);
+  color: #7ddfff;
+  font-size: 2.4rem;
+}
+
+.studio-project b {
+  display: block;
+  color: #f3eee2;
+}
+
+.studio-project span {
+  font-size: 0.75rem;
+  color: rgba(216, 210, 194, 0.65);
+}
+
+.studio-project > .webtoon-mini-danger {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+}
+
+.studio-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 1180px;
+  margin: 1rem auto 0;
+  padding: 0 1rem;
+}
+
+.studio-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-width: 8.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(125, 223, 255, 0.15);
+  border-radius: 0.6rem;
+  color: rgba(216, 210, 194, 0.5);
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.studio-step.is-reached {
+  color: #eae4d6;
+  border-color: rgba(125, 223, 255, 0.3);
+}
+
+.studio-step.is-active {
+  border-color: #7ddfff;
+  background: rgba(125, 223, 255, 0.1);
+  color: #fff;
+}
+
+.studio-step small {
+  font-size: 0.66rem;
+  color: rgba(125, 223, 255, 0.8);
+}
+
+.studio-step-number {
+  font-size: 0.65rem;
+  color: #7ddfff;
+}
+
+.studio-source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.studio-source {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+  font-size: 0.8rem;
+  color: rgba(216, 210, 194, 0.75);
+}
+
+.studio-source b {
+  color: #f3eee2;
+  font-size: 0.95rem;
+}
+
+.studio-source.is-on {
+  border-color: #7ddfff;
+  background: rgba(125, 223, 255, 0.1);
+}
+
+.studio-drop {
+  display: block;
+  padding: 1.2rem;
+  border: 1px dashed rgba(125, 223, 255, 0.45);
+  border-radius: 0.8rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #cfe9f5;
+  cursor: pointer;
+}
+
+.studio-drop:hover {
+  background: rgba(125, 223, 255, 0.06);
+}
+
+.studio-progress {
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: rgba(125, 223, 255, 0.12);
+}
+
+.studio-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #7ddfff);
+  transition: width 0.3s ease;
+}
+
+.studio-onboarding-next {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+
+.studio-bible-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.studio-bible-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 1rem;
+}
+
+.studio-bible-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.studio-bible-card.is-main {
+  border-color: rgba(125, 223, 255, 0.45);
+}
+
+.studio-bible-card.is-minor {
+  opacity: 0.8;
+}
+
+.studio-bible-frames {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.studio-bible-frame {
+  position: relative;
+  width: 88px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 0.4rem;
+  opacity: 0.55;
+}
+
+.studio-bible-frame.is-on {
+  border-color: #7ddfff;
+  opacity: 1;
+}
+
+.studio-bible-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.studio-bible-frame span {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  padding: 0 0.25rem;
+  border-radius: 0.2rem;
+  background: rgba(0, 0, 0, 0.65);
+  font-size: 0.6rem;
+  color: #fff;
+}
+
+.studio-bible-add {
+  width: 88px;
+  aspect-ratio: 16 / 9;
+  border: 1px dashed rgba(125, 223, 255, 0.5);
+  border-radius: 0.4rem;
+  font-size: 0.7rem;
+  color: #7ddfff;
+}
+
+.studio-bible-sheet img,
+.studio-bible-empty {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.studio-bible-sheet button {
+  display: block;
+  width: 100%;
+}
+
+.studio-bible-empty {
+  display: grid;
+  place-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(216, 210, 194, 0.6);
+  font-size: 0.8rem;
+}
+
+.studio-bible-summary {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.studio-bible-summary b {
+  color: #7ddfff;
+}
+
+.studio-sheet-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.studio-sheet-wall img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: #fff;
+}

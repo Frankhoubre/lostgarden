@@ -3,12 +3,16 @@
 import { useMemo, useState } from "react";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
 import { STUDIO_ANALYSIS, studioFilmFrames, studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
+import { coveredUntil } from "@/lib/webtoon/continuity";
+import { sparseFrames } from "@/lib/webtoon/project";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
 
 type StudioFramesProps = {
   panels: WebtoonPanel[];
   /** Continue the strip: a new panel drawn from this frame, appended after the last one. */
   onCreatePanel: (frame: { src: string; seconds: number }) => void;
+  /** The film of a project, one frame per second; Lost Garden episode 1 when unset. */
+  frames?: { src: string; seconds: number; label: string }[];
 };
 
 /**
@@ -16,17 +20,17 @@ type StudioFramesProps = {
  * then one frame every five seconds over the whole episode, with the part
  * already adapted marked, so the next segment is easy to pick.
  */
-export function StudioFrames({ panels, onCreatePanel }: StudioFramesProps) {
+export function StudioFrames({ panels, onCreatePanel, frames: projectFrames }: StudioFramesProps) {
   const [open, setOpen] = useState<{ src: string; label: string; seconds: number } | null>(null);
   /** One frame per second (what the writer reads) or one every five seconds (lighter to scan). */
   const [dense, setDense] = useState(true);
-  const frames = dense ? studioFilmFramesDense() : studioFilmFrames();
-  const adaptedUntil = useMemo(() => Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)), [panels]);
-  const shotFrames = STUDIO_ANALYSIS.shots.filter((shot) => shot.frames.length);
+  const frames = projectFrames ? (dense ? projectFrames : sparseFrames(projectFrames)) : dense ? studioFilmFramesDense() : studioFilmFrames();
+  const adaptedUntil = useMemo(() => coveredUntil(panels), [panels]);
+  const shotFrames = projectFrames ? [] : STUDIO_ANALYSIS.shots.filter((shot) => shot.frames.length);
 
   return (
     <div className="space-y-6">
-      <section className="studio-card">
+      {shotFrames.length ? <section className="studio-card">
         <p className="anime-label text-xs text-cyan-pale">Images de référence des plans adaptés</p>
         <h2 className="font-display text-lg text-lily">{shotFrames.length} plans, une image chacun</h2>
         <p className="text-xs text-ivory/60">Ce sont les images jointes en dernier dans chaque prompt, pour le cadrage et la lumière.</p>
@@ -39,7 +43,7 @@ export function StudioFrames({ panels, onCreatePanel }: StudioFramesProps) {
             </button>
           ))}
         </div>
-      </section>
+      </section> : null}
 
       <section className="studio-card">
         <div className="studio-section-head">

@@ -15,7 +15,7 @@ export const LIBRARY_COLLECTION = "webtoon_library";
 
 export const EMPTY_LIBRARY: LibraryOverlay = { assets: [], hidden: [] };
 
-type LibraryDocument = { assets_json: string; hidden_json: string; updated_at_iso: string; updated_by: string | null };
+type LibraryDocument = { assets_json: string; hidden_json: string; base?: "lost-garden" | "none"; updated_at_iso: string; updated_by: string | null };
 
 export async function loadLibrary(slug: string): Promise<LibraryOverlay | null> {
   const snapshot = await getDoc(doc(getDb(), LIBRARY_COLLECTION, slug));
@@ -25,6 +25,7 @@ export async function loadLibrary(slug: string): Promise<LibraryOverlay | null> 
     return {
       assets: data.assets_json ? (JSON.parse(data.assets_json) as ReferenceAsset[]) : [],
       hidden: data.hidden_json ? (JSON.parse(data.hidden_json) as string[]) : [],
+      ...(data.base ? { base: data.base } : {}),
     };
   } catch {
     return null;
@@ -35,6 +36,7 @@ export async function saveLibrary(slug: string, library: LibraryOverlay, user: U
   const payload: LibraryDocument & { touched: unknown } = {
     assets_json: JSON.stringify(library.assets),
     hidden_json: JSON.stringify(library.hidden),
+    ...(library.base ? { base: library.base } : {}),
     updated_at_iso: new Date().toISOString(),
     updated_by: user.email ?? null,
     touched: serverTimestamp(),
@@ -67,6 +69,7 @@ export function upsertAsset(library: LibraryOverlay, asset: ReferenceAsset): Lib
   const custom = { ...asset, custom: true };
   const exists = library.assets.some((a) => a.id === asset.id);
   return {
+    ...library,
     hidden: library.hidden.filter((id) => id !== asset.id),
     assets: exists ? library.assets.map((a) => (a.id === asset.id ? custom : a)) : [...library.assets, custom],
   };
@@ -75,6 +78,7 @@ export function upsertAsset(library: LibraryOverlay, asset: ReferenceAsset): Lib
 /** Remove an asset: a studio one disappears, a built-in one is hidden. */
 export function removeAsset(library: LibraryOverlay, id: string, builtIn: boolean): LibraryOverlay {
   return {
+    ...library,
     assets: library.assets.filter((a) => a.id !== id),
     hidden: builtIn && !library.hidden.includes(id) ? [...library.hidden, id] : library.hidden,
   };

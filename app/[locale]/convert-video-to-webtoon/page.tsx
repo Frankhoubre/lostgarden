@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { StudioApp } from "@/components/studio/StudioApp";
 import { StudioGate } from "@/components/studio/StudioGate";
+import { StudioHome } from "@/components/studio/StudioHome";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
 /**
- * /convert-video-to-webtoon: the private studio where the strip is edited.
- * Not indexed, not linked from the site, behind the Google allowlist gate.
+ * /convert-video-to-webtoon: the private studio, its list of projects (Lost
+ * Garden first) and the creation of a new one. A project opens on
+ * /convert-video-to-webtoon/<project>. Not indexed, not linked from the
+ * site, behind the Google allowlist gate.
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: localeParam } = await params;
@@ -33,12 +34,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function StudioPage({ params }: PageProps) {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) notFound();
-  const script = getWebtoonScript("ep1-opening");
-  if (!script) notFound();
 
   return (
     <StudioGate>
-      <StudioApp script={script} />
+      <StudioHome />
     </StudioGate>
   );
 }

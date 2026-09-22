@@ -1,7 +1,7 @@
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
 import { libraryCharacters, libraryLocations } from "@/lib/webtoon/references";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { getProjectContext } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -40,8 +40,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const project = await getProjectContext(slug, identity);
+  if (!project) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const { script } = project;
   if (!process.env.AI_GATEWAY_API_KEY) return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
 
   const body = (await request.json().catch(() => ({}))) as {

@@ -1,6 +1,6 @@
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
-import { getWebtoonScript } from "@/lib/webtoon/scripts";
+import { getProjectContext } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import { LETTERING_LOCALES, sourceLocale, type LetteringItem } from "@/lib/webtoon/translate";
 import type { Locale } from "@/lib/i18n/config";
@@ -25,8 +25,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
-  const script = getWebtoonScript(slug);
-  if (!script) return Response.json({ error: "unknown webtoon script" }, { status: 404 });
+  const context = await getProjectContext(slug, identity);
+  if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
+  const { script } = context;
   if (!process.env.AI_GATEWAY_API_KEY) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
@@ -37,7 +38,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const locales = (body.locales ?? LETTERING_LOCALES).filter((l) => LETTERING_LOCALES.includes(l));
 
   const system = [
-    `You translate the lettering of "${script.series}", an original poetic dark fantasy anime by Frank Houbre, adapted as a vertical webtoon. Episode ${script.episode}.`,
+    `You translate the lettering of "${script.series}", ${context.lostGarden ? "an original poetic dark fantasy anime by Frank Houbre" : "an animated film"}, adapted as a vertical webtoon. Episode ${script.episode}.`,
     "Speakers: Lanterne is a hollow suit of armour who never speaks. Rose is a small, calm child who speaks softly and simply. The Unhooker, the King of the Vault and the other creatures of the Below speak in short, low sentences.",
     "Rules: write natural spoken language, the way a person would say it out loud, never a word-for-word transfer. Keep each line as short as the original so it fits in a bubble. Keep the register (whisper, shout, thought). Captions are narration or a place or a time. Sound effects (sfx) are onomatopoeia: give the natural onomatopoeia of each language (Japanese in katakana, Korean in hangul), not a translation of the word.",
     "In English and French, use the second person singular only when a child or a close companion is addressed. Never use an em dash. Use plain punctuation.",
