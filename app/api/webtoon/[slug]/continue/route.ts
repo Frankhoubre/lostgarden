@@ -310,9 +310,11 @@ function helmetTrack(notes: FrameNote[], previous: WebtoonPanel[]): Map<number, 
   const readings = sorted.map((n) => {
     const h = (n.helmet ?? "").toLowerCase();
     if (!(n.characters ?? []).includes("lanterne")) return "absent" as const;
-    if (h.includes("on his head")) return "on" as const;
-    // "not visible" or a bare "off" is weak (a head out of frame, the top of the helmet seen from above): the state holds.
+    // A helmet in his hands is not on his head, whatever the supervisor wrote about the head:
+    // kneeling with the helmet held against him read as "on his head" and made the state flap.
+    if (/helmet/i.test(n.in_hands ?? "")) return "off" as const;
     if (h.includes("ground") || h.includes("in his hands") || h.includes("headless")) return "off" as const;
+    if (h.includes("on his head")) return "on" as const;
     return "unknown" as const;
   });
   const track = new Map<number, "off" | "on">();
@@ -331,8 +333,9 @@ function helmetTrack(notes: FrameNote[], previous: WebtoonPanel[]): Map<number, 
       // consecutive readings of Lanterne say "on": one or two isolated "on" after "off" are misreads.
       const text = `${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""} ${sorted[i].posture ?? ""} ${sorted[i].motion ?? ""}`;
       const putsBack = /helmet/i.test(text) && /(put|puts|putting|place|places|placing|set|sets|setting|lift|lifts|lifting|rais|lower|lowers|lowering|slide|slides|press|presses).*(on|onto|over|back|head|neck|shoulders)|helmet (is )?back on|back on his head/i.test(text);
-      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 2);
-      const stable = following.length === 2 && following.every((x) => x === "on");
+      // Coming back on is the rarer event: three readings in a row, not two, or the gesture itself.
+      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 3);
+      const stable = following.length === 3 && following.every((x) => x === "on");
       if (!off || putsBack || stable) off = false;
     }
     track.set(Number(sorted[i].seconds), off ? "off" : "on");
