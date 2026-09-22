@@ -8,6 +8,7 @@ import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
 import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
+import { coveredUntil } from "@/lib/webtoon/continuity";
 import { uploadLibraryImage, upsertAsset, slugify } from "@/lib/webtoon/library";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -32,7 +33,7 @@ import {
 } from "@/lib/webtoon/editor-ops";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { computeLayout } from "@/lib/webtoon/layout";
-import { libraryCharacters, libraryLocations, referencesForPanel } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryLocations, libraryObjects, libraryWith, referencesForPanel } from "@/lib/webtoon/references";
 import { imageSize, readFileAsDataUrl, uploadPanelImage } from "@/lib/webtoon/studio";
 import { studioFilmFrames } from "@/lib/webtoon/studio-assets";
 import { applyTranslations, itemsToTranslate, type LetteringItem } from "@/lib/webtoon/translate";
@@ -49,7 +50,7 @@ import type {
   TransitionType,
   WebtoonPanel,
   WebtoonScript,
-} from "@/lib/webtoon/types";
+ ReferenceAsset } from "@/lib/webtoon/types";
 
 const SHOT_TYPES: ShotType[] = ["extreme_wide", "wide", "full", "medium", "medium_close_up", "close_up", "extreme_close_up", "detail", "void"];
 const ANGLES: CameraAngle[] = ["eye_level", "low", "high", "top_down", "dutch", "over_the_shoulder", "worm"];
@@ -163,6 +164,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const locale = previewLocale;
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
   const LOCATIONS = useMemo(() => libraryLocations(library), [library]);
+  const OBJECTS = useMemo(() => libraryObjects(library), [library]);
   const { user } = useAuth();
   /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it, editable in place. */
   const [view, setView] = useState<"panel" | "strip">(() => {
@@ -266,7 +268,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel_id: panel.panel_id, panel, library }),
+        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
       const received = payload.src ?? payload.data_url;
@@ -363,7 +365,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const continueStory = async () => {
     if (busy) return;
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
-    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${Math.max(0, ...panels.map((p) => p.source_time_end ?? 0)).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
+    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
     await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
   };
 
@@ -376,8 +378,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (busy || !checkedPanels.length) return;
     const first = panels.findIndex((p) => p.panel_id === checkedPanels[0].panel_id);
     const before = panels[first - 1] ?? null;
-    const until = Math.max(...checkedPanels.map((p) => p.source_time_end ?? 0));
-    const from = before?.source_time_end ?? 0;
+    const until = coveredUntil(checkedPanels);
+    const from = before ? coveredUntil([before]) : 0;
     if (!(until > from)) {
       notify("Les cases cochées n'ont pas de temps de film à réécrire");
       return;
@@ -386,6 +388,47 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     const kept = panels.filter((p) => !checked.has(p.panel_id));
     setChecked(new Set());
     await writeSpan({ base: kept, insertAfter: before?.panel_id ?? null, count, until, label: "la séquence" });
+  };
+
+  /**
+   * Sheets for what the writer found in the film without one (an object in a
+   * hand, a creature, a machine): each is added to the library, drawn from the
+   * frames of the film where it is seen best, stored, and from then on every
+   * panel that names it attaches the same design.
+   */
+  const adoptAssets = async (found: { asset: ReferenceAsset; frames: string[] }[]) => {
+    for (const { asset, frames } of found) {
+      if (stopBatch.current) return;
+      const name = asset.name.split(",")[0];
+      const known = libraryWith(libraryRef.current).find((a) => a.id === asset.id);
+      if (known?.image) continue;
+      const target = known ?? asset;
+      let next = upsertAsset(libraryRef.current, target);
+      libraryRef.current = next;
+      setLibrary(next);
+      setJob((job) => (job ? { ...job, label: `Fiche de ${name} dessinée depuis le film…` } : job));
+      try {
+        const response = await fetch(`/api/webtoon/${script.slug}/asset`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+          body: JSON.stringify({ asset: target, library: next, frames }),
+        });
+        const payload = (await response.json().catch(() => ({}))) as { src?: string; data_url?: string; error?: string };
+        const received = payload.src ?? payload.data_url;
+        if (!response.ok || !received) {
+          notify(`Fiche de ${name} non dessinée : ${payload.error ?? response.status}`);
+          continue;
+        }
+        let src = received;
+        if (user && received.startsWith("data:")) src = await uploadLibraryImage(script.slug, target.id, received).catch(() => received);
+        next = upsertAsset(next, { ...target, image: src });
+        libraryRef.current = next;
+        setLibrary(next);
+        notify(`Fiche de ${name} ajoutée à la bibliothèque (${target.kind === "object" ? "objet" : "personnage"})`);
+      } catch (error) {
+        notify(`Fiche de ${name} : ${error instanceof Error ? error.message : "erreur"}`);
+      }
+    }
   };
 
   /** Write, generate and translate a span of the film into the strip, after `insertAfter` (or at the end). */
@@ -420,9 +463,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
           // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
-          body: JSON.stringify({ count: count - created.length, panels: current, library, pace, until_seconds: until }),
+          body: JSON.stringify({ count: count - created.length, panels: current, library: libraryRef.current, pace, until_seconds: until }),
         });
-        const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; error?: string };
+        const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
           // Nothing written at all: say why and stop. The end of the film after some panels is not an error.
           if (!created.length) {
@@ -437,6 +480,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         setPanels(assemble());
         onAutosave?.();
         if (created.length === payload.panels.length) select(created[0].panel_id);
+        // What the writer found in the film without a sheet gets one now, before any image is made.
+        if (payload.new_assets?.length) await adoptAssets(payload.new_assets);
       }
       notify(`${created.length} cases écrites. Génération des images…`);
       // A title card has no image to make.
@@ -1113,6 +1158,23 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 }}
               />
             </div>
+            {OBJECTS.length ? (
+              <div>
+                <span className="webtoon-field-label">Objets visibles (leur fiche est jointe)</span>
+                <div className="studio-chips">
+                  {OBJECTS.map((o) => {
+                    const current = selected.objects ?? [];
+                    const on = current.includes(o.id);
+                    return (
+                      <button key={o.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ objects: on ? current.filter((id) => id !== o.id) : [...current, o.id] })} aria-pressed={on} title={on ? `${o.name} est dans la case` : `Ajouter ${o.name} à la case`}>
+                        <Avatar image={o.image} name={o.name} mode="cover" />
+                        <span>{o.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
             <div>
               <span className="webtoon-field-label">Lieu (sa fiche est jointe)</span>
               <div className="studio-chips">

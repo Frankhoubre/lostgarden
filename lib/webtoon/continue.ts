@@ -1,5 +1,6 @@
 import { ASPECT_BY_SHOT, SPACING_BY_TRANSITION } from "./adaptation";
 import { composePanel, panelFromFrame, type FramePick } from "./compose";
+import { effectCues, motionCues } from "./continuity";
 import { heightForAspect } from "./layout";
 import type {
   Anchor,
@@ -67,6 +68,18 @@ export type NextPanelIntent = {
   dialogue?: NextText[];
   caption?: NextText[];
   sfx?: NextText[];
+  /** Objects with a sheet in the library, by id without the `obj.` prefix ("pendant"): their sheets are attached. */
+  objects?: string[];
+  /** How much moves in the panel; the prompt gets speed lines, debris and stretched cloth accordingly. */
+  motion?: "none" | "slow" | "fast" | "violent";
+  /** Visual effects the panel must show ("electric arcs", "dust", "debris"). */
+  effects?: string[];
+  /** What would be heard in the panel; a sound effect is lettered from it when `sfx` is empty. */
+  sound?: string;
+  /** Size of a thing next to the character, written into the prompt ("the machine: twenty times his height"). */
+  scale_note?: string;
+  /** More frames of the film to attach (the object seen best, the creature in close-up), public paths. */
+  extra_frames?: string[];
 };
 
 const SHOTS = new Set<ShotType>(["extreme_close_up", "close_up", "medium_close_up", "medium", "full", "wide", "extreme_wide", "detail", "void"]);
@@ -160,6 +173,9 @@ export function panelsFromIntents(
       continue;
     }
     const state = typeof intent.state === "string" ? intent.state.trim() : "";
+    // Movement, effects and scale are part of the picture: they go into the description the prompt is built from.
+    const cues = [motionCues(intent.motion), effectCues(intent.effects), typeof intent.scale_note === "string" && intent.scale_note.trim() ? `SCALE: ${intent.scale_note.trim()}` : ""].filter(Boolean).join(" ");
+    const extraFrames = Array.isArray(intent.extra_frames) ? intent.extra_frames.map((f) => String(f).trim()).filter((f) => f && f !== frame.src) : [];
     const shot = pick(intent.shot_type, SHOTS, "medium");
     const wanted = typeof intent.aspect_ratio === "string" && /^\d+:\d+$/.test(intent.aspect_ratio.trim()) ? intent.aspect_ratio.trim() : null;
     const aspect = wanted ?? ASPECT_BY_SHOT[shot];
@@ -170,15 +186,18 @@ export function panelsFromIntents(
     const draft: WebtoonPanel = {
       ...base,
       source_time_start: frame.seconds,
-      source_time_end: frame.seconds + 5,
+      // Frames are one second apart: the panel covers its second, and the next batch starts at the next frame.
+      source_time_end: frame.seconds + 1,
       fidelity: pick(intent.fidelity, new Set<Fidelity>(["direct", "reframe", "bridge"]), "direct"),
       narrative_role: pick(intent.narrative_role, ROLES, "action"),
       purpose: [(intent.purpose ?? "").trim(), state ? `State: ${state}` : ""].filter(Boolean).join(" "),
-      description: state ? `${intent.description.trim()} STATE TO KEEP EXACTLY: ${state}` : intent.description.trim(),
+      description: [intent.description.trim(), state ? `STATE TO KEEP EXACTLY: ${state}` : "", cues].filter(Boolean).join(" "),
       action: (intent.action ?? "").trim(),
       emotion: (intent.emotion ?? "").trim(),
       characters: Array.isArray(intent.characters) ? intent.characters.map((c) => String(c).trim().toLowerCase()).filter(Boolean) : base.characters,
       location: (intent.location ?? base.location).trim().toLowerCase(),
+      objects: Array.isArray(intent.objects) ? intent.objects.map((o) => String(o).trim().toLowerCase().replace(/^obj\./, "")).filter(Boolean) : [],
+      visual_references: [...base.visual_references, ...extraFrames],
       shot_type: shot,
       camera_angle: pick(intent.camera_angle, ANGLES, "eye_level"),
       composition: (intent.composition ?? "").trim(),
