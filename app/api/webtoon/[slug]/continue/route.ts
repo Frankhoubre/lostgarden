@@ -141,7 +141,7 @@ async function analyzeWindow(input: Parameters<typeof analyzeFrames>[0]): Promis
 /** Two frames the checker compares against: the helmet on (1:25) and the hollow neck (2:25). */
 const HELMET_EXAMPLES = { on: "/webtoon/ep1-opening/film/01m25s.jpg", off: "/webtoon/ep1-opening/film/02m25s.jpg" };
 
-async function helmetChecks(frames: { seconds: number; src: string }[], meter: CostMeter): Promise<Map<number, "on" | "off" | "unsure" | "absent">> {
+async function helmetChecks(frames: { seconds: number; src: string }[], meter: CostMeter): Promise<Map<number, "on" | "off" | "absent">> {
   const [exampleOn, exampleOff] = await Promise.all([frameAsDataUrl(HELMET_EXAMPLES.on), frameAsDataUrl(HELMET_EXAMPLES.off)]);
   const results = await Promise.all(
     frames.map(async (frame) => {
@@ -162,17 +162,17 @@ async function helmetChecks(frames: { seconds: number; src: string }[], meter: C
           temperature: 0,
           onCost: (usd) => { meter.usd += usd; },
         });
-        // "off" is strong only when the helmet is seen somewhere else (the ground, his hands): the top of the
-        // helmet seen from above, or a head cut by the frame, reads as a dark opening and would remove it wrongly.
-        const elsewhere = String(answer.helmet_elsewhere ?? "").toLowerCase();
-        const state: "on" | "off" | "unsure" | "absent" = !answer.lanterne_visible ? "absent" : answer.helmet_on_head ? "on" : /ground|hand/.test(elsewhere) ? "off" : "unsure";
+        // This check compares the frame to two examples at temperature zero and reads the helmet
+        // better than the supervisor, which described a headless knight as "on his head" three
+        // frames in a row: when Lanterne is visible, its answer decides.
+        const state: "on" | "off" | "absent" = !answer.lanterne_visible ? "absent" : answer.helmet_on_head ? "on" : "off";
         return [frame.seconds, state] as const;
       } catch {
         return [frame.seconds, "absent"] as const;
       }
     }),
   );
-  const map = new Map<number, "on" | "off" | "unsure" | "absent">();
+  const map = new Map<number, "on" | "off" | "absent">();
   for (const [seconds, state] of results) map.set(seconds, state);
   return map;
 }
@@ -333,9 +333,10 @@ function helmetTrack(notes: FrameNote[], previous: WebtoonPanel[]): Map<number, 
       // consecutive readings of Lanterne say "on": one or two isolated "on" after "off" are misreads.
       const text = `${sorted[i].action ?? ""} ${sorted[i].in_hands ?? ""} ${sorted[i].posture ?? ""} ${sorted[i].motion ?? ""}`;
       const putsBack = /helmet/i.test(text) && /(put|puts|putting|place|places|placing|set|sets|setting|lift|lifts|lifting|rais|lower|lowers|lowering|slide|slides|press|presses).*(on|onto|over|back|head|neck|shoulders)|helmet (is )?back on|back on his head/i.test(text);
-      // Coming back on is the rarer event: three readings in a row, not two, or the gesture itself.
-      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 3);
-      const stable = following.length === 3 && following.every((x) => x === "on");
+      // Coming back on happens once in the episode, through a gesture the film shows: five readings
+      // in a row, or the gesture itself. Three were enough for a misread stretch to put his head back.
+      const following = readings.slice(i + 1).filter((x) => x !== "absent" && x !== "unknown").slice(0, 5);
+      const stable = following.length === 5 && following.every((x) => x === "on");
       if (!off || putsBack || stable) off = false;
     }
     track.set(Number(sorted[i].seconds), off ? "off" : "on");
