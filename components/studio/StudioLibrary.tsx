@@ -204,9 +204,15 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     const from = panelId(entry);
     const to = panelId(target);
     const named = mergeInPanels(panels, kind, from, to);
-    if (!window.confirm(`Fusionner « ${entry.name} » dans « ${target.name} » ? ${named.changed} case${named.changed > 1 ? "s" : ""} qui le nomment nommeront ${target.name} et seront marquées à redessiner ; les fiches de ${entry.name} sont retirées.`)) return;
+    const keep = kind === "character" && entry.assets.some((a) => a.image);
+    if (!window.confirm(`Fusionner « ${entry.name} » dans « ${target.name} » ? ${named.changed} case${named.changed > 1 ? "s" : ""} qui le nomment nommeront ${target.name} et seront marquées à redessiner ; ${keep ? `ses fiches passent chez ${target.name}, après les siennes (le × les retire)` : `les fiches de ${entry.name} sont retirées`}.`)) return;
     let next = library;
-    for (const asset of entry.assets) next = removeAsset(next, asset.id, BUILT_IN_IDS.has(asset.id));
+    const last = Math.max(0, ...target.assets.map((a) => a.priority ?? 1));
+    entry.assets.forEach((asset, i) => {
+      // A character's other sheets are views of the same being (the Source: its face, its hands, the whole tree): they move, after the target's own.
+      if (keep && asset.image && !BUILT_IN_IDS.has(asset.id)) next = upsertAsset(next, { ...asset, subject: target.id, priority: last + 1 + i, name: `${target.name}, ${asset.name.split(",")[0]}`, tags: [...new Set([target.id, ...(asset.tags ?? []).filter((t) => t !== entry.id)])] });
+      else next = removeAsset(next, asset.id, BUILT_IN_IDS.has(asset.id));
+    });
     persist(next);
     setPanels(named.panels);
     notify(`${entry.name} fusionné dans ${target.name} : ${named.changed} case${named.changed > 1 ? "s" : ""} à redessiner (« Générer les cases manquantes »)`);
