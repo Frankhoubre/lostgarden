@@ -1034,7 +1034,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 className="webtoon-mini"
                 onClick={() => {
                   // The count is asked, with a suggestion by pace: the action pace tells every second in several panels, the others one panel per moment.
-                  const suggested = pace === "action" ? checkedPanels.length * 3 : pace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
+                  const suggested = pace === "action" ? checkedPanels.length * 2 : pace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
                   const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} : combien de cases écrire ?`, String(suggested));
                   const n = Math.round(Number(answer));
                   if (answer !== null && n > 0) void rewriteChecked(Math.min(150, n));
@@ -1145,7 +1145,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
               <label>
                 <span>Rythme</span>
-                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Action : trois à cinq cases par image du film, nerveuses ; calme : une à deux, larges et silencieuses">
+                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Normal : une case pour environ 2,6 s de film ; action : une pour 1,3 s, nerveuses ; calme : une pour 4 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
                   <option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
                 </select>
               </label>
@@ -1269,7 +1269,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références" : "Dessine la case à partir de sa description et de ses références"}>
                 {busy ? "…" : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Peins une zone de l'image et dis ce qui doit y apparaître : seule cette zone change">Retoucher une zone</button>
+              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">Modifier / retoucher</button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
@@ -1287,6 +1287,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             panel={selected}
             library={library}
             notify={notify}
+            quality={quality}
             onClose={() => setInpaintOpen(false)}
             onDone={async (dataUrl) => {
               await applyImage(selected, dataUrl, "inpaint");

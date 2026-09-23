@@ -119,3 +119,8 @@ Aucune case n'a été régénérée : chaque défaut a été corrigé dans le mo
 - **Cases en trop** : marcher et se tenir debout sont une seule posture, apparition et redressement une seule révélation, `dropRepeats` fusionne deux cases qui disent la même chose, `smoothLocations` corrige un lieu isolé.
 - **Vue de dos** : ni yeux ni visage au dos du casque.
 - **Qualité d'image** : la taille est déjà 1K (1024 × 1536). Le levier est la qualité : sur une case test à une référence, 0,053 $ en haute, 0,022 $ en moyenne, deux fois plus vite. Bouton HD / Éco dans la barre de la case, mémorisé par navigateur.
+
+## Moins de cases, et modifier une case avec un prompt (23 septembre 2026)
+
+- **Densité** : 14 cases pour 18 s de film (7:54 à 8:12), c'était trop. Chaque lot a maintenant un budget (`panelBudget` : une case pour 2,6 s en rythme normal, 1,3 s en action, 4 s en calme, plus une partie des cases qu'exigent les temps forts). L'écrivain reçoit ce nombre comme un plafond, et `trimToBudget` retire après coup les cases les plus faibles (un recadrage sans bulle ni son, proche dans le temps d'une voisine qui dit la même chose). Une case avec une réplique du film, un son, une carte-titre, une révélation ou un temps fort à son minimum n'est jamais retirée. Les consignes qui ajoutaient des cases (une case d'ambiance sur quatre, une case de liaison à chaque changement, trois à cinq cases par moment d'action) ont été ramenées.
+- **Modifier / retoucher** : sous chaque case. Sans rien peindre, le prompt modifie toute la case (cadrage, personnages, objets et style gardés, fiches jointes). En peignant une zone, seule la zone change. La proposition s'affiche avant de remplacer l'image : Garder, Réessayer ou Revenir à l'originale. Suit le réglage HD / Éco.
