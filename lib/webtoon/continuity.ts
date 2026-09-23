@@ -820,7 +820,9 @@ export const SECONDS_PER_PANEL = { action: 1.5, normal: 3.2, calm: 4.5 } as cons
  */
 export function panelBudget(input: { from: number; to: number; events: Pick<StoryEvent, "from" | "to" | "min_panels">[]; pace: keyof typeof SECONDS_PER_PANEL }): number {
   const span = Math.max(1, input.to - input.from + 1);
-  const extra = input.events.filter((e) => e.to >= input.from && e.from <= input.to).reduce((sum, e) => sum + Math.max(0, e.min_panels - 2), 0);
+  // At most two more for the events: a fight is a string of impacts, and one panel more for each
+  // made the last battle of episode 1 run at more than one panel per second.
+  const extra = Math.min(2, input.events.filter((e) => e.to >= input.from && e.from <= input.to).reduce((sum, e) => sum + Math.max(0, e.min_panels - 2), 0));
   return Math.max(3, Math.ceil(span / SECONDS_PER_PANEL[input.pace]) + extra);
 }
 
@@ -867,9 +869,12 @@ function mergeCloseLines<T extends { seconds: number; title_card?: string; dialo
 
 export function trimToBudget<T extends { seconds: number; description?: string; characters?: string[]; title_card?: string; fidelity?: string; dialogue?: unknown[]; sfx?: unknown[]; narrative_role?: string }>(list: T[], budget: number, events: Pick<StoryEvent, "from" | "to" | "min_panels">[] = []): T[] {
   const out = [...list];
+  const bigSound = (item: T) => (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150);
   const inEvent = (item: T) => events.find((e) => Number(item.seconds) >= e.from - 1 && Number(item.seconds) <= e.to + 1);
   const keeps = (item: T) => {
-    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150)) return true;
+    if (item.title_card || (item.dialogue?.length ?? 0) > 0) return true;
+    // A big sound protects the first impact of a burst, not every panel of it.
+    if (bigSound(item) && !out.some((o) => o !== item && bigSound(o) && out.indexOf(o) < out.indexOf(item) && Math.abs(Number(o.seconds) - Number(item.seconds)) <= 2)) return true;
     // One reveal and one establishing view are kept; the writer labels half a scene "reveal"
     // (9:00 to 9:18, the tree-being rising: twenty panels for twenty seconds).
     if (item.narrative_role === "reveal" || item.narrative_role === "establishing") return out.find((o) => o.narrative_role === item.narrative_role) === item;
