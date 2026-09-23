@@ -4675,3 +4675,16 @@ select.studio-input {
 .studio-thumb-item.is-flash .studio-thumb {
   animation: studio-thumb-flash 1.1s ease-out;
 }
+
+/* A span of film without any panel, between two panels of the list. */
+.studio-hole {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px dashed rgba(255, 176, 60, 0.7);
+  border-radius: 0.5rem;
+  background: rgba(255, 176, 60, 0.1);
+  color: #ffd9a0;
+  font-size: 0.7rem;
+}

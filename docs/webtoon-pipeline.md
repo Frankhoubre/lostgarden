@@ -106,3 +106,16 @@ Le studio gère plusieurs webtoons. `/convert-video-to-webtoon` liste les projet
   3. à 5. **La bible** : personnages (personnes, créatures, machines), objets importants, lieux et biomes. « Détecter dans le film » (route `bible`) lit jusqu'à 120 images réparties sur tout le film, par groupes de dix en parallèle, puis fusionne ce qui a été vu : nom, verrou de design écrit depuis les images, secondes où l'élément apparaît, deux ou trois où il est le mieux vu, importance, échelle. Chaque proposition se garde, s'écarte ou se corrige ; on peut aussi ajouter à la main. Chaque élément gardé choisit ses références : images du film (celles où il est le mieux vu sont cochées d'office, les autres se proposent) et images de l'auteur. Le prompt de sa fiche est préparé (`lib/webtoon/sheet-prompt.ts`), visible, modifiable et restaurable.
   6. **Prêt** : le mur des fiches, puis l'éditeur. « Bible du projet » dans la barre de l'éditeur rouvre la bible.
 - **Des fiches propres** (route `asset`) : fond blanc pur, aucun texte, aucune étiquette de vue, aucune pastille de couleur, demandés un par un dans le prompt ; puis un modèle de vision relit la fiche (texte présent, fond blanc) et la fiche fautive est redessinée une fois avec la faute nommée ; enfin les pixels presque blancs passent au blanc pur (`sharp`). Un lieu garde son décor.
+
+## Retour de Frank sur les cases 66 à 300 (23 septembre 2026)
+
+Aucune case n'a été régénérée : chaque défaut a été corrigé dans le moteur pour les prochains imports.
+
+- **Trou de 37 s (la course-poursuite)** : une réécriture bornée s'arrêtait à son nombre de cases. Elle écrit maintenant jusqu'au bout de sa plage, et la liste marque tout trou de plus de 8 s avec un bouton « Combler ».
+- **Répliques absentes** : le superviseur recopie le sous-titre incrusté de chaque image (`subtitle`), l'écrivain en fait des bulles, et `filmChecks` renvoie en correction tout sous-titre sans bulle.
+- **Ce qui change entre deux images** (`changed`) : une racine qui pousse devient un événement `grow` (grande case, lueur, KRRRAAAKK), un maillet sur un gong un `strike` sonore (BWONNNG), deux créatures qui s'affrontent un `fight`, un saut suivi d'un personnage debout un `land` (THOOM).
+- **Objets inventés** : la liste des objets n'oriente plus le superviseur ; un objet que les notes n'appuient pas est retiré. Un objet tenu est cadré lisible et garde sa taille contre la main.
+- **Un être en trois morceaux** : un visage, une main ou une racine appartient à l'être entier ; un arbre avec un visage est un personnage.
+- **Cases en trop** : marcher et se tenir debout sont une seule posture, apparition et redressement une seule révélation, `dropRepeats` fusionne deux cases qui disent la même chose, `smoothLocations` corrige un lieu isolé.
+- **Vue de dos** : ni yeux ni visage au dos du casque.
+- **Qualité d'image** : la taille est déjà 1K (1024 × 1536). Le levier est la qualité : sur une case test à une référence, 0,053 $ en haute, 0,022 $ en moyenne, deux fois plus vite. Bouton HD / Éco dans la barre de la case, mémorisé par navigateur.

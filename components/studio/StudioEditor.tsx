@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { Avatar } from "@/components/studio/Avatar";
 import { PanelInpaint } from "@/components/studio/PanelInpaint";
@@ -193,6 +193,22 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // Storage may be unavailable; the choice just does not persist.
     }
   };
+  /** Image quality: same 1K size either way; "medium" saves about 0.03 $ a panel and half the time (measured 23 September 2026). */
+  const [quality, setQuality] = useState<"high" | "medium">(() => {
+    try {
+      return window.localStorage.getItem("studio.quality") === "medium" ? "medium" : "high";
+    } catch {
+      return "high";
+    }
+  });
+  const chooseQuality = (next: "high" | "medium") => {
+    setQuality(next);
+    try {
+      window.localStorage.setItem("studio.quality", next);
+    } catch {
+      // Storage may be unavailable; the choice just does not persist.
+    }
+  };
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
@@ -305,7 +321,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current }),
+        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current, quality }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
       const received = payload.src ?? payload.data_url;
@@ -429,6 +445,29 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     `${drag.dragId === id || (drag.dragId && checked.has(drag.dragId) && checked.has(id)) ? "is-dragging" : ""} ${drag.target?.id === id && drag.dragId !== id ? (drag.target.after ? "is-drop-after" : "is-drop-before") + (drag.target.axis === "x" ? " is-drop-x" : "") : ""}`;
 
   /**
+   * Holes in the film: two panels in a row with more than eight seconds of
+   * film between them, which no event of the story explains (a lost span
+   * after a rewrite, a failed batch). Shown in the list, filled on demand.
+   */
+  const HOLE_SECONDS = 8;
+  const holeBefore = (index: number): { from: number; to: number } | null => {
+    if (index === 0) return null;
+    const prev = panels[index - 1];
+    const next = panels[index];
+    if (prev.source_time_start === null || next.source_time_start === null) return null;
+    const from = coveredUntil([prev]);
+    return next.source_time_start - from >= HOLE_SECONDS ? { from, to: next.source_time_start } : null;
+  };
+  const formatSeconds = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
+  const fillHole = async (index: number) => {
+    const hole = holeBefore(index);
+    if (!hole || busy) return;
+    const count = Math.max(3, Math.round((hole.to - hole.from) / 3));
+    if (!window.confirm(`Écrire, dessiner et traduire les cases de ${formatSeconds(hole.from)} à ${formatSeconds(hole.to)} (environ ${count} cases) ?`)) return;
+    await writeSpan({ base: panels, insertAfter: panels[index - 1].panel_id, count, until: hole.to - 1, label: "le trou" });
+  };
+
+  /**
    * Continue the story: the writer model drafts the next N panels from the
    * frames that follow the last one, the engine composes them, then the
    * images are generated one by one and the lettering is translated.
@@ -528,14 +567,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       let current = head;
       const assemble = () => [...current, ...tail].map((p, i) => ({ ...p, order: i + 1 }));
       setPanels(assemble());
-      while (created.length < count && !stopBatch.current) {
-        const ask = Math.min(8, count - created.length);
+      // A bounded span (a rewrite, a hole) is written to its end: the count is a target, not a stop.
+      // A rewrite of the chase stopped at its count and left 37 seconds of film without a panel.
+      const spanCovered = () => until !== null && coveredUntil(current) >= until - 1;
+      const cap = until === null ? count : Math.max(count * 2, count + 12);
+      while (!stopBatch.current && (until === null ? created.length < count : !spanCovered() && created.length < cap)) {
+        const ask = Math.min(8, Math.max(1, count - created.length));
         setJob((job) => (job ? { ...job, label: `Écriture des cases ${head.length + created.length + 1} à ${head.length + created.length + ask}…`, placeholders: count - created.length } : job));
         const response = await fetch(`/api/webtoon/${script.slug}/continue`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
           // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
-          body: JSON.stringify({ count: count - created.length, panels: current, library: libraryRef.current, pace, until_seconds: until }),
+          body: JSON.stringify({ count: until === null ? count - created.length : Math.max(8, count - created.length), panels: current, library: libraryRef.current, pace, until_seconds: until }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
@@ -565,7 +608,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         // What the writer found in the film without a sheet gets one now, before any image is made.
         if (payload.new_assets?.length) await adoptAssets(payload.new_assets);
       }
-      notify(`${created.length} cases écrites. Génération des images…`);
+      if (until !== null && !spanCovered() && !stopBatch.current) {
+        notify(`La plage n'est pas couverte jusqu'au bout : rien entre ${Math.round(coveredUntil(current))} s et ${Math.round(until)} s. Le trou est signalé dans la liste, « Combler » le termine.`);
+      } else {
+        notify(`${created.length} cases écrites. Génération des images…`);
+      }
       // A title card has no image to make.
       const ok = await runImages(created.filter((p) => p.description.trim() || p.generation_prompt.trim()));
       if (!stopBatch.current) {
@@ -1016,8 +1063,19 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           )}
         </div>
         <ol>
-          {panels.map((panel) => (
-            <li key={panel.panel_id} className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""} ${dropClass(listDrag, panel.panel_id)}`} {...listDrag.bind(panel.panel_id, "list")} title={busy ? undefined : "Maintenir le clic et glisser pour déplacer la case"}>
+          {panels.map((panel, index) => (
+            <Fragment key={panel.panel_id}>
+            {holeBefore(index) ? (
+              <li className="studio-hole">
+                <span>
+                  Trou dans le film : {formatSeconds(holeBefore(index)!.from)} → {formatSeconds(holeBefore(index)!.to)} ({Math.round(holeBefore(index)!.to - holeBefore(index)!.from)} s sans case)
+                </span>
+                <button type="button" className="webtoon-mini" onClick={() => void fillHole(index)} disabled={busy} title="Écrit, dessine et traduit les cases qui manquent entre ces deux cases">
+                  Combler
+                </button>
+              </li>
+            ) : null}
+            <li className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""} ${dropClass(listDrag, panel.panel_id)}`} {...listDrag.bind(panel.panel_id, "list")} title={busy ? undefined : "Maintenir le clic et glisser pour déplacer la case"}>
               <label className="studio-thumb-check" title="Cocher pour une action en lot (Maj+clic : plage)" onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
@@ -1064,6 +1122,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 +
               </button>
             </li>
+            </Fragment>
           ))}
           {job?.phase === "writing"
             ? Array.from({ length: job.placeholders }, (_, i) => (
@@ -1110,6 +1169,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div className="studio-viewswitch" role="group" aria-label="Vue">
               <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
               <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
+            </div>
+            <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
+              <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
+              <button type="button" className={`webtoon-mini ${quality === "medium" ? "is-active" : ""}`} onClick={() => chooseQuality("medium")} title="Qualité moyenne, même taille 1K : environ 0,03 $ de moins par case et deux fois plus rapide, un peu moins de détail">Éco</button>
             </div>
             <label className="flex items-center gap-2"><input type="checkbox" checked={showFocal} onChange={(e) => setShowFocal(e.target.checked)} /> Point focal</label>
             <div className="studio-gear" ref={panelMenuRef}>

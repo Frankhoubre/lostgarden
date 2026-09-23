@@ -41,11 +41,15 @@ export type FrameNote = {
   motion?: string;
   /** What would be heard ("a metallic clang", "a deep mechanical roar", "footsteps on moss", "silence"). */
   sound?: string;
+  /** What changed since the frame before (appeared, grew, rose, opened, broke, was hit): motion that one frame alone hides. */
+  changed?: string;
+  /** Subtitle burned into the frame, word for word: the line actually spoken. */
+  subtitle?: string;
   title_card?: string | null;
   screenplay_line?: string;
 };
 
-export type Moment = { from: number; to: number; frames: number } & Omit<FrameNote, "seconds">;
+export type Moment = { from: number; to: number; frames: number; /** Subtitles of the moment, each with the second it starts. */ subtitles?: { seconds: number; text: string }[] } & Omit<FrameNote, "seconds">;
 
 export type SoundEffect = { en: string; fr: string; style: "soft" | "hard" | "rumble"; size: number };
 
@@ -62,7 +66,10 @@ export type StoryEventKind =
   | "rise"
   | "roar"
   | "run"
-  | "impact";
+  | "impact"
+  | "grow"
+  | "land"
+  | "fight";
 
 export type StoryEvent = {
   kind: StoryEventKind;
@@ -120,6 +127,8 @@ export function normalizeNotes(notes: readonly unknown[]): FrameNote[] {
         scale: asText(n.scale),
         motion: asText(n.motion),
         sound: asText(n.sound),
+        changed: asText(n.changed),
+        subtitle: asText(n.subtitle).trim(),
         title_card: title || null,
         screenplay_line: asText(n.screenplay_line),
       } satisfies FrameNote;
@@ -167,10 +176,12 @@ const POSTURE_CLASSES: [RegExp, string][] = [
   [/lying|lies|collapsed|face down|on his back|prone|sprawled|flat on/i, "down"],
   [/climb|scrambl/i, "climb"],
   [/sit/i, "sit"],
+  [/in the air|mid-air|midair|airborne|leap|jump|vault|flying through/i, "air"],
   [/fall/i, "fall"],
   [/crouch|bend|bent|lean|stoop/i, "bend"],
-  [/walk|step|advanc|moving forward|approach/i, "walk"],
-  [/stand|still|frozen|motionless|upright/i, "stand"],
+  // Walking and standing read the same on a still image, and the supervisor flips between them
+  // from one second to the next: one class, or a panel "stands still" follows one "walks".
+  [/walk|step|advanc|moving forward|approach|stand|still|frozen|motionless|upright/i, "upright"],
 ];
 
 function postureClass(value: string | undefined): string {
@@ -211,10 +222,12 @@ export function momentsOf(notes: FrameNote[]): Moment[] {
       if (n.action && !String(last.action ?? "").includes(String(n.action).slice(0, 30))) last.action = `${last.action ?? ""} Then: ${n.action}`.trim();
       if (n.motion && !String(last.motion ?? "").includes(String(n.motion).slice(0, 30))) last.motion = words(last.motion, n.motion);
       if (n.sound && !String(last.sound ?? "").includes(String(n.sound).slice(0, 30))) last.sound = words(last.sound, n.sound);
+      if (n.changed && !/^\s*(nothing|none|no change)/i.test(n.changed) && !String(last.changed ?? "").includes(String(n.changed).slice(0, 30))) last.changed = words(last.changed, n.changed);
       if (n.scale && !last.scale) last.scale = n.scale;
+      if (n.subtitle && !(last.subtitles ?? []).some((x) => x.text === n.subtitle)) last.subtitles = [...(last.subtitles ?? []), { seconds: Number(n.seconds), text: n.subtitle }];
     } else {
       const { seconds, ...rest } = n;
-      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest });
+      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest, ...(n.subtitle ? { subtitles: [{ seconds: Number(seconds), text: n.subtitle }] } : {}) });
     }
   }
   return moments;
@@ -226,6 +239,11 @@ const POSTURE_RUN = /run|sprint|flee|dash|bolt/i;
 
 const RE_THROW = /throw|thrown|fling|hurl|toss|sweep|swept|cast(s|ing)? (it )?away|lets? go of/i;
 const RE_STRIKE = /punch|strik(e|es|ing) the ground|slam|pound|hits? the ground|hammers?|fist (comes|slams|hits|strikes|down)|beats? the ground/i;
+/** A blow on a thing that rings: a gong, a bell, a drum, an anvil, a door. */
+const RE_RING = /(strik|hit|bang|ring|beat|knock|swing)\w*[^.;]{0,40}\b(gong|bell|drum|anvil|shield|door|chime)|\b(mallet|hammer|stick|beater)\b[^.;]{0,40}\b(gong|bell|drum|anvil|chime)|\b(gong|bell|chime)\b[^.;]{0,30}\b(struck|rings|ringing|sounds|resounds|booms)/i;
+/** Something that grows or forms in the scenery: a root, a vine, a tree, a bridge, a path. */
+const RE_GROW = /\b(grow|grows|growing|grew|sprout|sprouts|extends?|extending|stretch(es|ing)?|unfurl|uncoil|coil(s|ing)? (up|out)|surges?|shoots? (up|out)|forms? (a|an)? ?(path|bridge|ramp|stair|walkway)|(bridge|path|walkway) (forms|appears|grows))\b/i;
+const RE_FIGHT = /\b(fight|fights|fighting|clash|clashes|battle|battling|grapple|grappling|wrestl|attack(s|ing)? (each other|one another|the other)|struggle with|locked together)\b/i;
 const RE_ROAR = /roar|scream|howl|shriek|bellow|screech/i;
 const RE_RISE = /\brises?\b|rising|stands? up|rears?( up)?|lifts? (itself|its body|its bulk|off the ground)|unfold|straighten|gets? up|towers? up|comes? alive|wakes?( up)?|awaken/i;
 const RE_ELECTRIC = /electric|lightning|spark|arc(s|ing)?\b|crackl|surge|voltage|static/i;
@@ -246,6 +264,9 @@ const SFX = {
   roar: { en: "ROAAAR", fr: "RAAAAH", style: "hard", size: 300 },
   steps: { en: "TAP TAP TAP", fr: "TAP TAP TAP", style: "hard", size: 130 },
   bzzt: { en: "BZZZT", fr: "BZZZT", style: "rumble", size: 200 },
+  gong: { en: "BWONNNG", fr: "BOOONNG", style: "rumble", size: 310 },
+  grow: { en: "KRRRAAAKK", fr: "KRRRAAAC", style: "rumble", size: 280 },
+  land: { en: "THOOM", fr: "BOUM", style: "hard", size: 240 },
 } satisfies Record<string, SoundEffect>;
 
 /**
@@ -389,6 +410,61 @@ export function eventsOf(moments: Moment[], options: { /** Text of the last pane
 
     if (!prev) for (const part of (cur.others_visible ?? "").toLowerCase().split(/[,;.]/)) { const n = headNoun(part.trim()); if (n.length > 2) seen.add(n); }
 
+    // A leap or a fall followed by a character on his feet: the landing is told even when the film cuts it.
+    if (prev && ["air", "fall"].includes(postureClass(prev.posture)) && ["upright", "run", "bend", "kneel"].includes(postureClass(cur.posture))) {
+      push({
+        kind: "land",
+        from: Math.max(prev.from, prev.to - 1),
+        to: cur.from,
+        what: "he lands",
+        beats: ["the landing: feet or knees hitting the ground, close on the contact, a burst of dust and moss, one sound effect", "him straightening up from the landing, the cape settling"],
+        min_panels: 2,
+        sfx: SFX.land,
+      });
+    }
+    const change = words(cur.changed, cur.action, cur.motion);
+    if (has(change, RE_GROW)) {
+      const subject = (/\b(root|roots|vine|vines|tree|trunk|branch|bridge|path|plant|stem|tendril)s?\b/i.exec(change)?.[0] ?? "the thing").toLowerCase();
+      push({
+        kind: "grow",
+        from: prev ? Math.max(prev.from, prev.to - 1) : cur.from,
+        to: Math.max(cur.to, cur.from + 1),
+        what: `a ${subject} grows`,
+        beats: [
+          `the first stir: close on the ${subject} cracking and starting to move, earth splitting, a sound`,
+          `the surge, the most spectacular panel of the sequence: a very tall panel, the ${subject} rising and twisting huge, glowing magic particles along it, earth and moss falling, the character tiny`,
+          `the result: the new ${subject} whole, forming its path or bridge, wide`,
+          "the character's reaction, or the first step onto it",
+        ],
+        min_panels: 3,
+        sfx: SFX.grow,
+        effects: ["a soft magical glow and floating light particles along the growing part", "earth, moss and small stones falling from it", "motion lines along the growth"],
+      });
+    }
+    if (has(words(cur.changed, cur.action, cur.sound, cur.in_hands, cur.others_visible), RE_RING)) {
+      const thing = (/\b(gong|bell|drum|anvil|shield|door|chime)\b/i.exec(words(cur.changed, cur.action, cur.sound, cur.others_visible))?.[0] ?? "gong").toLowerCase();
+      push({
+        kind: "strike",
+        from: cur.from,
+        to: Math.max(cur.to, cur.from + 1),
+        what: `the ${thing} is struck`,
+        beats: [`the mallet or the arm raised before the ${thing}`, `the blow: close on the contact with the ${thing}, the sound huge across the panel, rings of vibration rippling out`, "the echo: those who hear it, still, the sound fading"],
+        min_panels: 3,
+        sfx: SFX.gong,
+      });
+    }
+    if (has(words(cur.changed, cur.action, cur.motion), RE_FIGHT) && significantNouns(cur.others_visible).length) {
+      push({
+        kind: "fight",
+        from: cur.from,
+        to: Math.max(cur.to, cur.from + 1),
+        what: `a fight (${cur.others_visible})`,
+        beats: ["the fighters locked together, both visible and recognisable, each drawn from its own sheet", "a blow landing, close on the contact, one sound effect", "the character watching or slipping away, small against them"],
+        min_panels: 2,
+        sfx: SFX.crash,
+      });
+    }
+
     if (has(text, RE_STRIKE)) {
       push({
         kind: "strike",
@@ -443,7 +519,20 @@ export function eventsOf(moments: Moment[], options: { /** Text of the last pane
       else push({ kind: "impact", from: cur.from, to: cur.to, what: "electricity", beats: ["the electric arcs crackling, as a detail, with a sound"], min_panels: 1, sfx: SFX.bzzt, effects: electric });
     }
   }
-  return events.sort((a, b) => a.from - b.from || a.to - b.to);
+  // An appearance and a rise at the same seconds are one reveal: two lists of beats made the writer draw
+  // the same colossal figure twice in a row. The rise keeps the glimpse first, then its own beats.
+  const merged: StoryEvent[] = [];
+  for (const event of events.sort((a, b) => a.from - b.from || a.to - b.to)) {
+    if (event.kind === "appear") {
+      const rise = events.find((e) => e.kind === "rise" && Math.abs(e.from - event.from) <= 3);
+      if (rise) {
+        if (!rise.beats[0].startsWith("a fragment")) rise.beats = [event.beats[0], ...rise.beats.slice(1)];
+        continue;
+      }
+    }
+    merged.push(event);
+  }
+  return merged;
 }
 
 /** The events as one block of text for the writer. */
@@ -679,4 +768,28 @@ export function coveredUntil(panels: readonly Pick<WebtoonPanel, "panel_id" | "s
     if (covered > until) until = covered;
   }
   return until;
+}
+
+
+const wordsOf = (text: string) => new Set(text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3));
+
+/**
+ * Consecutive panels that say the same thing: the same second or the next,
+ * the same people, the same framing, most of the same words. The later one
+ * is dropped; an event keeps its beats because their words differ.
+ */
+export function dropRepeats<T extends { seconds: number; description?: string; characters?: string[]; shot_type?: string; title_card?: string }>(list: T[]): T[] {
+  const out: T[] = [];
+  for (const item of list) {
+    const last = out[out.length - 1];
+    if (last && !item.title_card && !last.title_card && Math.abs(Number(item.seconds) - Number(last.seconds)) <= 1 && (item.shot_type ?? "") === (last.shot_type ?? "") && [...(item.characters ?? [])].sort().join() === [...(last.characters ?? [])].sort().join()) {
+      const a = wordsOf(String(item.description ?? "").split("STATE TO KEEP")[0]);
+      const b = wordsOf(String(last.description ?? "").split("STATE TO KEEP")[0]);
+      let shared = 0;
+      for (const w of a) if (b.has(w)) shared += 1;
+      if (shared / Math.max(1, Math.min(a.size, b.size)) > 0.62) continue;
+    }
+    out.push(item);
+  }
+  return out;
 }
