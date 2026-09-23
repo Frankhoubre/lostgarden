@@ -67,6 +67,22 @@ const LOST_GARDEN_FRAMES = studioFilmFrames();
 /** Images generated at the same time by a batch. */
 const IMAGE_CONCURRENCY = 3;
 
+/**
+ * What the continue route needs from the strip: every panel's id, order and
+ * timecodes (to number the new panels and know where the film stops), and
+ * the last panels in full (continuity, helmet, lines already lettered).
+ * Sending the whole strip with every prompt made each call several MB at
+ * 340 panels.
+ */
+function slimForContinue(panels: readonly WebtoonPanel[]): WebtoonPanel[] {
+  const full = 16;
+  return panels.map((p, i) =>
+    i >= panels.length - full
+      ? p
+      : ({ panel_id: p.panel_id, order: p.order, source_time_start: p.source_time_start, source_time_end: p.source_time_end, prompt_auto: p.prompt_auto, description: "", purpose: "", characters: [], objects: [], dialogue: [], caption: [], sfx: [], image: { status: p.image.status } } as unknown as WebtoonPanel),
+  );
+}
+
 /** Headers of a generation call: the Firebase token, or the local bypass on the dev server. */
 async function studioHeaders(): Promise<Record<string, string>> {
   const token = (await getFirebaseAuth().currentUser?.getIdToken().catch(() => "")) ?? "";
@@ -578,7 +594,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
           // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
-          body: JSON.stringify({ count: until === null ? count - created.length : Math.max(8, count - created.length), panels: current, library: libraryRef.current, pace, until_seconds: until }),
+          body: JSON.stringify({ count: until === null ? count - created.length : Math.max(8, count - created.length), panels: slimForContinue(current), library: libraryRef.current, pace, until_seconds: until }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
