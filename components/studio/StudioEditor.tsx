@@ -227,6 +227,17 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
+  // A long run in a background tab was frozen by Chrome mid-run (fetches left pending, nothing saved).
+  // Chrome does not freeze a page that holds a Web Lock: hold one while a job runs.
+  useEffect(() => {
+    if (!busy || typeof navigator === "undefined" || !navigator.locks) return;
+    let release: () => void = () => {};
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    void navigator.locks.request("lostgarden-studio-job", () => held).catch(() => {});
+    return () => release();
+  }, [busy]);
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
@@ -494,7 +505,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (busy) return;
     if (nextUnit === "seconds") {
       // A stretch of film: written to its end, the number of panels follows the pace.
-      const seconds = Math.max(5, Math.min(180, Math.round(nextCount) || 30));
+      const seconds = Math.max(5, Math.min(600, Math.round(nextCount) || 30));
       const from = coveredUntil(panels);
       const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[pace]));
       if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases) ?`)) return;
@@ -1167,7 +1178,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 Adapté jusqu&apos;à {coveredUntil(panels).toFixed(0)} s du film. Le studio lit les images suivantes et le scénario, écrit les cases, génère les images et traduit les textes.
               </p>
               <label>
-                <input type="number" min={1} max={nextUnit === "seconds" ? 180 : 30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
+                <input type="number" min={1} max={nextUnit === "seconds" ? 600 : 30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
                 <select value={nextUnit} onChange={(e) => setNextUnit(e.target.value as "panels" | "seconds")} disabled={busy} aria-label="Unité">
                   <option value="panels">cases</option>
                   <option value="seconds">secondes de film</option>
@@ -1180,7 +1191,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 </select>
               </label>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
-                {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(180, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
+                {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(600, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
             </div>
           </li>
