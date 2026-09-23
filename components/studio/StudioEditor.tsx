@@ -193,6 +193,22 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // Storage may be unavailable; the choice just does not persist.
     }
   };
+  /** Image quality: same 1K size either way; "medium" saves about 0.03 $ a panel and half the time (measured 23 September 2026). */
+  const [quality, setQuality] = useState<"high" | "medium">(() => {
+    try {
+      return window.localStorage.getItem("studio.quality") === "medium" ? "medium" : "high";
+    } catch {
+      return "high";
+    }
+  });
+  const chooseQuality = (next: "high" | "medium") => {
+    setQuality(next);
+    try {
+      window.localStorage.setItem("studio.quality", next);
+    } catch {
+      // Storage may be unavailable; the choice just does not persist.
+    }
+  };
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
@@ -305,7 +321,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current }),
+        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current, quality }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
       const received = payload.src ?? payload.data_url;
@@ -1153,6 +1169,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div className="studio-viewswitch" role="group" aria-label="Vue">
               <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
               <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
+            </div>
+            <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
+              <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
+              <button type="button" className={`webtoon-mini ${quality === "medium" ? "is-active" : ""}`} onClick={() => chooseQuality("medium")} title="Qualité moyenne, même taille 1K : environ 0,03 $ de moins par case et deux fois plus rapide, un peu moins de détail">Éco</button>
             </div>
             <label className="flex items-center gap-2"><input type="checkbox" checked={showFocal} onChange={(e) => setShowFocal(e.target.checked)} /> Point focal</label>
             <div className="studio-gear" ref={panelMenuRef}>
