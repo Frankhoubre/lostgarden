@@ -53,6 +53,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     model?: string;
     /** The studio's library changes, so its characters and locations are attached. */
     library?: LibraryOverlay;
+    /** Image quality: "medium" costs about a third of "high" at the same size. */
+    quality?: "low" | "medium" | "high";
   };
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
   const requested = body.panel ?? script.panels.find((p) => p.panel_id === body.panel_id);
@@ -73,6 +75,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const generation = buildGenerationRequest(panel, body.model, overlay);
     const image = await generateWithGateway(generation, {
       model: body.model,
+      quality: body.quality === "low" || body.quality === "medium" || body.quality === "high" ? body.quality : undefined,
       resolveReference: referenceAsDataUrl,
     });
     void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "images" });

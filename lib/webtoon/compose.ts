@@ -72,6 +72,13 @@ export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?:
         "BACKGROUND: draw only what the film frame shows at this moment, from the framing asked. The location sheet gives the palette and the materials of the place; it never adds elements the frame does not show (no altar, no rose window, no beams, no building unless they are visible in the frame).",
       ]
     : [];
+  // Seen from behind, the face side is turned away: the model otherwise paints the eye holes on the back of the helmet.
+  if (/\b(from behind|back to (the )?(camera|viewer|us)|seen from the back|rear view|his back|her back|over (his|her) shoulder)\b/i.test(`${panel.description} ${panel.composition}`)) {
+    notes.push("SEEN FROM BEHIND: every character here faces away. Nothing of the face side is visible: no eyes, no eye holes, no face, no mouth; the back of a helmet or a head is plain.");
+  }
+  if (panel.objects.length) {
+    notes.push("OBJECT SIZE: each object keeps its real size against the hand and the body, exactly as its sheet and the film show it, from one panel to the next: never shrunk to a dot, never enlarged.");
+  }
   const { prompt, negative } = buildGenerationPrompt({
     panel,
     references,
