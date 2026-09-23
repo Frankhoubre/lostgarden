@@ -1067,6 +1067,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <span className="text-xs text-ivory/85"><b>{checked.size}</b> case{checked.size > 1 ? "s" : ""} cochée{checked.size > 1 ? "s" : ""}</span>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void regenerateChecked()} disabled={busy} title="Regénère les cases cochées, dans l'ordre de la bande">Regénérer</button>
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(checkedPanels, false)} disabled={busy} title="Remplit les langues vides des cases cochées">Traduire</button>
+              {checkedPanels.some((p) => p.image.status === "stale") ? (
+                <button
+                  type="button"
+                  className="webtoon-mini"
+                  onClick={() => {
+                    const ids = new Set(checkedPanels.filter((p) => p.image.status === "stale").map((p) => p.panel_id));
+                    setPanels((current) => current.map((p) => (ids.has(p.panel_id) ? { ...p, image: { ...p.image, status: "generated" as const } } : p)));
+                    notify(`${ids.size} image${ids.size > 1 ? "s" : ""} gardée${ids.size > 1 ? "s" : ""} telle${ids.size > 1 ? "s" : ""} quelle${ids.size > 1 ? "s" : ""}`);
+                  }}
+                  disabled={busy}
+                  title="L'image de ces cases est juste malgré le changement de texte ou de fiche : elles ne sont plus à regénérer"
+                >
+                  Garder l&apos;image
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="webtoon-mini"
