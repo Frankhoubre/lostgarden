@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { STUDIO_CAST } from "@/lib/webtoon/studio-assets";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
@@ -189,7 +190,7 @@ async function helmetChecks(frames: { seconds: number; src: string }[], meter: C
  * a design lock read from the frames. Terrain (branches, roots, mushrooms,
  * mist) is not an entity. New entities become sheets the studio draws.
  */
-async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAsset[]; frames: { seconds: number; src: string }[]; meter: CostMeter }): Promise<Entity[]> {
+async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAsset[]; frames: { seconds: number; src: string }[]; meter: CostMeter; cast?: { id: string; name: string; kind: string; looks: string }[] }): Promise<Entity[]> {
   const mentions = input.notes
     .map((n) => ({ seconds: Number(n.seconds), characters: n.characters ?? [], in_hands: n.in_hands ?? "", others: n.others_visible ?? "", scale: n.scale ?? "" }))
     .filter((m) => m.characters.length || (m.in_hands && !/^\s*(nothing|none|empty)/i.test(m.in_hands)) || m.others.trim());
@@ -207,16 +208,22 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
     ]),
   );
   try {
-    const answer = await completeJson<{ entities?: { ref?: string | null; kind?: string; name?: string; must_keep?: string; seconds?: number[]; best_seconds?: number[]; scale?: string; creature?: boolean }[] }>({
+    const answer = await completeJson<{ entities?: { ref?: string | null; cast?: string | null; kind?: string; name?: string; must_keep?: string; seconds?: number[]; best_seconds?: number[]; scale?: string; creature?: boolean }[] }>({
       system: [
         "You keep the registry of everything that appears in a film being adapted into a webtoon, so that each thing is drawn the same way in every panel. You get the continuity notes of a window of frames (who is visible, what is in the hands, what else is there, how big), some of the frames, and the library of things that already have a design sheet.",
         "One entity per being, never one per part: a face, a hand, an eye, a limb, a root or a branch that belongs to a being seen elsewhere in the notes is that being (use its id). A tree, a rock, a statue or any scenery with a face, eyes or hands, or that moves, speaks or acts, IS a character (kind `character`, creature true), whole: body, face and hands in one design lock. When the recent panels already name a being, reuse their id.",
         "List every ENTITY of the window: a character, a creature, a machine, or an object that is held, used, thrown or that the story follows. Not an entity: terrain and scenery (a branch, a root, a mushroom, mist, trunks, stones, flowers, light), body parts, clothing that belongs to a character, and a helmet or a hat while it is worn (a helmet lying alone on the ground IS an object entity).",
         "For each entity: `ref` is the id of the library entry when it is the same thing (the library ids are given; match on meaning: \"a silver pendant on a chain\" is the library's pendant), else null. `kind` is `character` for anything alive or any creature, monster or machine, `object` for a thing. `name` is short in English. `must_keep` is a precise DESIGN LOCK in English written from the frames: overall shape, proportions, materials, colours, distinctive parts, how it opens or moves, and for a creature or machine its size compared to Lanterne. `seconds` lists every second where it is visible; `best_seconds` the two or three seconds where it is seen best (largest, clearest, its whole shape). `scale` is its size compared to Lanterne, in words, for a creature, machine or structure. `creature` is true for a creature, monster or machine.",
-        'Answer with JSON only: {"entities": [ {ref, kind, name, must_keep, seconds, best_seconds, scale, creature} ]}. Escape double quotes inside strings.',
-      ].join("\n\n"),
+        input.cast?.length
+          ? "CAST: the named characters and objects of the series, some without a design sheet yet. When an entity with no library entry is one of them (match on the design: a keyhole-shaped helmet is Serrure's), set `cast` to its id and `name` to its cast name; else `cast` is null."
+          : "",
+        'Answer with JSON only: {"entities": [ {ref, cast, kind, name, must_keep, seconds, best_seconds, scale, creature} ]}. Escape double quotes inside strings.',
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       user: [
         { type: "text", text: `LIBRARY (id, kind, name, design lock):\n${JSON.stringify(known, null, 1)}` },
+        ...(input.cast?.length ? [{ type: "text" as const, text: `CAST (id, kind, name, design):\n${JSON.stringify(input.cast, null, 1)}` }] : []),
         { type: "text", text: `NOTES of the window:\n${JSON.stringify(mentions, null, 1)}` },
         { type: "text", text: "Some frames of the window:" },
         ...frameParts.flat(),
@@ -233,14 +240,16 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
       const kind: Entity["kind"] = raw.kind === "object" ? "object" : "character";
       const ref = typeof raw.ref === "string" ? raw.ref.trim().toLowerCase().replace(/^(obj|char)\./, "").replace(/\.webtoon$/, "") : "";
       const match = ref ? known.find((k) => k.id === ref && k.kind === kind) ?? known.find((k) => k.id === ref) : undefined;
-      const id = match?.id ?? entitySlug(raw.name);
+      const castId = typeof raw.cast === "string" ? raw.cast.trim().toLowerCase() : "";
+      const cast = castId ? input.cast?.find((c) => c.id === castId) : undefined;
+      const id = match?.id ?? (cast ? cast.id : entitySlug(raw.name));
       if (!id) continue;
       const seconds = (Array.isArray(raw.seconds) ? raw.seconds : []).map(Number).filter((s) => Number.isFinite(s));
       const best = (Array.isArray(raw.best_seconds) ? raw.best_seconds : []).map(Number).filter((s) => Number.isFinite(s));
       const entity: Entity = {
         id,
         kind: match?.kind ?? kind,
-        name: match?.name ?? raw.name.trim(),
+        name: match?.name ?? cast?.name ?? raw.name.trim(),
         must_keep: (typeof raw.must_keep === "string" && raw.must_keep.trim()) || match?.must_keep || raw.name.trim(),
         seconds,
         best_seconds: best.length ? best : seconds.slice(0, 2),
@@ -605,7 +614,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     lastEvents = events;
 
     // Entities: objects, creatures and machines, with a sheet or with one to draw.
-    const entities = await resolveEntities({ notes, library, frames, meter });
+    const entities = await resolveEntities({ notes, library, frames, meter, cast: lostGarden ? STUDIO_CAST : undefined });
     newAssets.push(...entityAssets(entities, library, frameSrc));
     const entityLines = entities.map((e) => `${e.kind === "object" ? `object "${e.id}"` : `character "${e.id}"`} = ${e.name}${e.scale ? ` (scale: ${e.scale})` : ""}, visible at ${e.seconds.slice(0, 12).join(", ")} s${e.has_sheet ? "" : " (sheet being drawn from the film)"}: ${e.must_keep.slice(0, 220)}`);
 

@@ -255,3 +255,34 @@ export const STUDIO_SCREENPLAY = screenplay as {
 };
 
 export const STUDIO_ANALYSIS: SourceAnalysis = EP1_OPENING_ANALYSIS;
+
+/** What the film shows of a cast member whose sheet only tells behaviour (read on the frames of episode 1). */
+const CAST_LOOKS: Record<string, string> = {
+  SER: "Serrure, the ninth knight: tall, dark steel plate armour, a tall helmet pierced by one vertical KEYHOLE-shaped slit, a golden key hanging on his chest, asymmetric pauldrons, a worn cape on one shoulder, twin swords on his back; half a head taller than Lanterne.",
+};
+
+function lookOf(text: string): string {
+  const sentences = text.replace(/```/g, "").replace(/\s+/g, " ").split(/(?<=[.!?])\s+/);
+  const visual = sentences.filter((line) => /\b(helmet|keyhole|armou?r|cape|cloak|scarf|sword|blade|plate|pauldron|colou?r|silver|gold|black|white|red|blue|tall|height|metres|shape|mask|horn|eye|body)\b/i.test(line));
+  return (visual.length ? visual : sentences).join(" ").slice(0, 700);
+}
+
+/**
+ * The cast of the series from the design sheets: the named characters and
+ * objects, with the start of their design. The entity resolver uses it so a
+ * knight with a keyhole helmet is registered as Serrure, not as "seated
+ * armoured figure (second knight)".
+ */
+export const STUDIO_CAST: { id: string; name: string; kind: "character" | "object"; looks: string }[] = DREAMINA.filter((entry) => entry.kind === "character" || entry.kind === "object").map((entry) => ({
+  id: entry.name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/^(le |la |les |l'|l’)/, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, ""),
+  name: entry.name.replace(/⚠️/g, "").trim(),
+  kind: entry.kind === "object" ? "object" : "character",
+  // The sheets open on size and behaviour; the look (helmet, armour, colours) is what tells two knights apart.
+  looks: CAST_LOOKS[entry.code] ?? lookOf(entry.text),
+}));
