@@ -205,7 +205,7 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     const to = panelId(target);
     const named = mergeInPanels(panels, kind, from, to);
     const keep = kind === "character" && entry.assets.some((a) => a.image);
-    if (!window.confirm(`Fusionner « ${entry.name} » dans « ${target.name} » ? ${named.changed} case${named.changed > 1 ? "s" : ""} qui le nomment nommeront ${target.name} et seront marquées à redessiner ; ${keep ? `ses fiches passent chez ${target.name}, après les siennes (le × les retire)` : `les fiches de ${entry.name} sont retirées`}.`)) return;
+    if (!window.confirm(`Fusionner « ${entry.name} » dans « ${target.name} » ? ${named.changed} case${named.changed > 1 ? "s" : ""} qui le nomment nommeront ${target.name} (leur image reste ; « Regénérer » une case si son dessin est faux) ; ${keep ? `ses fiches passent chez ${target.name}, après les siennes (le × les retire)` : `les fiches de ${entry.name} sont retirées`}.`)) return;
     let next = library;
     const last = Math.max(0, ...target.assets.map((a) => a.priority ?? 1));
     entry.assets.forEach((asset, i) => {
@@ -215,7 +215,7 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     });
     persist(next);
     setPanels(named.panels);
-    notify(`${entry.name} fusionné dans ${target.name} : ${named.changed} case${named.changed > 1 ? "s" : ""} à redessiner (« Générer les cases manquantes »)`);
+    notify(`${entry.name} fusionné dans ${target.name} : ${named.changed} case${named.changed > 1 ? "s" : ""} le nomment désormais`);
   };
 
   const restore = (entry: Entry) => {

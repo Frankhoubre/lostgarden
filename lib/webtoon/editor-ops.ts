@@ -217,9 +217,10 @@ export function markForRegeneration(panels: WebtoonPanel[], id: string): Webtoon
 /**
  * Two library entries that are the same thing (the engine drew Serrure as
  * "seated armoured figure", then again as "serrure"): every panel that names
- * `from` names `to` instead, speakers included, and a panel already drawn is
- * marked to redraw, since it was drawn from the other sheet. Returns the
- * panels and how many changed.
+ * `from` names `to` instead, speakers included. Drawn panels keep their image:
+ * a duplicate sheet is usually a good view of the same thing (the tavern's
+ * Serrure was right on every panel), and "Générer les cases manquantes" would
+ * otherwise redraw sixty panels. Returns the panels and how many changed.
  */
 export function mergeInPanels(panels: WebtoonPanel[], kind: "character" | "object" | "location", from: string, to: string): { panels: WebtoonPanel[]; changed: number } {
   let changed = 0;
@@ -244,7 +245,7 @@ export function mergeInPanels(panels: WebtoonPanel[], kind: "character" | "objec
     }
     if (!touched) return p;
     changed += 1;
-    return p.image.status === "generated" ? { ...p, image: { ...p.image, status: "stale" as const } } : p;
+    return p;
   });
   return { panels: next, changed };
 }
