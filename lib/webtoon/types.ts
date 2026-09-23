@@ -189,6 +189,8 @@ export type WebtoonPanel = {
   order: number;
   source_time_start: number | null;
   source_time_end: number | null;
+  /** "monochrome" when the film is in black and white at this moment (a memory, a flashback): drawn and delivered in greyscale. */
+  grade?: "monochrome";
   /** Shot ids of the source analysis this panel draws from. */
   source_shots: string[];
   fidelity: Fidelity;
