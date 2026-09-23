@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
@@ -375,6 +376,31 @@ function cutWindow(moments: Moment[], events: StoryEvent[], budget: number): { e
   return { end, needed: Math.max(1, needed) };
 }
 
+/**
+ * True when a frame has no colour: not one pixel in a thousand is coloured, and it is not a black frame.
+ * On Lost Garden it finds the memory of the oath (8:52 to 9:01) and nothing else: the white lily field
+ * of the opening keeps the pink of the girl's hair, a fade to black is too dark to count.
+ */
+async function isMonochrome(src: string): Promise<boolean> {
+  try {
+    const url = await imageAsDataUrl(src);
+    const bytes = Buffer.from(url.slice(url.indexOf(",") + 1), "base64");
+    const { data, info } = await sharp(bytes).resize(96, 54, { fit: "fill" }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const pixels = data.length / info.channels;
+    let coloured = 0;
+    let light = 0;
+    for (let i = 0; i < data.length; i += info.channels) {
+      const max = Math.max(data[i], data[i + 1], data[i + 2]);
+      const min = Math.min(data[i], data[i + 1], data[i + 2]);
+      if (max > 40 && (max - min) / max > 0.2) coloured += 1;
+      light += max;
+    }
+    return coloured / pixels < 0.001 && light / pixels > 30;
+  } catch {
+    return false;
+  }
+}
+
 /** The words that name a thing: its id and the longer words of its name ("silver pendant" → silver, pendant). */
 function keywordsOf(id: string, name: string): string[] {
   return [...new Set([...id.split(/[-_.]/), ...name.toLowerCase().split(/[^a-zà-ÿ]+/)].filter((w) => w.length > 3 && !/^(with|from|that|this|film|sheet|webtoon|model)$/.test(w)))];
@@ -454,6 +480,8 @@ function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch
     "Movement. A panel is a still image: say in `motion` how much moves (none, slow, fast, violent) and in `effects` what must be drawn to show it (speed lines, debris, dust, electric arcs, sparks). When a machine or a creature rises, unfolds, leans or strikes, the panel BEFORE shows it as it was, the panel of the movement shows the limbs mid-movement with debris falling and motion lines, the panel AFTER shows its new height against the character. Never describe a movement with a static standing pose.",
     "Scale. When something colossal is in the panel (a machine, a giant, a chasm), write its size against the character in `scale_note` (\"the machine: twenty times his height, one leg thicker than a trunk; the hero the size of one of its rivets\") and compose for it: the character tiny at the bottom, low angle, the thing overflowing the frame. The reveal of a colossal thing is the tallest panel of the sequence (`aspect_ratio` `9:16` or `panel_height` 2200 to 2600, full width), preceded by a fragment glimpsed first (a leg, a claw, an eye huge in the foreground, the character small behind) and followed by the reaction.",
     "Dialogue from the film, strict. The moments carry `subtitles`: the lines actually spoken, burned into the frames, with their seconds. Every subtitle line becomes ONE speech bubble, once, in the first panel of its seconds (a line held on screen across several frames or across a cut is still one bubble; a line already lettered in the last panels made is never lettered again; two short lines of the same speaker can share a panel): its text as written in `fr` when it is French (or `en` when it is English), translated into the other language, the `speaker` being the one who speaks (the character whose mouth moves, or the voice heard from off-frame with `style` off). Never drop a subtitle, never invent a line that is in neither the subtitles nor the screenplay.",
+    "Black and white. A moment with `grade` \"black and white\" is a memory or a flashback: the film shows another time. Its panels show exactly what those frames show (often someone of the past, another place or the same place long ago, a figure that dissolves into another), never the present scene redrawn; say \"black and white memory\" in the description, name the place the frames show, and never add a colour. A present character appears in it only when the frame shows him.",
+    "A being already revealed is not revealed again. After its reveal, a colossal being or a being that speaks is shown through the scene: in the frame behind Lanterne, in the panels of its lines, in his reactions. A panel of it alone (its face, a fragment, a wide view of it) without a line and without Lanterne comes at most once in four panels, even when the film cuts back to it often: the film can hold on a face, the strip cannot.",
     "Handled objects. An object in a hand or being handled (taken out, opened, looked at) is framed so it reads: a close-up or a medium close-up on the hands, never a wide shot where it shrinks to a dot. Its size against the hand and the body stays the size its sheet gives, from one panel to the next.",
     "Objects and creatures, strict. Every object in a hand and every creature or machine named in ENTITIES has a design sheet attached to the panel when you put its id in `objects` (objects) or in `characters` (creatures, machines): always do it, in every panel where it is visible, even partly. Draw what the notes say is there and nothing else: no paper, letter, note or map exists in this episode; the pale plate on Lanterne's chest is armour. An object taken out, opened, looked at, thrown gets its own panels, followed to the end.",
     lostGarden
@@ -542,6 +570,10 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     const [rawNotes, helmet] = await Promise.all([analyzeWindow({ script, lostGarden, screenplay, frames: window, characters, objects: objectEntries.map((o) => o.name), meter }), lostGarden ? helmetChecks(window, meter) : Promise.resolve(new Map<number, "on" | "off" | "absent">())]);
     if (!rawNotes.length) return Response.json({ error: "Le superviseur n'a rien lu sur ces images du film" }, { status: 502 });
+    // Black and white is measured on the pixels: the model sees a memory in greyscale and still writes "blue forest".
+    const grades = await Promise.all(window.map(async (frame) => [frame.seconds, await isMonochrome(frame.src)] as const));
+    const mono = new Set(grades.filter(([, m]) => m).map(([seconds]) => seconds));
+    for (const note of rawNotes) if (mono.has(Number(note.seconds))) note.grade = "black and white";
     for (const note of rawNotes) {
       const check = helmet.get(Number(note.seconds));
       if (check === "on") note.helmet = "on his head";
@@ -703,6 +735,8 @@ export async function POST(request: Request, { params }: RouteContext) {
       const cleaned = text.replace(/headless|without his helmet/gi, "helmet on his head");
       return { ...panel, description: `${cleaned} STATE TO KEEP EXACTLY: the helmet is ON his head. ${cues}`.trim() };
     });
+    // A panel at a black-and-white second is a memory: drawn and delivered in greyscale.
+    panels = panels.map((panel) => (panel.source_time_start !== null && mono.has(Math.round(panel.source_time_start)) ? { ...panel, grade: "monochrome" as const } : panel));
     panels = ensureSoundEffects(panels, intents, events);
     if (!panels.length) return Response.json({ error: "Le modèle n'a renvoyé aucune case exploitable" }, { status: 502 });
     created.push(...panels);

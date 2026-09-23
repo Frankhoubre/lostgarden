@@ -51,9 +51,13 @@ export function composeReferences(panel: WebtoonPanel, script: ScriptWorld, over
     );
     for (const sheet of sheets.slice(0, 2)) add(sheet);
   }
-  const palette = paletteForPanel(panel, script);
-  add(byId.get(script.style_anchors?.[palette] ?? ""));
-  add(byId.get(`loc.${panel.location}`));
+  // A black-and-white memory takes neither the colour anchor nor the location sheet: both painted the oath
+  // of 8:53 in the blue of the forest, before the altar, when the film shows a hall of pillars in greyscale.
+  if (panel.grade !== "monochrome") {
+    const palette = paletteForPanel(panel, script);
+    add(byId.get(script.style_anchors?.[palette] ?? ""));
+    add(byId.get(`loc.${panel.location}`));
+  }
   for (const object of panel.objects) add(byId.get(`obj.${object}`));
   for (const id of panel.visual_references) {
     const asset = byId.get(id);
@@ -76,6 +80,9 @@ export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?:
   if (/\b(from behind|back to (the )?(camera|viewer|us)|seen from the back|rear view|his back|her back|over (his|her) shoulder)\b/i.test(`${panel.description} ${panel.composition}`)) {
     notes.push("SEEN FROM BEHIND: every character here faces away. Nothing of the face side is visible: no eyes, no eye holes, no face, no mouth; the back of a helmet or a head is plain.");
   }
+  if (panel.grade === "monochrome") {
+    notes.push("BLACK AND WHITE MEMORY: the whole image in greyscale, no colour at all (no blue, no cream, no pink), like the film frame: soft grey mist, deep blacks, pale greys. It is a memory of long ago: draw the place and the people the frame shows, not the present scene.");
+  }
   if (panel.objects.length) {
     notes.push("OBJECT SIZE: each object keeps its real size against the hand and the body, exactly as its sheet and the film show it, from one panel to the next: never shrunk to a dot, never enlarged.");
   }
@@ -83,7 +90,7 @@ export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?:
     panel,
     references,
     bible: bibleFor(script.style_bible_id),
-    palette: paletteForPanel(panel, script),
+    palette: panel.grade === "monochrome" ? "" : paletteForPanel(panel, script),
     notes,
   });
   return {

@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
@@ -79,6 +80,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       resolveReference: referenceAsDataUrl,
     });
     void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "images" });
+    // A memory in black and white is delivered in black and white, whatever tint the model left.
+    if (panel.grade === "monochrome") {
+      const grey = await sharp(Buffer.from(image.base64, "base64")).grayscale().jpeg({ quality: 92 }).toBuffer();
+      image.base64 = grey.toString("base64");
+      image.media_type = "image/jpeg";
+    }
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({
       idToken: identity.idToken,

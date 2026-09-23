@@ -45,6 +45,8 @@ export type FrameNote = {
   changed?: string;
   /** Subtitle burned into the frame, word for word: the line actually spoken. */
   subtitle?: string;
+  /** Measured on the pixels, not read by the model: "black and white" when the frame has no colour (a memory, a flashback). */
+  grade?: string;
   title_card?: string | null;
   screenplay_line?: string;
 };
@@ -129,6 +131,7 @@ export function normalizeNotes(notes: readonly unknown[]): FrameNote[] {
         sound: asText(n.sound),
         changed: asText(n.changed),
         subtitle: asText(n.subtitle).trim(),
+        ...(n.grade ? { grade: asText(n.grade) } : {}),
         title_card: title || null,
         screenplay_line: asText(n.screenplay_line),
       } satisfies FrameNote;
@@ -212,6 +215,7 @@ export function momentsOf(notes: FrameNote[]): Moment[] {
       handsHold(n.in_hands) ? headNoun(heldThing(n.in_hands)) : "",
       significantNouns(n.others_visible).join(","),
       n.title_card ? "title" : "",
+      n.grade ?? "",
     ].join("|");
   const moments: Moment[] = [];
   const spoken = new Set<string>();
@@ -288,7 +292,9 @@ export function eventsOf(moments: Moment[], options: { /** Text of the last pane
   const seen = new Set<string>();
   for (let i = 0; i < moments.length; i += 1) {
     const cur = moments[i];
-    const prev = moments[i - 1];
+    // A dissolve into a black-and-white memory is not a movement: across a change of grade, no fall,
+    // no kneel, no landing (8:57, Lanterne kneeling in the memory made a knee slam with its KLANG).
+    const prev = moments[i - 1] && (moments[i - 1].grade ?? "") === (cur.grade ?? "") ? moments[i - 1] : undefined;
     const text = words(cur.action, cur.motion, cur.sound, cur.in_hands);
     const electric = has(words(cur.action, cur.motion, cur.others_visible, cur.sound), RE_ELECTRIC) ? ["crackling blue-white electric arcs jumping between its metal parts, small sparks, a cold glow thrown on the nearby surfaces"] : undefined;
 
@@ -396,7 +402,8 @@ export function eventsOf(moments: Moment[], options: { /** Text of the last pane
         const n = headNoun(part.trim());
         if (n.length > 2) seen.add(n);
       }
-      if (curFirst && fresh && !TERRAIN.test(curFirst) && !/^(helmet|hand|hands|arm|arms|cape|scarf|armour|armor|gauntlet|glove|boot|boots|fist|shadow|silhouette|water|reflection)$/.test(noun)) {
+      // Nor a part of a being already there: its face, its eyes, a root, a droplet (the Source was "revealed" five times, once per part).
+      if (curFirst && fresh && !TERRAIN.test(curFirst) && !/^(helmet|hand|hands|arm|arms|cape|scarf|armour|armor|gauntlet|glove|boot|boots|fist|shadow|silhouette|water|reflection|face|faces|eye|eyes|mouth|lips?|cheek|chin|brow|forehead|hair|root|roots|branch|branches|twig|twigs|finger|fingers|droplet|drop|tear|tears|petal|petals|flower|flowers|lily|lilies|light|glow|particle|particles|mist|fog)$/.test(noun)) {
         const scale = cur.scale && !/^\s*(none|-|n\/a)?\s*$/i.test(cur.scale) ? cur.scale : "";
         push({
           kind: "appear",
@@ -537,7 +544,10 @@ export function eventsOf(moments: Moment[], options: { /** Text of the last pane
     }
     merged.push(event);
   }
-  return merged;
+  // One spectacle at a time: an appearance, a rise or a growth within fifteen seconds of another is the
+  // same reveal seen again, not a new one (9:00 to 9:18: the Source revealed, risen and grown in turn).
+  const BIG = new Set(["appear", "rise", "grow"]);
+  return merged.filter((event, index) => !BIG.has(event.kind) || !merged.slice(0, index).some((e) => BIG.has(e.kind) && event.from - e.to <= 15));
 }
 
 /** The events as one block of text for the writer. */
