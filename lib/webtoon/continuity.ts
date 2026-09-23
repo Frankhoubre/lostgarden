@@ -810,12 +810,13 @@ export function dropRepeats<T extends { seconds: number; description?: string; c
 }
 
 /** Seconds of film per panel by pace, outside the extra beats of the events. */
-export const SECONDS_PER_PANEL = { action: 1.3, normal: 2.6, calm: 4 } as const;
+export const SECONDS_PER_PANEL = { action: 1.5, normal: 3.2, calm: 4.5 } as const;
 
 /**
  * How many panels a stretch of film deserves: its length at the pace, plus
  * part of what its events need beyond two panels each. Frank found 14 panels
- * for 18 seconds (7:54 to 8:12) too many; this gives about 10.
+ * for 18 seconds (7:54 to 8:12) too many, then still "a little too many" at
+ * one per 2.6 s; one per 3.2 s gives about 6 for those 18 seconds, plus the events.
  */
 export function panelBudget(input: { from: number; to: number; events: Pick<StoryEvent, "from" | "to" | "min_panels">[]; pace: keyof typeof SECONDS_PER_PANEL }): number {
   const span = Math.max(1, input.to - input.from + 1);
