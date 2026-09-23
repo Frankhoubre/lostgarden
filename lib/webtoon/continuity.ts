@@ -832,6 +832,39 @@ export function panelBudget(input: { from: number; to: number; events: Pick<Stor
  * card is never dropped, nor the last panel (where the next batch resumes),
  * nor a beat of an event already down to its minimum.
  */
+/**
+ * Moves the line of a panel into the panel just before when they are at most
+ * four seconds apart and hold two lines at most together, then removes the
+ * emptied panel. The two bubbles are placed one high on the left, one lower
+ * on the right, so they read in order. Returns false when no pair fits.
+ */
+function mergeCloseLines<T extends { seconds: number; title_card?: string; dialogue?: unknown[]; sfx?: unknown[] }>(list: T[]): boolean {
+  let best = -1;
+  let bestGap = Infinity;
+  for (let i = 1; i < list.length - 1; i += 1) {
+    const item = list[i];
+    const prev = list[i - 1];
+    if (item.title_card || prev.title_card || (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150)) continue;
+    const lines = (item.dialogue?.length ?? 0) + (prev.dialogue?.length ?? 0);
+    const gap = Math.abs(Number(item.seconds) - Number(prev.seconds));
+    if (!item.dialogue?.length || lines > 2 || gap > 4) continue;
+    if (gap < bestGap) {
+      bestGap = gap;
+      best = i;
+    }
+  }
+  if (best < 0) return false;
+  const prev = list[best - 1];
+  const moved = [...(prev.dialogue ?? []), ...(list[best].dialogue ?? [])] as { anchor?: { x: number; y: number } }[];
+  if (moved.length === 2) {
+    moved[0].anchor = { x: 30, y: 16 };
+    moved[1].anchor = { x: 68, y: 38 };
+  }
+  prev.dialogue = moved as T["dialogue"];
+  list.splice(best, 1);
+  return true;
+}
+
 export function trimToBudget<T extends { seconds: number; description?: string; characters?: string[]; title_card?: string; fidelity?: string; dialogue?: unknown[]; sfx?: unknown[]; narrative_role?: string }>(list: T[], budget: number, events: Pick<StoryEvent, "from" | "to" | "min_panels">[] = []): T[] {
   const out = [...list];
   const inEvent = (item: T) => events.find((e) => Number(item.seconds) >= e.from - 1 && Number(item.seconds) <= e.to + 1);
@@ -867,7 +900,12 @@ export function trimToBudget<T extends { seconds: number; description?: string; 
         worst = i;
       }
     }
-    if (worst < 0) break;
+    if (worst < 0) {
+      // Only panels that carry a line are left over the budget: two close lines share one panel
+      // (the tavern with Serrure came out at one panel every two seconds, one per subtitle).
+      if (!mergeCloseLines(out)) break;
+      continue;
+    }
     out.splice(worst, 1);
   }
   return out;
