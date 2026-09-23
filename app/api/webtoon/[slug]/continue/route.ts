@@ -241,15 +241,24 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
       const ref = typeof raw.ref === "string" ? raw.ref.trim().toLowerCase().replace(/^(obj|char)\./, "").replace(/\.webtoon$/, "") : "";
       const match = ref ? known.find((k) => k.id === ref && k.kind === kind) ?? known.find((k) => k.id === ref) : undefined;
       const castId = typeof raw.cast === "string" ? raw.cast.trim().toLowerCase() : "";
-      const cast = castId ? input.cast?.find((c) => c.id === castId) : undefined;
-      const id = match?.id ?? (cast ? cast.id : entitySlug(raw.name));
+      // The library wins over the cast: the cast's "Médaillon de la Graine" is the library's pendant.
+      const aliased = CAST_ALIASES[castId] ? known.find((k) => k.id === CAST_ALIASES[castId]) : undefined;
+      const cast = castId && !aliased ? input.cast?.find((c) => c.id === castId) : undefined;
+      // A name that says a library character ("blond-haired figure (Rose)") is that character.
+      const rawName = raw.name;
+      const named = match || aliased ? undefined : known.find((k) => {
+        const word = k.name.split(",")[0].trim();
+        return k.kind === kind && word.length > 2 && rawName.toLowerCase().split(/[^a-zà-ÿ]+/).includes(word.toLowerCase());
+      });
+      const library = match ?? aliased ?? named;
+      const id = library?.id ?? (cast ? cast.id : entitySlug(raw.name));
       if (!id) continue;
       const seconds = (Array.isArray(raw.seconds) ? raw.seconds : []).map(Number).filter((s) => Number.isFinite(s));
       const best = (Array.isArray(raw.best_seconds) ? raw.best_seconds : []).map(Number).filter((s) => Number.isFinite(s));
       const entity: Entity = {
         id,
-        kind: match?.kind ?? kind,
-        name: match?.name ?? cast?.name ?? raw.name.trim(),
+        kind: library?.kind ?? kind,
+        name: library?.name ?? cast?.name ?? raw.name.trim(),
         must_keep: (typeof raw.must_keep === "string" && raw.must_keep.trim()) || match?.must_keep || raw.name.trim(),
         seconds,
         best_seconds: best.length ? best : seconds.slice(0, 2),
@@ -386,6 +395,9 @@ function cutWindow(moments: Moment[], events: StoryEvent[], budget: number, pace
   }
   return { end, needed: Math.max(1, Math.round(needed)) };
 }
+
+/** Cast ids that are already in the library under another id. */
+const CAST_ALIASES: Record<string, string> = { "medaillon-de-la-graine": "pendant", lanterne: "lanterne" };
 
 /**
  * True when a frame has no colour: not one pixel in a thousand is coloured, and it is not a black frame.
