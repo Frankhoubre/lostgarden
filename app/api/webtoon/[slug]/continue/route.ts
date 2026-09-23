@@ -779,6 +779,8 @@ export async function POST(request: Request, { params }: RouteContext) {
   } catch (error) {
     void recordCost({ idToken: identity.idToken, slug, usd: meter.usd, kind: "writer" });
     const message = error instanceof Error ? error.message : "writing failed";
+    // In the function logs, so a failing stretch of film can be understood afterwards.
+    console.error(`continue ${slug} from ${start.length} panels failed: ${message}`);
     if (created.length) return Response.json({ panels: created, new_assets: newAssets, partial: true, error: message });
     return Response.json({ error: message }, { status: 502 });
   }
