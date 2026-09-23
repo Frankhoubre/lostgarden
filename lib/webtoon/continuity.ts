@@ -825,7 +825,10 @@ export function trimToBudget<T extends { seconds: number; description?: string; 
   const out = [...list];
   const inEvent = (item: T) => events.find((e) => Number(item.seconds) >= e.from - 1 && Number(item.seconds) <= e.to + 1);
   const keeps = (item: T) => {
-    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150) || item.narrative_role === "reveal" || item.narrative_role === "establishing") return true;
+    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150)) return true;
+    // One reveal and one establishing view are kept; the writer labels half a scene "reveal"
+    // (9:00 to 9:18, the tree-being rising: twenty panels for twenty seconds).
+    if (item.narrative_role === "reveal" || item.narrative_role === "establishing") return out.find((o) => o.narrative_role === item.narrative_role) === item;
     const event = inEvent(item);
     return Boolean(event && out.filter((o) => inEvent(o) === event).length <= event.min_panels);
   };
