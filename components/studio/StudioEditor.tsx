@@ -236,6 +236,32 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const fileInput = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => panels.find((p) => p.panel_id === selectedId) ?? panels[0] ?? null, [panels, selectedId]);
+  const selectedPanelId = selected?.panel_id ?? null;
+
+  // The list on the left follows the selection: a click on a panel of the strip (or the arrows, or
+  // the director) brings its thumbnail into view and makes it flash once. Only the list scrolls,
+  // never the page, so the strip stays where the author clicked.
+  const listRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !selectedPanelId) return;
+    const item = list.querySelector<HTMLElement>(`[data-drop-id="${CSS.escape(selectedPanelId)}"]`);
+    if (!item) return;
+    if (list.scrollHeight > list.clientHeight + 4) {
+      const box = list.getBoundingClientRect();
+      const at = item.getBoundingClientRect();
+      if (at.top < box.top + 48 || at.bottom > box.bottom - 48) {
+        // A smooth scroll never runs in a hidden tab: jump there instead.
+        list.scrollTo({ top: list.scrollTop + (at.top - box.top) - list.clientHeight / 2 + at.height / 2, behavior: document.hidden ? "auto" : "smooth" });
+      }
+    }
+    item.classList.remove("is-flash");
+    // Restart the animation when the same panel is selected again.
+    void item.offsetWidth;
+    item.classList.add("is-flash");
+    const done = window.setTimeout(() => item.classList.remove("is-flash"), 1200);
+    return () => window.clearTimeout(done);
+  }, [selectedPanelId]);
   const layout = useMemo(() => computeLayout(panels), [panels]);
   const index = selected ? panels.findIndex((p) => p.panel_id === selected.panel_id) : -1;
 
@@ -933,7 +959,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   return (
     <div className="studio-editor webtoon-editor">
-      <aside className="studio-list">
+      <aside className="studio-list" ref={listRef}>
         <p className="studio-list-total">{panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px</p>
         <div className="studio-list-actions">
           {job ? (
