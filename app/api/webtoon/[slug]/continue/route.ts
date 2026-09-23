@@ -2,7 +2,7 @@ import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue"
 import {
   bestFrameFor,
   coveredUntil,
-  dropRepeats, panelBudget, trimToBudget,
+  dropRepeatedLines, dropRepeats, panelBudget, trimToBudget,
   ensureSoundEffects,
   entityAssets,
   entitySheets,
@@ -388,7 +388,7 @@ const plain = (text: string) => text.toLowerCase().normalize("NFD").replace(/[\u
  * shot where the hands are empty); a subtitle no panel letters is a missing
  * line. Both go to the same fix call as the reviewer's findings.
  */
-function filmChecks(input: { intents: NextPanelIntent[]; notes: FrameNote[]; objects: { id: string; name: string }[] }): { missing: { seconds: number; moment: string }[]; invented: { index: number; problem: string }[] } {
+function filmChecks(input: { intents: NextPanelIntent[]; notes: FrameNote[]; objects: { id: string; name: string }[]; earlier?: string[] }): { missing: { seconds: number; moment: string }[]; invented: { index: number; problem: string }[] } {
   const invented: { index: number; problem: string }[] = [];
   const noteText = (seconds: number) =>
     input.notes
@@ -409,7 +409,7 @@ function filmChecks(input: { intents: NextPanelIntent[]; notes: FrameNote[]; obj
     intent.objects = kept;
   });
   const missing: { seconds: number; moment: string }[] = [];
-  const lettered = input.intents.flatMap((i) => (i.dialogue ?? []).flatMap((d) => [plain(d.en ?? ""), plain(d.fr ?? "")]));
+  const lettered = [...input.intents.flatMap((i) => (i.dialogue ?? []).flatMap((d) => [plain(d.en ?? ""), plain(d.fr ?? "")])), ...(input.earlier ?? []).map(plain)];
   const seen = new Set<string>();
   for (const note of [...input.notes].sort((a, b) => Number(a.seconds) - Number(b.seconds))) {
     const line = plain(note.subtitle ?? "");
@@ -453,7 +453,7 @@ function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch
     "Sound. Every impact, blow, fall, roar, crack and run carries sound effects in the lettering (`sfx`): one giant one on an impact, and in a run or a chase two or three smaller ones scattered across the panel (footsteps on moss, roots cracking, his own metal rattling, the roar behind) with different rotations. Also fill `sound` with what would be heard in the panel, in words, even when you letter nothing (\"silence\" when nothing). A panel of an action sequence without any sound effect is a mistake.",
     "Movement. A panel is a still image: say in `motion` how much moves (none, slow, fast, violent) and in `effects` what must be drawn to show it (speed lines, debris, dust, electric arcs, sparks). When a machine or a creature rises, unfolds, leans or strikes, the panel BEFORE shows it as it was, the panel of the movement shows the limbs mid-movement with debris falling and motion lines, the panel AFTER shows its new height against the character. Never describe a movement with a static standing pose.",
     "Scale. When something colossal is in the panel (a machine, a giant, a chasm), write its size against the character in `scale_note` (\"the machine: twenty times his height, one leg thicker than a trunk; the hero the size of one of its rivets\") and compose for it: the character tiny at the bottom, low angle, the thing overflowing the frame. The reveal of a colossal thing is the tallest panel of the sequence (`aspect_ratio` `9:16` or `panel_height` 2200 to 2600, full width), preceded by a fragment glimpsed first (a leg, a claw, an eye huge in the foreground, the character small behind) and followed by the reaction.",
-    "Dialogue from the film, strict. The moments carry `subtitles`: the lines actually spoken, burned into the frames, with their seconds. Every subtitle line becomes a speech bubble in a panel at its seconds: its text as written in `fr` when it is French (or `en` when it is English), translated into the other language, the `speaker` being the one who speaks (the character whose mouth moves, or the voice heard from off-frame with `style` off). Never drop a subtitle, never invent a line that is in neither the subtitles nor the screenplay.",
+    "Dialogue from the film, strict. The moments carry `subtitles`: the lines actually spoken, burned into the frames, with their seconds. Every subtitle line becomes ONE speech bubble, once, in the first panel of its seconds (a line held on screen across several frames or across a cut is still one bubble; a line already lettered in the last panels made is never lettered again; two short lines of the same speaker can share a panel): its text as written in `fr` when it is French (or `en` when it is English), translated into the other language, the `speaker` being the one who speaks (the character whose mouth moves, or the voice heard from off-frame with `style` off). Never drop a subtitle, never invent a line that is in neither the subtitles nor the screenplay.",
     "Handled objects. An object in a hand or being handled (taken out, opened, looked at) is framed so it reads: a close-up or a medium close-up on the hands, never a wide shot where it shrinks to a dot. Its size against the hand and the body stays the size its sheet gives, from one panel to the next.",
     "Objects and creatures, strict. Every object in a hand and every creature or machine named in ENTITIES has a design sheet attached to the panel when you put its id in `objects` (objects) or in `characters` (creatures, machines): always do it, in every panel where it is visible, even partly. Draw what the notes say is there and nothing else: no paper, letter, note or map exists in this episode; the pale plate on Lanterne's chest is armour. An object taken out, opened, looked at, thrown gets its own panels, followed to the end.",
     lostGarden
@@ -614,7 +614,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     // One review, two checks: what is missing (moments and event beats) and what contradicts the film; one fix call for both.
     const review = await reviewPanels({ moments, events, intents, meter });
     // What needs no model: objects no frame shows, subtitles no bubble carries.
-    const checks = filmChecks({ intents, notes, objects: [...objectEntries.map((o) => ({ id: o.id, name: o.name })), ...entities.filter((e) => e.kind === "object").map((e) => ({ id: e.id, name: e.name }))] });
+    // The lines already lettered in the last panels made: not missing, and never lettered twice.
+    const earlierLines = start.slice(-12).flatMap((p) => p.dialogue.flatMap((d) => [d.text.fr ?? "", d.text.en ?? ""]));
+    const checks = filmChecks({ intents, notes, earlier: earlierLines, objects: [...objectEntries.map((o) => ({ id: o.id, name: o.name })), ...entities.filter((e) => e.kind === "object").map((e) => ({ id: e.id, name: e.name }))] });
     const missing = [...review.missing, ...checks.missing].slice(0, 14);
     const invented = [...review.invented, ...checks.invented.filter((c) => !review.invented.some((r) => r.index === c.index))].slice(0, 10);
     if (missing.length || invented.length) {
@@ -657,7 +659,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     }
 
     // Two panels saying the same thing in a row become one; a place that flips for one panel follows its neighbours.
-    intents = trimToBudget(dropRepeats(intents), budget, events);
+    intents = trimToBudget(dropRepeats(dropRepeatedLines(intents, earlierLines)), budget, events);
     smoothLocations(intents, notes);
 
     // Deterministic passes on the intents: objects in hand, the frame where each entity is seen best, scale.
