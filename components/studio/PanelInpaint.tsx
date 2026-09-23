@@ -9,6 +9,8 @@ type PanelInpaintProps = {
   panel: WebtoonPanel;
   library: LibraryOverlay;
   notify: (message: string) => void;
+  /** The quality chosen in the studio (HD or Éco). */
+  quality?: "high" | "medium";
   /** The retouched panel as a PNG data URL, at the original size. */
   onDone: (dataUrl: string) => Promise<void> | void;
   onClose: () => void;
@@ -48,12 +50,14 @@ function fit(width: number, height: number) {
 }
 
 /**
- * Retouch one zone of a panel with the image model. The user paints the
- * zone on the panel, says what should appear there, and only that zone
- * changes: the model redraws the whole image with the mask as guide, then
- * the zone alone is pasted back on the original with a soft edge.
+ * Change a panel with the image model, two ways. Without painting: a prompt
+ * edits the whole panel ("make it night", "he turns his head to the left"),
+ * framing, characters and style kept. With a painted zone: only that zone
+ * changes; the model redraws the image with the mask as guide, then the zone
+ * alone is pasted back on the original with a soft edge. The result is shown
+ * before it replaces the image: keep it, try again, or go back.
  */
-export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: PanelInpaintProps) {
+export function PanelInpaint({ slug, panel, library, notify, quality = "high", onDone, onClose }: PanelInpaintProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const maskRef = useRef<HTMLCanvasElement | null>(null);
@@ -66,6 +70,8 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [painted, setPainted] = useState(false);
+  /** The proposal waiting for a decision, at the original size. */
+  const [proposal, setProposal] = useState<string | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -150,12 +156,8 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
     const image = imageRef.current;
     const mask = maskRef.current;
     if (!image || !mask || busy) return;
-    if (!painted) {
-      notify("Peins d'abord la zone à retoucher");
-      return;
-    }
     if (!prompt.trim()) {
-      notify("Dis ce qui doit apparaître dans la zone");
+      notify(painted ? "Dis ce qui doit apparaître dans la zone" : "Dis ce qui doit changer dans la case");
       return;
     }
     setBusy(true);
@@ -173,20 +175,24 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
       sctx.fillRect(0, 0, sw, sh);
       sctx.drawImage(image, ox, oy, dw, dh);
 
-      // The mask the model expects: opaque everywhere, transparent where the zone is.
-      const apiMask = document.createElement("canvas");
-      apiMask.width = sw;
-      apiMask.height = sh;
-      const mctx = apiMask.getContext("2d")!;
-      mctx.fillStyle = "#000";
-      mctx.fillRect(0, 0, sw, sh);
-      mctx.globalCompositeOperation = "destination-out";
-      mctx.drawImage(mask, ox, oy, dw, dh);
+      // The mask the model expects: opaque everywhere, transparent where the zone is. None for a whole-panel edit.
+      let apiMask: string | undefined;
+      if (painted) {
+        const canvas = document.createElement("canvas");
+        canvas.width = sw;
+        canvas.height = sh;
+        const mctx = canvas.getContext("2d")!;
+        mctx.fillStyle = "#000";
+        mctx.fillRect(0, 0, sw, sh);
+        mctx.globalCompositeOperation = "destination-out";
+        mctx.drawImage(mask, ox, oy, dw, dh);
+        apiMask = canvas.toDataURL("image/png");
+      }
 
       const response = await fetch(`/api/webtoon/${slug}/inpaint`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel, image: source.toDataURL("image/jpeg", 0.92), mask: apiMask.toDataURL("image/png"), prompt: prompt.trim(), size: `${sw}x${sh}`, library }),
+        body: JSON.stringify({ panel, image: source.toDataURL("image/jpeg", 0.92), ...(apiMask ? { mask: apiMask } : {}), prompt: prompt.trim(), size: `${sw}x${sh}`, library, quality }),
       });
       const payload = (await response.json().catch(() => ({}))) as { data_url?: string; error?: string };
       if (!response.ok || !payload.data_url) {
@@ -194,6 +200,15 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
         return;
       }
       const result = await loadImage(payload.data_url);
+      if (!painted) {
+        // The whole panel: the letterbox cropped away, back at the original size.
+        const whole = document.createElement("canvas");
+        whole.width = w;
+        whole.height = h;
+        whole.getContext("2d")!.drawImage(result, ox, oy, dw, dh, 0, 0, w, h);
+        setProposal(whole.toDataURL("image/png"));
+        return;
+      }
 
       // Paste only the painted zone, with a soft edge, onto the original.
       const layer = document.createElement("canvas");
@@ -212,11 +227,21 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
       const fctx = final.getContext("2d")!;
       fctx.drawImage(image, 0, 0);
       fctx.drawImage(layer, 0, 0);
-      await onDone(final.toDataURL("image/png"));
-      notify("Zone retouchée");
-      onClose();
+      setProposal(final.toDataURL("image/png"));
     } catch (e) {
       notify(e instanceof Error ? e.message : "Retouche impossible");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const keep = async () => {
+    if (!proposal) return;
+    setBusy(true);
+    try {
+      await onDone(proposal);
+      notify(painted ? "Zone retouchée" : "Case modifiée");
+      onClose();
     } finally {
       setBusy(false);
     }
@@ -229,10 +254,11 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
           {error ? <p className="text-sm text-ivory/80">{error}</p> : null}
           <div className="studio-inpaint-frame">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={panel.image.src} alt={panel.description} draggable={false} />
+          <img src={proposal ?? panel.image.src} alt={panel.description} draggable={false} />
           <canvas
             ref={overlayRef}
             className={busy ? "is-busy" : ""}
+            hidden={Boolean(proposal)}
             onPointerDown={(e) => {
               if (!ready || busy) return;
               painting.current = true;
@@ -254,30 +280,49 @@ export function PanelInpaint({ slug, panel, library, notify, onDone, onClose }: 
           {busy ? (
             <div className="studio-stage-overlay">
               <span className="studio-spinner studio-spinner-lg" aria-hidden />
-              <span>Retouche en cours…</span>
+              <span>{painted ? "Retouche en cours…" : "Modification en cours…"}</span>
               <small>≈ 40 s</small>
             </div>
           ) : null}
           </div>
         </div>
         <aside className="studio-inpaint-side">
-          <p className="anime-label text-xs text-cyan-pale">Retoucher une zone · {panel.panel_id}</p>
-          <p className="text-xs text-ivory/70">Peins la zone à changer directement sur l&apos;image, puis dis ce qui doit y apparaître. Le reste de la case ne bouge pas.</p>
+          <p className="anime-label text-xs text-cyan-pale">Modifier la case · {panel.panel_id}</p>
+          <p className="text-xs text-ivory/70">
+            {painted
+              ? "Seule la zone peinte change, le reste de la case ne bouge pas."
+              : "Sans rien peindre, le prompt modifie toute la case en gardant le cadrage, les personnages et le style. Pour ne toucher qu'un endroit, peins-le sur l'image."}
+          </p>
           <label className="webtoon-field">
             <span>Pinceau · {brush} px</span>
-            <input type="range" min={20} max={300} step={5} value={brush} onChange={(e) => setBrush(Number(e.target.value))} disabled={busy} />
+            <input type="range" min={20} max={300} step={5} value={brush} onChange={(e) => setBrush(Number(e.target.value))} disabled={busy || Boolean(proposal)} />
           </label>
           <label className="webtoon-field">
-            <span>Ce qui doit apparaître dans la zone</span>
-            <textarea rows={5} value={prompt} placeholder="Par exemple : le casque posé dans la mousse, vu de près, avec son anneau ; ou : retire la branche, ne laisse que la brume bleue." onChange={(e) => setPrompt(e.target.value)} disabled={busy} />
+            <span>{painted ? "Ce qui doit apparaître dans la zone" : "Ce qui doit changer dans la case"}</span>
+            <textarea
+              rows={5}
+              value={prompt}
+              placeholder={painted ? "Par exemple : le casque posé dans la mousse, vu de près, avec son anneau ; ou : retire la branche, ne laisse que la brume bleue." : "Par exemple : la scène de nuit, seulement la lueur des champignons ; ou : Lanterne tourne la tête vers la gauche ; ou : retire le deuxième lapin."}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={busy || Boolean(proposal)}
+            />
           </label>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="webtoon-mini studio-primary" onClick={() => void retouch()} disabled={busy || !ready}>
-              {busy ? "…" : "Retoucher (IA)"}
-            </button>
-            <button type="button" className="webtoon-mini" onClick={clearMask} disabled={busy || !painted}>Effacer le masque</button>
-            <button type="button" className="webtoon-mini" onClick={onClose} disabled={busy}>Fermer</button>
-          </div>
+          {proposal ? (
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void keep()} disabled={busy}>Garder</button>
+              <button type="button" className="webtoon-mini" onClick={() => { setProposal(null); void retouch(); }} disabled={busy}>Réessayer</button>
+              <button type="button" className="webtoon-mini" onClick={() => setProposal(null)} disabled={busy}>Revenir à l&apos;originale</button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void retouch()} disabled={busy || !ready}>
+                {busy ? "…" : painted ? "Retoucher la zone (IA)" : "Modifier la case (IA)"}
+              </button>
+              <button type="button" className="webtoon-mini" onClick={clearMask} disabled={busy || !painted}>Effacer le masque</button>
+              <button type="button" className="webtoon-mini" onClick={onClose} disabled={busy}>Fermer</button>
+            </div>
+          )}
+          {proposal ? <p className="text-xs text-ivory/70">Voici la proposition. L&apos;image de la case ne change que si tu cliques sur Garder.</p> : null}
         </aside>
       </div>
     </dialog>

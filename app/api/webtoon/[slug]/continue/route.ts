@@ -2,7 +2,7 @@ import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue"
 import {
   bestFrameFor,
   coveredUntil,
-  dropRepeats,
+  dropRepeats, panelBudget, trimToBudget,
   ensureSoundEffects,
   entityAssets,
   entitySheets,
@@ -459,13 +459,13 @@ function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch
     lostGarden
       ? "Continuity of state, strict. The `helmet` field of the moments is computed from the whole sequence and is the truth: when it says OFF, Lanterne is headless in that panel, whatever the character sheet shows and even if the head is out of frame; never write \"helmet on\" or \"helmet back on\" for a moment marked OFF. Carry the state of each character from panel to panel and write it in every `description` and in `state`. Once the helmet is on the ground, Lanterne is drawn WITHOUT his helmet in every panel until the panel where he puts it back: a hollow suit of armour with the cream scarf around an open, empty neck, no head, nothing inside; the helmet lies where it fell and is shown or implied. The same for kneeling, holding an object, an injury, a torn cape: a state changes only when the film or the screenplay changes it. A note saying the helmet is \"not visible\" means the frame does not include the head, nothing more."
       : "Continuity of state, strict. Carry the state of each character from panel to panel and write it in every `description` and in `state`: an injury, a torn cloth, something held, kneeling, a light on or off. A state changes only when the film or the screenplay changes it; never invent a change of state.",
-    "Not every panel shows a character. One panel in four or five is an illustration or an atmosphere panel with nobody in it: the place, the light, a detail of the environment, an object on the ground (the fallen helmet alone, the pendant where it landed). Use them for silences, for a change of place and to let the reader breathe.",
+    "Not every panel shows a character. At a change of place or in a long silence, one of your panels can be an illustration with nobody in it: the place, the light, an object on the ground (the fallen helmet alone, the pendant where it landed). It takes the place of a panel, it is not one more.",
     `Title cards. When the film shows the title of the series or a logo, make a title card panel instead of an image: \`title_card\` set to the exact text ${lostGarden ? '(for this series: "LOST GARDEN")' : "(the words on the card, as they are written)"}, background black, transition fade_to_black, no description needed. Never ask the image model to draw text.`,
-    "Rhythm of a webtoon: a wide establishing panel each time the place changes, close-ups on gestures, details on objects, an almost empty panel for a silence, a tall panel for a fall or a vertical space. Never lose the reader: when the place, the subject or the direction changes, add a connective panel (an establishing view, an insert on what the character looks at, a reaction, a step, a hand, a sound in the dark).",
+    "Rhythm of a webtoon: a wide establishing panel each time the place changes, close-ups on gestures, details on objects, an almost empty panel for a silence, a tall panel for a fall or a vertical space. Never lose the reader: when the place changes, the first panel there is an establishing view. Economy: the panel count is given and it is a ceiling; every panel must show something the previous one did not (a new action, a new line, a new place, a new threat). Two panels of the same instant (a wide one then a reframe) only for an event beat.",
     "Layout, like a real webtoon. Break the stack of full-width rectangles with `frame`: `width` in percent (40 to 100), `align` (left, center, right), `shape` (rect, rounded, slant, slant-reverse, wedge, wedge-reverse), `overlap` (px, the panel rides over the one above, 60 to 300), `tilt` (degrees, -6 to 6), `shadow`. A landscape or a reveal is full width (100, shape rect or wedge); a detail or a reaction is narrow (50 to 72) pushed left or right, often overlapping the big panel above by 100 to 200 px, rounded or slanted; two or three narrow panels in a row alternate sides like a zigzag; an impact gets slant edges and a small tilt; a quiet moment gets a centered rounded panel with margins; keep full width for at most half of the panels.",
-    "Action and threat: make the reader feel it. When something threatens or attacks (a machine that wakes, a chase, a fall, a blow), tell every second in three to five panels: the threat rising in the background while the character does not see it yet; a detail of the threat huge in the foreground with the character tiny behind; the character turning, backing away, the first step of the run; extreme close-ups of the eye holes, the hands, the feet hitting the moss; the threat from below, low angle, dutch angle; the character from above, small; a wide shot of the two with the distance closing; the impact panel with a giant sound effect; then the breath after. Mini panels in rapid succession (`3:1` and `16:9`, 300 to 450 px, continuous or hard_cut, no gap) with one very tall panel for the peak. Diagonals, tilted horizon (`tilt` 3 to 6, shape slant), cape and limbs stretched by motion. Never a calm medium shot in the middle of a chase.",
+    "Action and threat: make the reader feel it. When something threatens or attacks (a machine that wakes, a chase, a fall, a blow), tell each beat in one panel, choosing among: the threat rising in the background while the character does not see it yet; a detail of the threat huge in the foreground with the character tiny behind; the character turning, backing away, the first step of the run; extreme close-ups of the eye holes, the hands, the feet hitting the moss; the threat from below, low angle, dutch angle; the character from above, small; a wide shot of the two with the distance closing; the impact panel with a giant sound effect; then the breath after. Mini panels in rapid succession (`3:1` and `16:9`, 300 to 450 px, continuous or hard_cut, no gap) with one very tall panel for the peak. Diagonals, tilted horizon (`tilt` 3 to 6, shape slant), cape and limbs stretched by motion. Never a calm medium shot in the middle of a chase.",
     pace === "action"
-      ? `THIS BATCH IS AN ACTION SEQUENCE: ${batch} panels for the few frames given, three to five per moment, dense, dynamic, sounds in every panel, no calm panel except the last breath.`
+      ? `THIS BATCH IS AN ACTION SEQUENCE: ${batch} panels for the few frames given, two or three per moment, dense, dynamic, sounds in every panel, no calm panel except the last breath.`
       : pace === "calm"
         ? "This batch is a calm sequence: one to two panels per moment, wide and quiet, silence between them."
         : "",
@@ -566,7 +566,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     const events = allEvents.filter((e) => e.from <= cut.end);
     // What the window actually needs, not a fixed eight: asking for more than the moments
     // hold is what padded the strip with several panels of the same motionless second.
-    const asked = Math.max(3, Math.min(BATCH_MAX, cut.needed));
+    // And never more than the stretch deserves at this pace: Frank found 14 panels for 18 seconds too many.
+    const budget = panelBudget({ from: frames[0]?.seconds ?? cut.end, to: cut.end, events, pace });
+    const asked = Math.max(3, Math.min(BATCH_MAX, cut.needed, budget));
     lastNotes = notes;
     lastEvents = events;
 
@@ -598,7 +600,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       { type: "text", text: `Screenplay of the episode (French):\n${screenplay}` },
       {
         type: "text",
-        text: `MOMENTS of this window, from the continuity supervisor's frame-by-frame notes (consecutive identical frames merged; \`from\` and \`to\` are seconds, \`frames\` how many). They are the truth about the state of the characters (helmet ON or OFF, posture, what is in the hands), the place, the people and things visible, their size, what moves and what is heard. One panel per still moment, two to four for a moment whose action changes. Put each panel's \`seconds\` inside its moment:\n${JSON.stringify(moments, null, 1)}`,
+        text: `MOMENTS of this window, from the continuity supervisor's frame-by-frame notes (consecutive identical frames merged; \`from\` and \`to\` are seconds, \`frames\` how many). They are the truth about the state of the characters (helmet ON or OFF, posture, what is in the hands), the place, the people and things visible, their size, what moves and what is heard. One panel per still moment, two for a moment whose action changes. Put each panel's \`seconds\` inside its moment:\n${JSON.stringify(moments, null, 1)}`,
       },
       { type: "text", text: `EVENTS of this window and the beats each must be told in (mandatory, in this order, each beat its own panel):\n${eventsBrief(events) || "none: no physical event in these seconds"}` },
       { type: "text", text: `ENTITIES visible in this window (put the id in \`objects\` or \`characters\` of every panel where the thing is visible):\n${entityLines.join("\n") || "none besides the characters"}` },
@@ -655,7 +657,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     }
 
     // Two panels saying the same thing in a row become one; a place that flips for one panel follows its neighbours.
-    intents = dropRepeats(intents);
+    intents = trimToBudget(dropRepeats(intents), budget, events);
     smoothLocations(intents, notes);
 
     // Deterministic passes on the intents: objects in hand, the frame where each entity is seen best, scale.

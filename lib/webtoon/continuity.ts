@@ -793,3 +793,63 @@ export function dropRepeats<T extends { seconds: number; description?: string; c
   }
   return out;
 }
+
+/** Seconds of film per panel by pace, outside the extra beats of the events. */
+export const SECONDS_PER_PANEL = { action: 1.3, normal: 2.6, calm: 4 } as const;
+
+/**
+ * How many panels a stretch of film deserves: its length at the pace, plus
+ * part of what its events need beyond two panels each. Frank found 14 panels
+ * for 18 seconds (7:54 to 8:12) too many; this gives about 10.
+ */
+export function panelBudget(input: { from: number; to: number; events: Pick<StoryEvent, "from" | "to" | "min_panels">[]; pace: keyof typeof SECONDS_PER_PANEL }): number {
+  const span = Math.max(1, input.to - input.from + 1);
+  const extra = input.events.filter((e) => e.to >= input.from && e.from <= input.to).reduce((sum, e) => sum + Math.max(0, e.min_panels - 2), 0);
+  return Math.max(3, Math.ceil(span / SECONDS_PER_PANEL[input.pace]) + extra);
+}
+
+/**
+ * Brings a batch down to its budget, dropping the weakest panels first: a
+ * reframe or bridge with no bubble, no sound effect and no title, whose
+ * second is already told by a neighbour and whose description adds the
+ * least to it. A panel that carries a line of the film, a sound or a title
+ * card is never dropped, nor the last panel (where the next batch resumes),
+ * nor a beat of an event already down to its minimum.
+ */
+export function trimToBudget<T extends { seconds: number; description?: string; characters?: string[]; title_card?: string; fidelity?: string; dialogue?: unknown[]; sfx?: unknown[]; narrative_role?: string }>(list: T[], budget: number, events: Pick<StoryEvent, "from" | "to" | "min_panels">[] = []): T[] {
+  const out = [...list];
+  const inEvent = (item: T) => events.find((e) => Number(item.seconds) >= e.from - 1 && Number(item.seconds) <= e.to + 1);
+  const keeps = (item: T) => {
+    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx?.length ?? 0) > 0 || item.narrative_role === "reveal" || item.narrative_role === "establishing") return true;
+    const event = inEvent(item);
+    return Boolean(event && out.filter((o) => inEvent(o) === event).length <= event.min_panels);
+  };
+  const overlap = (a: T, b: T | undefined) => {
+    if (!b) return 0;
+    const wa = wordsOf(String(a.description ?? "").split("STATE TO KEEP")[0]);
+    const wb = wordsOf(String(b.description ?? "").split("STATE TO KEEP")[0]);
+    let shared = 0;
+    for (const w of wa) if (wb.has(w)) shared += 1;
+    return shared / Math.max(1, Math.min(wa.size, wb.size));
+  };
+  while (out.length > budget) {
+    let worst = -1;
+    let worstScore = Infinity;
+    for (let i = 0; i < out.length - 1; i += 1) {
+      const item = out[i];
+      if (keeps(item)) continue;
+      const prev = out[i - 1];
+      const next = out[i + 1];
+      const gap = Math.min(prev ? Math.abs(Number(item.seconds) - Number(prev.seconds)) : 99, next ? Math.abs(Number(next.seconds) - Number(item.seconds)) : 99);
+      // Lower is weaker: close in time to a neighbour, redundant with it, a reframe or a bridge rather than the frame itself.
+      const score = Math.min(gap, 4) - 3 * Math.max(overlap(item, prev), overlap(item, next)) + (item.fidelity === "direct" ? 1.5 : 0) - (item.characters?.length ? 0 : 0.5);
+      if (score < worstScore) {
+        worstScore = score;
+        worst = i;
+      }
+    }
+    if (worst < 0) break;
+    out.splice(worst, 1);
+  }
+  return out;
+}
