@@ -8,7 +8,7 @@ import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
 import { cleanFrame, panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
-import { coveredUntil } from "@/lib/webtoon/continuity";
+import { coveredUntil, SECONDS_PER_PANEL } from "@/lib/webtoon/continuity";
 import { PanelDragGhost } from "@/components/studio/PanelDragGhost";
 import { usePanelDrag, type DropTarget } from "@/components/studio/usePanelDrag";
 import { uploadLibraryImage, upsertAsset, slugify } from "@/lib/webtoon/library";
@@ -230,6 +230,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
+  /** The continuation is asked in panels or in seconds of film ("the next 30 seconds"). */
+  const [nextUnit, setNextUnit] = useState<"panels" | "seconds">("panels");
   const [pace, setPace] = useState<"calm" | "normal" | "action">("normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
   // Latest panels and library, for the director's actions that run one after the other.
@@ -490,6 +492,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    */
   const continueStory = async () => {
     if (busy) return;
+    if (nextUnit === "seconds") {
+      // A stretch of film: written to its end, the number of panels follows the pace.
+      const seconds = Math.max(5, Math.min(180, Math.round(nextCount) || 30));
+      const from = coveredUntil(panels);
+      const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[pace]));
+      if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases) ?`)) return;
+      await writeSpan({ base: panels, insertAfter: null, count: estimate, until: from + seconds, label: "la suite" });
+      return;
+    }
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
     if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
     await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
@@ -1156,17 +1167,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 Adapté jusqu&apos;à {coveredUntil(panels).toFixed(0)} s du film. Le studio lit les images suivantes et le scénario, écrit les cases, génère les images et traduit les textes.
               </p>
               <label>
-                <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
-                <span>cases</span>
+                <input type="number" min={1} max={nextUnit === "seconds" ? 180 : 30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} disabled={busy} />
+                <select value={nextUnit} onChange={(e) => setNextUnit(e.target.value as "panels" | "seconds")} disabled={busy} aria-label="Unité">
+                  <option value="panels">cases</option>
+                  <option value="seconds">secondes de film</option>
+                </select>
               </label>
               <label>
                 <span>Rythme</span>
-                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Normal : une case pour environ 2,6 s de film ; action : une pour 1,3 s, nerveuses ; calme : une pour 4 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
+                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Normal : une case pour environ 3 s de film ; action : une pour 1,5 s, nerveuses ; calme : une pour 4,5 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
                   <option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
                 </select>
               </label>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
-                {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
+                {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(180, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
             </div>
           </li>
