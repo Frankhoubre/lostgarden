@@ -510,7 +510,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify("Les cases cochées n'ont pas de temps de film à réécrire");
       return;
     }
-    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme action ?`)) return;
+    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} ?`)) return;
     const kept = panels.filter((p) => !checked.has(p.panel_id));
     setChecked(new Set());
     await writeSpan({ base: kept, insertAfter: before?.panel_id ?? null, count, until, label: "la séquence" });
