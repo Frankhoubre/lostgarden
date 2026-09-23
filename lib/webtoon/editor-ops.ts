@@ -213,3 +213,38 @@ export function markForRegeneration(panels: WebtoonPanel[], id: string): Webtoon
     p.panel_id === id ? { ...p, image: { ...p.image, status: p.image.src ? "stale" : "missing" } } : p,
   );
 }
+
+/**
+ * Two library entries that are the same thing (the engine drew Serrure as
+ * "seated armoured figure", then again as "serrure"): every panel that names
+ * `from` names `to` instead, speakers included, and a panel already drawn is
+ * marked to redraw, since it was drawn from the other sheet. Returns the
+ * panels and how many changed.
+ */
+export function mergeInPanels(panels: WebtoonPanel[], kind: "character" | "object" | "location", from: string, to: string): { panels: WebtoonPanel[]; changed: number } {
+  let changed = 0;
+  const next = panels.map((panel) => {
+    let touched = false;
+    let p = panel;
+    if (kind === "character" && (panel.characters.includes(from) || panel.dialogue.some((d) => d.speaker === from))) {
+      touched = panel.characters.includes(from);
+      p = {
+        ...p,
+        characters: [...new Set(panel.characters.map((c) => (c === from ? to : c)))],
+        dialogue: panel.dialogue.map((d) => (d.speaker === from ? { ...d, speaker: to } : d)),
+      };
+    }
+    if (kind === "object" && (panel.objects ?? []).includes(from)) {
+      touched = true;
+      p = { ...p, objects: [...new Set((panel.objects ?? []).map((o) => (o === from ? to : o)))] };
+    }
+    if (kind === "location" && panel.location === from) {
+      touched = true;
+      p = { ...p, location: to };
+    }
+    if (!touched) return p;
+    changed += 1;
+    return p.image.status === "generated" ? { ...p, image: { ...p.image, status: "stale" as const } } : p;
+  });
+  return { panels: next, changed };
+}

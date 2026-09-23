@@ -8,15 +8,18 @@ import { getFirebaseAuth } from "@/lib/firebase";
 import { removeAsset, restoreAsset, slugify, uploadLibraryImage, upsertAsset } from "@/lib/webtoon/library";
 import { libraryWith, REFERENCE_LIBRARY } from "@/lib/webtoon/references";
 import { readFileAsDataUrl } from "@/lib/webtoon/studio";
+import { mergeInPanels } from "@/lib/webtoon/editor-ops";
 import type { StudioTextBlock } from "@/lib/webtoon/studio-assets";
-import type { LibraryOverlay, ReferenceAsset, WebtoonScript } from "@/lib/webtoon/types";
+import type { LibraryOverlay, ReferenceAsset, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
 type Kind = "character" | "location" | "object";
 
 type StudioLibraryProps = {
   kind: Kind;
   script: WebtoonScript;
-  panels: { characters: string[]; location: string; objects?: string[] }[];
+  panels: WebtoonPanel[];
+  /** To merge two entries: the panels that name one are switched to the other. */
+  setPanels?: (next: WebtoonPanel[]) => void;
   library: LibraryOverlay;
   setLibrary: (next: LibraryOverlay) => void;
   notify: (message: string) => void;
@@ -47,7 +50,7 @@ async function studioHeaders(): Promise<Record<string, string>> {
  * generate the images, remove; the engine attaches what is here to every
  * prompt that names the character or the place.
  */
-export function StudioLibrary({ kind, script, panels, library, setLibrary, notify, docs }: StudioLibraryProps) {
+export function StudioLibrary({ kind, script, panels, setPanels, library, setLibrary, notify, docs }: StudioLibraryProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState<{ src: string; label: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -192,6 +195,23 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
     persist(next);
   };
 
+  /** The id panels use for an entry: the subject for a character, the id without prefix for an object or a place. */
+  const panelId = (entry: Entry) => (kind === "location" ? entry.id.replace(/^loc\./, "") : kind === "object" ? entry.id.replace(/^obj\./, "") : entry.id);
+
+  const merge = (entry: Entry, targetId: string) => {
+    const target = entries.find((e) => e.id === targetId);
+    if (!target || !setPanels) return;
+    const from = panelId(entry);
+    const to = panelId(target);
+    const named = mergeInPanels(panels, kind, from, to);
+    if (!window.confirm(`Fusionner « ${entry.name} » dans « ${target.name} » ? ${named.changed} case${named.changed > 1 ? "s" : ""} qui le nomment nommeront ${target.name} et seront marquées à redessiner ; les fiches de ${entry.name} sont retirées.`)) return;
+    let next = library;
+    for (const asset of entry.assets) next = removeAsset(next, asset.id, BUILT_IN_IDS.has(asset.id));
+    persist(next);
+    setPanels(named.panels);
+    notify(`${entry.name} fusionné dans ${target.name} : ${named.changed} case${named.changed > 1 ? "s" : ""} à redessiner (« Générer les cases manquantes »)`);
+  };
+
   const restore = (entry: Entry) => {
     let next = library;
     for (const asset of entry.assets) next = restoreAsset(next, asset.id);
@@ -251,6 +271,22 @@ export function StudioLibrary({ kind, script, panels, library, setLibrary, notif
                   ) : (
                     <>
                       <button type="button" className="webtoon-mini" onClick={() => addImage(entry)} disabled={busyId !== null}>+ Image</button>
+                      {setPanels && entries.filter((e) => e.id !== entry.id && !e.hidden).length ? (
+                        <select
+                          className="webtoon-mini"
+                          value=""
+                          onChange={(e) => e.target.value && merge(entry, e.target.value)}
+                          title={`${entry.name} est la même chose qu'une autre entrée : ses cases passent à l'autre, ses fiches sont retirées`}
+                          aria-label="Fusionner avec"
+                        >
+                          <option value="">Fusionner avec…</option>
+                          {entries
+                            .filter((e) => e.id !== entry.id && !e.hidden)
+                            .map((e) => (
+                              <option key={e.id} value={e.id}>{e.name}</option>
+                            ))}
+                        </select>
+                      ) : null}
                       <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => remove(entry)}>Retirer</button>
                     </>
                   )}
