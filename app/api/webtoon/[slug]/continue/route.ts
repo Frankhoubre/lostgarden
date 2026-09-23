@@ -4,7 +4,7 @@ import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue"
 import {
   bestFrameFor,
   coveredUntil,
-  dropRepeatedLines, dropRepeats, panelBudget, trimToBudget,
+  dropRepeatedLines, dropRepeats, panelBudget, SECONDS_PER_PANEL, trimToBudget,
   ensureSoundEffects,
   entityAssets,
   entitySheets,
@@ -371,18 +371,20 @@ function nearestSecond(track: Map<number, "off" | "on">, seconds: number): numbe
  * plus the extra panels each event needs. The last moment kept is where the
  * next call resumes, so no second of film is skipped or rushed.
  */
-function cutWindow(moments: Moment[], events: StoryEvent[], budget: number): { end: number; needed: number } {
+function cutWindow(moments: Moment[], events: StoryEvent[], budget: number, pace: keyof typeof SECONDS_PER_PANEL): { end: number; needed: number } {
   let needed = 0;
   let end = moments.length ? moments[0].to : 0;
   for (const moment of moments) {
-    const cost = 1 + events.filter((e) => e.to >= moment.from && e.to <= moment.to).reduce((sum, e) => sum + Math.max(0, e.min_panels - 1), 0);
+    // A moment costs its length at the pace, not a whole panel: in a shot/reverse shot conversation every
+    // cut is a moment, and one panel each made the tavern advance four seconds per call.
+    const cost = Math.max(0.35, moment.frames / SECONDS_PER_PANEL[pace]) + events.filter((e) => e.to >= moment.from && e.to <= moment.to).reduce((sum, e) => sum + Math.max(0, e.min_panels - 1), 0);
     // Never cut inside an event: a blow told without its consequence is what the reader cannot follow.
     const straddles = events.some((e) => e.from <= end && e.to > end);
     if (needed && needed + cost > budget && !straddles) break;
     needed += cost;
     end = moment.to;
   }
-  return { end, needed: Math.max(1, needed) };
+  return { end, needed: Math.max(1, Math.round(needed)) };
 }
 
 /**
@@ -600,7 +602,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     // Moments, events, then the cut: the batch tells what fits, the next call resumes at the cut.
     const allMoments = momentsOf(rawNotes);
     const allEvents = eventsOf(allMoments, { previous: start.slice(-4).map((p) => `${p.description} ${p.characters.join(" ")} ${p.objects.join(" ")}`).join(" ") });
-    const cut = cutWindow(allMoments, allEvents, pace === "action" ? BATCH_MAX : batch);
+    const cut = cutWindow(allMoments, allEvents, pace === "action" ? BATCH_MAX : batch, pace);
     const frames = window.filter((f) => f.seconds <= cut.end);
     const notes = rawNotes.filter((n) => Number(n.seconds) <= cut.end);
     const moments = allMoments.filter((m) => m.from <= cut.end);
