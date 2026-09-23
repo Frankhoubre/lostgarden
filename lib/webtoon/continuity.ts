@@ -214,6 +214,7 @@ export function momentsOf(notes: FrameNote[]): Moment[] {
       n.title_card ? "title" : "",
     ].join("|");
   const moments: Moment[] = [];
+  const spoken = new Set<string>();
   for (const n of sorted) {
     const last = moments[moments.length - 1];
     if (last && key(last) === key(n)) {
@@ -224,10 +225,14 @@ export function momentsOf(notes: FrameNote[]): Moment[] {
       if (n.sound && !String(last.sound ?? "").includes(String(n.sound).slice(0, 30))) last.sound = words(last.sound, n.sound);
       if (n.changed && !/^\s*(nothing|none|no change)/i.test(n.changed) && !String(last.changed ?? "").includes(String(n.changed).slice(0, 30))) last.changed = words(last.changed, n.changed);
       if (n.scale && !last.scale) last.scale = n.scale;
-      if (n.subtitle && !(last.subtitles ?? []).some((x) => x.text === n.subtitle)) last.subtitles = [...(last.subtitles ?? []), { seconds: Number(n.seconds), text: n.subtitle }];
+      if (n.subtitle && !spoken.has(sameLine(n.subtitle))) last.subtitles = [...(last.subtitles ?? []), { seconds: Number(n.seconds), text: n.subtitle }];
+      if (n.subtitle) spoken.add(sameLine(n.subtitle));
     } else {
-      const { seconds, ...rest } = n;
-      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest, ...(n.subtitle ? { subtitles: [{ seconds: Number(seconds), text: n.subtitle }] } : {}) });
+      // A line stays on screen across several frames and often across a cut: it is spoken once, in the moment where it appears.
+      const { seconds, subtitle, ...rest } = n;
+      const fresh = subtitle && !spoken.has(sameLine(subtitle));
+      if (subtitle) spoken.add(sameLine(subtitle));
+      moments.push({ from: Number(seconds), to: Number(seconds), frames: 1, ...rest, ...(fresh ? { subtitles: [{ seconds: Number(seconds), text: subtitle }] } : {}) });
     }
   }
   return moments;
@@ -820,7 +825,7 @@ export function trimToBudget<T extends { seconds: number; description?: string; 
   const out = [...list];
   const inEvent = (item: T) => events.find((e) => Number(item.seconds) >= e.from - 1 && Number(item.seconds) <= e.to + 1);
   const keeps = (item: T) => {
-    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx?.length ?? 0) > 0 || item.narrative_role === "reveal" || item.narrative_role === "establishing") return true;
+    if (item.title_card || (item.dialogue?.length ?? 0) > 0 || (item.sfx ?? []).some((x) => Number((x as { size?: number }).size ?? 0) >= 150) || item.narrative_role === "reveal" || item.narrative_role === "establishing") return true;
     const event = inEvent(item);
     return Boolean(event && out.filter((o) => inEvent(o) === event).length <= event.min_panels);
   };
@@ -852,4 +857,29 @@ export function trimToBudget<T extends { seconds: number; description?: string; 
     out.splice(worst, 1);
   }
   return out;
+}
+
+/** A line of dialogue reduced to its words, to tell the same line in two panels. */
+export function sameLine(text: string): string {
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/**
+ * A line of the film is lettered once. A subtitle held across several
+ * frames came back as the same bubble in two or three panels in a row
+ * (8:14 to 8:40: « Le plus maladroit, c'est certain. » three times); the
+ * later copies are removed, also when the last panels already made carry it.
+ */
+export function dropRepeatedLines<T extends { dialogue?: { en?: string; fr?: string }[] }>(list: T[], earlier: string[] = []): T[] {
+  const said = new Set(earlier.map(sameLine).filter(Boolean));
+  for (const item of list) {
+    if (!item.dialogue?.length) continue;
+    item.dialogue = item.dialogue.filter((d) => {
+      const keys = [d.fr, d.en].filter((x): x is string => Boolean(x)).map(sameLine).filter(Boolean);
+      if (keys.some((k) => said.has(k))) return false;
+      for (const k of keys) said.add(k);
+      return true;
+    });
+  }
+  return list;
 }
