@@ -103,6 +103,10 @@ type GeneratePayload = {
   generation_prompt?: string;
   negative_constraints?: string[];
   visual_references?: string[];
+  /** The bubbles placed from where the characters are in the drawn image. */
+  dialogue?: WebtoonPanel["dialogue"];
+  /** What the image check found: faults of the first drawing, and those left after the redraw. */
+  check?: { first: string[]; remaining: string[]; redrawn: boolean };
 };
 
 /**
@@ -359,10 +363,13 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         setPanels((current) => markForRegeneration(current, panel.panel_id));
         return false;
       }
-      const composed: Partial<WebtoonPanel> =
-        needsComposition(panel) && payload.generation_prompt
+      const composed: Partial<WebtoonPanel> = {
+        ...(needsComposition(panel) && payload.generation_prompt
           ? { generation_prompt: payload.generation_prompt, negative_constraints: payload.negative_constraints ?? panel.negative_constraints, visual_references: payload.visual_references ?? panel.visual_references, prompt_auto: true }
-          : {};
+          : {}),
+        ...(payload.dialogue ? { dialogue: payload.dialogue } : {}),
+      };
+      if (payload.check?.remaining.length) notify(`${panel.panel_id} : ${payload.check.remaining.join(" ")}`);
       await applyImage(panel, received, payload.model, composed, payload.cost_usd);
       return true;
     } catch (error) {
@@ -963,6 +970,54 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const checkedPanels = panels.filter((p) => checked.has(p.panel_id));
 
+  /**
+   * Re-places the bubbles of the checked panels from where the characters are
+   * in their image, without redrawing, and checks each image against its
+   * panel (cast, canon, state). The panels whose image breaks something stay
+   * checked, ready for "Regénérer".
+   */
+  const reletterChecked = async () => {
+    if (busy) return;
+    const list = checkedPanels.filter((p) => p.image.src && p.image.status !== "missing");
+    if (!list.length) return;
+    setBusy(true);
+    const faulty: string[] = [];
+    const reports: string[] = [];
+    let done = 0;
+    setJob({ phase: "images", label: `Bulles et vérification de ${list.length} cases…`, done: 0, total: list.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(Math.ceil(list.length / 4) * 12000) });
+    const queue = [...list];
+    const worker = async () => {
+      for (let panel = queue.shift(); panel; panel = queue.shift()) {
+        try {
+          const response = await fetch(`/api/webtoon/${script.slug}/letter`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+            body: JSON.stringify({ panel, library: libraryRef.current }),
+          });
+          const payload = (await response.json().catch(() => ({}))) as { dialogue?: WebtoonPanel["dialogue"]; issues?: string[]; error?: string };
+          if (response.ok) {
+            const id = panel.panel_id;
+            if (payload.dialogue) setPanels((current) => current.map((p) => (p.panel_id === id ? { ...p, dialogue: payload.dialogue! } : p)));
+            if (payload.issues?.length) {
+              faulty.push(id);
+              reports.push(`${id} : ${payload.issues.join(" ")}`);
+            }
+          }
+        } catch {
+          // One panel failing does not stop the others.
+        }
+        done += 1;
+        setJob((job) => (job ? { ...job, done } : job));
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(4, list.length) }, worker));
+    setJob(null);
+    setBusy(false);
+    setChecked(new Set(faulty));
+    notify(faulty.length ? `Bulles replacées. ${faulty.length} image${faulty.length > 1 ? "s" : ""} à redessiner, restée${faulty.length > 1 ? "s" : ""} cochée${faulty.length > 1 ? "s" : ""} : ${reports.slice(0, 3).join(" · ")}` : "Bulles replacées, aucune image fautive");
+    onAutosave?.();
+  };
+
   const regenerateChecked = async () => {
     if (busy || !checkedPanels.length) return;
     const withText = checkedPanels.filter((p) => p.description.trim() || p.generation_prompt.trim());
@@ -1067,6 +1122,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <span className="text-xs text-ivory/85"><b>{checked.size}</b> case{checked.size > 1 ? "s" : ""} cochée{checked.size > 1 ? "s" : ""}</span>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void regenerateChecked()} disabled={busy} title="Regénère les cases cochées, dans l'ordre de la bande">Regénérer</button>
               <button type="button" className="webtoon-mini" onClick={() => void translatePanels(checkedPanels, false)} disabled={busy} title="Remplit les langues vides des cases cochées">Traduire</button>
+              <button type="button" className="webtoon-mini" onClick={() => void reletterChecked()} disabled={busy} title="Place les bulles à côté de qui parle, d'après l'image, et vérifie chaque image (personnages, casque, armes) ; les cases fautives restent cochées">Replacer les bulles</button>
               {checkedPanels.some((p) => p.image.status === "stale") ? (
                 <button
                   type="button"

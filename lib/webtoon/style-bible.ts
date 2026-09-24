@@ -18,10 +18,32 @@ export type StyleBible = {
   palettes: Record<string, string>;
   /** Things no panel may contain. */
   negative: string[];
+  /**
+   * The canon of the series, by character id: what is always true of that
+   * character, whatever the frame or the writer says. Written into the prompt
+   * of every panel where the character is, given to the writer, and checked on
+   * the drawn image.
+   */
+  canon?: Record<string, string[]>;
 };
 
 export const STYLE_BIBLE: StyleBible = {
   id: "lost-garden-webtoon-v4",
+  // Frank's notes on the end of episode 1: swords and a spear in Lanterne's hands (549, 550, 572, 581, 582, 585),
+  // Serrure without his helmet (577), his key shown as a pendant (455, 457, 458), two Lanternes (459).
+  canon: {
+    lanterne: [
+      "Lanterne NEVER holds or carries a weapon: no sword, no spear, no lance, no blade, no shield, ever. His hands are empty or hold his pendant or his helmet.",
+      "There is only ONE Lanterne: never two knights with a lantern-shaped helmet in the same image.",
+      "Lanterne is a small empty armour with a tall white lantern-shaped helmet with two black oval eye holes, a cream scarf and a torn beige cape; never a bare rag or a cape without a body.",
+    ],
+    serrure: [
+      "Serrure NEVER takes off his helmet: his tall dark helmet pierced by one vertical keyhole slit is always on his head.",
+      "The golden key hanging on Serrure's chest is a KEY fixed to his armour, not a pendant: he never holds it up or opens it. His pendant is a separate small silver locket that he only shows by taking it out from under his armour.",
+      "The twin swords belong to Serrure alone: only he ever holds them.",
+      "Serrure is half a head taller than Lanterne.",
+    ],
+  },
   base:
     "Lost Garden, an original dark fantasy anime by Frank Houbre, redrawn as a Korean webtoon (manhwa) panel in a deliberately simple, flat, graphic style. Keep the identity of the series: the same character designs, the poetic dark fantasy mood, the deep blue and cyan palette, the strong readable silhouettes. Rendering rules, strict: every element is built from large flat colour shapes, three to five tones per element at most (base colour, one hard cel shadow, one small highlight); clean digital ink outlines of varied weight on characters and props; backgrounds are simplified into a few big flat shapes and silhouettes with at most one soft gradient, drawn with far less detail than the characters; light, mist and glow are flat translucent shapes; small repeated details are suggested by a handful of simple marks, never drawn one by one; lots of empty space. The result looks like a weekly webtoon page coloured with bucket fills, not like a painting and not like a film frame.",
   rendering: [

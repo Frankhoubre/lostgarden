@@ -83,6 +83,9 @@ export function composePanel(panel: WebtoonPanel, script: ScriptWorld, overlay?:
   if (panel.grade === "monochrome") {
     notes.push("BLACK AND WHITE MEMORY: the whole image in greyscale, no colour at all (no blue, no cream, no pink), like the film frame: soft grey mist, deep blacks, pale greys. It is a memory of long ago: draw the place and the people the frame shows, not the present scene.");
   }
+  // The canon of the series for the characters in this panel: what no frame or description may break.
+  const canon = panel.characters.flatMap((id) => bibleFor(script.style_bible_id).canon?.[id] ?? []);
+  if (canon.length) notes.push(`CANON, never broken: ${canon.join(" ")}`);
   if (panel.objects.length) {
     notes.push("OBJECT SIZE: each object keeps its real size against the hand and the body, exactly as its sheet and the film show it, from one panel to the next: never shrunk to a dot, never enlarged.");
   }
