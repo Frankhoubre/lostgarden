@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { checkPanelImage } from "@/lib/webtoon/image-check";
-import { fixLettering, imageToPanel, layoutBubbles, type Figure } from "@/lib/webtoon/lettering";
+import { fixLettering, imageToPanel, layoutBubbles, moveSfxOffBubbles, type Figure } from "@/lib/webtoon/lettering";
 import { getProjectContext, imageAsDataUrl } from "@/lib/webtoon/project-server";
 import { libraryWith } from "@/lib/webtoon/references";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
@@ -48,7 +48,8 @@ export async function POST(request: Request, { params }: RouteContext) {
       if (head) figures.push({ who: f.who, head });
     }
     const dialogue = lettered.dialogue.length ? layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box, cast: [...new Set(libraryWith(overlay).filter((a) => a.kind === "character" && a.subject).map((a) => a.subject as string))] }) : lettered.dialogue;
-    return Response.json({ dialogue, panel_height: lettered.panel_height, issues: check.issues, cost_usd: check.cost_usd });
+    const sfx = moveSfxOffBubbles({ dialogue, sfx: panel.sfx, panel: box });
+    return Response.json({ dialogue, sfx, panel_height: lettered.panel_height, issues: check.issues, cost_usd: check.cost_usd });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "lettering failed" }, { status: 502 });
   }
