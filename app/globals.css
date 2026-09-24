@@ -2326,6 +2326,9 @@ h3 {
   position: absolute;
   z-index: 2;
   transform: translate(-50%, -50%);
+  /* Sized on its text, not on the room left to the right of its anchor: a bubble anchored at 72% was squeezed
+     into a column taller than the panel (458). */
+  width: max-content;
   min-width: 24cqw;
   max-width: 48cqw;
   padding: 3.6cqw 5.2cqw;
