@@ -406,6 +406,18 @@ function libraryLocationWords(library: ReferenceAsset[]): { id: string; words: s
     }));
 }
 
+/**
+ * The cast of the series that this episode's screenplay names: a figure in the last fight was taken
+ * for the Décrocheur, who is not in episode 1 (it was Lanterne, panels 600 and 601).
+ */
+function castOfEpisode(screenplay: string): typeof STUDIO_CAST {
+  const text = plain(screenplay);
+  return STUDIO_CAST.filter((c) => {
+    const name = plain(c.name).replace(/^(le|la|les|l) /, "");
+    return name.length > 2 && text.includes(name);
+  });
+}
+
 /** Cast ids that are already in the library under another id. */
 const CAST_ALIASES: Record<string, string> = { "medaillon-de-la-graine": "pendant", lanterne: "lanterne" };
 
@@ -708,7 +720,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const unarmed = bibleFor(script.style_bible_id).unarmed ?? [];
     const WEAPON = /\b(sword|swords|blade|blades|spear|lance|knife|dagger|axe|halberd|weapon)s?\b/i;
     // "Thin dark blade (Lanterne's)": a weapon given to a character who never holds one is a misreading, not an entity.
-    const entities = (await resolveEntities({ notes, library, frames, meter, cast: lostGarden ? STUDIO_CAST : undefined })).filter(
+    const entities = (await resolveEntities({ notes, library, frames, meter, cast: lostGarden ? castOfEpisode(screenplay) : undefined })).filter(
       (e) => !(e.kind === "object" && WEAPON.test(e.name) && unarmed.some((u) => e.name.toLowerCase().includes(u))),
     );
     newAssets.push(...entityAssets(entities, library, frameSrc));
