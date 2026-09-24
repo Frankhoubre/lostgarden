@@ -4,7 +4,7 @@ import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { checkPanelImage } from "@/lib/webtoon/image-check";
-import { autoPlaced, imageToPanel, layoutBubbles, type Figure } from "@/lib/webtoon/lettering";
+import { autoPlaced, fixLettering, imageToPanel, layoutBubbles, type Figure } from "@/lib/webtoon/lettering";
 import { libraryWith } from "@/lib/webtoon/references";
 import { bibleFor } from "@/lib/webtoon/style-bible";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
@@ -107,16 +107,17 @@ export async function POST(request: Request, { params }: RouteContext) {
       image.media_type = "image/jpeg";
     }
     // Bubbles placed from where the characters are in this image, unless someone placed them by hand.
-    let dialogue = panel.dialogue;
-    if (panel.dialogue.length && autoPlaced(panel.dialogue)) {
+    const lettered = fixLettering(panel, { mute: bibleFor(script.style_bible_id).mute });
+    let dialogue = lettered.dialogue;
+    if (lettered.dialogue.length && autoPlaced(lettered.dialogue)) {
       const meta = await sharp(Buffer.from(image.base64, "base64")).metadata();
-      const box = { width: 1080, height: panel.panel_height || 1350 };
+      const box = { width: 1080, height: lettered.panel_height || 1350 };
       const figures: Figure[] = [];
       for (const f of check.figures) {
         const head = imageToPanel(f.head, { width: meta.width ?? 1024, height: meta.height ?? 1536 }, box, panel.focal_point);
         if (head) figures.push({ who: f.who, head });
       }
-      dialogue = layoutBubbles({ dialogue: panel.dialogue, sfx: panel.sfx, figures, panel: box });
+      dialogue = layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box });
     }
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({
@@ -132,6 +133,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       generated_at: new Date().toISOString(),
       cost_usd: spent + checkCost,
       dialogue,
+      panel_height: lettered.panel_height,
       check: { first: firstIssues, remaining: check.issues, redrawn: firstIssues.length > 0 },
       generation_prompt: panel.generation_prompt,
       negative_constraints: panel.negative_constraints,

@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { STUDIO_CAST } from "@/lib/webtoon/studio-assets";
 import { bibleFor } from "@/lib/webtoon/style-bible";
+import { fixLettering } from "@/lib/webtoon/lettering";
 import { panelsFromIntents, type NextPanelIntent, type NextText } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
@@ -837,6 +838,16 @@ export async function POST(request: Request, { params }: RouteContext) {
     // A panel at a black-and-white second is a memory: drawn and delivered in greyscale.
     panels = panels.map((panel) => (panel.source_time_start !== null && mono.has(Math.round(panel.source_time_start)) ? { ...panel, grade: "monochrome" as const } : panel));
     panels = ensureSoundEffects(panels, intents, events);
+    // Lanterne never speaks; a panel too short for its lines grows (panels 435, 451 to 453, 469).
+    {
+      const bible = bibleFor(script.style_bible_id);
+      let lastSpeaker = [...start].reverse().flatMap((p) => p.dialogue.map((d) => d.speaker)).find((s) => s && !(bible.mute ?? []).includes(s));
+      panels = panels.map((panel) => {
+        const fixed = fixLettering(panel, { mute: bible.mute, lastSpeaker });
+        lastSpeaker = fixed.dialogue.map((d) => d.speaker).filter((s) => s !== "voice").pop() ?? lastSpeaker;
+        return fixed;
+      });
+    }
     if (!panels.length) return Response.json({ error: "Le modèle n'a renvoyé aucune case exploitable" }, { status: 502 });
     created.push(...panels);
     void recordCost({ idToken: identity.idToken, slug, usd: meter.usd, kind: "writer" });

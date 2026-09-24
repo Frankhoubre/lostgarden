@@ -105,6 +105,8 @@ type GeneratePayload = {
   visual_references?: string[];
   /** The bubbles placed from where the characters are in the drawn image. */
   dialogue?: WebtoonPanel["dialogue"];
+  /** Taller when the bubbles need it. */
+  panel_height?: number;
   /** What the image check found: faults of the first drawing, and those left after the redraw. */
   check?: { first: string[]; remaining: string[]; redrawn: boolean };
 };
@@ -368,6 +370,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ? { generation_prompt: payload.generation_prompt, negative_constraints: payload.negative_constraints ?? panel.negative_constraints, visual_references: payload.visual_references ?? panel.visual_references, prompt_auto: true }
           : {}),
         ...(payload.dialogue ? { dialogue: payload.dialogue } : {}),
+        ...(payload.panel_height && payload.panel_height > panel.panel_height ? { panel_height: payload.panel_height } : {}),
       };
       if (payload.check?.remaining.length) notify(`${panel.panel_id} : ${payload.check.remaining.join(" ")}`);
       await applyImage(panel, received, payload.model, composed, payload.cost_usd);
@@ -992,12 +995,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           const response = await fetch(`/api/webtoon/${script.slug}/letter`, {
             method: "POST",
             headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-            body: JSON.stringify({ panel, library: libraryRef.current }),
+            body: JSON.stringify({ panel, library: libraryRef.current, previous_speakers: panels.slice(Math.max(0, panels.findIndex((p) => p.panel_id === panel.panel_id) - 8), panels.findIndex((p) => p.panel_id === panel.panel_id)).reverse().flatMap((p) => p.dialogue.map((d) => d.speaker)) }),
           });
-          const payload = (await response.json().catch(() => ({}))) as { dialogue?: WebtoonPanel["dialogue"]; issues?: string[]; error?: string };
+          const payload = (await response.json().catch(() => ({}))) as { dialogue?: WebtoonPanel["dialogue"]; panel_height?: number; issues?: string[]; error?: string };
           if (response.ok) {
             const id = panel.panel_id;
-            if (payload.dialogue) setPanels((current) => current.map((p) => (p.panel_id === id ? { ...p, dialogue: payload.dialogue! } : p)));
+            if (payload.dialogue) setPanels((current) => current.map((p) => (p.panel_id === id ? { ...p, dialogue: payload.dialogue!, panel_height: Math.max(p.panel_height, payload.panel_height ?? 0) } : p)));
             if (payload.issues?.length) {
               faulty.push(id);
               reports.push(`${id} : ${payload.issues.join(" ")}`);
