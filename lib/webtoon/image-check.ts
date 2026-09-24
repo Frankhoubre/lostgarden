@@ -34,7 +34,7 @@ export async function checkPanelImage(input: {
       system: [
         "You check one drawn webtoon panel against what it must show, like a strict continuity supervisor.",
         "1. FIGURES: every character or creature drawn in the image, with `who` (one of the expected ids when it is that character, else \"unknown\") and `head`: the centre of its head, helmet or face, in percent of the image (x from the left, y from the top). A character seen from behind still has a head position.",
-        "2. ISSUES: only real faults, each in one short English sentence an illustrator can act on. Faults: a person, knight or creature that is NOT in the expected cast (not a background silhouette of scenery); an expected character missing; the same character drawn twice; a canon rule broken; the state broken (a helmet on when it must be off, or off when it must be on); letters or text drawn in the image. Style, beauty and small details are not faults. When everything is right, `issues` is empty.",
+        "2. ISSUES: only real faults of these kinds, each in one short English sentence an illustrator can act on: a person, knight or creature that is NOT in the expected cast (not a background silhouette of scenery); an expected character missing; the same character drawn twice; a canon rule broken; the state broken (a helmet on when it must be off, or off when it must be on); letters or text drawn in the image. NOT faults, never listed: the side of a flower, a pose, a colour, a missing detail, anything about bubbles or subtitles, style or beauty. Never write a doubt, a note or a sentence saying there is no fault: when everything is right, `issues` is an empty list.",
         'Answer with JSON only: {"figures": [{"who", "head": {"x", "y"}}], "issues": [..]}.',
       ].join("\n\n"),
       user: [
@@ -53,7 +53,8 @@ export async function checkPanelImage(input: {
     const figures: Figure[] = (answer.figures ?? [])
       .filter((f) => f && f.head && Number.isFinite(Number(f.head.x)) && Number.isFinite(Number(f.head.y)))
       .map((f) => ({ who: ids.has(String(f.who)) ? String(f.who) : "unknown", head: { x: Number(f.head!.x), y: Number(f.head!.y) } }));
-    const issues = (answer.issues ?? []).filter((i) => typeof i === "string" && i.trim()).slice(0, 6);
+    // A note that says there is nothing wrong is not a fault (the model wrote "no other issues found" as an issue).
+    const issues = (answer.issues ?? []).filter((i) => typeof i === "string" && i.trim() && !/\b(no (other )?issues?|not itself a|no faults?|nothing wrong|everything (is )?(right|correct))\b/i.test(i)).slice(0, 6);
     return { figures, issues, cost_usd: usd };
   } catch {
     return { figures: [], issues: [], cost_usd: usd };
