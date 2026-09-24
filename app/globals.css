@@ -2376,7 +2376,8 @@ h3 {
   border-width: 0.2cqw;
   font-style: italic;
   font-weight: 600;
-  min-width: 0;
+  /* As wide as a speech bubble: a narrow box turned a long line into a column taller than the panel (458). */
+  min-width: 24cqw;
 }
 
 .webtoon-caption {

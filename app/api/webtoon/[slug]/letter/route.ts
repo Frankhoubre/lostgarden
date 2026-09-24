@@ -47,7 +47,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       const head = imageToPanel(f.head, { width: meta.width ?? 1024, height: meta.height ?? 1536 }, box, panel.focal_point);
       if (head) figures.push({ who: f.who, head });
     }
-    const dialogue = lettered.dialogue.length ? layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box }) : lettered.dialogue;
+    const dialogue = lettered.dialogue.length ? layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box, cast: [...new Set(libraryWith(overlay).filter((a) => a.kind === "character" && a.subject).map((a) => a.subject as string))] }) : lettered.dialogue;
     return Response.json({ dialogue, panel_height: lettered.panel_height, issues: check.issues, cost_usd: check.cost_usd });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "lettering failed" }, { status: 502 });

@@ -117,7 +117,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         const head = imageToPanel(f.head, { width: meta.width ?? 1024, height: meta.height ?? 1536 }, box, panel.focal_point);
         if (head) figures.push({ who: f.who, head });
       }
-      dialogue = layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box });
+      dialogue = layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box, cast: [...new Set(libraryWith(overlay).filter((a) => a.kind === "character" && a.subject).map((a) => a.subject as string))] });
     }
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({

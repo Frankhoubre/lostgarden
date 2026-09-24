@@ -70,7 +70,7 @@ export function heightForLettering(dialogue: Pick<Dialogue, "text" | "style">[])
  * style). Candidates are tried until one stays inside the panel and touches
  * no other bubble, no sound effect and no face.
  */
-export function layoutBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; figures: Figure[]; panel: { width: number; height: number } }): Dialogue[] {
+export function layoutBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; figures: Figure[]; panel: { width: number; height: number }; /** The characters of the series: their lines are never a voice-over box. */ cast?: string[] }): Dialogue[] {
   const { panel, figures } = input;
   const taken: Box[] = input.sfx.map((effect) => sfxBox(effect, panel));
   // Faces stay visible: a small box around each head.
@@ -80,7 +80,8 @@ export function layoutBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; figures
     const speaker = figures.find((f) => f.who === line.speaker);
     // The square box is for a real voice-over only (Frank, panel 567). A speaker of the scene who is out of this
     // panel keeps a round bubble whose tail points out of the panel, towards the edge; one who is drawn gets his tail.
-    const style = speaker && line.style === "off" ? "speech" : line.style;
+    const known = Boolean(speaker) || (input.cast ?? []).includes(line.speaker);
+    const style = known && line.style === "off" ? "speech" : line.style;
     const fits = (cx: number, cy: number) => {
       const box = { x: cx - size.w / 2, y: cy - size.h / 2, w: size.w, h: size.h };
       if (box.x < MARGIN || box.y < MARGIN || box.x + box.w > 100 - MARGIN || box.y + box.h > 100 - MARGIN) return null;
