@@ -30,7 +30,7 @@ export function bubbleBox(line: Pick<Dialogue, "text" | "style">, panel: { width
   // Words wrap before the edge: count a fifth fewer characters per line than fit.
   const perLine = Math.max(8, Math.floor(((48 - 10.4) / (font * 0.56)) * 0.8));
   const lines = Math.max(1, Math.ceil(text.length / perLine));
-  const widthCqw = Math.min(48, Math.max(24, Math.min(text.length, perLine) * font * 0.52 + 10.4));
+  const widthCqw = Math.min(48, Math.max(24, text.length * font * 0.56 + 10.4));
   const heightCqw = lines * font * 1.25 + 7.2;
   const cqwToY = panel.width / panel.height;
   return { w: widthCqw, h: heightCqw * cqwToY };
