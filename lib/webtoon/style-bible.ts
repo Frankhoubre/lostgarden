@@ -27,11 +27,14 @@ export type StyleBible = {
   canon?: Record<string, string[]>;
   /** Characters who never speak: a line given to them belongs to someone else. */
   mute?: string[];
+  /** Characters who never hold a weapon: a blade "of theirs" is a misreading of the frame. */
+  unarmed?: string[];
 };
 
 export const STYLE_BIBLE: StyleBible = {
   id: "lost-garden-webtoon-v4",
   mute: ["lanterne"],
+  unarmed: ["lanterne"],
   // Frank's notes on the end of episode 1: swords and a spear in Lanterne's hands (549, 550, 572, 581, 582, 585),
   // Serrure without his helmet (577), his key shown as a pendant (455, 457, 458), two Lanternes (459).
   canon: {
