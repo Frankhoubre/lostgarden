@@ -27,7 +27,8 @@ export function bubbleBox(line: Pick<Dialogue, "text" | "style">, panel: { width
   const text = line.text.fr ?? line.text.en ?? "";
   const shout = line.style === "shout";
   const font = shout ? 5 : 3.4;
-  const perLine = Math.max(8, Math.floor((48 - 10.4) / (font * 0.52)));
+  // Words wrap before the edge: count a fifth fewer characters per line than fit.
+  const perLine = Math.max(8, Math.floor(((48 - 10.4) / (font * 0.56)) * 0.8));
   const lines = Math.max(1, Math.ceil(text.length / perLine));
   const widthCqw = Math.min(48, Math.max(24, Math.min(text.length, perLine) * font * 0.52 + 10.4));
   const heightCqw = lines * font * 1.25 + 7.2;
@@ -38,13 +39,28 @@ export function bubbleBox(line: Pick<Dialogue, "text" | "style">, panel: { width
 function sfxBox(effect: Sfx, panel: { width: number; height: number }): Box {
   const text = effect.text.fr ?? effect.text.en ?? "";
   const size = ((effect.size ?? 96) / 1080) * 100;
-  const w = Math.min(95, text.length * size * 0.62);
-  const h = size * 1.1 * (panel.width / panel.height);
+  const w = Math.min(95, text.length * size * 0.7 + 4);
+  const h = size * 1.3 * (panel.width / panel.height);
   return { x: effect.anchor.x - w / 2, y: effect.anchor.y - h / 2, w, h };
 }
 
 const overlap = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/**
+ * The height a panel needs, in canvas px at 1080 wide, for its bubbles to fit
+ * inside it: the tallest bubble plus room for the art (a wide 3:1 strip with
+ * a three-line line cut the text at the bottom, panel 469).
+ */
+export function heightForLettering(dialogue: Pick<Dialogue, "text" | "style">[]): number {
+  if (!dialogue.length) return 0;
+  const unit = { width: 100, height: 100 };
+  const tallest = Math.max(...dialogue.map((line) => bubbleBox(line, unit).h));
+  const stacked = dialogue.reduce((sum, line) => sum + bubbleBox(line, unit).h, 0);
+  // In cqw (percent of the width): the bubbles side by side need the tallest, stacked need their sum; keep 40% for the art.
+  const needed = Math.max(tallest / 0.55, (dialogue.length > 1 ? stacked * 0.75 : tallest) / 0.6);
+  return Math.round((needed / 100) * 1080);
+}
 
 /**
  * Places every bubble of a panel. `figures` are the characters found in the
@@ -62,7 +78,9 @@ export function layoutBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; figures
   return input.dialogue.map((line, index) => {
     const size = bubbleBox(line, panel);
     const speaker = figures.find((f) => f.who === line.speaker);
-    const style = speaker ? (line.style === "off" ? "speech" : line.style) : "off";
+    // The square box is for a real voice-over only (Frank, panel 567). A speaker of the scene who is out of this
+    // panel keeps a round bubble whose tail points out of the panel, towards the edge; one who is drawn gets his tail.
+    const style = speaker && line.style === "off" ? "speech" : line.style;
     const fits = (cx: number, cy: number) => {
       const box = { x: cx - size.w / 2, y: cy - size.h / 2, w: size.w, h: size.h };
       if (box.x < MARGIN || box.y < MARGIN || box.x + box.w > 100 - MARGIN || box.y + box.h > 100 - MARGIN) return null;
@@ -107,7 +125,11 @@ export function layoutBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; figures
       ...line,
       style,
       anchor,
-      ...(speaker ? { tail: { x: speaker.head.x, y: Math.min(98, speaker.head.y + 3) } } : { tail: undefined }),
+      ...(speaker
+        ? { tail: { x: speaker.head.x, y: Math.min(98, speaker.head.y + 3) } }
+        : style === "off"
+          ? { tail: undefined }
+          : { tail: { x: anchor.x < 50 ? 0 : 100, y: clamp(anchor.y + size.h / 2 + 6, 0, 100) } }),
     };
   });
 }
@@ -127,4 +149,21 @@ export function imageToPanel(point: Anchor, image: { width: number; height: numb
 /** True when nobody placed these bubbles by hand: the writer's defaults (tail on the centre of the panel). */
 export function autoPlaced(dialogue: Dialogue[]): boolean {
   return dialogue.every((line) => !line.tail || (line.tail.x === 50 && line.tail.y === 50));
+}
+
+/**
+ * The lettering rules that need no image: a line given to a character who
+ * never speaks (Lanterne) goes to the other character of the panel, or to the
+ * last one who spoke, or becomes a voice-over; a panel too short for its
+ * bubbles grows to hold them.
+ */
+export function fixLettering<P extends { characters: string[]; dialogue: Dialogue[]; panel_height: number }>(panel: P, rules: { mute?: string[]; lastSpeaker?: string }): P {
+  const mute = new Set(rules.mute ?? []);
+  const dialogue = panel.dialogue.map((line) => {
+    if (!mute.has(line.speaker)) return line;
+    const other = panel.characters.find((c) => !mute.has(c)) ?? (rules.lastSpeaker && !mute.has(rules.lastSpeaker) ? rules.lastSpeaker : "");
+    return other ? { ...line, speaker: other } : { ...line, speaker: "voice", style: "off" as const };
+  });
+  const height = heightForLettering(dialogue);
+  return { ...panel, dialogue, panel_height: Math.max(panel.panel_height || 0, height) };
 }
