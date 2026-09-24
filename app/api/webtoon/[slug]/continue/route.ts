@@ -705,7 +705,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     lastEvents = events;
 
     // Entities: objects, creatures and machines, with a sheet or with one to draw.
-    const entities = await resolveEntities({ notes, library, frames, meter, cast: lostGarden ? STUDIO_CAST : undefined });
+    const unarmed = bibleFor(script.style_bible_id).unarmed ?? [];
+    const WEAPON = /\b(sword|swords|blade|blades|spear|lance|knife|dagger|axe|halberd|weapon)s?\b/i;
+    // "Thin dark blade (Lanterne's)": a weapon given to a character who never holds one is a misreading, not an entity.
+    const entities = (await resolveEntities({ notes, library, frames, meter, cast: lostGarden ? STUDIO_CAST : undefined })).filter(
+      (e) => !(e.kind === "object" && WEAPON.test(e.name) && unarmed.some((u) => e.name.toLowerCase().includes(u))),
+    );
     newAssets.push(...entityAssets(entities, library, frameSrc));
     const entityLines = entities.map((e) => `${e.kind === "object" ? `object "${e.id}"` : `character "${e.id}"`} = ${e.name}${e.scale ? ` (scale: ${e.scale})` : ""}, visible at ${e.seconds.slice(0, 12).join(", ")} s${e.has_sheet ? "" : " (sheet being drawn from the film)"}: ${e.must_keep.slice(0, 220)}`);
 
@@ -788,6 +793,19 @@ export async function POST(request: Request, { params }: RouteContext) {
       };
       const added = usable(fixed.added).filter((candidate) => !intents.some((i) => Math.abs(Number(i.seconds) - Number(candidate.seconds)) <= 2 && similar(i, candidate)));
       intents = [...intents, ...added].sort((a, b) => Number(a.seconds) - Number(b.seconds));
+    }
+
+    // No weapon in the hands of a character who never holds one (swords and a spear in Lanterne's hands, 549 to 585):
+    // a panel with only unarmed characters loses its weapon objects, and a description that arms them is corrected.
+    for (const intent of intents) {
+      const chars = intent.characters ?? [];
+      if (!chars.length || !chars.some((c) => unarmed.includes(c))) continue;
+      if (chars.every((c) => unarmed.includes(c))) intent.objects = (intent.objects ?? []).filter((o) => !WEAPON.test(o));
+      for (const u of unarmed) {
+        const armed = new RegExp(`\\b${u}\\b[^.]{0,80}\\b(holds?|holding|grips?|gripping|wields?|wielding|raises?|raising|swings?|swinging|draws?|drawing|with)\\b[^.]{0,30}${WEAPON.source}`, "i");
+        const grip = new RegExp(`\\b(holds?|holding|grips?|gripping|wields?|wielding|raises?|raising|swings?|swinging|draws?|drawing|with)\\b[^.]{0,30}${WEAPON.source}`, "i");
+        if (armed.test(intent.description)) intent.description = `${intent.description.replace(armed, (m) => m.replace(grip, "with empty hands"))} ${u} holds no weapon.`;
+      }
     }
 
     // Two panels saying the same thing in a row become one; a place that flips for one panel follows its neighbours.
