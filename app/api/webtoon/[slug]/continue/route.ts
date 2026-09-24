@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { STUDIO_CAST } from "@/lib/webtoon/studio-assets";
 import { bibleFor } from "@/lib/webtoon/style-bible";
-import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
+import { panelsFromIntents, type NextPanelIntent, type NextText } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
   coveredUntil,
@@ -595,6 +595,28 @@ function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch
 
 const isUsable = (i: NextPanelIntent | undefined): i is NextPanelIntent => Boolean(i && ((typeof i.title_card === "string" && i.title_card.trim()) || (typeof i.description === "string" && i.description.trim())));
 
+/**
+ * The model sometimes answers a list field with a string ("characters": "lanterne")
+ * or an object: every pass after it maps over the field and the whole batch failed
+ * with "(e ?? []).map is not a function" (15:08 and 12:54 of episode 1). Lists are
+ * made lists here, once, before anything reads them.
+ */
+function sanitizeIntent(intent: NextPanelIntent): NextPanelIntent {
+  const list = <T,>(value: unknown): T[] => (Array.isArray(value) ? value : value === undefined || value === null || value === "" ? [] : typeof value === "string" ? (value.split(/\s*,\s*/) as unknown as T[]) : [value as T]);
+  const texts = (value: unknown) => list<NextText>(value).map((t) => (typeof t === "string" ? { en: t } : t)).filter((t) => t && typeof t === "object");
+  return {
+    ...intent,
+    characters: list<string>(intent.characters).map(String),
+    objects: list<string>(intent.objects).map(String),
+    effects: list<string>(intent.effects).map(String),
+    extra_frames: list<string>(intent.extra_frames).map(String),
+    dialogue: texts(intent.dialogue),
+    caption: texts(intent.caption),
+    sfx: texts(intent.sfx),
+  };
+}
+const usable = (value: unknown): NextPanelIntent[] => (Array.isArray(value) ? value : []).filter(isUsable).map(sanitizeIntent);
+
 export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
@@ -718,7 +740,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       { type: "text", text: `Write the next ${asked} panels now, as JSON, consistent with the notes and the events.` },
     ];
     const result = await completeJson<{ panels?: NextPanelIntent[] }>({ system, user, maxTokens: 24000, reasoning: "none", onCost: (usd) => { meter.usd += usd; } });
-    let intents = (result.panels ?? []).filter(isUsable).slice(0, BATCH_MAX + 4);
+    let intents = usable(result.panels).slice(0, BATCH_MAX + 4);
 
     // One review, two checks: what is missing (moments and event beats) and what contradicts the film; one fix call for both.
     const review = await reviewPanels({ moments, events, intents, meter });
@@ -749,10 +771,10 @@ export async function POST(request: Request, { params }: RouteContext) {
         reasoning: "none",
         onCost: (usd) => { meter.usd += usd; },
       }).catch(() => ({ added: [], rewritten: [] }));
-      const rewritten = fixed.rewritten ?? [];
+      const rewritten = Array.isArray(fixed.rewritten) ? fixed.rewritten : [];
       invented.forEach((m, k) => {
         const replacement = rewritten[k];
-        if (replacement && typeof replacement.description === "string" && replacement.description.trim() && intents[m.index]) intents[m.index] = { ...intents[m.index], ...replacement };
+        if (replacement && typeof replacement.description === "string" && replacement.description.trim() && intents[m.index]) intents[m.index] = sanitizeIntent({ ...intents[m.index], ...replacement });
       });
       // An added panel that repeats one already written (same beat, same second, same words) is dropped.
       const bag = (i: NextPanelIntent) => new Set(`${i.description} ${i.action ?? ""}`.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3));
@@ -763,7 +785,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         for (const w of A) if (B.has(w)) shared += 1;
         return shared / Math.max(1, Math.min(A.size, B.size)) > 0.6;
       };
-      const added = (fixed.added ?? []).filter(isUsable).filter((candidate) => !intents.some((i) => Math.abs(Number(i.seconds) - Number(candidate.seconds)) <= 2 && similar(i, candidate)));
+      const added = usable(fixed.added).filter((candidate) => !intents.some((i) => Math.abs(Number(i.seconds) - Number(candidate.seconds)) <= 2 && similar(i, candidate)));
       intents = [...intents, ...added].sort((a, b) => Number(a.seconds) - Number(b.seconds));
     }
 
