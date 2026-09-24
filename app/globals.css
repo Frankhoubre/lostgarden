@@ -2311,7 +2311,8 @@ h3 {
   z-index: 1;
   fill: #fff;
   stroke: var(--wt-ink);
-  stroke-width: 0.32;
+  /* As strong as the bubble's border: at 0.32 the outline was a hairline and the tail looked slipped behind the bubble. */
+  stroke-width: 1.4px;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
@@ -2357,7 +2358,7 @@ h3 {
 
 .webtoon-lettering:has(.webtoon-bubble-whisper) .webtoon-tail-under {
   stroke: #7b8190;
-  stroke-width: 0.24;
+  stroke-width: 1px;
 }
 
 .webtoon-bubble-thought {

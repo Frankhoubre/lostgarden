@@ -235,17 +235,24 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
   const [showFocal, setShowFocal] = useState(false);
   const [busy, setBusy] = useState(false);
+  /**
+   * Panels being redrawn one by one ("Regénérer l'image"): each has its own
+   * state, so several can be drawn at once, while a long run goes on too.
+   * The studio's lock (`busy`) is only for the long runs.
+   */
+  const [drawing, setDrawing] = useState<Set<string>>(() => new Set());
   // A long run in a background tab was frozen by Chrome mid-run (fetches left pending, nothing saved).
   // Chrome does not freeze a page that holds a Web Lock: hold one while a job runs.
+  const working = busy || drawing.size > 0;
   useEffect(() => {
-    if (!busy || typeof navigator === "undefined" || !navigator.locks) return;
+    if (!working || typeof navigator === "undefined" || !navigator.locks) return;
     let release: () => void = () => {};
     const held = new Promise<void>((resolve) => {
       release = resolve;
     });
     void navigator.locks.request("lostgarden-studio-job", () => held).catch(() => {});
     return () => release();
-  }, [busy]);
+  }, [working]);
   const [job, setJob] = useState<Job | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
@@ -385,18 +392,21 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   const regenerate = async () => {
-    if (!selected || busy) return;
+    if (!selected || drawing.has(selected.panel_id)) return;
     if (!selected.description.trim() && !selected.generation_prompt.trim()) {
       notify("Écris d'abord une description de la case");
       return;
     }
-    setBusy(true);
-    stopBatch.current = false;
+    const panel = selected;
+    setDrawing((current) => new Set(current).add(panel.panel_id));
     try {
-      if (await runImages([selected])) notify(selected.image.src ? "Image regénérée" : "Image générée");
+      if (await generateOne(panel)) notify(`${panel.panel_id} : ${panel.image.src ? "image regénérée" : "image générée"}`);
     } finally {
-      setJob(null);
-      setBusy(false);
+      setDrawing((current) => {
+        const next = new Set(current);
+        next.delete(panel.panel_id);
+        return next;
+      });
     }
   };
 
@@ -1212,7 +1222,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 ) : (
                   <span className="studio-thumb-empty">{panel.caption.some((c) => c.style === "title") ? panel.caption[0].text.en : "sans image"}</span>
                 )}
-                {job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) ? (
+                {job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) || drawing.has(panel.panel_id) ? (
                   <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />Génération…</span>
                 ) : job?.queue.includes(panel.panel_id) ? (
                   <span className="studio-thumb-overlay studio-thumb-overlay-soft">en attente</span>
@@ -1367,11 +1377,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ) : (
             <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
           )}
-          {view === "panel" && job?.current === selected.panel_id ? (
+          {view === "panel" && (job?.current === selected.panel_id || drawing.has(selected.panel_id)) ? (
             <div className="studio-stage-overlay" role="status">
               <span className="studio-spinner studio-spinner-lg" aria-hidden />
               <span>Génération de l&apos;image…</span>
-              <small>{job.deadline > now ? `≈ ${remaining(job.deadline - now)}` : "presque fini"}</small>
+              <small>{job && job.deadline > now ? `≈ ${remaining(job.deadline - now)}` : "≈ 1 min"}</small>
             </div>
           ) : null}
         </div>
@@ -1384,10 +1394,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </span>
           {!isTitleCard ? (
             <>
-              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={busy} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références" : "Dessine la case à partir de sa description et de ses références"}>
-                {busy ? "…" : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
+              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={drawing.has(selected.panel_id)} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références ; d'autres cases peuvent être redessinées en même temps" : "Dessine la case à partir de sa description et de ses références"}>
+                {drawing.has(selected.panel_id) ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={busy || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">Modifier / retoucher</button>
+              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">Modifier / retoucher</button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
