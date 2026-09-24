@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { STUDIO_CAST } from "@/lib/webtoon/studio-assets";
+import { bibleFor } from "@/lib/webtoon/style-bible";
 import { panelsFromIntents, type NextPanelIntent } from "@/lib/webtoon/continue";
 import {
   bestFrameFor,
@@ -213,6 +214,7 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
         "You keep the registry of everything that appears in a film being adapted into a webtoon, so that each thing is drawn the same way in every panel. You get the continuity notes of a window of frames (who is visible, what is in the hands, what else is there, how big), some of the frames, and the library of things that already have a design sheet.",
         "One entity per being, never one per part: a face, a hand, an eye, a limb, a root or a branch that belongs to a being seen elsewhere in the notes is that being (use its id). A tree, a rock, a statue or any scenery with a face, eyes or hands, or that moves, speaks or acts, IS a character (kind `character`, creature true), whole: body, face and hands in one design lock. When the recent panels already name a being, reuse their id.",
         "List every ENTITY of the window: a character, a creature, a machine, or an object that is held, used, thrown or that the story follows. Not an entity: terrain and scenery (a branch, a root, a mushroom, mist, trunks, stones, flowers, light), body parts, clothing that belongs to a character, a helmet or a hat while it is worn (a helmet lying alone on the ground IS an object entity), the furniture and tableware of a place (mugs, glasses, bottles, chairs, a strap), and a weapon or a key that belongs to a character (it is drawn with the character's sheet).",
+        "A limb, a claw, an arm or a tentacle belongs to the creature present in this window (the one fighting or seen nearby in the notes), never to a creature of an earlier scene unless the frames show that creature itself: in the last fight, the arms that reach for the knights are the machine's.",
         "A silhouette, a small or distant figure, a figure seen from too far or too dark to be designed is NOT a new entity: it is the library character or cast member it most likely is (a small armoured figure falling is Lanterne or Serrure, a claw reaching in during the machine's attack is the machine); set `ref` to it, or leave it out when you cannot tell. Only a being with a clear, distinct design of its own becomes a new entity.",
         "For each entity: `ref` is the id of the library entry when it is the same thing (the library ids are given; match on meaning: \"a silver pendant on a chain\" is the library's pendant), else null. `kind` is `character` for anything alive or any creature, monster or machine, `object` for a thing. `name` is short in English. `must_keep` is a precise DESIGN LOCK in English written from the frames: overall shape, proportions, materials, colours, distinctive parts, how it opens or moves, and for a creature or machine its size compared to Lanterne. `seconds` lists every second where it is visible; `best_seconds` the two or three seconds where it is seen best (largest, clearest, its whole shape). `scale` is its size compared to Lanterne, in words, for a creature, machine or structure. `creature` is true for a creature, monster or machine.",
         input.cast?.length
@@ -245,13 +247,8 @@ async function resolveEntities(input: { notes: FrameNote[]; library: ReferenceAs
       // The library wins over the cast: the cast's "Médaillon de la Graine" is the library's pendant.
       const aliased = CAST_ALIASES[castId] ? known.find((k) => k.id === CAST_ALIASES[castId]) : undefined;
       const cast = castId && !aliased ? input.cast?.find((c) => c.id === castId) : undefined;
-      // A name that says a library character ("blond-haired figure (Rose)") is that character.
-      const rawName = raw.name;
-      const named = match || aliased ? undefined : known.find((k) => {
-        const word = k.name.split(",")[0].trim();
-        return k.kind === kind && word.length > 2 && rawName.toLowerCase().split(/[^a-zà-ÿ]+/).includes(word.toLowerCase());
-      });
-      const library = match ?? aliased ?? named;
+      // No match on a name alone: "blond-haired figure (Rose)" was Lanterne's cape, and a "purple rose" is not Rose.
+      const library = match ?? aliased;
       const id = library?.id ?? (cast ? cast.id : entitySlug(raw.name));
       if (!id) continue;
       const seconds = (Array.isArray(raw.seconds) ? raw.seconds : []).map(Number).filter((s) => Number.isFinite(s));
@@ -397,6 +394,17 @@ function cutWindow(moments: Moment[], events: StoryEvent[], budget: number, pace
   return { end, needed: Math.max(1, Math.round(needed)) };
 }
 
+/** The library locations with the words the supervisor would use for them: id, name, the start of the design lock. */
+function libraryLocationWords(library: ReferenceAsset[]): { id: string; words: string[] }[] {
+  return library
+    .filter((a) => a.kind === "location" && a.id.startsWith("loc."))
+    .map((a) => ({
+      id: a.id.replace(/^loc\./, "").replace(/\.[a-z0-9-]+$/, ""),
+      // The id and the name only: the design lock's "underground", "stone" would match any place.
+      words: [...new Set(plain(`${a.id.replace(/^loc\./, "").replace(/[-.]/g, " ")} ${a.name.split("(")[0]}`).split(" ").filter((w) => w.length > 3 && !/^(with|from|that|this|very|dark|blue|white|great|large|huge|small|vast|deep|into|under|over|near|webtoon|sheet|film|place|location|source|frame|above)$/.test(w)))],
+    }));
+}
+
 /** Cast ids that are already in the library under another id. */
 const CAST_ALIASES: Record<string, string> = { "medaillon-de-la-graine": "pendant", lanterne: "lanterne" };
 
@@ -438,8 +446,33 @@ const plain = (text: string) => text.toLowerCase().normalize("NFD").replace(/[\u
  * shot where the hands are empty); a subtitle no panel letters is a missing
  * line. Both go to the same fix call as the reviewer's findings.
  */
-function filmChecks(input: { intents: NextPanelIntent[]; notes: FrameNote[]; objects: { id: string; name: string }[]; earlier?: string[] }): { missing: { seconds: number; moment: string }[]; invented: { index: number; problem: string }[] } {
+function filmChecks(input: {
+  intents: NextPanelIntent[];
+  notes: FrameNote[];
+  objects: { id: string; name: string }[];
+  earlier?: string[];
+  /** Creatures and characters found by the entity resolver, with the seconds they are seen. */
+  entities?: { id: string; seconds: number[] }[];
+  /** Library locations with the words that describe them. */
+  locations?: { id: string; words: string[] }[];
+}): { missing: { seconds: number; moment: string }[]; invented: { index: number; problem: string }[] } {
   const invented: { index: number; problem: string }[] = [];
+  // Who is in the film around a second: the supervisor's cast of the frames, and the entities seen then.
+  // Rose in the middle of the last fight (555, 557), the rabbit sleeping by the machine (537, 538),
+  // knights from nowhere (551, 552): a character the frames do not show is not in the panel.
+  const castAround = (seconds: number) => {
+    const near = input.notes.filter((n) => Math.abs(Number(n.seconds) - seconds) <= 3);
+    const ids = new Set(near.flatMap((n) => (n.characters ?? []).map((c) => String(c).toLowerCase())));
+    for (const e of input.entities ?? []) if (e.seconds.some((s) => Math.abs(s - seconds) <= 3)) ids.add(e.id);
+    return { ids, known: near.length > 0 };
+  };
+  const placeAround = (seconds: number) =>
+    plain(
+      input.notes
+        .filter((n) => Math.abs(Number(n.seconds) - seconds) <= 2)
+        .map((n) => n.place ?? "")
+        .join(" "),
+    );
   const noteText = (seconds: number) =>
     input.notes
       .filter((n) => Math.abs(Number(n.seconds) - seconds) <= 2)
@@ -457,6 +490,22 @@ function filmChecks(input: { intents: NextPanelIntent[]; notes: FrameNote[]; obj
       else if (words.some((w) => text.includes(w))) invented.push({ index, problem: `shows ${object?.name ?? id}, but no frame shows it around ${intent.seconds} s; draw what the frames show instead (hands: ${around.slice(0, 160) || "empty"})` });
     }
     intent.objects = kept;
+    const cast = castAround(Number(intent.seconds));
+    if (cast.known && intent.characters?.length) {
+      const absent = intent.characters.filter((c) => !cast.ids.has(c.toLowerCase()));
+      if (absent.length) {
+        intent.characters = intent.characters.filter((c) => cast.ids.has(c.toLowerCase()));
+        invented.push({ index, problem: `puts ${absent.join(", ")} in the panel, but no frame shows ${absent.length > 1 ? "them" : "it"} around ${intent.seconds} s (the frames show: ${[...cast.ids].join(", ") || "nobody"}); draw only who is there` });
+      }
+    }
+    // A library location whose words the frames do not use is another place: its sheet would paint the wrong
+    // one (the altar where Lanterne slept, during the fall between the giant spikes: 529, 532).
+    const location = input.locations?.find((l) => l.id === intent.location);
+    const place = placeAround(Number(intent.seconds));
+    if (location && place && !location.words.some((w) => place.includes(w))) {
+      const fresh = place.split(" ").filter((w) => w.length > 3 && !/^(with|from|that|this|very|dark|blue|large|huge|small|vast|deep|into|under|over|near)$/.test(w)).slice(0, 3).join("-");
+      if (fresh) intent.location = fresh;
+    }
   });
   const missing: { seconds: number; moment: string }[] = [];
   const lettered = [...input.intents.flatMap((i) => (i.dialogue ?? []).flatMap((d) => [plain(d.en ?? ""), plain(d.fr ?? "")])), ...(input.earlier ?? []).map(plain)];
@@ -494,7 +543,9 @@ function smoothLocations(intents: NextPanelIntent[], notes: FrameNote[]): void {
 
 function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch: number; characters: string[]; locations: string[]; objects: string[]; pace?: "calm" | "normal" | "action" }): string {
   const { script, lostGarden, batch, characters, locations, objects, pace = "normal" } = input;
+  const canon = Object.entries(bibleFor(script.style_bible_id).canon ?? {});
   return [
+    canon.length ? `CANON OF THE SERIES, always true whatever a frame seems to show: ${canon.map(([id, rules]) => `${id}: ${rules.join(" ")}`).join(" | ")}` : "",
     `You are the adaptation engine of "${script.series}", ${lostGarden ? "an original poetic dark fantasy anime by Frank Houbre" : "an animated film"}, being redrawn as a vertical Korean-style webtoon read on a phone. Episode ${script.episode}. You write the NEXT ${batch} panels of the strip, continuing exactly where it stops.`,
     "You receive: the last panels already made (for continuity), the MOMENTS of the next seconds of the film as noted by a continuity supervisor (frames taken every second, identical consecutive frames merged), the EVENTS of those seconds with the beats each must be told in, the ENTITIES visible (objects, creatures, machines, with the ids to use), the frames themselves, and the screenplay of the episode in French.",
     "Two sources, both authoritative, and they match: the film (the frames and the notes) and the screenplay. Method: first find the passage of the screenplay that corresponds to the frames. Then cover EVERY moment and EVERY event beat, in order, and only the seconds given: the window is cut so that your panels fit it; the last panel lands on the last moment, where the next call continues. Each panel gives the timecode of its frame in `seconds` and quotes the screenplay line it comes from in `screenplay_line`. Never skip a moment where something changes, never jump ahead, never invent an action that is in neither source.",
@@ -506,6 +557,8 @@ function writerSystem(input: { script: WebtoonScript; lostGarden: boolean; batch
     "Dialogue from the film, strict. The moments carry `subtitles`: the lines actually spoken, burned into the frames, with their seconds. Every subtitle line becomes ONE speech bubble, once, in the first panel of its seconds (a line held on screen across several frames or across a cut is still one bubble; a line already lettered in the last panels made is never lettered again; two short lines of the same speaker can share a panel): its text as written in `fr` when it is French (or `en` when it is English), translated into the other language, the `speaker` being the one who speaks (the character whose mouth moves, or the voice heard from off-frame with `style` off). Never drop a subtitle, never invent a line that is in neither the subtitles nor the screenplay.",
     "Black and white. A moment with `grade` \"black and white\" is a memory or a flashback: the film shows another time. Its panels show exactly what those frames show (often someone of the past, another place or the same place long ago, a figure that dissolves into another), never the present scene redrawn; say \"black and white memory\" in the description, name the place the frames show, and never add a colour. A present character appears in it only when the frame shows him.",
     "A being already revealed is not revealed again. After its reveal, a colossal being or a being that speaks is shown through the scene: in the frame behind Lanterne, in the panels of its lines, in his reactions. A panel of it alone (its face, a fragment, a wide view of it) without a line and without Lanterne comes at most once in four panels, even when the film cuts back to it often: the film can hold on a face, the strip cannot.",
+    "Cast, strict. A panel's `characters` are ONLY those the notes list at its seconds (or the creatures of ENTITIES seen then). Never bring in a character of another scene because the story talks about it: Rose, the ghost rabbit, the Source or a knight of a memory are not in a fight they are not in. During a fight, a limb, a claw or an arm that reaches in belongs to the creature fighting at that moment, never to a creature of an earlier scene.",
+    "Speech bubbles. `style` is `speech` for a line said by someone drawn in the panel (the lettering puts the bubble next to him and the tail on him), `shout` only for a shouted line, `off` ONLY for a voice whose speaker is not drawn in the panel (a square box without tail), `thought` for a thought. At most two bubbles in a panel. Never letter a line over a sound effect: a panel with a big sound effect carries no bubble, or the bubble goes in the next panel.",
     "Handled objects. An object in a hand or being handled (taken out, opened, looked at) is framed so it reads: a close-up or a medium close-up on the hands, never a wide shot where it shrinks to a dot. Its size against the hand and the body stays the size its sheet gives, from one panel to the next.",
     "Objects and creatures, strict. Every object in a hand and every creature or machine named in ENTITIES has a design sheet attached to the panel when you put its id in `objects` (objects) or in `characters` (creatures, machines): always do it, in every panel where it is visible, even partly. Draw what the notes say is there and nothing else: no paper, letter, note or map exists in this episode; the pale plate on Lanterne's chest is armour. An object taken out, opened, looked at, thrown gets its own panels, followed to the end.",
     lostGarden
@@ -672,7 +725,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     // What needs no model: objects no frame shows, subtitles no bubble carries.
     // The lines already lettered in the last panels made: not missing, and never lettered twice.
     const earlierLines = start.slice(-12).flatMap((p) => p.dialogue.flatMap((d) => [d.text.fr ?? "", d.text.en ?? ""]));
-    const checks = filmChecks({ intents, notes, earlier: earlierLines, objects: [...objectEntries.map((o) => ({ id: o.id, name: o.name })), ...entities.filter((e) => e.kind === "object").map((e) => ({ id: e.id, name: e.name }))] });
+    const checks = filmChecks({ intents, notes, earlier: earlierLines, entities: entities.map((e) => ({ id: e.id, seconds: e.seconds })), locations: libraryLocationWords(library), objects: [...objectEntries.map((o) => ({ id: o.id, name: o.name })), ...entities.filter((e) => e.kind === "object").map((e) => ({ id: e.id, name: e.name }))] });
     const missing = [...review.missing, ...checks.missing].slice(0, 14);
     const invented = [...review.invented, ...checks.invented.filter((c) => !review.invented.some((r) => r.index === c.index))].slice(0, 10);
     if (missing.length || invented.length) {

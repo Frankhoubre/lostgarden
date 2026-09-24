@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
+import { checkPanelImage } from "@/lib/webtoon/image-check";
+import { autoPlaced, imageToPanel, layoutBubbles, type Figure } from "@/lib/webtoon/lettering";
+import { libraryWith } from "@/lib/webtoon/references";
+import { bibleFor } from "@/lib/webtoon/style-bible";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
 import { getProjectContext } from "@/lib/webtoon/project-server";
 import { recordCost } from "@/lib/webtoon/cost-server";
@@ -26,7 +30,7 @@ import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
  * token of a studio account in the Authorization header.
  */
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -74,17 +78,45 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   try {
     const generation = buildGenerationRequest(panel, body.model, overlay);
-    const image = await generateWithGateway(generation, {
+    const options = {
       model: body.model,
       quality: body.quality === "low" || body.quality === "medium" || body.quality === "high" ? body.quality : undefined,
       resolveReference: referenceAsDataUrl,
-    });
-    void recordCost({ idToken: identity.idToken, slug, usd: image.cost_usd, kind: "images" });
+    };
+    let image = await generateWithGateway(generation, options);
+    let spent = image.cost_usd;
+    // The drawn image, checked against the panel: cast, canon, state. One redraw with the faults named.
+    const library = libraryWith(overlay);
+    const canon = bibleFor(script.style_bible_id).canon;
+    let check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon });
+    let checkCost = check.cost_usd;
+    const firstIssues = check.issues;
+    if (check.issues.length) {
+      const again = await generateWithGateway({ ...generation, prompt: `${generation.prompt}\n\nFIX: the previous drawing of this panel was wrong: ${check.issues.join(" ")} Draw it again without these faults.` }, options);
+      spent += again.cost_usd;
+      image = again;
+      check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon });
+      checkCost += check.cost_usd;
+    }
+    void recordCost({ idToken: identity.idToken, slug, usd: spent, kind: "images" });
+    void recordCost({ idToken: identity.idToken, slug, usd: checkCost, kind: "writer" });
     // A memory in black and white is delivered in black and white, whatever tint the model left.
     if (panel.grade === "monochrome") {
       const grey = await sharp(Buffer.from(image.base64, "base64")).grayscale().jpeg({ quality: 92 }).toBuffer();
       image.base64 = grey.toString("base64");
       image.media_type = "image/jpeg";
+    }
+    // Bubbles placed from where the characters are in this image, unless someone placed them by hand.
+    let dialogue = panel.dialogue;
+    if (panel.dialogue.length && autoPlaced(panel.dialogue)) {
+      const meta = await sharp(Buffer.from(image.base64, "base64")).metadata();
+      const box = { width: 1080, height: panel.panel_height || 1350 };
+      const figures: Figure[] = [];
+      for (const f of check.figures) {
+        const head = imageToPanel(f.head, { width: meta.width ?? 1024, height: meta.height ?? 1536 }, box, panel.focal_point);
+        if (head) figures.push({ who: f.who, head });
+      }
+      dialogue = layoutBubbles({ dialogue: panel.dialogue, sfx: panel.sfx, figures, panel: box });
     }
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({
@@ -98,7 +130,9 @@ export async function POST(request: Request, { params }: RouteContext) {
       model: image.model,
       ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }),
       generated_at: new Date().toISOString(),
-      cost_usd: image.cost_usd,
+      cost_usd: spent + checkCost,
+      dialogue,
+      check: { first: firstIssues, remaining: check.issues, redrawn: firstIssues.length > 0 },
       generation_prompt: panel.generation_prompt,
       negative_constraints: panel.negative_constraints,
       visual_references: panel.visual_references,
