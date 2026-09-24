@@ -4,7 +4,7 @@ import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { checkPanelImage } from "@/lib/webtoon/image-check";
-import { autoPlaced, fixLettering, imageToPanel, layoutBubbles, type Figure } from "@/lib/webtoon/lettering";
+import { autoPlaced, fixLettering, imageToPanel, layoutBubbles, moveSfxOffBubbles, type Figure } from "@/lib/webtoon/lettering";
 import { libraryWith } from "@/lib/webtoon/references";
 import { bibleFor } from "@/lib/webtoon/style-bible";
 import { generateWithGateway } from "@/lib/webtoon/providers/vercel-gateway";
@@ -109,6 +109,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     // Bubbles placed from where the characters are in this image, unless someone placed them by hand.
     const lettered = fixLettering(panel, { mute: bibleFor(script.style_bible_id).mute });
     let dialogue = lettered.dialogue;
+    let sfx = panel.sfx;
     if (lettered.dialogue.length && autoPlaced(lettered.dialogue)) {
       const meta = await sharp(Buffer.from(image.base64, "base64")).metadata();
       const box = { width: 1080, height: lettered.panel_height || 1350 };
@@ -118,6 +119,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         if (head) figures.push({ who: f.who, head });
       }
       dialogue = layoutBubbles({ dialogue: lettered.dialogue, sfx: panel.sfx, figures, panel: box, cast: [...new Set(libraryWith(overlay).filter((a) => a.kind === "character" && a.subject).map((a) => a.subject as string))] });
+      sfx = moveSfxOffBubbles({ dialogue, sfx: panel.sfx, panel: box });
     }
     const extension = image.media_type === "image/jpeg" ? "jpg" : image.media_type === "image/webp" ? "webp" : "png";
     const src = await storeGeneratedImage({
@@ -133,6 +135,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       generated_at: new Date().toISOString(),
       cost_usd: spent + checkCost,
       dialogue,
+      sfx,
       panel_height: lettered.panel_height,
       check: { first: firstIssues, remaining: check.issues, redrawn: firstIssues.length > 0 },
       generation_prompt: panel.generation_prompt,

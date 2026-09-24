@@ -168,3 +168,44 @@ export function fixLettering<P extends { characters: string[]; dialogue: Dialogu
   const height = heightForLettering(dialogue);
   return { ...panel, dialogue, panel_height: Math.max(panel.panel_height || 0, height) };
 }
+
+/**
+ * Sound effects moved off the bubbles: when a bubble could not avoid a sound
+ * effect (no free place in a crowded panel), the sound effect moves instead,
+ * to the free spot farthest from the bubbles (panels 568 and the last fight).
+ */
+export function moveSfxOffBubbles(input: { dialogue: Dialogue[]; sfx: Sfx[]; panel: { width: number; height: number } }): Sfx[] {
+  const { panel } = input;
+  const bubbles: Box[] = input.dialogue.map((line) => {
+    const size = bubbleBox(line, panel);
+    return { x: line.anchor.x - size.w / 2, y: line.anchor.y - size.h / 2, w: size.w, h: size.h };
+  });
+  const placed: Box[] = [];
+  return input.sfx.map((effect) => {
+    const box = sfxBox(effect, panel);
+    const clash = (b: Box) => [...bubbles, ...placed].some((o) => overlap(o, b));
+    if (!clash(box)) {
+      placed.push(box);
+      return effect;
+    }
+    let best: { anchor: Anchor; box: Box } | null = null;
+    for (const cy of [85, 70, 55, 40, 25, 12]) {
+      for (const cx of [50, 25, 75]) {
+        const x = clamp(cx, box.w / 2 + MARGIN, 100 - box.w / 2 - MARGIN);
+        const y = clamp(cy, box.h / 2 + MARGIN, 100 - box.h / 2 - MARGIN);
+        const candidate = { x: x - box.w / 2, y: y - box.h / 2, w: box.w, h: box.h };
+        if (!clash(candidate)) {
+          best = { anchor: { x, y }, box: candidate };
+          break;
+        }
+      }
+      if (best) break;
+    }
+    if (!best) {
+      placed.push(box);
+      return effect;
+    }
+    placed.push(best.box);
+    return { ...effect, anchor: best.anchor };
+  });
+}
