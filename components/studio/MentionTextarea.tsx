@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type KeyboardEvent, type TextareaHTMLAttributes } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { Avatar } from "@/components/studio/Avatar";
 import type { ReferenceAsset } from "@/lib/webtoon/types";
 
@@ -38,6 +38,51 @@ const fold = (text: string) =>
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase();
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** The text with every "@Name" of a known reference wrapped in a mark (the longest name first). */
+function highlighted(text: string, names: string[]): ReactNode[] {
+  if (!names.length || !text.includes("@")) return [text];
+  const pattern = new RegExp(`@(?:${names.map(escape).join("|")})(?![\\p{L}\\p{N}])`, "giu");
+  const out: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(pattern)) {
+    const at = match.index ?? 0;
+    if (at > last) out.push(text.slice(last, at));
+    out.push(
+      <mark key={at} className="studio-mention-mark">
+        {match[0]}
+      </mark>,
+    );
+    last = at + match[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+/** The layout of the textarea the highlight layer copies, so each mark sits exactly under its word. */
+const MIRRORED = [
+  "fontFamily",
+  "fontSize",
+  "fontWeight",
+  "fontStyle",
+  "letterSpacing",
+  "lineHeight",
+  "textTransform",
+  "wordSpacing",
+  "tabSize",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "borderTopWidth",
+  "borderRightWidth",
+  "borderBottomWidth",
+  "borderLeftWidth",
+  "borderRadius",
+  "boxSizing",
+] as const;
+
 /** The "@word" being typed just before the caret, if any. */
 function tokenAt(text: string, caret: number): { start: number; query: string } | null {
   const before = text.slice(0, caret);
@@ -55,6 +100,35 @@ function tokenAt(text: string, caret: number): { start: number; query: string } 
  */
 export function MentionTextarea({ value, onChange, items, onMention, onKeyDown, className = "", ...rest }: MentionTextareaProps) {
   const area = useRef<HTMLTextAreaElement>(null);
+  const backdrop = useRef<HTMLDivElement>(null);
+  // The names that are highlighted once written: every reference the list knows, the longest first.
+  const names = useMemo(() => [...new Set(items.map((i) => i.name).filter(Boolean))].sort((a, b) => b.length - a.length), [items]);
+  // The highlight layer takes the textarea's own box and background; the textarea becomes transparent above it.
+  useEffect(() => {
+    const el = area.current;
+    const layer = backdrop.current;
+    if (!el || !layer) return;
+    const background = getComputedStyle(el).backgroundColor;
+    const copy = () => {
+      const style = getComputedStyle(el);
+      for (const key of MIRRORED) layer.style[key] = style[key];
+      layer.style.borderStyle = "solid";
+      layer.style.borderColor = "transparent";
+      layer.style.backgroundColor = background;
+      layer.style.width = `${el.offsetWidth}px`;
+      layer.style.height = `${el.offsetHeight}px`;
+      layer.scrollTop = el.scrollTop;
+    };
+    copy();
+    el.style.backgroundColor = "transparent";
+    const observer = new ResizeObserver(copy);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      // Back to its own background, so a second run of the effect reads the real one.
+      el.style.backgroundColor = "";
+    };
+  }, []);
   const [token, setToken] = useState<{ start: number; query: string } | null>(null);
   const [active, setActive] = useState(0);
 
@@ -126,6 +200,10 @@ export function MentionTextarea({ value, onChange, items, onMention, onKeyDown, 
   let lastGroup: MentionKind | null = null;
   return (
     <div className="studio-mention">
+      <div ref={backdrop} className="studio-mention-backdrop" aria-hidden="true">
+        {highlighted(value, names)}
+        {"\n"}
+      </div>
       <textarea
         {...rest}
         ref={area}
@@ -136,6 +214,9 @@ export function MentionTextarea({ value, onChange, items, onMention, onKeyDown, 
           refresh(e.target.value, e.target.selectionStart ?? e.target.value.length);
         }}
         onKeyDown={keyDown}
+        onScroll={(e) => {
+          if (backdrop.current) backdrop.current.scrollTop = e.currentTarget.scrollTop;
+        }}
         onClick={(e) => refresh(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
         onBlur={() => window.setTimeout(() => setToken(null), 150)}
       />
