@@ -26,6 +26,7 @@ import { recordCost } from "@/lib/webtoon/cost-server";
 import { completeJson, type UserPart } from "@/lib/webtoon/providers/gateway-text";
 import { libraryCharacters, libraryLocations, libraryObjects, libraryWith } from "@/lib/webtoon/references";
 import { getProjectContext, imageAsDataUrl } from "@/lib/webtoon/project-server";
+import { guideBrief, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
 import type { LibraryOverlay, ReferenceAsset, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
@@ -642,8 +643,13 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
   if (!context.frames.length) return Response.json({ error: "Ce projet n'a pas encore d'images du film : importez la vidéo dans l'accueil du projet." }, { status: 400 });
 
-  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "calm" | "normal" | "action"; until_seconds?: number };
-  const pace: "calm" | "normal" | "action" = body.pace === "calm" || body.pace === "action" ? body.pace : "normal";
+  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "auto" | "calm" | "normal" | "action"; until_seconds?: number; guide?: Pick<FilmGuide, "sequences" | "beats"> };
+  // The film guide around the stretch (sent by the studio): its sequences set the pace in "auto", its lines go to the writer.
+  const guide = body.guide && Array.isArray(body.guide.sequences) ? { sequences: body.guide.sequences, beats: Array.isArray(body.guide.beats) ? body.guide.beats : [] } : undefined;
+  const startSeconds = coveredUntil(Array.isArray(body.panels) && body.panels.length ? body.panels : []);
+  const sequence = sequenceAt(guide, startSeconds);
+  const pace: "calm" | "normal" | "action" =
+    body.pace === "calm" || body.pace === "action" || body.pace === "normal" ? body.pace : sequence ? paceOfKind(sequence.kind, sequence.intensity) : "normal";
   // `until_seconds: null` (the open-ended "next panels" of the studio) must stay open: Number(null) is 0.
   const until = body.until_seconds !== null && body.until_seconds !== undefined && Number.isFinite(Number(body.until_seconds)) ? Number(body.until_seconds) : null;
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [], ...(body.library.base ? { base: body.library.base } : {}) } : null;
@@ -675,7 +681,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     // The window: a few seconds per panel by pace, then cut where the moments and events fit the batch.
     // Inside a bounded span (a rewrite), the frames left are spread over the panels left to write.
     const perPanel = FRAMES_PER_PANEL[pace];
-    const available = allFrames.filter((f) => f.seconds >= adaptedUntil && (until === null || f.seconds <= until));
+    // In "auto" a batch stays inside one sequence of the guide: an action scene is not diluted into the calm that follows.
+    const sequenceEnd = body.pace === "auto" && sequence && sequence.to - adaptedUntil >= 3 ? sequence.to : null;
+    const available = allFrames.filter((f) => f.seconds >= adaptedUntil && (until === null || f.seconds <= until) && (sequenceEnd === null || f.seconds <= sequenceEnd));
     const share = until === null ? Math.max(2, Math.ceil(batch * perPanel)) : Math.max(1, Math.ceil((available.length * batch) / Math.max(batch, count)));
     const window = available.slice(0, Math.min(MAX_FRAMES, share));
     if (!window.length) return Response.json({ error: "Fin de l'épisode : il n'y a plus d'image du film après la dernière case" }, { status: 400 });
@@ -752,6 +760,14 @@ export async function POST(request: Request, { params }: RouteContext) {
         text: `MOMENTS of this window, from the continuity supervisor's frame-by-frame notes (consecutive identical frames merged; \`from\` and \`to\` are seconds, \`frames\` how many). They are the truth about the state of the characters (helmet ON or OFF, posture, what is in the hands), the place, the people and things visible, their size, what moves and what is heard. One panel per still moment, two for a moment whose action changes. Put each panel's \`seconds\` inside its moment:\n${JSON.stringify(moments, null, 1)}`,
       },
       { type: "text", text: `EVENTS of this window and the beats each must be told in (mandatory, in this order, each beat its own panel):\n${eventsBrief(events) || "none: no physical event in these seconds"}` },
+      ...(guide
+        ? [
+            {
+              type: "text" as const,
+              text: `FILM GUIDE of these seconds (the whole film was read once, sequence by sequence; it says what kind of scene this is and what changes from one second to the next). Tell the scene in its nature: an ACTION sequence in many dynamic panels (impacts, speed lines, sounds, diagonal and tall frames), a TENSION sequence by holding on the threat, a CONTEMPLATION or CALM sequence in few large quiet panels, a DIALOGUE by the faces of who speaks. Every change it notes is a candidate panel:\n${guideBrief(guide, frames[0]?.seconds ?? adaptedUntil, cut.end)}`,
+            },
+          ]
+        : []),
       { type: "text", text: `ENTITIES visible in this window (put the id in \`objects\` or \`characters\` of every panel where the thing is visible):\n${entityLines.join("\n") || "none besides the characters"}` },
       { type: "text", text: `Frames of the film from ${frames[0].seconds} s to ${frames[frames.length - 1].seconds} s, in order:` },
       ...frameParts.flat(),

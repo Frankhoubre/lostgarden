@@ -3,13 +3,15 @@
 import { signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n/config";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
+import { useFilmGuide } from "@/components/studio/useFilmGuide";
+import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { StudioLocations } from "@/components/studio/StudioLocations";
 import { StudioNotifications } from "@/components/studio/StudioNotifications";
 import { ProgressBar } from "@/components/studio/ProgressBar";
@@ -196,6 +198,13 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     },
     [toast],
   );
+  // The film guide: the whole film read once by the AI, sequence by sequence; the film tab shows it, the writer follows it.
+  const filmDuration = useMemo(() => {
+    const list = frames ?? studioFilmFramesDense();
+    return list.length ? list[list.length - 1].seconds : 0;
+  }, [frames]);
+  const filmGuide = useFilmGuide({ slug: script.slug, user, duration: filmDuration, notify, track });
+
   const markNotificationsRead = useCallback(
     () =>
       setNotifications((current) =>
@@ -583,13 +592,24 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               previewLocale={previewLocale}
               onJob={setJob}
               filmFrames={frames ? sparseFrames(frames) : undefined}
+              guide={filmGuide.guide}
             />
           </div>
           {tab === "scenario" ? (project ? <StudioProjectText project={project} notify={notify} /> : <StudioScreenplay panels={panels} />) : null}
           {tab === "personnages" ? <StudioCharacters script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "objets" ? <StudioObjects script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "decors" ? <StudioLocations script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
-          {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} frames={frames} /> : null}
+          {tab === "film" ? (
+            <StudioFrames
+              panels={panels}
+              onCreatePanel={createFromFrame}
+              frames={frames}
+              guide={filmGuide.guide}
+              run={filmGuide.run}
+              onRead={(fromScratch) => void filmGuide.start(fromScratch)}
+              onStop={filmGuide.stop}
+            />
+          ) : null}
         </main>
       </div>
     </div>

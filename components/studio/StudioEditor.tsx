@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
 import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
 import type { TrackTask } from "@/lib/webtoon/notifications";
+import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -186,6 +187,8 @@ type StudioEditorProps = {
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
   onJob?: (job: JobSummary) => void;
+  /** The film guide (sequences, second by second lines): the "auto" pace follows it and the writer reads it. */
+  guide?: FilmGuide | null;
   /** Frames of the project's film offered by the pickers (every five seconds); Lost Garden's when unset. */
   filmFrames?: { src: string; seconds: number; label: string }[];
 };
@@ -196,7 +199,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const locale = previewLocale;
@@ -267,7 +270,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [nextCount, setNextCount] = useState(10);
   /** The continuation is asked in panels or in seconds of film ("the next 30 seconds"). */
   const [nextUnit, setNextUnit] = useState<"panels" | "seconds">("panels");
-  const [pace, setPace] = useState<"calm" | "normal" | "action">("normal");
+  /** "auto": the kind of the film sequence decides (action, calm...), as read in the film guide. */
+  const [pace, setPace] = useState<"auto" | "calm" | "normal" | "action">("auto");
+  /** The pace a stretch starting here gets: the one chosen, or the one of the guide's sequence in "auto". */
+  const paceAt = (seconds: number): "calm" | "normal" | "action" => {
+    if (pace !== "auto") return pace;
+    const sequence = sequenceAt(guide, seconds);
+    return sequence ? paceOfKind(sequence.kind, sequence.intensity) : "normal";
+  };
+  const paceWord = (value: "calm" | "normal" | "action") => (value === "action" ? "action" : value === "calm" ? "calme" : "normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
   // Latest panels and library, for the director's actions that run one after the other.
   const panelsRef = useRef(panels);
@@ -587,13 +598,13 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // A stretch of film: written to its end, the number of panels follows the pace.
       const seconds = Math.max(5, Math.min(600, Math.round(nextCount) || 30));
       const from = coveredUntil(panels);
-      const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[pace]));
+      const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[paceAt(from)]));
       if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases) ?`)) return;
       await writeSpan({ base: panels, insertAfter: null, count: estimate, until: from + seconds, label: "la suite" });
       return;
     }
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
-    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
+    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "auto" ? (guide?.sequences.length ? ", au rythme du guide du film" : ", en rythme normal (le film n'est pas encore lu)") : `, en rythme ${paceWord(pace)}`} ?`)) return;
     await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
   };
 
@@ -612,7 +623,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify("Les cases cochées n'ont pas de temps de film à réécrire");
       return;
     }
-    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} ?`)) return;
+    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme ${pace === "auto" ? "du guide du film" : paceWord(pace)} ?`)) return;
     const kept = panels.filter((p) => !checked.has(p.panel_id));
     setChecked(new Set());
     await writeSpan({ base: kept, insertAfter: before?.panel_id ?? null, count, until, label: "la séquence" });
@@ -697,7 +708,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
           // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
-          body: JSON.stringify({ count: until === null ? count - created.length : Math.max(8, count - created.length), panels: slimForContinue(current), library: libraryRef.current, pace, until_seconds: until }),
+          body: JSON.stringify({
+            count: until === null ? count - created.length : Math.max(8, count - created.length),
+            panels: slimForContinue(current),
+            library: libraryRef.current,
+            pace,
+            until_seconds: until,
+            // The guide around the stretch to write: its sequences drive the "auto" pace and its lines go to the writer.
+            guide: guideSlice(guide, Math.max(0, coveredUntil(current) - 2), coveredUntil(current) + 180),
+          }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
@@ -1152,7 +1171,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} className="studio-input" style={{ width: "5rem" }} aria-label="Nombre de cases" />
-            <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} className="studio-input" aria-label="Rythme">
+            <select value={pace} onChange={(e) => setPace(e.target.value as "auto" | "calm" | "normal" | "action")} className="studio-input" aria-label="Rythme">
+              <option value="auto">Auto (guide du film)</option>
               <option value="normal">Normal</option>
               <option value="action">Action</option>
               <option value="calm">Calme</option>
@@ -1231,8 +1251,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 className="webtoon-mini"
                 onClick={() => {
                   // The count is asked, with a suggestion by pace: the action pace tells every second in several panels, the others one panel per moment.
-                  const suggested = pace === "action" ? checkedPanels.length * 2 : pace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
-                  const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} : combien de cases écrire ?`, String(suggested));
+                  const rewritePace = paceAt(Math.min(...checkedPanels.map((p) => p.source_time_start ?? 0)));
+                  const suggested = rewritePace === "action" ? checkedPanels.length * 2 : rewritePace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
+                  const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "auto" ? `du guide (${paceWord(rewritePace)})` : paceWord(pace)} : combien de cases écrire ?`, String(suggested));
                   const n = Math.round(Number(answer));
                   if (answer !== null && n > 0) void rewriteChecked(Math.min(150, n));
                 }}
@@ -1349,10 +1370,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
               <label>
                 <span>Rythme</span>
-                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Normal : une case pour environ 3 s de film ; action : une pour 1,5 s, nerveuses ; calme : une pour 4,5 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
-                  <option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
+                <select value={pace} onChange={(e) => setPace(e.target.value as "auto" | "calm" | "normal" | "action")} disabled={busy} title="Auto : le rythme de chaque séquence du guide du film (action, calme...). Normal : une case pour environ 3 s de film ; action : une pour 1,5 s, nerveuses ; calme : une pour 4,5 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
+                  <option value="auto">Auto (guide du film)</option><option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
                 </select>
               </label>
+              {(() => {
+                const next = sequenceAt(guide, coveredUntil(panels));
+                if (!next) return pace === "auto" ? <p className="studio-next-guide">Le film n&apos;est pas encore lu : lancez la lecture dans « Images du film » pour que le rythme suive les scènes.</p> : null;
+                return (
+                  <p className="studio-next-guide">
+                    À suivre : <b>{next.title}</b> · {SEQUENCE_LABEL[next.kind]}, intensité {next.intensity}/5
+                    {pace === "auto" ? ` · rythme ${paceWord(paceOfKind(next.kind, next.intensity))}` : ""}
+                  </p>
+                );
+              })()}
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
                 {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(600, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
