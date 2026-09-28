@@ -12,8 +12,8 @@ import type { WebtoonPanel } from "@/lib/webtoon/types";
 
 type StudioFramesProps = {
   panels: WebtoonPanel[];
-  /** Continue the strip: a new panel drawn from this frame, appended after the last one. */
-  onCreatePanel: (frame: { src: string; seconds: number }) => void;
+  /** Continue the strip: a new panel drawn from this frame, appended after the last one (not offered before the strip exists). */
+  onCreatePanel?: (frame: { src: string; seconds: number }) => void;
   /** The film of a project, one frame per second; Lost Garden episode 1 when unset. */
   frames?: { src: string; seconds: number; label: string }[];
   guide: FilmGuide | null;
@@ -37,6 +37,8 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
   const [open, setOpen] = useState<{ src: string; label: string; seconds: number } | null>(null);
   /** One frame per second (what the writer reads) or one every five seconds (lighter to scan). */
   const [dense, setDense] = useState(false);
+  // Before the strip exists (the project's welcome), nothing is "to adapt": no greyed frames, no adapted mark.
+  const adapting = Boolean(onCreatePanel);
   const [only, setOnly] = useState<number | null>(null);
   const all = projectFrames ?? studioFilmFramesDense();
   const frames = projectFrames ? (dense ? projectFrames : sparseFrames(projectFrames)) : dense ? studioFilmFramesDense() : studioFilmFrames();
@@ -102,7 +104,7 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
                 />
               ))}
               {read <= duration ? <span className="studio-guide-unread" style={{ flexGrow: Math.max(0, duration - read) }} /> : null}
-              <span className="studio-guide-adapted" style={{ left: `${Math.min(100, (adaptedUntil / Math.max(1, duration)) * 100)}%` }} title={`Adapté jusqu'à ${tc(adaptedUntil)}`} />
+              {adapting ? <span className="studio-guide-adapted" style={{ left: `${Math.min(100, (adaptedUntil / Math.max(1, duration)) * 100)}%` }} title={`Adapté jusqu'à ${tc(adaptedUntil)}`} /> : null}
             </div>
             <div className="studio-guide-legend">
               {counts.map((c) => (
@@ -111,7 +113,7 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
                   {SEQUENCE_LABEL[c.kind]} · {c.n} ({tc(c.seconds)})
                 </span>
               ))}
-              <span className="studio-guide-legend-adapted">▲ adapté jusqu&apos;à {tc(adaptedUntil)}</span>
+              {adapting ? <span className="studio-guide-legend-adapted">▲ adapté jusqu&apos;à {tc(adaptedUntil)}</span> : null}
             </div>
             <ol className="studio-guide-list">
               {sequences.map((s, i) => (
@@ -152,7 +154,11 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
             </div>
           </div>
         </div>
-        <p className="text-xs text-ivory/60">Adapté jusqu&apos;à {adaptedUntil.toFixed(0)} s : les images grisées restent à adapter. Une image ouverte en grand devient une nouvelle case à la fin de la bande.</p>
+        {adapting ? (
+          <p className="text-xs text-ivory/60">Adapté jusqu&apos;à {adaptedUntil.toFixed(0)} s : les images grisées restent à adapter. Une image ouverte en grand devient une nouvelle case à la fin de la bande.</p>
+        ) : (
+          <p className="text-xs text-ivory/60">Toutes les images extraites du film. « 1 s » les montre toutes, « 5 s » une sur cinq ; une image s&apos;ouvre en grand au clic.</p>
+        )}
         {groups
           .filter((g) => only === null || g.sequence === sequences[only])
           .map((group, gi) => (
@@ -172,7 +178,7 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
                     <button
                       key={frame.src}
                       type="button"
-                      className={`studio-frame ${frame.seconds > adaptedUntil ? "is-todo" : ""}`}
+                      className={`studio-frame ${adapting && frame.seconds > adaptedUntil ? "is-todo" : ""}`}
                       onClick={() => setOpen({ src: frame.src, label: `${frame.label}${beat ? ` · ${beat.what}` : ""}`, seconds: frame.seconds })}
                       title={beat ? `${beat.what}${beat.change && beat.change !== "rien" ? `\nChangement : ${beat.change}` : ""}` : frame.label}
                     >
@@ -191,7 +197,7 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
         src={open?.src ?? null}
         label={open?.label}
         onClose={() => setOpen(null)}
-        action={open ? { label: "Nouvelle case depuis cette image", onClick: () => { onCreatePanel({ src: open.src, seconds: open.seconds }); setOpen(null); } } : undefined}
+        action={open && onCreatePanel ? { label: "Nouvelle case depuis cette image", onClick: () => { onCreatePanel({ src: open.src, seconds: open.seconds }); setOpen(null); } } : undefined}
       />
     </div>
   );
