@@ -56,7 +56,7 @@ export function sheetPrompt(input: { asset: Pick<ReferenceAsset, "name" | "kind"
     lines.push(`OBJECT TURNAROUND SHEET of ${name}, in the webtoon style described above, exactly as the reference images show it. ${THREE_VIEWS} The object alone, large, no hand holding it. Same shape, materials and colours in every view.`);
   } else {
     lines.push(
-      `AERIAL ESTABLISHING VIEW of ${name}, in the webtoon style described above: the place seen from high above at a three-quarter angle, wide enough to show the whole place and what surrounds it, its main volumes, its ground, its light sources and its atmosphere (mist, glow, depth), empty of characters, exactly as the reference images show the place. One single illustration, a reference for every future panel set here.`,
+      `AERIAL ESTABLISHING VIEW of ${name}, in the webtoon style described above: the place seen from high above at a three-quarter angle, wide enough to show the whole place and what surrounds it, its main volumes, its ground, its light sources and its atmosphere (mist, glow, depth), exactly as the reference images show the place. One single illustration, a reference for every future panel set here. ABSOLUTELY NOBODY IN IT: no character, no person, no figure, no silhouette however small or distant, no creature, no animal, no machine or monster of the story, even when the reference images show one there: draw the place as if everyone had left it.`,
     );
   }
   lines.push(`DESIGN LOCKED, copy exactly: ${asset.must_keep.trim()}`);
