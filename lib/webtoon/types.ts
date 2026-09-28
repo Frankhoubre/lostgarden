@@ -147,6 +147,11 @@ export type PanelFrame = {
   overlap?: number;
   /** Tilt in degrees, -6 to 6. */
   tilt?: number;
+  /**
+   * Stacking against the panels around it, -2 to 6 ("Mettre au-dessus", "Mettre en dessous"):
+   * where two panels overlap, the higher one is drawn in front. Unset: 0, or 1 for a panel that overlaps the previous one.
+   */
+  z?: number;
   shadow?: boolean;
 };
 

@@ -28,6 +28,7 @@ import {
   appendFromFrame,
   deletePanel,
   deletePanels,
+  setLayer,
   renumber,
   insertAfter,
   markForRegeneration,
@@ -287,6 +288,23 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     panelsRef.current = panels;
     libraryRef.current = library;
   }, [panels, library]);
+  // The Delete key deletes the selected panel, unless the author is typing or a window is open.
+  const deleteRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    deleteRef.current = deleteSelected;
+  });
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.key !== "Delete" && event.key !== "Backspace") return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true'], dialog")) return;
+      if (document.querySelector("dialog[open]")) return;
+      event.preventDefault();
+      deleteRef.current();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   const [inspectorTab, setInspectorTab] = useState<"scene" | "text" | "layout">("scene");
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const panelMenuRef = useRef<HTMLDivElement>(null);
@@ -411,6 +429,27 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify(error instanceof Error ? error.message : "Erreur de génération");
       return null;
     }
+  };
+
+  /** Delete the selected panel (button on the panel, the toolbar, or the Delete key), the next one selected. */
+  const deleteSelected = () => {
+    const current = panelsRef.current;
+    const at = current.findIndex((p) => p.panel_id === selectedId);
+    if (at < 0) return;
+    const target = current[at];
+    if (drawing.has(target.panel_id)) return notify("Cette case est en train d'être dessinée : attendez la fin avant de la supprimer");
+    if (!window.confirm(`Supprimer la case ${target.order} (${target.panel_id}) ?`)) return;
+    const next = deletePanel(current, target.panel_id);
+    setPanels(next);
+    select(next[Math.min(at, next.length - 1)]?.panel_id ?? null);
+    onAutosave?.();
+    notify(`Case ${target.order} supprimée`);
+  };
+
+  /** "Mettre au-dessus" / "Mettre en dessous": in front of or behind the panels it can overlap. */
+  const moveLayer = (id: string, direction: "front" | "back") => {
+    setPanels((current) => setLayer(current, id, direction));
+    onAutosave?.();
   };
 
   const regenerate = async () => {
@@ -1466,6 +1505,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               dragDisabled={busy}
               checkedIds={checked}
               busyIds={stripBusy}
+              onLayer={moveLayer}
+              onDelete={(id) => {
+                if (id !== selectedId) select(id);
+                deleteSelected();
+              }}
               frames={FILM_FRAMES}
               onInsertAfter={(id) => {
                 const next = insertAfter(panels, id);
@@ -1512,6 +1556,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
           ) : null}
+          <span className="studio-stage-actions-sep" aria-hidden />
+          <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "front")} title="Passe cette case devant les cases voisines, là où elles se chevauchent">Mettre au-dessus</button>
+          <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "back")} title="Passe cette case derrière les cases voisines, là où elles se chevauchent">Mettre en dessous</button>
+          <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteSelected} title="Supprime cette case (touche Suppr)">Supprimer</button>
           <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
         </div>
         {versions.length > 1 ? (

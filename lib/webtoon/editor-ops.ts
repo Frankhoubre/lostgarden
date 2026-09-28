@@ -1,3 +1,4 @@
+import { frameLayer } from "./frame";
 import { SPACING_BY_TRANSITION } from "./adaptation";
 import { panelFromFrame, type FramePick } from "./compose";
 import type { PanelImage, TransitionType, WebtoonPanel } from "./types";
@@ -248,4 +249,21 @@ export function mergeInPanels(panels: WebtoonPanel[], kind: "character" | "objec
     return p;
   });
   return { panels: next, changed };
+}
+
+
+/**
+ * "Mettre au-dessus" / "Mettre en dessous": the panel goes in front of (or behind) the panels just
+ * before and after it, the ones it can overlap, in one click.
+ */
+export function setLayer(panels: WebtoonPanel[], id: string, direction: "front" | "back"): WebtoonPanel[] {
+  const index = panels.findIndex((p) => p.panel_id === id);
+  if (index < 0) return panels;
+  const neighbours = [panels[index - 1], panels[index + 1]].filter((p): p is WebtoonPanel => Boolean(p)).map(frameLayer);
+  const current = frameLayer(panels[index]);
+  const target =
+    direction === "front"
+      ? Math.min(6, Math.max(current + 1, ...neighbours.map((z) => z + 1)))
+      : Math.max(-2, Math.min(current - 1, ...neighbours.map((z) => z - 1)));
+  return panels.map((p, i) => (i === index ? { ...p, frame: { ...(p.frame ?? {}), z: target } } : p));
 }
