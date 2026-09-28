@@ -58,8 +58,26 @@ export async function fetchPublishedStrip(slug: string): Promise<PublishedStrip 
 }
 
 /** The script with the published panels swapped in, when there are some. */
+function timecode(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/** The subtitle of the engine names its own span; the published strip may cover far more of the film. */
+function subtitleFor(script: WebtoonScript, panels: WebtoonPanel[]): WebtoonScript["subtitle"] {
+  const end = Math.max(0, ...panels.map((panel) => panel.source_time_end ?? 0));
+  if (!end) return script.subtitle;
+  const span = `0:00 ${timecode(end)}`;
+  return {
+    en: `Episode ${script.episode} · ${span.replace(" ", " to ")}`,
+    fr: `Épisode ${script.episode} · ${span.replace(" ", " à ")}`,
+    ja: `第${script.episode}話 · ${span.replace(" ", "〜")}`,
+    ko: `${script.episode}화 · ${span.replace(" ", "~")}`,
+  };
+}
+
 export async function withPublishedPanels(script: WebtoonScript): Promise<WebtoonScript & { published_at?: string | null }> {
   const published = await fetchPublishedStrip(script.slug);
   if (!published) return script;
-  return { ...script, panels: published.panels, published_at: published.published_at };
+  return { ...script, panels: published.panels, subtitle: subtitleFor(script, published.panels), published_at: published.published_at };
 }
