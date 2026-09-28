@@ -2,8 +2,8 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
-import { Avatar } from "@/components/studio/Avatar";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
+import { CastPicker } from "@/components/studio/CastPicker";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
 import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
@@ -1542,6 +1542,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
         {inspectorTab === "scene" ? (
           <div className="studio-section">
+            <h3 className="studio-group-title">La case</h3>
             <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
             <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
             <div className="grid grid-cols-2 gap-3">
@@ -1551,62 +1552,35 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
             </div>
             <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
-            <div>
-              <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
-              <div className="studio-chips">
-                {CHARACTERS.map((c) => {
-                  const on = selected.characters.includes(c.id);
-                  return (
-                    <button key={c.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => setCharacters(c.id, !on)} aria-pressed={on} title={on ? `${c.name} est dans la case` : `Ajouter ${c.name} à la case`}>
-                      <Avatar image={c.image} name={c.name} crop={c.avatar} />
-                      <span>{c.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <input
-                className="mt-1"
-                placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
-                value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
-                onChange={(e) => {
-                  const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
-                  const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
-                  patch({ characters: [...known, ...others] });
-                }}
-              />
-            </div>
+            <h3 className="studio-group-title">Personnages <small>leurs fiches sont jointes au prompt</small></h3>
+            <CastPicker items={CHARACTERS} selected={selected.characters} onToggle={(id, on) => setCharacters(id, on)} />
+            <input
+              placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
+              value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
+              onChange={(e) => {
+                const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
+                const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
+                patch({ characters: [...known, ...others] });
+              }}
+            />
             {OBJECTS.length ? (
-              <div>
-                <span className="webtoon-field-label">Objets visibles (leur fiche est jointe)</span>
-                <div className="studio-chips">
-                  {OBJECTS.map((o) => {
+              <>
+                <h3 className="studio-group-title">Objets <small>visibles dans la case</small></h3>
+                <CastPicker
+                  items={OBJECTS}
+                  selected={selected.objects ?? []}
+                  mode="cover"
+                  onToggle={(id, on) => {
                     const current = selected.objects ?? [];
-                    const on = current.includes(o.id);
-                    return (
-                      <button key={o.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ objects: on ? current.filter((id) => id !== o.id) : [...current, o.id] })} aria-pressed={on} title={on ? `${o.name} est dans la case` : `Ajouter ${o.name} à la case`}>
-                        <Avatar image={o.image} name={o.name} mode="cover" />
-                        <span>{o.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                    patch({ objects: on ? [...current, id] : current.filter((o) => o !== id) });
+                  }}
+                />
+              </>
             ) : null}
-            <div>
-              <span className="webtoon-field-label">Lieu (sa fiche est jointe)</span>
-              <div className="studio-chips">
-                {LOCATIONS.map((l) => {
-                  const on = selected.location === l.id;
-                  return (
-                    <button key={l.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ location: l.id })} aria-pressed={on} title={l.name}>
-                      <Avatar image={l.image} name={l.name} mode="cover" />
-                      <span>{l.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <input className="mt-1" placeholder="Autre lieu : un identifiant en minuscules avec des tirets, décrit dans la case" value={LOCATIONS.some((l) => l.id === selected.location) ? "" : selected.location} onChange={(e) => patch({ location: e.target.value.trim().toLowerCase() })} />
-            </div>
+            <h3 className="studio-group-title">Lieu</h3>
+            <CastPicker items={LOCATIONS} selected={[selected.location]} mode="cover" onToggle={(id) => patch({ location: id })} />
+            <input placeholder="Autre lieu : un identifiant en minuscules avec des tirets, décrit dans la case" value={LOCATIONS.some((l) => l.id === selected.location) ? "" : selected.location} onChange={(e) => patch({ location: e.target.value.trim().toLowerCase() })} />
+            <h3 className="studio-group-title">Caméra</h3>
             <div className="grid grid-cols-2 gap-3">
               <label className="webtoon-field"><span>Type de plan</span>
                 <select value={selected.shot_type} onChange={(e) => patch({ shot_type: e.target.value as ShotType })}>{SHOT_TYPES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
@@ -1615,9 +1589,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <select value={selected.camera_angle} onChange={(e) => patch({ camera_angle: e.target.value as CameraAngle })}>{ANGLES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
               </label>
             </div>
+            <h3 className="studio-group-title">Images du film</h3>
             <div>
               <div className="studio-section-head">
-                <span className="webtoon-field-label">Images du film jointes</span>
+                <span className="webtoon-field-label">Jointes à cette case</span>
                 <select value="" onChange={(e) => { if (e.target.value) setPanels((c) => toggleFrame(c, selected.panel_id, e.target.value)); }}>
                   <option value="">+ Joindre une image du film…</option>
                   {FILM_FRAMES.filter((f) => !frames.includes(f.src)).map((f) => <option key={f.src} value={f.src}>{f.label}</option>)}
