@@ -43,7 +43,7 @@ type RouteContext = { params: Promise<{ slug: string }> };
 const MAX_REFERENCES = 8;
 const IMAGE_SRC = /^(\/[\w./%-]+\.(jpe?g|png|webp)|https:\/\/firebasestorage\.googleapis\.com\/[^\s]+)$/i;
 
-type SheetCheck = { has_text?: boolean; text_seen?: string; background_plain_white?: boolean; views?: number; extras?: boolean; problems?: string };
+type SheetCheck = { has_text?: boolean; text_seen?: string; background_plain_white?: boolean; views?: number; extras?: boolean; figures?: boolean; figures_seen?: string; problems?: string };
 
 /** A small JPEG of the sheet for the check: the model reads it as well, and the request stays light. */
 async function preview(base64: string): Promise<string> {
@@ -57,7 +57,7 @@ async function checkSheet(base64: string, location: boolean, onCost: (usd: numbe
       system:
         'You check a reference sheet drawn for a webtoon. Look at the whole image carefully, corners included. Answer with JSON only: {"has_text": true|false, "text_seen": "<the words, letters, numbers or labels you see, empty if none>", "background_plain_white": true|false, "problems": "<one short sentence, empty if none>"}. has_text is true for any letter, word, number, label (FRONT, SIDE...), caption, signature, logo or colour swatch. background_plain_white is true when everything around the drawings is plain white, with no floor, shadow, gradient, texture or frame.' +
         (location
-          ? " This sheet is a location illustration: its background is the place itself, so answer background_plain_white true."
+          ? ' This sheet is a location illustration: its background is the place itself, so answer background_plain_white true. Also add "figures": true|false and "figures_seen": "<what, empty if none>": figures is true for ANY person, character, figure, silhouette (even tiny or far away), creature, animal or monster in the image; statues, carvings and paintings that are part of the place do not count.'
           : ' Also add "views": <how many whole views of the subject the sheet shows> and "extras": true|false, true when anything else is drawn besides those whole views (a portrait, a close-up, a detail inset, an expression, a second figure).'),
       user: [
         { type: "text", text: "The sheet:" },
@@ -159,7 +159,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const roles = references.map((r, i) => {
     const role = r.tags.includes("webtonize")
       ? "THE SUBJECT TO WEBTONIZE: redraw exactly this subject (every part of its design, its clothes or materials, its colours, its proportions, its distinctive details) in the webtoon style described above; change only the rendering, never the design"
-      : r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.id === asset.id ? "the current image of this place: keep its design, not its viewpoint" : "an earlier sheet: copy the design only, never its layout, its extra views or its portraits";
+      : r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? (kind === "location" ? "the place as the finished film shows it: copy the place only; the characters and creatures in the frame are NOT to be drawn" : "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame") : r.id === asset.id ? "the current image of this place: keep the design of the place, not its viewpoint, and never the characters or creatures it shows" : "an earlier sheet: copy the design only, never its layout, its extra views or its portraits";
     return `image ${i + 1} is ${r.name} (${role})`;
   });
   const promptFor = (fix?: string) => [base, roles.length ? `REFERENCE IMAGES, in order: ${roles.join("; ")}.` : "", fix ?? ""].filter(Boolean).join("\n\n");
@@ -188,18 +188,34 @@ export async function POST(request: Request, { params }: RouteContext) {
     let check = await checkSheet(image.base64, kind === "location", meter);
     let attempts = 1;
     const wrongViews = (c: SheetCheck) => kind !== "location" && ((typeof c.views === "number" && c.views !== 3) || c.extras === true);
-    const failed = (c: SheetCheck) => c.has_text === true || (kind !== "location" && c.background_plain_white === false) || wrongViews(c);
+    // A location never shows anybody: a figure, even tiny, is a fault like text.
+    const peopled = (c: SheetCheck) => kind === "location" && c.figures === true;
+    const failed = (c: SheetCheck) => c.has_text === true || (kind !== "location" && c.background_plain_white === false) || wrongViews(c) || peopled(c);
     if (failed(check)) {
       const fault = [
         check.has_text ? `it contained text (${check.text_seen || "labels"})` : "",
         check.background_plain_white === false ? "its background was not plain white" : "",
         wrongViews(check) ? `it showed ${check.views ?? "the wrong number of"} views${check.extras ? " and extra drawings" : ""} instead of exactly three (front, side, back)` : "",
+        peopled(check) ? `it showed somebody in the place (${check.figures_seen || "a figure"})` : "",
         check.problems ?? "",
       ].filter(Boolean).join("; ");
-      const second = await draw(promptFor(`CORRECTION: the previous attempt was rejected because ${fault}. This time: absolutely no text or label anywhere${kind !== "location" ? ", nothing but plain white around the drawings, and exactly three whole views (front, side in profile, back) with nothing else" : ""}.`));
+      const correction = (why: string) =>
+        `CORRECTION: the previous attempt was rejected because ${why}. This time: absolutely no text or label anywhere${kind !== "location" ? ", nothing but plain white around the drawings, and exactly three whole views (front, side in profile, back) with nothing else" : ", and NOBODY in the place: no character, no figure, no silhouette, no creature, no animal, only the empty place"}.`;
+      let second = await draw(promptFor(correction(fault)));
       meter(second.cost_usd);
-      const secondCheck = await checkSheet(second.base64, kind === "location", meter);
+      let secondCheck = await checkSheet(second.base64, kind === "location", meter);
       attempts = 2;
+      // A place that still shows somebody gets one more try: a location never has a character in it.
+      if (peopled(secondCheck)) {
+        const third = await draw(promptFor(correction(`it showed somebody in the place twice (${secondCheck.figures_seen || "a figure"})`)));
+        meter(third.cost_usd);
+        const thirdCheck = await checkSheet(third.base64, true, meter);
+        attempts = 3;
+        if (!peopled(thirdCheck)) {
+          second = third;
+          secondCheck = thirdCheck;
+        }
+      }
       if (!failed(secondCheck) || failed(check)) {
         image = second;
         check = secondCheck;
