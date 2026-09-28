@@ -386,6 +386,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const select = (id: string | null) => {
     setSelectedId(id);
+    // The panel last clicked is where a Shift+click range starts, whichever way it goes (up or down the list).
+    if (id) lastChecked.current = id;
   };
 
   const step = (delta: number) => {
@@ -1122,7 +1124,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const toggleChecked = (id: string, shiftKey: boolean) => {
     // Read the anchor now: the state updater runs later, once the anchor has moved.
-    const anchor = shiftKey ? lastChecked.current : null;
+    const anchor = shiftKey ? lastChecked.current ?? selectedId : null;
     lastChecked.current = id;
     setChecked((current) => {
       const next = new Set(current);
