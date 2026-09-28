@@ -23,6 +23,8 @@ type PanelCanvasProps = {
   selected?: boolean;
   /** A click on the panel (not on a handle) selects it. */
   onSelect?: () => void;
+  /** Set while the panel's image is being drawn or retouched: a loader covers it, with this word. */
+  busyLabel?: string;
 };
 
 const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black: "#020409", abyss: "#020817" };
@@ -35,7 +37,7 @@ const round1 = (value: number) => Math.round(value * 10) / 10;
  * handle on every movable thing: bubble, tail tip, SFX, caption, focal point.
  * Drag a handle to move it; drag the bottom edge to change the panel height.
  */
-export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect }: PanelCanvasProps) {
+export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect, busyLabel }: PanelCanvasProps) {
   const surface = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
 
@@ -115,6 +117,12 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
           </div>
         )}
         <PanelLettering dialogue={panel.dialogue} caption={panel.caption} sfx={panel.sfx} locale={locale} />
+        {busyLabel ? (
+          <div className={`studio-panel-busy ${busyLabel === "En attente" ? "is-soft" : ""}`} role="status">
+            {busyLabel === "En attente" ? null : <span className="studio-spinner studio-spinner-lg" aria-hidden />}
+            <span>{busyLabel}</span>
+          </div>
+        ) : null}
 
         <div className="studio-handles" aria-hidden="true">
           {panel.dialogue.map((line, index) => (
@@ -170,14 +178,17 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
       </div>
       <button
         type="button"
-        className="studio-resize"
-        title="Glisser pour changer la hauteur de la case"
+        className={`studio-resize ${drag?.kind === "resize" ? "is-active" : ""}`}
+        title="Hauteur de la case : glisse vers le bas pour l'allonger, vers le haut pour la raccourcir. L'image est recadrée, jamais étirée."
         onPointerDown={(event) => {
           const width = surface.current?.getBoundingClientRect().width ?? WEBTOON_WIDTH;
           start({ kind: "resize", startY: event.clientY, startHeight: panel.panel_height, width })(event);
         }}
       >
-        <span>{panel.panel_height} px</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5" />
+        </svg>
+        <span>Hauteur · {panel.panel_height} px</span>
       </button>
     </div>
   );
