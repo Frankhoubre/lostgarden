@@ -12,6 +12,7 @@ import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioLocations } from "@/components/studio/StudioLocations";
 import { StudioNotifications } from "@/components/studio/StudioNotifications";
+import { ProgressBar } from "@/components/studio/ProgressBar";
 import { StudioObjects } from "@/components/studio/StudioObjects";
 import { StudioProjectText } from "@/components/studio/StudioProjectText";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
@@ -39,7 +40,7 @@ type StripCost = { total_usd: number; images_usd?: number; sheets_usd?: number; 
 const usd = (value: number | undefined) => `${(value ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
 
 /** What the editor reports about its running job, shown in the bar from every tab. */
-export type JobSummary = { label: string; done: number; total: number; deadline: number } | null;
+export type JobSummary = { label: string; done: number; total: number; deadline: number; started?: number } | null;
 
 type Tab = "webtoon" | "scenario" | "personnages" | "objets" | "decors" | "film";
 
@@ -110,12 +111,6 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   /** Language of the lettering shown in the editor and the strip preview. */
   const [previewLocale, setPreviewLocale] = useState<Locale>(locale);
   const [job, setJob] = useState<JobSummary>(null);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!job) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [job]);
 
   const [working, setWorking] = useState<"save" | "publish" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -187,9 +182,9 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
 
   /** A task that shows as running in the center until the editor ends it. */
   const track = useCallback<TrackTask>(
-    (title, panelId) => {
+    (title, panelId, estimateMs) => {
       const id = `t${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      setNotifications((current) => [{ id, title, status: "running" as const, panel_id: panelId, started_at: Date.now(), read: false }, ...current].slice(0, NOTIFICATION_LIMIT));
+      setNotifications((current) => [{ id, title, status: "running" as const, panel_id: panelId, started_at: Date.now(), estimate_ms: estimateMs, read: false }, ...current].slice(0, NOTIFICATION_LIMIT));
       let ended = false;
       const end = (status: "done" | "error", detail?: string, thumb?: string) => {
         if (ended) return;
@@ -474,9 +469,11 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
           </div>
           {job ? (
             <button type="button" className="studio-jobpill" onClick={() => setTab("webtoon")} title="Revenir à l'éditeur">
-              <span className="studio-spinner" aria-hidden />
-              {job.label}
-              {job.deadline > now ? ` · ≈ ${Math.max(1, Math.round((job.deadline - now) / 60000))} min` : ""}
+              <span className="studio-jobpill-row">
+                <span className="studio-spinner" aria-hidden />
+                <span className="studio-jobpill-label">{job.label}</span>
+              </span>
+              <ProgressBar key={job.started ?? 0} startedAt={job.started ?? job.deadline - 60_000} estimateMs={Math.max(5_000, job.deadline - (job.started ?? job.deadline - 60_000))} compact />
             </button>
           ) : null}
           <span className={`studio-status ${dirty ? "is-dirty" : ""}`}>{status}</span>

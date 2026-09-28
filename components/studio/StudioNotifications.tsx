@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { StudioNotification } from "@/lib/webtoon/notifications";
 
 type StudioNotificationsProps = {
@@ -112,9 +113,13 @@ export function StudioNotifications({ items, onOpenPanel, onMarkRead, onClear }:
                     <span className="studio-notif-text">
                       <b>{entry.title}</b>
                       {entry.detail ? <span>{entry.detail}</span> : null}
-                      <small>
-                        {entry.status === "running" ? `en cours depuis ${duration(entry, now)}` : `${ago(entry.ended_at ?? entry.started_at, now)}${entry.ended_at && entry.status !== "info" ? ` · ${duration(entry, now)}` : ""}`}
-                      </small>
+                      {entry.status === "running" && entry.estimate_ms ? (
+                        <ProgressBar startedAt={entry.started_at} estimateMs={entry.estimate_ms} compact />
+                      ) : (
+                        <small>
+                          {entry.status === "running" ? `en cours depuis ${duration(entry, now)}` : `${ago(entry.ended_at ?? entry.started_at, now)}${entry.ended_at && entry.status !== "info" ? ` · ${duration(entry, now)}` : ""}`}
+                        </small>
+                      )}
                     </span>
                     {entry.thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element

@@ -3,7 +3,7 @@
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { frameClass, frameStyle } from "@/lib/webtoon/frame";
+import { frameClass, frameStyle, imageStyle } from "@/lib/webtoon/frame";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { WEBTOON_WIDTH, type PanelBackground, type WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -51,7 +51,6 @@ export function WebtoonReader({
         const previous = index > 0 ? panels[index - 1] : null;
         const interactive = Boolean(onSelect);
         const selected = selectedId === panel.panel_id;
-        const focal = `${panel.focal_point.x}% ${panel.focal_point.y}%`;
         const newBeat = previous !== null && previous.beat_id !== panel.beat_id;
         const worldChange = previous !== null && previous.background !== panel.background;
         // The gap before a panel: a soft fall when the world changes, a small
@@ -100,7 +99,7 @@ export function WebtoonReader({
                   height={panel.image.height || panel.panel_height}
                   loading={index < 2 ? "eager" : "lazy"}
                   decoding="async"
-                  style={{ objectPosition: focal }}
+                  style={imageStyle(panel)}
                   className={panel.image.status === "stale" ? "webtoon-img-stale" : ""}
                 />
               )}

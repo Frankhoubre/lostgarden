@@ -7,7 +7,7 @@ type ProgressBarProps = {
   startedAt: number;
   estimateMs: number;
   label?: string;
-  /** Several items of one job: shown as "3 / 12" and folded into the bar. */
+  /** Several items of one job: shown as "3 / 12" next to the time left. */
   done?: number;
   total?: number;
   /** Small variant, for a thumbnail or a notification. */
@@ -47,19 +47,19 @@ export function ProgressBar({ startedAt, estimateMs, label, done, total, compact
   }, []);
   const elapsed = Math.max(0, now - startedAt);
   const items = total && total > 1 ? { done: Math.min(done ?? 0, total), total } : null;
-  // A job of several items: the finished ones count in full, the running one along its estimate.
-  const fraction = items ? Math.min(0.99, (items.done + progressAt(elapsed - (items.done * estimateMs) / items.total, estimateMs / items.total)) / items.total) : progressAt(elapsed, estimateMs);
+  // The estimate of a job of several items already counts the items left: the bar follows the time.
+  const fraction = progressAt(elapsed, estimateMs);
   const left = estimateMs - elapsed;
   const pct = Math.round(Math.min(0.99, Math.max(0.02, fraction)) * 100);
   return (
-    <div className={`studio-progress ${compact ? "is-compact" : ""} ${className}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
-      <div className="studio-progress-track">
-        <div className="studio-progress-fill" style={{ width: `${pct}%` }} />
+    <div className={`studio-pbar ${compact ? "is-compact" : ""} ${className}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
+      <div className="studio-pbar-track">
+        <div className="studio-pbar-fill" style={{ width: `${pct}%` }} />
       </div>
-      <div className="studio-progress-meta">
-        {label ? <span className="studio-progress-label">{label}</span> : null}
+      <div className="studio-pbar-meta">
+        {label ? <span className="studio-pbar-label">{label}</span> : null}
         {items ? <span>{items.done} / {items.total}</span> : null}
-        <span className="studio-progress-time">{left > 1500 ? `≈ ${formatLeft(left)}` : "presque fini…"}</span>
+        <span className="studio-pbar-time">{left > 1500 ? `≈ ${formatLeft(left)}` : "presque fini…"}</span>
       </div>
     </div>
   );
