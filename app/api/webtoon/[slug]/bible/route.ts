@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { slugId, type BibleCandidate, type BibleStep } from "@/lib/webtoon/bible";
 import { recordCost } from "@/lib/webtoon/cost-server";
 import { getProjectContext, imageAsDataUrl } from "@/lib/webtoon/project-server";
@@ -15,7 +16,9 @@ import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
  * duplicates, a design lock written from the images and the seconds where
  * each thing is seen best. Without a film: the screenplay is read instead.
  * What the bible already holds (`known`) is given so it is not proposed
- * again, and so an object is told apart from a character.
+ * again, and so an object is told apart from a character. What the author's
+ * other projects hold (`previous`, with their sheets) is given too: an entry
+ * that is one of them comes back with `same_as`, so its sheet is reused.
  */
 
 export const maxDuration = 300;
@@ -36,6 +39,13 @@ const WHAT: Record<BibleStep, string> = {
 
 type Seen = { name: string; kind?: string; looks?: string; seconds?: number[] };
 
+/** A sheet of an earlier project, small: fourteen of them go with the merge call. */
+async function smallSheet(src: string): Promise<string> {
+  const data = await imageAsDataUrl(src);
+  const bytes = await sharp(Buffer.from(data.split(",")[1], "base64")).resize({ width: 512, withoutEnlargement: true }).flatten({ background: "#ffffff" }).jpeg({ quality: 75 }).toBuffer();
+  return `data:image/jpeg;base64,${bytes.toString("base64")}`;
+}
+
 function sample<T>(list: readonly T[], max: number): T[] {
   if (list.length <= max) return [...list];
   const step = list.length / max;
@@ -46,13 +56,25 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { slug } = await params;
   const identity = await verifyStudioRequest(request);
   if (!identity) return Response.json({ error: "studio access required" }, { status: 401 });
+  if (!process.env.AI_GATEWAY_API_KEY) return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
+  const body = (await request.json().catch(() => ({}))) as {
+    step?: BibleStep;
+    known?: { id: string; name: string; kind: string; must_keep?: string }[];
+    previous?: { id: string; name: string; kind: string; must_keep?: string; project?: string; image?: string }[];
+    /** "Rapprocher": candidates already detected, matched against the earlier projects only (no new detection). */
+    match?: { id: string; name: string; kind: string; must_keep?: string; description?: string; frames?: string[] }[];
+  };
+  if (Array.isArray(body.match)) return matchCandidates(body, slug, identity.idToken);
   const context = await getProjectContext(slug, identity);
   if (!context) return Response.json({ error: "unknown webtoon project" }, { status: 404 });
-  if (!process.env.AI_GATEWAY_API_KEY) return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
-
-  const body = (await request.json().catch(() => ({}))) as { step?: BibleStep; known?: { id: string; name: string; kind: string; must_keep?: string }[] };
   const step: BibleStep = body.step === "objects" || body.step === "locations" ? body.step : "characters";
   const known = (Array.isArray(body.known) ? body.known : []).slice(0, 60).map((k) => ({ id: k.id, name: k.name, kind: k.kind, looks: String(k.must_keep ?? "").slice(0, 160) }));
+  const stepKinds = step === "characters" ? ["character"] : step === "objects" ? ["object"] : ["location"];
+  const previous = (Array.isArray(body.previous) ? body.previous : [])
+    .filter((p) => p && typeof p.id === "string" && stepKinds.includes(String(p.kind)))
+    .slice(0, 40)
+    .map((p) => ({ id: p.id, name: String(p.name ?? ""), project: String(p.project ?? ""), looks: String(p.must_keep ?? "").slice(0, 400), image: typeof p.image === "string" ? p.image : "" }));
+  const previousIds = new Set(previous.map((p) => p.id));
   const synopsis = context.project?.synopsis?.trim() ?? "";
   let usd = 0;
   const onCost = (value: number) => {
@@ -110,17 +132,44 @@ export async function POST(request: Request, { params }: RouteContext) {
           : "There is no film: read the screenplay and the synopsis.",
         "For each entry write: `id` (english, lower case with hyphens, short), `name` (a short name to show the author, in French when the thing has no proper name in the story, the proper name otherwise), `kind`, `must_keep` (a precise DESIGN LOCK in English that an illustrator can draw from without the images: overall shape, proportions, colours, materials, clothes, distinctive details; for a creature, a machine or a place, its size against a person), `description` (what it is in the story, one short sentence in French), `seconds` (all the seconds where it was seen), `best_seconds` (two or three seconds where it is seen best: large, clear, its whole shape), `importance` (main, secondary or minor), `scale` (for a creature, a machine or a structure: its size against a person, in English; else empty).",
         known.length ? `Already in the bible, never propose them again: ${JSON.stringify(known)}.` : "",
+        previous.length
+          ? "EARLIER PROJECTS of the same author (other episodes, other webtoons) already have these entries, with their sheets shown as images. When an entry you write is the same being, object or place as one of them (the same design, even described with other words: a knight with a lantern-shaped helmet IS the earlier knight with a lantern-shaped helmet), set `same_as` to that earlier entry's id and use its name. Only for a real match of design; never force one."
+          : "",
         `Only entries of this step: ${step === "characters" ? "`kind` character or creature" : step === "objects" ? "`kind` object" : "`kind` location"}; leave out everything else, it has its own step. Order the entries by importance, the main ones first. Answer with JSON only: {"candidates": [...]}. Escape double quotes inside strings.`,
       ]
         .filter(Boolean)
         .join("\n\n"),
       user: [
-        synopsis ? `SYNOPSIS:\n${synopsis}` : "",
-        seen.length ? `WHAT THE READERS SAW:\n${JSON.stringify(seen.map(({ group, ...s }) => ({ ...s, group })), null, 1)}` : "",
-        !seen.length && screenplay ? `SCREENPLAY:\n${screenplay}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
+        {
+          type: "text" as const,
+          text: [
+            synopsis ? `SYNOPSIS:\n${synopsis}` : "",
+            seen.length ? `WHAT THE READERS SAW:\n${JSON.stringify(seen.map(({ group, ...s }) => ({ ...s, group })), null, 1)}` : "",
+            !seen.length && screenplay ? `SCREENPLAY:\n${screenplay}` : "",
+            previous.length ? `EARLIER PROJECTS' ENTRIES:\n${JSON.stringify(previous.map(({ image, ...p }) => ({ ...p, has_sheet: Boolean(image) })), null, 1)}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+        },
+        // Their sheets, so a match is made on the design and not on the words.
+        ...(
+          await Promise.all(
+            previous
+              .filter((p) => p.image)
+              .slice(0, 14)
+              .map(async (p): Promise<UserPart[]> => {
+                try {
+                  return [
+                    { type: "text", text: `Sheet of the earlier entry ${p.id} (${p.name}, from ${p.project}):` },
+                    { type: "image_url", image_url: { url: await smallSheet(p.image) } },
+                  ];
+                } catch {
+                  return [];
+                }
+              }),
+          )
+        ).flat(),
+      ],
       maxTokens: 12000,
       reasoning: "none",
       temperature: 0,
@@ -156,6 +205,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         best_seconds: best.length ? best : seconds.slice(0, 3),
         importance: raw.importance === "main" || raw.importance === "minor" ? raw.importance : "secondary",
         ...(typeof raw.scale === "string" && raw.scale.trim() ? { scale: raw.scale.trim() } : {}),
+        ...(typeof raw.same_as === "string" && previousIds.has(raw.same_as) ? { same_as: raw.same_as } : {}),
       });
     }
     void recordCost({ idToken: identity.idToken, slug, usd, kind: "writer" });
@@ -163,5 +213,65 @@ export async function POST(request: Request, { params }: RouteContext) {
   } catch (error) {
     void recordCost({ idToken: identity.idToken, slug, usd, kind: "writer" });
     return Response.json({ error: error instanceof Error ? error.message : "detection failed" }, { status: 502 });
+  }
+}
+
+
+/**
+ * "Rapprocher": which of the candidates already detected are someone or something of the author's
+ * earlier projects. One call with the candidates (their design lock and a frame of each) and the
+ * earlier entries (their sheet); answers { matches: { <candidate id>: <earlier asset id> } }.
+ */
+async function matchCandidates(
+  body: { match?: { id: string; name: string; kind: string; must_keep?: string; description?: string; frames?: string[] }[]; previous?: { id: string; name: string; kind: string; must_keep?: string; project?: string; image?: string }[] },
+  slug: string,
+  idToken: string | null | undefined,
+) {
+  const candidates = (body.match ?? []).slice(0, 40);
+  const previous = (Array.isArray(body.previous) ? body.previous : []).slice(0, 40);
+  if (!candidates.length || !previous.length) return Response.json({ matches: {} });
+  const ids = new Set(previous.map((p) => p.id));
+  let usd = 0;
+  try {
+    const parts: UserPart[] = [
+      {
+        type: "text",
+        text: `NEW PROJECT'S CANDIDATES:\n${JSON.stringify(candidates.map((c) => ({ id: c.id, name: c.name, kind: c.kind, looks: String(c.must_keep ?? "").slice(0, 400), story: c.description ?? "" })), null, 1)}\n\nEARLIER PROJECTS' ENTRIES:\n${JSON.stringify(previous.map((p) => ({ id: p.id, name: p.name, kind: p.kind, project: p.project, looks: String(p.must_keep ?? "").slice(0, 400) })), null, 1)}`,
+      },
+    ];
+    for (const c of candidates) {
+      const frame = (c.frames ?? []).find((f) => typeof f === "string");
+      if (!frame) continue;
+      try {
+        parts.push({ type: "text", text: `A frame of the new film showing candidate ${c.id} (${c.name}):` }, { type: "image_url", image_url: { url: await smallSheet(frame) } });
+      } catch {
+        // No frame: the words decide.
+      }
+    }
+    for (const p of previous.filter((x) => x.image).slice(0, 16)) {
+      try {
+        parts.push({ type: "text", text: `Sheet of the earlier entry ${p.id} (${p.name}):` }, { type: "image_url", image_url: { url: await smallSheet(p.image!) } });
+      } catch {
+        // No sheet: the words decide.
+      }
+    }
+    const answer = await completeJson<{ matches?: { candidate?: string; earlier?: string }[] }>({
+      system:
+        'You match the characters, objects or places detected in a new film of an author with the ones of the author\'s earlier projects (other episodes of the same series, other webtoons). A candidate matches an earlier entry when it is the same being, object or place: the same design, even described with other words or seen from another angle (a knight with a lantern-shaped helmet is the earlier knight with a lantern-shaped helmet). Never match two different beings that merely look alike in kind (two different knights). Answer with JSON only: {"matches": [{"candidate": "<candidate id>", "earlier": "<earlier entry id>"}]}, only the real matches.',
+      user: [...parts, { type: "text", text: "The matches, as JSON." }],
+      maxTokens: 3000,
+      reasoning: "none",
+      temperature: 0,
+      onCost: (value) => {
+        usd += value;
+      },
+    });
+    const matches: Record<string, string> = {};
+    for (const m of answer.matches ?? []) if (m?.candidate && m.earlier && ids.has(m.earlier) && candidates.some((c) => c.id === m.candidate)) matches[m.candidate] = m.earlier;
+    void recordCost({ idToken: idToken ?? null, slug, usd, kind: "writer" });
+    return Response.json({ matches, cost_usd: usd });
+  } catch (error) {
+    void recordCost({ idToken: idToken ?? null, slug, usd, kind: "writer" });
+    return Response.json({ error: error instanceof Error ? error.message : "rapprochement impossible" }, { status: 502 });
   }
 }

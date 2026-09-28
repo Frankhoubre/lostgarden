@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { assetStep, BIBLE_STEPS, candidateAsset, slugId, type BibleCandidate, type BibleStep } from "@/lib/webtoon/bible";
 import { removeAsset, upsertAsset } from "@/lib/webtoon/library";
 import { frameLabel, type StudioProject } from "@/lib/webtoon/project";
 import { uploadReference } from "@/lib/webtoon/projects-client";
+import { importedAsset, loadPreviousCast, type PreviousEntry } from "@/lib/webtoon/cross-project";
 import { libraryWith } from "@/lib/webtoon/references";
 import { sheetKind, sheetPrompt, SHEET_KIND_LABEL } from "@/lib/webtoon/sheet-prompt";
 import { ProgressBar } from "@/components/studio/ProgressBar";
@@ -56,6 +57,25 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
   const [picked, setPicked] = useState<Record<string, string[]>>({});
   const [manual, setManual] = useState<{ name: string; must_keep: string } | null>(null);
   const uploadTarget = useRef<string | null>(null);
+  /** Who and what the author's other projects hold: recognised by the detection, or added by hand. */
+  const [previousCast, setPreviousCast] = useState<PreviousEntry[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    loadPreviousCast(project.id)
+      .then((list) => {
+        if (!cancelled) setPreviousCast(list);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [user, project.id]);
+  const stepKind = step === "characters" ? "character" : step === "objects" ? "object" : "location";
+  const previousForStep = previousCast.filter((p) => p.kind === stepKind);
+  const inBible = new Set(all.map((a) => a.id));
+  const previousAvailable = previousForStep.filter((p) => !inBible.has(p.asset.id));
+  const [showPrevious, setShowPrevious] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const frameOf = (seconds: number) => bySecond.get(seconds);
@@ -76,13 +96,18 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
       const response = await fetch(`/api/webtoon/${project.id}/bible`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ step, known }),
+        body: JSON.stringify({
+          step,
+          known,
+          previous: previousAvailable.map((p) => ({ id: p.asset.id, name: p.name, kind: p.kind, must_keep: p.asset.must_keep, project: p.project_title, image: p.asset.image || undefined })),
+        }),
       });
       const payload = (await response.json().catch(() => ({}))) as { candidates?: BibleCandidate[]; error?: string; note?: string };
       if (!response.ok) return notify(payload.error ?? `Détection impossible (${response.status})`);
       const found = payload.candidates ?? [];
       changeCandidates((list) => [...list, ...found.filter((c) => !list.some((x) => x.id === c.id))]);
-      notify(found.length ? `${found.length} proposition${found.length > 1 ? "s" : ""} à valider` : (payload.note ?? `Aucun ${meta.noun} de plus trouvé`));
+      const known2 = found.filter((c) => c.same_as).length;
+      notify(found.length ? `${found.length} proposition${found.length > 1 ? "s" : ""} à valider${known2 ? `, dont ${known2} déjà dans vos projets précédents` : ""}` : (payload.note ?? `Aucun ${meta.noun} de plus trouvé`));
     } catch (error) {
       notify(error instanceof Error ? error.message : "Détection impossible");
     } finally {
@@ -96,6 +121,47 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
     changeCandidates((list) => list.filter((c) => c.id !== candidate.id));
   };
   const reject = (candidate: BibleCandidate) => changeCandidates((list) => list.filter((c) => c.id !== candidate.id));
+  const matchOf = (candidate: BibleCandidate) => (candidate.same_as ? previousCast.find((p) => p.asset.id === candidate.same_as) : undefined);
+  /** The candidate is someone of an earlier project: its sheet, id and design lock come along, the frames of this film are added. */
+  const takeOver = (candidate: BibleCandidate, entry: PreviousEntry) => {
+    const sources = [...new Set([...(entry.asset.sources ?? []), ...chosen(candidate)])].slice(-MAX_SOURCES);
+    updateLibrary((current) => upsertAsset(current, importedAsset(entry, { sources, seen_seconds: candidate.seconds })));
+    changeCandidates((list) => list.filter((c) => c.id !== candidate.id));
+    notify(`${entry.name} repris de « ${entry.project_title} », avec sa fiche`);
+  };
+  const [matching, setMatching] = useState(false);
+  /** Candidates detected before the earlier projects were known: which of them are someone of those projects. */
+  const matchWithPrevious = async () => {
+    const open = candidates.filter((c) => !c.same_as);
+    if (!open.length || !previousAvailable.length) return;
+    setMatching(true);
+    try {
+      const response = await fetch(`/api/webtoon/${project.id}/bible`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+        body: JSON.stringify({
+          step,
+          match: open.map((c) => ({ id: c.id, name: c.name, kind: c.kind, must_keep: c.must_keep, description: c.description, frames: chosen(c).slice(0, 1) })),
+          previous: previousAvailable.map((p) => ({ id: p.asset.id, name: p.name, kind: p.kind, must_keep: p.asset.must_keep, project: p.project_title, image: p.asset.image || undefined })),
+        }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { matches?: Record<string, string>; error?: string };
+      if (!response.ok) return notify(payload.error ?? `Rapprochement impossible (${response.status})`);
+      const matches = payload.matches ?? {};
+      changeCandidates((list) => list.map((c) => (matches[c.id] ? { ...c, same_as: matches[c.id] } : c)));
+      const n = Object.keys(matches).length;
+      notify(n ? `${n} déjà connu${n > 1 ? "s" : ""} dans vos projets précédents : « Reprendre sa fiche »` : "Aucun de ces candidats n'est dans vos projets précédents");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Rapprochement impossible");
+    } finally {
+      setMatching(false);
+    }
+  };
+
+  const addPrevious = (entry: PreviousEntry) => {
+    updateLibrary((current) => upsertAsset(current, importedAsset(entry)));
+    notify(`${entry.name} ajouté depuis « ${entry.project_title} », avec sa fiche`);
+  };
 
   const addManual = () => {
     if (!manual?.name.trim()) return;
@@ -215,14 +281,56 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="font-display text-base text-lily">À valider · {candidates.length}</h3>
-            <button type="button" className="webtoon-mini" onClick={() => candidates.forEach(keep)}>Tout garder</button>
+            {previousAvailable.length && candidates.some((c) => !c.same_as) ? (
+              <button type="button" className="webtoon-mini" onClick={() => void matchWithPrevious()} disabled={matching} title="Cherche parmi ces candidats ceux qui sont déjà dans vos projets précédents, pour reprendre leur fiche">
+                {matching ? <><span className="studio-spinner" aria-hidden /> Rapprochement…</> : "Rapprocher avec vos projets précédents"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="webtoon-mini"
+              onClick={() =>
+                candidates.forEach((c) => {
+                  const match = matchOf(c);
+                  if (match) takeOver(c, match);
+                  else keep(c);
+                })
+              }
+              title="Garde tout ; ce qui est déjà dans un projet précédent reprend sa fiche"
+            >
+              Tout garder
+            </button>
           </div>
           <div className="studio-bible-grid">
             {candidates.map((c) => {
               const sel = chosen(c);
               const offer = [...new Set([...c.best_seconds, ...c.seconds])].map((s) => ({ s, src: frameOf(s) })).filter((f): f is { s: number; src: string } => Boolean(f.src)).slice(0, 10);
               return (
-                <article key={c.id} className={`studio-card studio-bible-card is-${c.importance}`}>
+                <article key={c.id} className={`studio-card studio-bible-card is-${c.importance} ${matchOf(c) ? "is-known" : ""}`}>
+                  {(() => {
+                    const match = matchOf(c);
+                    if (!match) return null;
+                    return (
+                      <div className="studio-bible-known">
+                        {match.asset.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={match.asset.image} alt="" loading="lazy" />
+                        ) : null}
+                        <div>
+                          <b>Déjà connu : {match.name}</b>
+                          <span>dans « {match.project_title} »{match.asset.image ? ", avec sa fiche" : ""}</span>
+                          <div className="flex flex-wrap gap-2">
+                            <button type="button" className="webtoon-mini studio-primary" onClick={() => takeOver(c, match)} title="Reprend l'identifiant, le verrou de design et la fiche du projet précédent ; les images de ce film s'ajoutent à ses références">
+                              Reprendre sa fiche
+                            </button>
+                            <button type="button" className="webtoon-mini" onClick={() => updateCandidate(c.id, { same_as: undefined })} title="Ce n'est pas le même : en faire un nouveau">
+                              Ce n&apos;est pas lui
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="studio-bible-frames">
                     {offer.map((f) => (
                       <button
@@ -260,13 +368,45 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button type="button" className="webtoon-mini studio-primary" onClick={() => keep(c)}>Garder</button>
+                    <button type="button" className={`webtoon-mini ${matchOf(c) ? "" : "studio-primary"}`} onClick={() => keep(c)}>{matchOf(c) ? "Garder comme nouveau" : "Garder"}</button>
                     <button type="button" className="webtoon-mini" onClick={() => reject(c)}>Écarter</button>
                   </div>
                 </article>
               );
             })}
           </div>
+        </section>
+      ) : null}
+
+      {previousAvailable.length ? (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-base text-lily">Depuis vos projets précédents · {previousAvailable.length}</h3>
+            <button type="button" className="webtoon-mini" onClick={() => setShowPrevious((v) => !v)}>{showPrevious ? "Replier" : "Afficher"}</button>
+          </div>
+          {showPrevious ? (
+            <div className="studio-previous-grid">
+              {previousAvailable.map((entry) => (
+                <div key={`${entry.project_id}:${entry.asset.id}`} className="studio-previous-card">
+                  <div className="studio-previous-image">
+                    {entry.asset.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={entry.asset.image} alt={entry.name} loading="lazy" />
+                    ) : (
+                      <span>pas de fiche</span>
+                    )}
+                  </div>
+                  <b>{entry.name}</b>
+                  <small>{entry.project_title}</small>
+                  <button type="button" className="webtoon-mini" onClick={() => addPrevious(entry)} title="Ajoute cette entrée à la bible du projet, avec sa fiche et son verrou de design">
+                    Ajouter
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-ivory/55">La détection les reconnaît d&apos;elle-même dans le film ; vous pouvez aussi en ajouter un à la main.</p>
+          )}
         </section>
       ) : null}
 
