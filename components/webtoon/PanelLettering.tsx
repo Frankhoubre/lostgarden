@@ -57,39 +57,44 @@ function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
   const [border, setBorder] = useState<number | null>(null);
   const target: Anchor | undefined = line.style === "off" ? undefined : line.tail;
 
+  // Measured in the panel's own layout, never on screen: a tilted panel (frame.tilt) is rotated, and its
+  // screen box is larger than the panel, which put the tail beside the bubble instead of under it. The
+  // bubble's centre is its anchor (it is translated by -50%, -50%); its size is its layout size.
+  const ax = line.anchor.x;
+  const ay = line.anchor.y;
+  const tx = target?.x;
+  const ty = target?.y;
   useEffect(() => {
     const el = ref.current;
-    const panel = el?.closest<HTMLElement>(".webtoon-panel");
-    if (!el || !panel || !target) return;
+    const layer = el?.parentElement;
+    if (!el || !layer || tx === undefined || ty === undefined) {
+      setTail(null);
+      return;
+    }
     const measure = () => {
-      const pr = panel.getBoundingClientRect();
-      const br = el.getBoundingClientRect();
-      if (!pr.width || !br.width) return;
+      const w = layer.clientWidth;
+      const h = layer.clientHeight;
+      if (!w || !h || !el.offsetWidth) return;
       const width = parseFloat(getComputedStyle(el).borderTopWidth);
       setBorder(Number.isFinite(width) && width > 0 ? width : null);
       setTail(
         tailPath(
-          {
-            cx: br.left - pr.left + br.width / 2,
-            cy: br.top - pr.top + br.height / 2,
-            rx: br.width / 2,
-            ry: br.height / 2,
-          },
-          { x: (target.x / 100) * pr.width, y: (target.y / 100) * pr.height },
-          { w: pr.width, h: pr.height },
+          { cx: (ax / 100) * w, cy: (ay / 100) * h, rx: el.offsetWidth / 2, ry: el.offsetHeight / 2 },
+          { x: (tx / 100) * w, y: (ty / 100) * h },
+          { w, h },
         ),
       );
     };
     const frame = window.requestAnimationFrame(measure);
     const observer = new ResizeObserver(measure);
     observer.observe(el);
-    observer.observe(panel);
+    observer.observe(layer);
     document.fonts?.ready.then(measure).catch(() => undefined);
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [target, locale, line.text, line.style]);
+  }, [ax, ay, tx, ty, locale, line.text, line.style]);
 
   return (
     <div className="webtoon-lettering">
