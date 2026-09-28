@@ -5950,3 +5950,74 @@ select.studio-input {
 .studio-bible-pbar {
   margin-top: 0.5rem;
 }
+
+/* An entry of an earlier project, recognised in the new film or offered by hand. */
+.studio-bible-card.is-known {
+  border-color: rgba(94, 180, 255, 0.45);
+}
+
+.studio-bible-known {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.6rem;
+  border-radius: 10px;
+  background: var(--st-accent-bg, rgba(94, 180, 255, 0.13));
+  font-size: 0.78rem;
+}
+
+.studio-bible-known img {
+  flex: none;
+  width: 6.5rem;
+  aspect-ratio: 3 / 2;
+  border-radius: 6px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.studio-bible-known > div {
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+}
+
+.studio-bible-known span {
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-previous-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.7rem;
+}
+
+.studio-previous-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.55rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 12px;
+  background: var(--st-panel, #14161a);
+  font-size: 0.78rem;
+}
+
+.studio-previous-card small {
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-previous-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  color: #6c7280;
+  font-size: 0.72rem;
+}
+
+.studio-previous-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

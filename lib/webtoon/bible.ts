@@ -33,6 +33,11 @@ export type BibleCandidate = {
   importance: "main" | "secondary" | "minor";
   /** For a creature, a machine, a structure: its size against a person. */
   scale?: string;
+  /**
+   * The same being, object or place as an entry of an earlier project (its asset id there), as the
+   * detection recognised it: the author takes that sheet instead of drawing a new one.
+   */
+  same_as?: string;
 };
 
 /** The library asset a kept candidate becomes (its sheet is drawn afterwards). */
