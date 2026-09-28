@@ -7,9 +7,11 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { assetStep, BIBLE_STEPS, type BibleStep } from "@/lib/webtoon/bible";
 import { extractFrames, formatDuration, loadVideo } from "@/lib/webtoon/extract-frames";
+import { StudioFrames } from "@/components/studio/StudioFrames";
+import { useFilmGuide } from "@/components/studio/useFilmGuide";
 import { localePath } from "@/lib/i18n/navigation";
 import { loadLibrary, saveLibrary } from "@/lib/webtoon/library";
-import { EMPTY_PROJECT_LIBRARY, frameLabel, labelledFrames, ONBOARDING_STEPS, sparseFrames, type OnboardingStep, type ProjectFrame, type ProjectSource, type StudioProject } from "@/lib/webtoon/project";
+import { EMPTY_PROJECT_LIBRARY, labelledFrames, ONBOARDING_STEPS, type OnboardingStep, type ProjectFrame, type ProjectSource, type StudioProject } from "@/lib/webtoon/project";
 import { saveFrames, saveProject, uploadFrame } from "@/lib/webtoon/projects-client";
 import { libraryWith } from "@/lib/webtoon/references";
 import { readScreenplayFile } from "@/lib/webtoon/screenplay-file";
@@ -388,7 +390,9 @@ function FramesStep({
 
   // The time of the last progress report, not the clock of the render: the estimate stays pure.
   const eta = progress && progress.sent > 5 ? ((progress.at - progress.started) / progress.sent) * (progress.total - progress.sent) : null;
-  const preview = sparseFrames(labelledFrames(frames), frames.length > 600 ? 20 : 10);
+  // Every frame extracted, with the film guide: the whole film is visible and readable from here, before the bible.
+  const labelled = useMemo(() => labelledFrames(frames), [frames]);
+  const filmGuide = useFilmGuide({ slug: project.id, user, duration: labelled.length ? labelled[labelled.length - 1].seconds : 0, notify });
 
   return (
     <div className="space-y-5">
@@ -432,19 +436,15 @@ function FramesStep({
           </div>
         )}
       </section>
-      {preview.length ? (
-        <section className="studio-card">
-          <p className="anime-label text-xs text-cyan-pale">Aperçu</p>
-          <div className="studio-frames">
-            {preview.slice(0, 60).map((f) => (
-              <div key={f.src} className="studio-frame">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={f.src} alt="" loading="lazy" />
-                <span>{frameLabel(f.seconds)}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+      {labelled.length ? (
+        <StudioFrames
+          panels={[]}
+          frames={labelled}
+          guide={filmGuide.guide}
+          run={filmGuide.run}
+          onRead={(fromScratch) => void filmGuide.start(fromScratch)}
+          onStop={filmGuide.stop}
+        />
       ) : null}
     </div>
   );
