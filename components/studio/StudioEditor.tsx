@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type Set
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
+import { PanelHistory } from "@/components/studio/PanelHistory";
 import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
@@ -294,6 +295,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
   const paceWord = (value: "calm" | "normal" | "action") => (value === "action" ? "action" : value === "calm" ? "calme" : "normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   // Latest panels and library, for the director's actions that run one after the other.
   const panelsRef = useRef(panels);
   const libraryRef = useRef(library);
@@ -1621,6 +1623,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
           ) : null}
+          {!isTitleCard ? (
+            <button type="button" className="webtoon-mini" onClick={() => setHistoryOpen(true)} disabled={!selected.image.src && !(selected.image_history ?? []).length} title="Toutes les images générées pour cette case, pour en remettre une">
+              Historique
+            </button>
+          ) : null}
           <span className="studio-stage-actions-sep" aria-hidden />
           <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "front")} title="Passe cette case devant les cases voisines, là où elles se chevauchent">Mettre au-dessus</button>
           <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "back")} title="Passe cette case derrière les cases voisines, là où elles se chevauchent">Mettre en dessous</button>
@@ -1658,6 +1665,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, pastille « Hauteur » en bas = hauteur de la case (l&apos;image est recadrée, pas étirée).
         </p>
 
+        {historyOpen ? (
+          <PanelHistory
+            slug={script.slug}
+            panel={selected}
+            onClose={() => setHistoryOpen(false)}
+            onPick={(image) => {
+              setPanels((current) => current.map((p) => (p.panel_id === selected.panel_id ? withNewImage(p, image) : p)));
+              onAutosave?.();
+              notify(`Case ${selected.order} : version de l'historique remise`);
+            }}
+          />
+        ) : null}
         {inpaintOpen && selected.image.src ? (
           <PanelInpaint
             panel={selected}

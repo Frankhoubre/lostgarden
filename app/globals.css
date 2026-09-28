@@ -6229,3 +6229,120 @@ select.studio-input {
   box-shadow: 0 0 0 1px rgba(94, 180, 255, 0.55);
   color: transparent;
 }
+
+/* Every image of a panel: one large, the others in a grid, "Utiliser cette version". */
+.studio-history {
+  width: min(1100px, 94vw);
+  max-width: none;
+}
+
+.studio-history-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--st-panel, #14161a);
+  border-radius: 14px;
+}
+
+@media (max-width: 800px) {
+  .studio-history-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-history-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  border-radius: 10px;
+  background: #0b0c0f;
+}
+
+.studio-history-stage img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+}
+
+.studio-history-empty,
+.studio-history-error {
+  font-size: 0.8rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-history-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.studio-history-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-history-head span {
+  font-size: 0.74rem;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-history-info {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-history-info q {
+  font-style: italic;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-history-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.studio-history-thumb {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 8px;
+  background: var(--st-raised, #1b1e24);
+}
+
+.studio-history-thumb img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.studio-history-thumb span {
+  overflow: hidden;
+  font-size: 0.6rem;
+  color: var(--st-muted, #a3a9b5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-history-thumb.is-on {
+  border-color: var(--st-accent, #5eb4ff);
+  box-shadow: 0 0 0 1px var(--st-accent, #5eb4ff);
+}
+
+.studio-history-thumb.is-current span {
+  color: var(--st-accent-2, #9fd2ff);
+  font-weight: 600;
+}
