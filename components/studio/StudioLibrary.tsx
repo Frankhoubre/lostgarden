@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/studio/Avatar";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
@@ -56,6 +56,12 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
   const [open, setOpen] = useState<{ src: string; label: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [busyStart, setBusyStart] = useState(0);
+  const [busyKind, setBusyKind] = useState<"sheet" | "webtonize">("sheet");
+  // The latest library, for what lands after a minute of drawing: the author kept editing meanwhile.
+  const libraryRef = useRef(library);
+  useEffect(() => {
+    libraryRef.current = library;
+  }, [library]);
   const [draft, setDraft] = useState<{ name: string; must_keep: string } | null>(null);
   const fileTarget = useRef<{ id: string; entryId: string } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -102,7 +108,8 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     persist(next);
   };
 
-  const storeImage = async (asset: ReferenceAsset, dataUrl: string) => {
+  /** Stores the image and sets it on the entry; `imported` also keeps it as the author's imported image. */
+  const storeImage = async (asset: ReferenceAsset, dataUrl: string, extra: Partial<ReferenceAsset> = {}, imported = false) => {
     let src = dataUrl;
     if (user && dataUrl.startsWith("data:")) {
       try {
@@ -111,22 +118,30 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
         notify(`Image gardée dans la session seulement : ${error instanceof Error ? error.message : "envoi impossible"}`);
       }
     }
-    persist(upsertAsset(library, { ...asset, image: src }));
+    const latest = libraryWith(libraryRef.current).find((a) => a.id === asset.id) ?? asset;
+    persist(upsertAsset(libraryRef.current, { ...latest, image: src, ...extra, ...(imported ? { imported_image: src } : {}) }));
+    return src;
   };
 
-  const generate = async (entry: Entry, asset: ReferenceAsset) => {
+  /**
+   * Draw the sheet. With `webtonize`, the author's imported image is the design to copy exactly,
+   * redrawn in the webtoon style as the sheet (front, side, back on white); the imported image stays
+   * on the entry, to redraw it again or bring it back.
+   */
+  const generate = async (entry: Entry, asset: ReferenceAsset, webtonize?: string) => {
     if (busyId) return;
-    if (!asset.must_keep.trim()) {
+    if (!asset.must_keep.trim() && !webtonize) {
       notify("Écris d'abord le verrou de design (ce que le modèle doit copier)");
       return;
     }
     setBusyId(asset.id);
     setBusyStart(Date.now());
+    setBusyKind(webtonize ? "webtonize" : "sheet");
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/asset`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ asset, library }),
+        body: JSON.stringify({ asset, library, ...(webtonize ? { webtonize } : {}) }),
       });
       const payload = (await response.json().catch(() => ({}))) as { src?: string; data_url?: string; error?: string };
       const received = payload.src ?? payload.data_url;
@@ -134,8 +149,8 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
         notify(payload.error ?? `Erreur ${response.status}`);
         return;
       }
-      await storeImage(asset, received);
-      notify(`Fiche générée pour ${entry.name}`);
+      await storeImage(asset, received, webtonize ? { imported_image: webtonize } : {});
+      notify(webtonize ? `${entry.name} webtonisé : l'image importée est gardée` : `Fiche générée pour ${entry.name}`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de génération");
     } finally {
@@ -151,8 +166,9 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     if (!asset) return;
     setBusyId(asset.id);
     try {
-      await storeImage(asset, await readFileAsDataUrl(file));
-      notify("Image enregistrée dans la bibliothèque");
+      // The imported image is remembered: "Webtoniser" redraws it in the style of the webtoon.
+      await storeImage(asset, await readFileAsDataUrl(file), {}, true);
+      notify("Image importée : « Webtoniser » la redessine dans le style du webtoon");
     } finally {
       setBusyId(null);
     }
@@ -301,7 +317,7 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
                           {busyId === sheet.id ? <span className="studio-spinner studio-spinner-lg" aria-hidden /> : <span>Pas encore de {kind === "location" ? "vue du décor" : "fiche"}</span>}
                         </div>
                       )}
-                      {busyId === sheet.id ? <ProgressBar startedAt={busyStart} estimateMs={SHEET_ESTIMATE_MS} label={kind === "location" ? "Vue aérienne en cours" : "Fiche en cours"} /> : null}
+                      {busyId === sheet.id ? <ProgressBar startedAt={busyStart} estimateMs={SHEET_ESTIMATE_MS} label={busyKind === "webtonize" ? "Webtonisation en cours" : kind === "location" ? "Vue aérienne en cours" : "Fiche en cours"} /> : null}
                       <div className="studio-sheet-actions">
                         <span className="studio-sheet-caption">{kind === "location" ? "Vue aérienne du décor" : "Fiche · face, profil, dos · fond blanc"}</span>
                         {sheet.kind !== "style" ? (
@@ -309,7 +325,23 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
                             {busyId === sheet.id ? "…" : sheet.image ? "Regénérer" : "Générer"}
                           </button>
                         ) : null}
-                        <button type="button" className="webtoon-mini" onClick={() => { fileTarget.current = { id: sheet.id, entryId: entry.id }; fileInput.current?.click(); }} disabled={busyId !== null}>Remplacer</button>
+                        {sheet.image || sheet.imported_image ? (
+                          <button
+                            type="button"
+                            className="webtoon-mini"
+                            onClick={() => void generate(entry, sheet, sheet.imported_image ?? sheet.image)}
+                            disabled={busyId !== null}
+                            title={sheet.imported_image ? "Redessine l'image importée dans le style du webtoon, en fiche (face, profil, dos, fond blanc), sans rien changer au design" : "Redessine cette image dans le style du webtoon, en fiche (face, profil, dos, fond blanc), sans rien changer au design"}
+                          >
+                            {busyId === sheet.id && busyKind === "webtonize" ? "…" : "Webtoniser"}
+                          </button>
+                        ) : null}
+                        {sheet.imported_image && sheet.image !== sheet.imported_image ? (
+                          <button type="button" className="webtoon-mini" onClick={() => persist(upsertAsset(library, { ...sheet, image: sheet.imported_image! }))} disabled={busyId !== null} title="Remet l'image importée telle quelle">
+                            Image importée
+                          </button>
+                        ) : null}
+                        <button type="button" className="webtoon-mini" onClick={() => { fileTarget.current = { id: sheet.id, entryId: entry.id }; fileInput.current?.click(); }} disabled={busyId !== null} title="Importer une image de votre ordinateur (photo, dessin, autre style)">Importer</button>
                       </div>
                     </div>
                   ) : null}

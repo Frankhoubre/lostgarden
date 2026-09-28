@@ -108,8 +108,9 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
     notify(`${manual.name.trim()} ajouté : ajoutez des images de référence puis générez la fiche`);
   };
 
-  const generate = async (asset: ReferenceAsset) => {
-    if (!asset.must_keep.trim()) return notify("Écrivez d'abord ce que la fiche doit respecter (verrou de design)");
+  /** Draws the sheet; with `webtonize`, the author's image is the design, redrawn in the style of the webtoon. */
+  const generate = async (asset: ReferenceAsset, webtonize?: string) => {
+    if (!asset.must_keep.trim() && !webtonize) return notify("Écrivez d'abord ce que la fiche doit respecter (verrou de design)");
     setBusy((b) => new Set(b).add(asset.id));
     setBusySince((m) => ({ ...m, [asset.id]: Date.now() }));
     try {
@@ -117,14 +118,21 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
       const response = await fetch(`/api/webtoon/${project.id}/asset`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ asset, library, frames: sources.filter(isFilm), references: sources.filter((s) => !isFilm(s)), prompt: asset.sheet_prompt || undefined }),
+        body: JSON.stringify({
+          asset,
+          library,
+          frames: webtonize ? [] : sources.filter(isFilm),
+          references: sources.filter((s) => !isFilm(s) && s !== webtonize),
+          prompt: asset.sheet_prompt || undefined,
+          ...(webtonize ? { webtonize } : {}),
+        }),
       });
       const payload = (await response.json().catch(() => ({}))) as { src?: string; data_url?: string; error?: string; attempts?: number; check?: { has_text?: boolean } };
       const received = payload.src ?? payload.data_url;
       if (!response.ok || !received) return notify(`${asset.name.split(",")[0]} : ${payload.error ?? `erreur ${response.status}`}`);
       // The library changed while the sheet was drawn (other sheets, edits): only the image is set, on the latest entry.
-      updateAsset(asset, { image: received });
-      notify(`Fiche de ${asset.name.split(",")[0]} prête${payload.attempts && payload.attempts > 1 ? " (redessinée une fois : texte ou fond à corriger)" : ""}`);
+      updateAsset(asset, webtonize ? { image: received, imported_image: webtonize } : { image: received });
+      notify(`${webtonize ? `${asset.name.split(",")[0]} webtonisé` : `Fiche de ${asset.name.split(",")[0]} prête`}${payload.attempts && payload.attempts > 1 ? " (redessinée une fois : texte ou fond à corriger)" : ""}`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Génération impossible");
     } finally {
@@ -356,6 +364,16 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                   <button type="button" className="webtoon-mini studio-primary" onClick={() => void generate(asset)} disabled={working}>
                     {working ? "…" : asset.image ? "Regénérer la fiche" : "Générer la fiche"}
                   </button>
+                  {(() => {
+                    // The author's own image (the last one imported with "+ Vos images"), redrawn in the style of the webtoon.
+                    const own = (asset.sources ?? []).filter((s) => !isFilm(s));
+                    const source = asset.imported_image ?? own[own.length - 1];
+                    return source ? (
+                      <button type="button" className="webtoon-mini" onClick={() => void generate(asset, source)} disabled={working} title="Redessine votre image dans le style du webtoon, en fiche (face, profil, dos, fond blanc), sans rien changer au design">
+                        Webtoniser mon image
+                      </button>
+                    ) : null;
+                  })()}
                   <button
                     type="button"
                     className="webtoon-mini webtoon-mini-danger"

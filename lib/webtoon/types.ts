@@ -48,6 +48,11 @@ export type ReferenceAsset = {
   sheet_prompt?: string;
   /** Seconds of the film where the thing was detected, to offer more frames as references. */
   seen_seconds?: number[];
+  /**
+   * The image the author imported for this entry (a photo, a drawing, another style), kept when
+   * "Webtoniser" redraws it as a webtoon sheet, so it can be redrawn again or brought back.
+   */
+  imported_image?: string;
 };
 
 /**

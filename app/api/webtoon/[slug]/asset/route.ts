@@ -103,8 +103,19 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { asset?: ReferenceAsset; library?: LibraryOverlay; palette?: string; frames?: string[]; references?: string[]; prompt?: string };
-  const asset = body.asset;
+  const body = (await request.json().catch(() => ({}))) as {
+    asset?: ReferenceAsset;
+    library?: LibraryOverlay;
+    palette?: string;
+    frames?: string[];
+    references?: string[];
+    prompt?: string;
+    /** "Webtoniser": the author's own image, redrawn exactly in the webtoon style as the sheet. */
+    webtonize?: string;
+  };
+  const webtonize =
+    typeof body.webtonize === "string" && (IMAGE_SRC.test(body.webtonize.trim()) || (body.webtonize.startsWith("data:image/") && body.webtonize.length < 8_000_000)) ? body.webtonize.trim() : null;
+  const asset = body.asset && webtonize && !body.asset.must_keep?.trim() ? { ...body.asset, must_keep: "exactly the subject of the author's image: its shape, proportions, clothes or materials, colours and every distinctive detail." } : body.asset;
   if (!asset?.id || !asset.must_keep?.trim()) return Response.json({ error: "Décris d'abord l'élément (verrou de design)" }, { status: 400 });
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [], ...(body.library.base ? { base: body.library.base } : {}) } : null;
   const library = libraryWith(overlay);
@@ -121,6 +132,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const add = (item: ReferenceAsset) => {
     if (references.length < MAX_REFERENCES && item.image && !references.some((r) => r.image === item.image)) references.push(item);
   };
+  if (webtonize) add({ id: "webtonize", kind: "source_frame", name: `the author's image of ${name}`, image: webtonize, must_keep: "", description: "", tags: ["own", "webtonize"] });
   own.forEach((src, i) => add({ id: `own-${i}`, kind: "source_frame", name: `reference image ${i + 1} given by the author for ${name}`, image: src, must_keep: "", description: "", tags: ["own"] }));
   frames.forEach((src) => {
     const at = /(\d{2})m(\d{2})s/.exec(decodeURIComponent(src));
@@ -136,9 +148,18 @@ export async function POST(request: Request, { params }: RouteContext) {
   if (anchor?.image) add(anchor);
 
   const prepared = sheetPrompt({ asset, bible, scale, palette });
-  const base = body.prompt?.trim() ? body.prompt.trim() : prepared;
+  const base = [
+    body.prompt?.trim() ? body.prompt.trim() : prepared,
+    webtonize
+      ? "WEBTONIZE: the first reference image is the author's own picture of this subject, in another style (a photo, a painting, a 3D render, a sketch). Convert it: the same subject, recognisable at a glance, redrawn in the flat webtoon style of the series (clean line art, cel shading, the palette treatment described), as the sheet described above. Do not redesign, simplify away or add anything."
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   const roles = references.map((r, i) => {
-    const role = r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.id === asset.id ? "the current image of this place: keep its design, not its viewpoint" : "an earlier sheet: copy the design only, never its layout, its extra views or its portraits";
+    const role = r.tags.includes("webtonize")
+      ? "THE SUBJECT TO WEBTONIZE: redraw exactly this subject (every part of its design, its clothes or materials, its colours, its proportions, its distinctive details) in the webtoon style described above; change only the rendering, never the design"
+      : r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.id === asset.id ? "the current image of this place: keep its design, not its viewpoint" : "an earlier sheet: copy the design only, never its layout, its extra views or its portraits";
     return `image ${i + 1} is ${r.name} (${role})`;
   });
   const promptFor = (fix?: string) => [base, roles.length ? `REFERENCE IMAGES, in order: ${roles.join("; ")}.` : "", fix ?? ""].filter(Boolean).join("\n\n");
