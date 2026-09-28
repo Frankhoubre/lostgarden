@@ -9,6 +9,7 @@ import { frameLabel, type StudioProject } from "@/lib/webtoon/project";
 import { uploadReference } from "@/lib/webtoon/projects-client";
 import { libraryWith } from "@/lib/webtoon/references";
 import { sheetKind, sheetPrompt, SHEET_KIND_LABEL } from "@/lib/webtoon/sheet-prompt";
+import { ProgressBar } from "@/components/studio/ProgressBar";
 import { studioHeaders } from "@/lib/webtoon/studio-headers";
 import { bibleFor } from "@/lib/webtoon/style-bible";
 import type { LibraryOverlay, ReferenceAsset } from "@/lib/webtoon/types";
@@ -49,6 +50,8 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
   const candidates = project.candidates?.[step] ?? [];
   const [detecting, setDetecting] = useState(false);
   const [busy, setBusy] = useState<Set<string>>(new Set());
+  /** When each sheet started drawing, for its progress bar. */
+  const [busySince, setBusySince] = useState<Record<string, number>>({});
   const [open, setOpen] = useState<{ src: string; label: string } | null>(null);
   const [picked, setPicked] = useState<Record<string, string[]>>({});
   const [manual, setManual] = useState<{ name: string; must_keep: string } | null>(null);
@@ -108,6 +111,7 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
   const generate = async (asset: ReferenceAsset) => {
     if (!asset.must_keep.trim()) return notify("Écrivez d'abord ce que la fiche doit respecter (verrou de design)");
     setBusy((b) => new Set(b).add(asset.id));
+    setBusySince((m) => ({ ...m, [asset.id]: Date.now() }));
     try {
       const sources = asset.sources ?? [];
       const response = await fetch(`/api/webtoon/${project.id}/asset`, {
@@ -287,6 +291,7 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                   ) : (
                     <div className="studio-bible-empty">{working ? <><span className="studio-spinner studio-spinner-lg" aria-hidden /> Dessin de la fiche…</> : "Pas encore de fiche"}</div>
                   )}
+                  {working && busySince[asset.id] ? <ProgressBar key={busySince[asset.id]} startedAt={busySince[asset.id]} estimateMs={75_000} label="Fiche en cours" className="studio-bible-pbar" /> : null}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <input

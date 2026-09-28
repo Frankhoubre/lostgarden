@@ -43,7 +43,7 @@ type RouteContext = { params: Promise<{ slug: string }> };
 const MAX_REFERENCES = 8;
 const IMAGE_SRC = /^(\/[\w./%-]+\.(jpe?g|png|webp)|https:\/\/firebasestorage\.googleapis\.com\/[^\s]+)$/i;
 
-type SheetCheck = { has_text?: boolean; text_seen?: string; background_plain_white?: boolean; problems?: string };
+type SheetCheck = { has_text?: boolean; text_seen?: string; background_plain_white?: boolean; views?: number; extras?: boolean; problems?: string };
 
 /** A small JPEG of the sheet for the check: the model reads it as well, and the request stays light. */
 async function preview(base64: string): Promise<string> {
@@ -56,7 +56,9 @@ async function checkSheet(base64: string, location: boolean, onCost: (usd: numbe
     return await completeJson<SheetCheck>({
       system:
         'You check a reference sheet drawn for a webtoon. Look at the whole image carefully, corners included. Answer with JSON only: {"has_text": true|false, "text_seen": "<the words, letters, numbers or labels you see, empty if none>", "background_plain_white": true|false, "problems": "<one short sentence, empty if none>"}. has_text is true for any letter, word, number, label (FRONT, SIDE...), caption, signature, logo or colour swatch. background_plain_white is true when everything around the drawings is plain white, with no floor, shadow, gradient, texture or frame.' +
-        (location ? " This sheet is a location illustration: its background is the place itself, so answer background_plain_white true." : ""),
+        (location
+          ? " This sheet is a location illustration: its background is the place itself, so answer background_plain_white true."
+          : ' Also add "views": <how many whole views of the subject the sheet shows> and "extras": true|false, true when anything else is drawn besides those whole views (a portrait, a close-up, a detail inset, an expression, a second figure).'),
       user: [
         { type: "text", text: "The sheet:" },
         { type: "image_url", image_url: { url: await preview(base64) } },
@@ -129,17 +131,14 @@ export async function POST(request: Request, { params }: RouteContext) {
     : library.filter((a) => a.kind === asset.kind && a.id !== asset.id && a.id.startsWith(asset.id));
   sameSubject.slice(0, 2).forEach(add);
   if (asset.kind === "location" && asset.image) add(asset);
-  // A creature of Lost Garden is drawn next to Lanterne, whose size the series knows.
-  const hero = context.lostGarden && kind === "creature" && scale ? library.find((a) => a.kind === "character" && a.subject === "lanterne" && a.image) : undefined;
-  if (hero) add(hero);
   const palette = body.palette && bible.palettes[body.palette] ? body.palette : kind === "location" ? "blue_sanctuary" : "white_memory";
   const anchor = library.find((a) => a.id === context.script.style_anchors?.[palette]);
   if (anchor?.image) add(anchor);
 
-  const prepared = sheetPrompt({ asset, bible, scale, palette, scaleFigure: hero ? "Lanterne, the small armoured knight of image " + (references.indexOf(hero) + 1) : undefined });
+  const prepared = sheetPrompt({ asset, bible, scale, palette });
   const base = body.prompt?.trim() ? body.prompt.trim() : prepared;
   const roles = references.map((r, i) => {
-    const role = r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r === hero ? "for the scale silhouette only" : "design to keep";
+    const role = r.kind === "style" ? "rendering reference only: copy its flatness, line weight and colour treatment, nothing of its content" : r.tags.includes("own") ? "the design to follow, given by the author" : r.tags.includes("film") ? "the subject as the finished film shows it: copy its design exactly, ignore the rendering and the rest of the frame" : r.id === asset.id ? "the current image of this place: keep its design, not its viewpoint" : "an earlier sheet: copy the design only, never its layout, its extra views or its portraits";
     return `image ${i + 1} is ${r.name} (${role})`;
   });
   const promptFor = (fix?: string) => [base, roles.length ? `REFERENCE IMAGES, in order: ${roles.join("; ")}.` : "", fix ?? ""].filter(Boolean).join("\n\n");
@@ -167,10 +166,16 @@ export async function POST(request: Request, { params }: RouteContext) {
     meter(image.cost_usd);
     let check = await checkSheet(image.base64, kind === "location", meter);
     let attempts = 1;
-    const failed = (c: SheetCheck) => c.has_text === true || (kind !== "location" && c.background_plain_white === false);
+    const wrongViews = (c: SheetCheck) => kind !== "location" && ((typeof c.views === "number" && c.views !== 3) || c.extras === true);
+    const failed = (c: SheetCheck) => c.has_text === true || (kind !== "location" && c.background_plain_white === false) || wrongViews(c);
     if (failed(check)) {
-      const fault = [check.has_text ? `it contained text (${check.text_seen || "labels"})` : "", check.background_plain_white === false ? "its background was not plain white" : "", check.problems ?? ""].filter(Boolean).join("; ");
-      const second = await draw(promptFor(`CORRECTION: the previous attempt was rejected because ${fault}. This time: absolutely no text or label anywhere${kind !== "location" ? ", and nothing but plain white around the drawings" : ""}.`));
+      const fault = [
+        check.has_text ? `it contained text (${check.text_seen || "labels"})` : "",
+        check.background_plain_white === false ? "its background was not plain white" : "",
+        wrongViews(check) ? `it showed ${check.views ?? "the wrong number of"} views${check.extras ? " and extra drawings" : ""} instead of exactly three (front, side, back)` : "",
+        check.problems ?? "",
+      ].filter(Boolean).join("; ");
+      const second = await draw(promptFor(`CORRECTION: the previous attempt was rejected because ${fault}. This time: absolutely no text or label anywhere${kind !== "location" ? ", nothing but plain white around the drawings, and exactly three whole views (front, side in profile, back) with nothing else" : ""}.`));
       meter(second.cost_usd);
       const secondCheck = await checkSheet(second.base64, kind === "location", meter);
       attempts = 2;

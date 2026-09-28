@@ -18,6 +18,8 @@ export type StudioNotification = {
   /** The resulting image, shown as a thumbnail. */
   thumb?: string;
   started_at: number;
+  /** How long this kind of work usually takes: the running entry shows a progress bar. */
+  estimate_ms?: number;
   ended_at?: number;
   read: boolean;
 };
@@ -28,7 +30,7 @@ export type StudioTask = {
   fail: (detail: string) => void;
 };
 
-export type TrackTask = (title: string, panelId?: string) => StudioTask;
+export type TrackTask = (title: string, panelId?: string, estimateMs?: number) => StudioTask;
 
 export const NOTIFICATION_LIMIT = 80;
 

@@ -1,0 +1,198 @@
+/**
+ * THE FILM GUIDE: the whole film read once, as a guide for the adaptation.
+ *
+ * The frames (one per second) are read by windows of twenty, each window
+ * with the end of the previous one in mind. For every second the guide says
+ * what is seen and what changed since the second before; over the seconds it
+ * cuts the film into sequences of one kind (action, tension, dialogue, calm,
+ * contemplation, transition, flashback, title) with an intensity. The studio
+ * shows it in the film tab (a coloured timeline, the sequences, a line under
+ * every frame), and the writer reads it: in "auto" pace the kind of the
+ * sequence sets how many panels a second of film gets (an action sequence
+ * gets many dynamic panels, a contemplation few and large), a batch never
+ * straddles two sequences, and the sequence and its frame-by-frame lines go
+ * into the writer's prompt.
+ *
+ * Stored per project in `webtoon_library/<slug>~guide` (`guide_json`).
+ */
+
+export const GUIDE_WINDOW = 20;
+
+export const SEQUENCE_KINDS = ["action", "tension", "dialogue", "calm", "contemplation", "transition", "flashback", "title"] as const;
+export type SequenceKind = (typeof SEQUENCE_KINDS)[number];
+
+export type GuideBeat = {
+  seconds: number;
+  /** What the frame shows, in one short sentence. */
+  what: string;
+  /** What changed since the second before ("rien" when nothing did). */
+  change: string;
+};
+
+export type GuideSequence = {
+  from: number;
+  to: number;
+  kind: SequenceKind;
+  /** 1 (still) to 5 (the strongest moment of the film). */
+  intensity: number;
+  title: string;
+  summary: string;
+  place?: string;
+  characters?: string[];
+};
+
+export type FilmGuide = {
+  version: 1;
+  /** Seconds read so far (the next window starts here). */
+  analyzed_until: number;
+  duration: number;
+  beats: GuideBeat[];
+  sequences: GuideSequence[];
+  updated_at: string;
+};
+
+export const SEQUENCE_LABEL: Record<SequenceKind, string> = {
+  action: "Action",
+  tension: "Tension",
+  dialogue: "Dialogue",
+  calm: "Calme",
+  contemplation: "Contemplation",
+  transition: "Transition",
+  flashback: "Souvenir",
+  title: "Titre",
+};
+
+export const SEQUENCE_COLOR: Record<SequenceKind, string> = {
+  action: "#ff6b6b",
+  tension: "#ffa94d",
+  dialogue: "#5eb4ff",
+  calm: "#63e6be",
+  contemplation: "#b197fc",
+  transition: "#868e96",
+  flashback: "#ced4da",
+  title: "#ffd43b",
+};
+
+/** The pace the writer takes in a sequence of this kind. */
+export function paceOfKind(kind: SequenceKind, intensity = 3): "action" | "normal" | "calm" {
+  if (kind === "action") return "action";
+  if (kind === "tension") return intensity >= 4 ? "action" : "normal";
+  if (kind === "calm" || kind === "contemplation" || kind === "transition" || kind === "title") return "calm";
+  return "normal";
+}
+
+export function emptyGuide(duration: number): FilmGuide {
+  return { version: 1, analyzed_until: 0, duration, beats: [], sequences: [], updated_at: new Date().toISOString() };
+}
+
+function isKind(value: unknown): value is SequenceKind {
+  return typeof value === "string" && (SEQUENCE_KINDS as readonly string[]).includes(value);
+}
+
+/** What the model answered for a window, cleaned: numbers inside the window, known kinds, ordered. */
+export function cleanWindow(raw: { beats?: unknown[]; sequences?: unknown[]; continues_previous?: unknown }, from: number, to: number): { beats: GuideBeat[]; sequences: GuideSequence[]; continues: boolean } {
+  const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+  const beats = (raw.beats ?? [])
+    .map((b) => b as Record<string, unknown>)
+    .map((b) => ({ seconds: Math.round(Number(b.seconds)), what: text(b.what), change: text(b.change) || "rien" }))
+    .filter((b) => Number.isFinite(b.seconds) && b.seconds >= from && b.seconds <= to && b.what)
+    .sort((a, b) => a.seconds - b.seconds);
+  const sequences = (raw.sequences ?? [])
+    .map((s) => s as Record<string, unknown>)
+    .map((s) => ({
+      from: Math.max(from, Math.round(Number(s.from))),
+      to: Math.min(to, Math.round(Number(s.to))),
+      kind: isKind(s.kind) ? s.kind : "calm",
+      intensity: Math.min(5, Math.max(1, Math.round(Number(s.intensity) || 2))),
+      title: text(s.title) || "Séquence",
+      summary: text(s.summary),
+      place: text(s.place) || undefined,
+      characters: Array.isArray(s.characters) ? s.characters.map(text).filter(Boolean).slice(0, 8) : undefined,
+    }))
+    .filter((s) => Number.isFinite(s.from) && Number.isFinite(s.to) && s.to >= s.from)
+    .sort((a, b) => a.from - b.from);
+  // No hole and no overlap inside the window: each sequence starts where the one before ends.
+  const tiled: GuideSequence[] = [];
+  for (const sequence of sequences) {
+    const previous = tiled[tiled.length - 1];
+    const start = previous ? previous.to + 1 : from;
+    if (sequence.to < start) continue;
+    tiled.push({ ...sequence, from: start });
+  }
+  if (tiled.length) tiled[tiled.length - 1].to = to;
+  else tiled.push({ from, to, kind: "calm", intensity: 2, title: "Séquence", summary: "" });
+  return { beats, sequences: tiled, continues: raw.continues_previous === true };
+}
+
+/**
+ * Sequences at the scale of a scene. Two neighbours of the same kind are one
+ * sequence (windows are read apart, a scene often spans two of them); a
+ * quiet piece of three seconds or less (a fade to black, a breath between
+ * two shots) joins the sequence before it. A short action, tension,
+ * dialogue, memory or title keeps its own place: a fall of two seconds is
+ * exactly what must get its panels.
+ */
+export function consolidate(sequences: GuideSequence[]): GuideSequence[] {
+  const quiet = (s: GuideSequence) => (s.kind === "transition" || s.kind === "calm" || s.kind === "contemplation") && s.intensity <= 2;
+  const merge = (a: GuideSequence, b: GuideSequence): GuideSequence => ({
+    ...a,
+    to: Math.max(a.to, b.to),
+    intensity: Math.max(a.intensity, b.intensity),
+    summary: b.summary && !a.summary.includes(b.summary) ? `${a.summary} ${b.summary}`.trim().slice(0, 700) : a.summary,
+    characters: [...new Set([...(a.characters ?? []), ...(b.characters ?? [])])],
+  });
+  const out: GuideSequence[] = [];
+  for (const sequence of sequences) {
+    const last = out[out.length - 1];
+    if (last && (last.kind === sequence.kind || (quiet(sequence) && sequence.to - sequence.from < 3))) out[out.length - 1] = merge(last, sequence);
+    else out.push({ ...sequence });
+  }
+  // A quiet piece at the very start takes the kind of what follows it.
+  if (out.length > 1 && quiet(out[0]) && out[0].to - out[0].from < 3) out.splice(0, 2, { ...out[1], from: out[0].from });
+  return out;
+}
+
+/** The guide with one more window: its beats added, its first sequence merged into the last one when it continues it. */
+export function appendWindow(guide: FilmGuide, window: { beats: GuideBeat[]; sequences: GuideSequence[]; continues: boolean }, to: number): FilmGuide {
+  const beats = [...guide.beats.filter((b) => !window.beats.some((w) => w.seconds === b.seconds)), ...window.beats].sort((a, b) => a.seconds - b.seconds);
+  const sequences = [...guide.sequences];
+  const [first, ...rest] = window.sequences;
+  const last = sequences[sequences.length - 1];
+  if (first && last && window.continues && last.kind === first.kind) {
+    sequences[sequences.length - 1] = {
+      ...last,
+      to: first.to,
+      intensity: Math.max(last.intensity, first.intensity),
+      summary: first.summary && first.summary !== last.summary ? `${last.summary} ${first.summary}`.slice(0, 600) : last.summary,
+      characters: [...new Set([...(last.characters ?? []), ...(first.characters ?? [])])],
+    };
+  } else if (first) sequences.push(first);
+  sequences.push(...rest);
+  return { ...guide, beats, sequences: consolidate(sequences), analyzed_until: Math.max(guide.analyzed_until, to + 1), updated_at: new Date().toISOString() };
+}
+
+/** The sequence a second belongs to (the next one when the second falls before the first). */
+export function sequenceAt(guide: Pick<FilmGuide, "sequences"> | null | undefined, seconds: number): GuideSequence | undefined {
+  if (!guide?.sequences.length) return undefined;
+  return guide.sequences.find((s) => seconds >= s.from && seconds <= s.to) ?? guide.sequences.find((s) => s.from > seconds);
+}
+
+/** What the writer needs of the guide around a stretch of film: the sequences that touch it and its lines. */
+export function guideSlice(guide: FilmGuide | null | undefined, from: number, to: number): Pick<FilmGuide, "sequences" | "beats"> | undefined {
+  if (!guide?.sequences.length) return undefined;
+  return {
+    sequences: guide.sequences.filter((s) => s.to >= from && s.from <= to),
+    beats: guide.beats.filter((b) => b.seconds >= from && b.seconds <= to),
+  };
+}
+
+/** The guide as the writer reads it, for the seconds of its window. */
+export function guideBrief(slice: Pick<FilmGuide, "sequences" | "beats"> | undefined, from: number, to: number): string {
+  if (!slice?.sequences.length) return "";
+  const tc = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, "0")}`;
+  const sequences = slice.sequences
+    .filter((s) => s.to >= from && s.from <= to)
+    .map((s) => `${tc(s.from)} to ${tc(s.to)}: ${s.kind.toUpperCase()} sequence, intensity ${s.intensity}/5, "${s.title}": ${s.summary}`);
+  const beats = slice.beats.filter((b) => b.seconds >= from && b.seconds <= to).map((b) => `${tc(b.seconds)} ${b.what}${b.change && b.change !== "rien" ? ` (changed: ${b.change})` : ""}`);
+  return [`Sequences:\n${sequences.join("\n")}`, beats.length ? `Second by second:\n${beats.join("\n")}` : ""].filter(Boolean).join("\n\n");
+}

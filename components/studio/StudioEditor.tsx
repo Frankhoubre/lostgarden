@@ -2,10 +2,13 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
-import { Avatar } from "@/components/studio/Avatar";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
+import { CastPicker } from "@/components/studio/CastPicker";
+import { ProgressBar } from "@/components/studio/ProgressBar";
+import type { PanelBusy } from "@/components/studio/PanelCanvas";
 import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
 import type { TrackTask } from "@/lib/webtoon/notifications";
+import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -135,22 +138,19 @@ type Job = {
   placeholders: number;
   /** When the current estimate says the job ends. */
   deadline: number;
+  /** When the current phase started: the progress bar runs from here to the deadline. */
+  started?: number;
+  /** When each running panel's image started. */
+  runningSince?: Record<string, number>;
 };
 
-const ESTIMATE = { writeBase: 25_000, writePer: 5_000, image: 50_000, translateBase: 10_000, translatePer: 1_000 };
+const ESTIMATE = { writeBase: 25_000, writePer: 5_000, image: 50_000, retouch: 42_000, translateBase: 10_000, translatePer: 1_000 };
 
 /** A deadline `ms` from now, kept out of the component so the lint knows it is not render work. */
 function deadlineIn(ms: number): number {
   return Date.now() + ms;
 }
 
-function remaining(ms: number): string {
-  const s = Math.max(0, Math.round(ms / 1000));
-  if (s < 60) return `${s} s`;
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return r >= 15 ? `${m} min ${r} s` : `${m} min`;
-}
 
 /** Panels that still need an image: none yet, or the prompt changed since. */
 function pendingPanels(panels: WebtoonPanel[]): WebtoonPanel[] {
@@ -187,6 +187,8 @@ type StudioEditorProps = {
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
   onJob?: (job: JobSummary) => void;
+  /** The film guide (sequences, second by second lines): the "auto" pace follows it and the writer reads it. */
+  guide?: FilmGuide | null;
   /** Frames of the project's film offered by the pickers (every five seconds); Lost Garden's when unset. */
   filmFrames?: { src: string; seconds: number; label: string }[];
 };
@@ -197,7 +199,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const locale = previewLocale;
@@ -244,8 +246,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    * state, so several can be drawn at once, while a long run goes on too.
    * The studio's lock (`busy`) is only for the long runs.
    */
-  const [drawing, setDrawing] = useState<Map<string, "generate" | "retouch">>(() => new Map());
-  const startDrawing = (id: string, kind: "generate" | "retouch") => setDrawing((current) => new Map(current).set(id, kind));
+  const [drawing, setDrawing] = useState<Map<string, { kind: "generate" | "retouch"; started: number }>>(() => new Map());
+  const startDrawing = (id: string, kind: "generate" | "retouch") => setDrawing((current) => new Map(current).set(id, { kind, started: Date.now() }));
   const stopDrawing = (id: string) =>
     setDrawing((current) => {
       const next = new Map(current);
@@ -265,11 +267,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     return () => release();
   }, [working]);
   const [job, setJob] = useState<Job | null>(null);
-  const [now, setNow] = useState(() => Date.now());
   const [nextCount, setNextCount] = useState(10);
   /** The continuation is asked in panels or in seconds of film ("the next 30 seconds"). */
   const [nextUnit, setNextUnit] = useState<"panels" | "seconds">("panels");
-  const [pace, setPace] = useState<"calm" | "normal" | "action">("normal");
+  /** "auto": the kind of the film sequence decides (action, calm...), as read in the film guide. */
+  const [pace, setPace] = useState<"auto" | "calm" | "normal" | "action">("auto");
+  /** The pace a stretch starting here gets: the one chosen, or the one of the guide's sequence in "auto". */
+  const paceAt = (seconds: number): "calm" | "normal" | "action" => {
+    if (pace !== "auto") return pace;
+    const sequence = sequenceAt(guide, seconds);
+    return sequence ? paceOfKind(sequence.kind, sequence.intensity) : "normal";
+  };
+  const paceWord = (value: "calm" | "normal" | "action") => (value === "action" ? "action" : value === "calm" ? "calme" : "normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
   // Latest panels and library, for the director's actions that run one after the other.
   const panelsRef = useRef(panels);
@@ -293,16 +302,19 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
-  /** Measured image durations, so the estimate learns from the real speed. */
+  /** Measured image durations, so the estimate learns from the real speed (kept in the browser across visits). */
   const imageTimes = useRef<number[]>([]);
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem("studio-image-times") ?? "[]") as number[];
+      if (Array.isArray(stored)) imageTimes.current = stored.filter((t) => Number.isFinite(t) && t > 5_000 && t < 400_000).slice(-10);
+    } catch {
+      // No storage: the default estimate is used.
+    }
+  }, []);
 
   useEffect(() => {
-    if (!job) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [job]);
-  useEffect(() => {
-    onJob?.(job ? { label: job.label, done: job.done, total: job.total, deadline: job.deadline } : null);
+    onJob?.(job ? { label: job.label, done: job.done, total: job.total, deadline: job.deadline, started: job.started } : null);
   }, [job, onJob]);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -409,7 +421,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     }
     const panel = selected;
     startDrawing(panel.panel_id, "generate");
-    const task = track?.(`Case ${panel.order} · ${panel.image.src ? "nouvelle image" : "première image"}`, panel.panel_id);
+    const task = track?.(`Case ${panel.order} · ${panel.image.src ? "nouvelle image" : "première image"}`, panel.panel_id, imageEstimate());
     let failure = "la génération a échoué";
     try {
       const src = await generateOne(panel, (reason) => {
@@ -433,7 +445,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const runRetouch = async (panel: WebtoonPanel, request: RetouchRequest) => {
     startDrawing(panel.panel_id, "retouch");
     const short = request.prompt.length > 70 ? `${request.prompt.slice(0, 67)}…` : request.prompt;
-    const task = track?.(`Case ${panel.order} · ${request.mask ? "retouche d'une zone" : "modification"}`, panel.panel_id);
+    const task = track?.(`Case ${panel.order} · ${request.mask ? "retouche d'une zone" : "modification"}`, panel.panel_id, ESTIMATE.retouch);
     try {
       const dataUrl = await retouchImage({ ...request, slug: script.slug, panel, library: libraryRef.current, quality });
       const src = await applyImage(panel, dataUrl, "inpaint", {}, undefined, "inpaint", request.prompt);
@@ -488,30 +500,40 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     let ok = 0;
     let next = 0;
     let done = 0;
-    const running = new Set<string>();
+    const running = new Map<string, number>();
+    // One estimate for the whole batch, from its start: re-estimating from "now" at each image pushed the end away.
+    const batchStart = Date.now();
+    const batchEnd = batchStart + Math.ceil(list.length / IMAGE_CONCURRENCY) * imageEstimate();
     const report = () =>
       setJob({
+        started: batchStart,
         phase: "images",
         label: `Images ${Math.min(done + running.size, list.length)}/${list.length}${running.size > 1 ? ` · ${running.size} en même temps` : ""}`,
         done,
         total: list.length,
         queue: list.slice(next).map((p) => p.panel_id),
-        current: [...running][0] ?? null,
-        running: [...running],
+        current: [...running.keys()][0] ?? null,
+        running: [...running.keys()],
+        runningSince: Object.fromEntries(running),
         placeholders: 0,
-        deadline: deadlineIn(Math.ceil((list.length - done) / IMAGE_CONCURRENCY) * imageEstimate()),
+        deadline: batchEnd,
       });
     if (list[0]) select(list[0].panel_id);
     const worker = async () => {
       while (!stopBatch.current && next < list.length) {
         const panel = list[next];
         next += 1;
-        running.add(panel.panel_id);
-        report();
         const started = Date.now();
+        running.set(panel.panel_id, started);
+        report();
         if (await generateOne(panel)) {
           ok += 1;
-          imageTimes.current.push(Date.now() - started);
+          imageTimes.current = [...imageTimes.current, Date.now() - started].slice(-10);
+          try {
+            window.localStorage.setItem("studio-image-times", JSON.stringify(imageTimes.current));
+          } catch {
+            // No storage: the estimate learns for this visit only.
+          }
           onAutosave?.();
         }
         running.delete(panel.panel_id);
@@ -576,13 +598,13 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // A stretch of film: written to its end, the number of panels follows the pace.
       const seconds = Math.max(5, Math.min(600, Math.round(nextCount) || 30));
       const from = coveredUntil(panels);
-      const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[pace]));
+      const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[paceAt(from)]));
       if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases) ?`)) return;
       await writeSpan({ base: panels, insertAfter: null, count: estimate, until: from + seconds, label: "la suite" });
       return;
     }
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
-    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "action" ? ", en rythme action" : pace === "calm" ? ", en rythme calme" : ""} ?`)) return;
+    if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "auto" ? (guide?.sequences.length ? ", au rythme du guide du film" : ", en rythme normal (le film n'est pas encore lu)") : `, en rythme ${paceWord(pace)}`} ?`)) return;
     await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
   };
 
@@ -601,7 +623,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify("Les cases cochées n'ont pas de temps de film à réécrire");
       return;
     }
-    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} ?`)) return;
+    if (!window.confirm(`Remplacer ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} (${from.toFixed(0)} s à ${until.toFixed(0)} s du film) par environ ${count} cases en rythme ${pace === "auto" ? "du guide du film" : paceWord(pace)} ?`)) return;
     const kept = panels.filter((p) => !checked.has(p.panel_id));
     setChecked(new Set());
     await writeSpan({ base: kept, insertAfter: before?.panel_id ?? null, count, until, label: "la séquence" });
@@ -654,6 +676,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     setBusy(true);
     stopBatch.current = false;
     setJob({
+      started: Date.now(),
       phase: "writing",
       label: count === 1 ? "Lecture du film et écriture de la case suivante…" : `Lecture du film et écriture de ${count} cases…`,
       done: 0,
@@ -685,7 +708,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           method: "POST",
           headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
           // The route writes at most eight; it needs the whole remaining count to spread a bounded span evenly.
-          body: JSON.stringify({ count: until === null ? count - created.length : Math.max(8, count - created.length), panels: slimForContinue(current), library: libraryRef.current, pace, until_seconds: until }),
+          body: JSON.stringify({
+            count: until === null ? count - created.length : Math.max(8, count - created.length),
+            panels: slimForContinue(current),
+            library: libraryRef.current,
+            pace,
+            until_seconds: until,
+            // The guide around the stretch to write: its sequences drive the "auto" pace and its lines go to the writer.
+            guide: guideSlice(guide, Math.max(0, coveredUntil(current) - 2), coveredUntil(current) + 180),
+          }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
         if (!response.ok || !payload.panels?.length) {
@@ -723,7 +754,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       // A title card has no image to make.
       const ok = await runImages(created.filter((p) => p.description.trim() || p.generation_prompt.trim()));
       if (!stopBatch.current) {
-        setJob({ phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
+        setJob({ started: Date.now(), phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
         setBusy(false);
         await translatePanels(created, false);
       }
@@ -746,7 +777,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (!confirmed && !window.confirm("Peaufiner la bande ? L'IA donne une forme de webtoon à chaque case (largeur, côté, bords, chevauchement) et ajoute les cases de liaison qui manquent, puis génère leurs images.")) return;
     setBusy(true);
     stopBatch.current = false;
-    setJob({ phase: "writing", label: "Mise en page et cases de liaison…", done: 0, total: 1, queue: [], current: null, placeholders: 0, deadline: deadlineIn(90_000) });
+    setJob({ started: Date.now(), phase: "writing", label: "Mise en page et cases de liaison…", done: 0, total: 1, queue: [], current: null, placeholders: 0, deadline: deadlineIn(90_000) });
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/polish`, {
         method: "POST",
@@ -772,7 +803,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       if (created.length) {
         const ok = await runImages(created);
         if (!stopBatch.current) {
-          setJob({ phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
+          setJob({ started: Date.now(), phase: "translating", label: "Traduction des textes…", done: created.length, total: created.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(ESTIMATE.translateBase + ESTIMATE.translatePer * created.length) });
           setBusy(false);
           await translatePanels(created, false);
         }
@@ -1046,7 +1077,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     const faulty: string[] = [];
     const reports: string[] = [];
     let done = 0;
-    setJob({ phase: "images", label: `Bulles et vérification de ${list.length} cases…`, done: 0, total: list.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(Math.ceil(list.length / 4) * 12000) });
+    setJob({ started: Date.now(), phase: "images", label: `Bulles et vérification de ${list.length} cases…`, done: 0, total: list.length, queue: [], current: null, placeholders: 0, deadline: deadlineIn(Math.ceil(list.length / 4) * 12000) });
     const queue = [...list];
     const worker = async () => {
       for (let panel = queue.shift(); panel; panel = queue.shift()) {
@@ -1140,7 +1171,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             <input type="number" min={1} max={30} value={nextCount} onChange={(e) => setNextCount(Number(e.target.value))} className="studio-input" style={{ width: "5rem" }} aria-label="Nombre de cases" />
-            <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} className="studio-input" aria-label="Rythme">
+            <select value={pace} onChange={(e) => setPace(e.target.value as "auto" | "calm" | "normal" | "action")} className="studio-input" aria-label="Rythme">
+              <option value="auto">Auto (guide du film)</option>
               <option value="normal">Normal</option>
               <option value="action">Action</option>
               <option value="calm">Calme</option>
@@ -1155,12 +1187,19 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   }
 
   const pending = pendingPanels(panels).length;
+  /** When a panel's image started and how long it usually takes: its own drawing, or its turn in a batch. */
+  const busyOf = (id: string): { started: number; estimate: number } | undefined => {
+    const own = drawing.get(id);
+    if (own) return { started: own.started, estimate: own.kind === "retouch" ? ESTIMATE.retouch : imageEstimate() };
+    const since = job?.runningSince?.[id];
+    return since ? { started: since, estimate: imageEstimate() } : undefined;
+  };
   const isTitleCard = selected.caption.some((c) => c.style === "title") && !selected.image.src;
   const versions = imageVersions(selected);
-  const stripBusy = new Map<string, string>([
-    ...(job?.running ?? (job?.current ? [job.current] : [])).map((id) => [id, "Génération…"] as [string, string]),
-    ...(job?.queue ?? []).map((id) => [id, "En attente"] as [string, string]),
-    ...[...drawing].map(([id, kind]) => [id, kind === "retouch" ? "Retouche…" : "Génération…"] as [string, string]),
+  const stripBusy = new Map<string, PanelBusy>([
+    ...(job?.running ?? (job?.current ? [job.current] : [])).map((id) => [id, { label: "Génération…", ...busyOf(id) }] as [string, PanelBusy]),
+    ...(job?.queue ?? []).map((id) => [id, { label: "En attente" }] as [string, PanelBusy]),
+    ...[...drawing].map(([id, entry]) => [id, { label: entry.kind === "retouch" ? "Retouche…" : "Génération…", ...busyOf(id) }] as [string, PanelBusy]),
   ]);
   const preview = panelForGeneration(selected, script, library);
   const frames = attachedFrames(selected);
@@ -1177,13 +1216,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <span className="studio-job-label">{job.label}</span>
                 <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => { stopBatch.current = true; }} disabled={job.phase !== "images"}>Arrêter</button>
               </div>
-              <div className="studio-progress" aria-hidden>
-                <i style={{ width: `${job.phase === "writing" ? 6 : job.phase === "translating" ? 96 : Math.round(8 + (88 * job.done) / Math.max(1, job.total))}%` }} />
-              </div>
-              <span className="studio-job-eta">
-                {job.phase === "images" ? `${job.done}/${job.total} images faites · ` : ""}
-                {job.deadline > now ? `≈ ${remaining(job.deadline - now)} restantes` : "encore quelques secondes…"}
-              </span>
+              <ProgressBar
+                key={`${job.phase}-${job.started ?? 0}`}
+                startedAt={job.started ?? job.deadline - 60_000}
+                estimateMs={Math.max(5_000, job.deadline - (job.started ?? job.deadline - 60_000))}
+                label={job.phase === "writing" ? "Écriture des cases" : job.phase === "translating" ? "Traduction" : "Images"}
+                done={job.phase === "images" ? job.done : undefined}
+                total={job.phase === "images" ? job.total : undefined}
+              />
             </div>
           ) : checked.size ? (
             <div className="studio-selection" role="toolbar" aria-label="Cases cochées">
@@ -1211,8 +1251,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 className="webtoon-mini"
                 onClick={() => {
                   // The count is asked, with a suggestion by pace: the action pace tells every second in several panels, the others one panel per moment.
-                  const suggested = pace === "action" ? checkedPanels.length * 2 : pace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
-                  const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "action" ? "action" : pace === "calm" ? "calme" : "normal"} : combien de cases écrire ?`, String(suggested));
+                  const rewritePace = paceAt(Math.min(...checkedPanels.map((p) => p.source_time_start ?? 0)));
+                  const suggested = rewritePace === "action" ? checkedPanels.length * 2 : rewritePace === "calm" ? Math.max(4, Math.round(checkedPanels.length * 0.8)) : Math.max(8, Math.round(checkedPanels.length * 1.2));
+                  const answer = window.prompt(`Réécrire ${checkedPanels.length} case${checkedPanels.length > 1 ? "s" : ""} en rythme ${pace === "auto" ? `du guide (${paceWord(rewritePace)})` : paceWord(pace)} : combien de cases écrire ?`, String(suggested));
                   const n = Math.round(Number(answer));
                   if (answer !== null && n > 0) void rewriteChecked(Math.min(150, n));
                 }}
@@ -1275,7 +1316,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <span className="studio-thumb-empty">{panel.caption.some((c) => c.style === "title") ? panel.caption[0].text.en : "sans image"}</span>
                 )}
                 {job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) || drawing.has(panel.panel_id) ? (
-                  <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />{drawing.get(panel.panel_id) === "retouch" ? "Retouche…" : "Génération…"}</span>
+                  <span className="studio-thumb-overlay">
+                    <span className="studio-spinner studio-spinner-lg" aria-hidden />
+                    {drawing.get(panel.panel_id)?.kind === "retouch" ? "Retouche…" : "Génération…"}
+                    {busyOf(panel.panel_id) ? <ProgressBar key={busyOf(panel.panel_id)!.started} startedAt={busyOf(panel.panel_id)!.started} estimateMs={busyOf(panel.panel_id)!.estimate} compact /> : null}
+                  </span>
                 ) : job?.queue.includes(panel.panel_id) ? (
                   <span className="studio-thumb-overlay studio-thumb-overlay-soft">en attente</span>
                 ) : null}
@@ -1325,10 +1370,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
               <label>
                 <span>Rythme</span>
-                <select value={pace} onChange={(e) => setPace(e.target.value as "calm" | "normal" | "action")} disabled={busy} title="Normal : une case pour environ 3 s de film ; action : une pour 1,5 s, nerveuses ; calme : une pour 4,5 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
-                  <option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
+                <select value={pace} onChange={(e) => setPace(e.target.value as "auto" | "calm" | "normal" | "action")} disabled={busy} title="Auto : le rythme de chaque séquence du guide du film (action, calme...). Normal : une case pour environ 3 s de film ; action : une pour 1,5 s, nerveuses ; calme : une pour 4,5 s, larges et silencieuses. Les temps forts ajoutent leurs cases.">
+                  <option value="auto">Auto (guide du film)</option><option value="normal">Normal</option><option value="action">Action</option><option value="calm">Calme</option>
                 </select>
               </label>
+              {(() => {
+                const next = sequenceAt(guide, coveredUntil(panels));
+                if (!next) return pace === "auto" ? <p className="studio-next-guide">Le film n&apos;est pas encore lu : lancez la lecture dans « Images du film » pour que le rythme suive les scènes.</p> : null;
+                return (
+                  <p className="studio-next-guide">
+                    À suivre : <b>{next.title}</b> · {SEQUENCE_LABEL[next.kind]}, intensité {next.intensity}/5
+                    {pace === "auto" ? ` · rythme ${paceWord(paceOfKind(next.kind, next.intensity))}` : ""}
+                  </p>
+                );
+              })()}
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
                 {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(600, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
@@ -1433,8 +1488,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           {view === "panel" && (job?.current === selected.panel_id || job?.running?.includes(selected.panel_id) || drawing.has(selected.panel_id)) ? (
             <div className="studio-stage-overlay" role="status">
               <span className="studio-spinner studio-spinner-lg" aria-hidden />
-              <span>{drawing.get(selected.panel_id) === "retouch" ? "Retouche de l'image…" : "Génération de l'image…"}</span>
-              <small>{job && job.deadline > now ? `≈ ${remaining(job.deadline - now)}` : "≈ 1 min"}</small>
+              <span>{drawing.get(selected.panel_id)?.kind === "retouch" ? "Retouche de l'image…" : "Génération de l'image…"}</span>
+              {busyOf(selected.panel_id) ? <ProgressBar key={busyOf(selected.panel_id)!.started} startedAt={busyOf(selected.panel_id)!.started} estimateMs={busyOf(selected.panel_id)!.estimate} className="studio-stage-pbar" /> : null}
             </div>
           ) : null}
         </div>
@@ -1448,10 +1503,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           {!isTitleCard ? (
             <>
               <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={drawing.has(selected.panel_id)} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références ; d'autres cases peuvent être redessinées en même temps" : "Dessine la case à partir de sa description et de ses références"}>
-                {drawing.get(selected.panel_id) === "generate" ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
+                {drawing.get(selected.panel_id)?.kind === "generate" ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
               </button>
               <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">
-                {drawing.get(selected.panel_id) === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : "Modifier / retoucher"}
+                {drawing.get(selected.panel_id)?.kind === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : "Modifier / retoucher"}
               </button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
@@ -1518,6 +1573,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
         {inspectorTab === "scene" ? (
           <div className="studio-section">
+            <h3 className="studio-group-title">La case</h3>
             <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
             <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
             <div className="grid grid-cols-2 gap-3">
@@ -1527,62 +1583,35 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </label>
             </div>
             <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
-            <div>
-              <span className="webtoon-field-label">Personnages présents (leurs fiches sont jointes)</span>
-              <div className="studio-chips">
-                {CHARACTERS.map((c) => {
-                  const on = selected.characters.includes(c.id);
-                  return (
-                    <button key={c.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => setCharacters(c.id, !on)} aria-pressed={on} title={on ? `${c.name} est dans la case` : `Ajouter ${c.name} à la case`}>
-                      <Avatar image={c.image} name={c.name} crop={c.avatar} />
-                      <span>{c.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <input
-                className="mt-1"
-                placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
-                value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
-                onChange={(e) => {
-                  const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
-                  const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
-                  patch({ characters: [...known, ...others] });
-                }}
-              />
-            </div>
+            <h3 className="studio-group-title">Personnages <small>leurs fiches sont jointes au prompt</small></h3>
+            <CastPicker items={CHARACTERS} selected={selected.characters} onToggle={(id, on) => setCharacters(id, on)} />
+            <input
+              placeholder="Autres, séparés par des virgules (sans fiche, décrits dans le texte)"
+              value={selected.characters.filter((c) => !CHARACTERS.some((k) => k.id === c)).join(", ")}
+              onChange={(e) => {
+                const known = selected.characters.filter((c) => CHARACTERS.some((k) => k.id === c));
+                const others = e.target.value.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
+                patch({ characters: [...known, ...others] });
+              }}
+            />
             {OBJECTS.length ? (
-              <div>
-                <span className="webtoon-field-label">Objets visibles (leur fiche est jointe)</span>
-                <div className="studio-chips">
-                  {OBJECTS.map((o) => {
+              <>
+                <h3 className="studio-group-title">Objets <small>visibles dans la case</small></h3>
+                <CastPicker
+                  items={OBJECTS}
+                  selected={selected.objects ?? []}
+                  mode="cover"
+                  onToggle={(id, on) => {
                     const current = selected.objects ?? [];
-                    const on = current.includes(o.id);
-                    return (
-                      <button key={o.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ objects: on ? current.filter((id) => id !== o.id) : [...current, o.id] })} aria-pressed={on} title={on ? `${o.name} est dans la case` : `Ajouter ${o.name} à la case`}>
-                        <Avatar image={o.image} name={o.name} mode="cover" />
-                        <span>{o.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                    patch({ objects: on ? [...current, id] : current.filter((o) => o !== id) });
+                  }}
+                />
+              </>
             ) : null}
-            <div>
-              <span className="webtoon-field-label">Lieu (sa fiche est jointe)</span>
-              <div className="studio-chips">
-                {LOCATIONS.map((l) => {
-                  const on = selected.location === l.id;
-                  return (
-                    <button key={l.id} type="button" className={`studio-chip ${on ? "is-on" : ""}`} onClick={() => patch({ location: l.id })} aria-pressed={on} title={l.name}>
-                      <Avatar image={l.image} name={l.name} mode="cover" />
-                      <span>{l.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <input className="mt-1" placeholder="Autre lieu : un identifiant en minuscules avec des tirets, décrit dans la case" value={LOCATIONS.some((l) => l.id === selected.location) ? "" : selected.location} onChange={(e) => patch({ location: e.target.value.trim().toLowerCase() })} />
-            </div>
+            <h3 className="studio-group-title">Lieu</h3>
+            <CastPicker items={LOCATIONS} selected={[selected.location]} mode="cover" onToggle={(id) => patch({ location: id })} />
+            <input placeholder="Autre lieu : un identifiant en minuscules avec des tirets, décrit dans la case" value={LOCATIONS.some((l) => l.id === selected.location) ? "" : selected.location} onChange={(e) => patch({ location: e.target.value.trim().toLowerCase() })} />
+            <h3 className="studio-group-title">Caméra</h3>
             <div className="grid grid-cols-2 gap-3">
               <label className="webtoon-field"><span>Type de plan</span>
                 <select value={selected.shot_type} onChange={(e) => patch({ shot_type: e.target.value as ShotType })}>{SHOT_TYPES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
@@ -1591,9 +1620,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <select value={selected.camera_angle} onChange={(e) => patch({ camera_angle: e.target.value as CameraAngle })}>{ANGLES.map((v) => <option key={v} value={v}>{v}</option>)}</select>
               </label>
             </div>
+            <h3 className="studio-group-title">Images du film</h3>
             <div>
               <div className="studio-section-head">
-                <span className="webtoon-field-label">Images du film jointes</span>
+                <span className="webtoon-field-label">Jointes à cette case</span>
                 <select value="" onChange={(e) => { if (e.target.value) setPanels((c) => toggleFrame(c, selected.panel_id, e.target.value)); }}>
                   <option value="">+ Joindre une image du film…</option>
                   {FILM_FRAMES.filter((f) => !frames.includes(f.src)).map((f) => <option key={f.src} value={f.src}>{f.label}</option>)}
@@ -1752,7 +1782,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                     <input type="range" min={40} max={100} step={2} value={width} onChange={(e) => setFrame({ width: Number(e.target.value) })} />
                   </label>
                   <label className="webtoon-field"><span>Côté</span>
-                    <select value={frame.align ?? "center"} onChange={(e) => setFrame({ align: e.target.value as PanelFrame["align"] })} disabled={width >= 100}>
+                    <select value={typeof frame.x === "number" ? "free" : frame.align ?? "center"} onChange={(e) => e.target.value !== "free" && setFrame({ align: e.target.value as PanelFrame["align"], x: undefined })} disabled={width >= 100}>
+                      {typeof frame.x === "number" ? <option value="free">Placée à la main</option> : null}
                       <option value="left">À gauche</option><option value="center">Centrée</option><option value="right">À droite</option>
                     </select>
                   </label>

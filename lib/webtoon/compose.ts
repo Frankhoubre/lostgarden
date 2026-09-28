@@ -49,7 +49,8 @@ export function composeReferences(panel: WebtoonPanel, script: ScriptWorld, over
     const sheets = library.filter((asset) => asset.kind === "character" && asset.subject === character && asset.image).sort(
       (a, b) => (a.priority ?? 99) - (b.priority ?? 99),
     );
-    for (const sheet of sheets.slice(0, 2)) add(sheet);
+    // One sheet per character: its turnaround (front, side, back), the first one that has an image.
+    add(sheets[0]);
   }
   // A black-and-white memory takes neither the colour anchor nor the location sheet: both painted the oath
   // of 8:53 in the blue of the forest, before the altar, when the film shows a hall of pillars in greyscale.

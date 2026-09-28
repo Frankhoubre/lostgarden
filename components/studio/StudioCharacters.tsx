@@ -1,13 +1,11 @@
 "use client";
 
 import { StudioLibrary } from "@/components/studio/StudioLibrary";
-import { characterDocs } from "@/lib/webtoon/studio-assets";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
-type Props = { script: WebtoonScript; panels: WebtoonPanel[]; setPanels?: (next: WebtoonPanel[]) => void; library: LibraryOverlay; setLibrary: (next: LibraryOverlay) => void; notify: (message: string) => void; /** The production notes of Lost Garden under each entry. */ withDocs?: boolean };
+type Props = { script: WebtoonScript; panels: WebtoonPanel[]; setPanels?: (next: WebtoonPanel[]) => void; library: LibraryOverlay; setLibrary: (next: LibraryOverlay) => void; notify: (message: string) => void };
 
-/** The cast as an editable library: sheets, design locks, production notes. */
+/** The cast as an editable library: one turnaround sheet per character (front, side, back, on white). */
 export function StudioCharacters(props: Props) {
-  const { withDocs = true, ...rest } = props;
-  return <StudioLibrary kind="character" docs={withDocs ? characterDocs() : {}} {...rest} />;
+  return <StudioLibrary kind="character" {...props} />;
 }

@@ -11,5 +11,5 @@ type Props = { script: WebtoonScript; panels: WebtoonPanel[]; setPanels?: (next:
  * for every object it meets in the film without one.
  */
 export function StudioObjects(props: Props) {
-  return <StudioLibrary kind="object" docs={{}} {...props} />;
+  return <StudioLibrary kind="object" {...props} />;
 }

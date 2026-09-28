@@ -30,7 +30,12 @@ export function frameStyle(panel: Pick<WebtoonPanel, "bleed" | "frame">): CSSPro
   const frame = panel.frame ?? {};
   const width = Math.min(100, Math.max(40, frame.width ?? (panel.bleed ? 100 : 92)));
   const style: CSSProperties = { width: `${width}%` };
-  if (width < 100) {
+  if (width < 100 && typeof frame.x === "number" && Number.isFinite(frame.x)) {
+    // A free place, dragged in the studio: the centre moves, the panel never leaves the strip.
+    const left = Math.min(100 - width, Math.max(0, 50 + frame.x - width / 2));
+    style.marginLeft = `${left}%`;
+    style.marginRight = "auto";
+  } else if (width < 100) {
     const side = frame.align ?? "center";
     const margin = `${(100 - width) / 2}%`;
     if (side === "left") {
@@ -48,5 +53,44 @@ export function frameStyle(panel: Pick<WebtoonPanel, "bleed" | "frame">): CSSPro
   if (clip) style.clipPath = clip;
   if (frame.overlap) style.marginTop = `-${(frame.overlap / WEBTOON_WIDTH) * 100}%`;
   if (frame.tilt) style.transform = `rotate(${Math.max(-6, Math.min(6, frame.tilt))}deg)`;
+  return style;
+}
+
+/** The panel's centre, in percent of the strip from its middle, whatever set it (free place or side). */
+export function frameCenter(panel: Pick<WebtoonPanel, "bleed" | "frame">): number {
+  const frame = panel.frame ?? {};
+  const width = Math.min(100, Math.max(40, frame.width ?? (panel.bleed ? 100 : 92)));
+  if (width >= 100) return 0;
+  if (typeof frame.x === "number" && Number.isFinite(frame.x)) return Math.min(50 - width / 2, Math.max(width / 2 - 50, frame.x));
+  if (frame.align === "left") return 3 + width / 2 - 50;
+  if (frame.align === "right") return 50 - 3 - width / 2;
+  return 0;
+}
+
+/** The width of the panel on the strip, in percent. */
+export function frameWidth(panel: Pick<WebtoonPanel, "bleed" | "frame">): number {
+  return Math.min(100, Math.max(40, panel.frame?.width ?? (panel.bleed ? 100 : 92)));
+}
+
+/**
+ * The image inside its frame: covered, placed on the focal point, zoomed
+ * around it when the author reframed it. The zoomed box is the frame scaled
+ * by the zoom and shifted by the same focal fractions, so the focal point
+ * stays where object-position puts it and a drag moves the image under the
+ * pointer (see PanelCanvas).
+ */
+export function imageStyle(panel: Pick<WebtoonPanel, "focal_point" | "image_zoom">): CSSProperties {
+  const fx = panel.focal_point?.x ?? 50;
+  const fy = panel.focal_point?.y ?? 50;
+  const zoom = Math.min(3, Math.max(1, panel.image_zoom ?? 1));
+  const style: CSSProperties = { objectPosition: `${fx}% ${fy}%` };
+  if (zoom > 1.001) {
+    style.inset = "auto";
+    style.width = `${zoom * 100}%`;
+    style.height = `${zoom * 100}%`;
+    style.left = `${-(zoom - 1) * fx}%`;
+    style.top = `${-(zoom - 1) * fy}%`;
+    style.maxWidth = "none";
+  }
   return style;
 }

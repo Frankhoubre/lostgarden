@@ -130,6 +130,11 @@ export type PanelFrame = {
   /** Width in percent of the strip, 40 to 100 (100 = edge to edge). */
   width?: number;
   align?: "left" | "center" | "right";
+  /**
+   * Free horizontal place: the panel's centre, in percent of the strip from its middle (-30 to 30).
+   * Set when the author drags the panel sideways in the studio; it wins over `align`.
+   */
+  x?: number;
   shape?: "rect" | "rounded" | "slant" | "slant-reverse" | "wedge" | "wedge-reverse";
   /** Overlaps the previous panel by this many canvas px (at 1080 wide). */
   overlap?: number;
@@ -216,6 +221,8 @@ export type WebtoonPanel = {
   panel_height: number;
   /** Point of the image kept visible when the panel crops it (percent). */
   focal_point: Anchor;
+  /** Zoom of the image inside its frame (1 = the whole frame covered, up to 3), centred on the focal point. */
+  image_zoom?: number;
   transition_type: TransitionType;
   spacing_before: number;
   spacing_after: number;

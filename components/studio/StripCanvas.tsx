@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { PanelCanvas, type PanelBusy } from "@/components/studio/PanelCanvas";
 import { PanelDragGhost } from "@/components/studio/PanelDragGhost";
 import { usePanelDrag, type DropTarget } from "@/components/studio/usePanelDrag";
 import type { Locale } from "@/lib/i18n/config";
@@ -24,8 +24,8 @@ type StripCanvasProps = {
   dragDisabled?: boolean;
   /** Checked panels move together with the one dragged. */
   checkedIds?: ReadonlySet<string>;
-  /** Panels being drawn, retouched or waiting their turn, with the word shown on their loader. */
-  busyIds?: ReadonlyMap<string, string>;
+  /** Panels being drawn, retouched or waiting their turn, with their loader. */
+  busyIds?: ReadonlyMap<string, PanelBusy>;
 };
 
 const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black: "#020409", abyss: "#020817" };
@@ -78,7 +78,7 @@ export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, sh
                 onSelect(panel.panel_id);
               }}
               onChange={(changes) => onChange(panel.panel_id, changes)}
-              busyLabel={busyIds?.get(panel.panel_id)}
+              busy={busyIds?.get(panel.panel_id)}
             />
             <div style={{ paddingTop: pct(placement.gap_after) }} aria-hidden="true" />
             {onInsertAfter ? (

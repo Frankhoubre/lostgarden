@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/studio/Avatar";
+import { ProgressBar } from "@/components/studio/ProgressBar";
 import { StudioLightbox } from "@/components/studio/StudioLightbox";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { getFirebaseAuth } from "@/lib/firebase";
@@ -9,7 +10,6 @@ import { removeAsset, restoreAsset, slugify, uploadLibraryImage, upsertAsset } f
 import { libraryWith, REFERENCE_LIBRARY } from "@/lib/webtoon/references";
 import { readFileAsDataUrl } from "@/lib/webtoon/studio";
 import { mergeInPanels } from "@/lib/webtoon/editor-ops";
-import type { StudioTextBlock } from "@/lib/webtoon/studio-assets";
 import type { LibraryOverlay, ReferenceAsset, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
 type Kind = "character" | "location" | "object";
@@ -23,9 +23,10 @@ type StudioLibraryProps = {
   library: LibraryOverlay;
   setLibrary: (next: LibraryOverlay) => void;
   notify: (message: string) => void;
-  /** Production documentation shown under a built-in entry, by subject or location id. */
-  docs: Record<string, { role?: string; blocks: StudioTextBlock[]; extra?: { src: string; label: string; note?: string }[] }>;
 };
+
+/** A sheet takes about a minute (drawing, text check, sometimes a second drawing). */
+const SHEET_ESTIMATE_MS = 75_000;
 
 type Entry = {
   id: string;
@@ -50,10 +51,11 @@ async function studioHeaders(): Promise<Record<string, string>> {
  * generate the images, remove; the engine attaches what is here to every
  * prompt that names the character or the place.
  */
-export function StudioLibrary({ kind, script, panels, setPanels, library, setLibrary, notify, docs }: StudioLibraryProps) {
+export function StudioLibrary({ kind, script, panels, setPanels, library, setLibrary, notify }: StudioLibraryProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState<{ src: string; label: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyStart, setBusyStart] = useState(0);
   const [draft, setDraft] = useState<{ name: string; must_keep: string } | null>(null);
   const fileTarget = useRef<{ id: string; entryId: string } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -119,6 +121,7 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
       return;
     }
     setBusyId(asset.id);
+    setBusyStart(Date.now());
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/asset`, {
         method: "POST",
@@ -138,20 +141,6 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
     } finally {
       setBusyId(null);
     }
-  };
-
-  const addImage = (entry: Entry) => {
-    const n = entry.assets.length + 1;
-    const first = entry.assets[0];
-    const asset: ReferenceAsset =
-      kind === "character"
-        ? { id: `char.${entry.id}.studio-${Date.now().toString(36)}`, kind: "character", subject: entry.id, priority: n, name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: [entry.id, "studio"] }
-        : kind === "object"
-          ? { id: `${entry.id}.studio-${Date.now().toString(36)}`, kind: "object", name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: ["studio"] }
-          : { id: `loc.${entry.id.replace(/^loc\./, "")}.studio-${Date.now().toString(36)}`, kind: "location", name: `${entry.name}, image ${n}`, image: "", must_keep: first?.must_keep ?? "", description: "Image ajoutée dans le studio.", tags: ["studio"] };
-    fileTarget.current = { id: asset.id, entryId: entry.id };
-    persist(upsertAsset(library, asset));
-    fileInput.current?.click();
   };
 
   const onFile = async (file: File) => {
@@ -256,8 +245,9 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
 
       <div className="studio-grid">
         {entries.map((entry) => {
-          const doc = docs[entry.id.replace(/^loc\./, "")];
           const primary = entry.assets[0];
+          // One sheet per entry: the first one with an image, the first one otherwise. The others stay out of the prompts.
+          const sheet = entry.assets.find((a) => a.image) ?? primary;
           return (
             <article key={entry.id} className={`studio-card studio-character ${inStrip(entry) ? "is-in-strip" : ""} ${entry.hidden ? "is-hidden" : ""}`}>
               <header className="studio-card-head">
@@ -269,14 +259,12 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
                     <code>{entry.id}</code>
                   </p>
                   <input className="studio-library-name font-display text-xl text-lily" value={entry.name} onChange={(e) => rename(entry, e.target.value)} disabled={entry.hidden} aria-label="Nom" />
-                  {doc?.role ? <p className="text-sm text-ivory/80">{doc.role}</p> : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {entry.hidden ? (
                     <button type="button" className="webtoon-mini" onClick={() => restore(entry)}>Restaurer</button>
                   ) : (
                     <>
-                      <button type="button" className="webtoon-mini" onClick={() => addImage(entry)} disabled={busyId !== null}>+ Image</button>
                       {setPanels && entries.filter((e) => e.id !== entry.id && !e.hidden).length ? (
                         <select
                           className="webtoon-mini"
@@ -301,50 +289,34 @@ export function StudioLibrary({ kind, script, panels, setPanels, library, setLib
 
               {!entry.hidden ? (
                 <>
-                  <div className="studio-images">
-                    {entry.assets.map((asset) => (
-                      <div key={asset.id} className="studio-image studio-library-image">
-                        {asset.image ? (
-                          <button type="button" onClick={() => setOpen({ src: asset.image, label: asset.name })}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={asset.image} alt={asset.name} loading="lazy" />
-                          </button>
-                        ) : (
-                          <div className="studio-library-empty">{busyId === asset.id ? <span className="studio-spinner studio-spinner-lg" aria-hidden /> : "pas d'image"}</div>
-                        )}
-                        <span>{asset.name.includes(",") ? asset.name.slice(asset.name.indexOf(",") + 1).trim() : asset.kind === "style" ? "Ancre de style" : "Fiche"}</span>
-                        <div className="flex flex-wrap gap-1">
-                          {asset.kind !== "style" ? (
-                            <button type="button" className="webtoon-mini" onClick={() => generate(entry, asset)} disabled={busyId !== null} title="Dessine la fiche avec GPT Image 2.5 à partir du verrou de design et des autres images">
-                              {busyId === asset.id ? "…" : asset.image ? "Regénérer (IA)" : "Générer (IA)"}
-                            </button>
-                          ) : null}
-                          <button type="button" className="webtoon-mini" onClick={() => { fileTarget.current = { id: asset.id, entryId: entry.id }; fileInput.current?.click(); }} disabled={busyId !== null}>Remplacer</button>
-                          {entry.assets.length > 1 ? (
-                            <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => persist(removeAsset(library, asset.id, BUILT_IN_IDS.has(asset.id)))} disabled={busyId !== null}>×</button>
-                          ) : null}
+                  {sheet ? (
+                    <div className="studio-sheet">
+                      {sheet.image ? (
+                        <button type="button" className="studio-sheet-image" onClick={() => setOpen({ src: sheet.image, label: entry.name })}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={sheet.image} alt={entry.name} loading="lazy" />
+                        </button>
+                      ) : (
+                        <div className="studio-sheet-image studio-sheet-empty">
+                          {busyId === sheet.id ? <span className="studio-spinner studio-spinner-lg" aria-hidden /> : <span>Pas encore de {kind === "location" ? "vue du décor" : "fiche"}</span>}
                         </div>
+                      )}
+                      {busyId === sheet.id ? <ProgressBar startedAt={busyStart} estimateMs={SHEET_ESTIMATE_MS} label={kind === "location" ? "Vue aérienne en cours" : "Fiche en cours"} /> : null}
+                      <div className="studio-sheet-actions">
+                        <span className="studio-sheet-caption">{kind === "location" ? "Vue aérienne du décor" : "Fiche · face, profil, dos · fond blanc"}</span>
+                        {sheet.kind !== "style" ? (
+                          <button type="button" className="webtoon-mini studio-primary" onClick={() => generate(entry, sheet)} disabled={busyId !== null} title={kind === "location" ? "Dessine une vue aérienne du lieu, son ambiance et ce qui l'entoure" : "Dessine la fiche : trois vues en pied (face, profil, dos) sur fond blanc, sans texte"}>
+                            {busyId === sheet.id ? "…" : sheet.image ? "Regénérer" : "Générer"}
+                          </button>
+                        ) : null}
+                        <button type="button" className="webtoon-mini" onClick={() => { fileTarget.current = { id: sheet.id, entryId: entry.id }; fileInput.current?.click(); }} disabled={busyId !== null}>Remplacer</button>
                       </div>
-                    ))}
-                    {doc?.extra?.map((image) => (
-                      <button key={image.src} type="button" className="studio-image" onClick={() => setOpen({ src: image.src, label: `${entry.name} · ${image.label}` })}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={image.src} alt={`${entry.name}, ${image.label}`} loading="lazy" />
-                        <span>{image.label}</span>
-                        {image.note ? <small>{image.note}</small> : null}
-                      </button>
-                    ))}
-                  </div>
+                    </div>
+                  ) : null}
                   <label className="webtoon-field">
                     <span>Verrou de design (injecté dans chaque prompt qui nomme {thisNoun})</span>
-                    <textarea rows={5} value={primary?.must_keep ?? ""} onChange={(e) => updateLock(entry, e.target.value)} />
+                    <textarea rows={4} value={primary?.must_keep ?? ""} onChange={(e) => updateLock(entry, e.target.value)} />
                   </label>
-                  {doc?.blocks.map((block) => (
-                    <details key={block.title} className="studio-details">
-                      <summary>{block.title}</summary>
-                      <pre className="studio-text">{block.text}</pre>
-                    </details>
-                  ))}
                 </>
               ) : null}
             </article>

@@ -9,8 +9,9 @@ import type { ReferenceAsset } from "./types";
  * images (the frames where the film shows the thing, or images of their
  * own). The route appends the list of the images actually attached.
  *
- * A sheet is a design document, not an illustration: plain white around the
- * subject, nothing written on it. Image models love to add "FRONT", "SIDE",
+ * A sheet is a design document, not an illustration: one sheet per
+ * character, creature or object, three views (front, side, back) on plain
+ * white, nothing written on it; a location gets one aerial establishing view. Image models love to add "FRONT", "SIDE",
  * colour swatches and a floor shadow; the prompt forbids each by name, and
  * the route checks the result and cleans the white.
  */
@@ -37,26 +38,25 @@ const NO_TEXT =
   "NO TEXT OF ANY KIND: no title, no name, no view labels (no FRONT, SIDE, BACK, 3/4), no arrows, no measurement lines, no numbers, no colour swatches or palette chips, no notes, no signature, no logo, no watermark. Only the drawings.";
 
 /** The prepared prompt of a sheet, without the list of reference images. */
-export function sheetPrompt(input: { asset: Pick<ReferenceAsset, "name" | "kind" | "tags" | "must_keep" | "description">; bible: StyleBible; scale?: string; palette?: string; /** Who stands next to a creature for scale: an adult human, or the hero of the series. */ scaleFigure?: string }): string {
+export function sheetPrompt(input: { asset: Pick<ReferenceAsset, "name" | "kind" | "tags" | "must_keep" | "description">; bible: StyleBible; scale?: string; palette?: string}): string {
   const { asset, bible } = input;
   const name = asset.name.split(",")[0].trim();
   const kind = sheetKind(asset);
   const lines = [bible.base];
+  // One sheet per subject, three views and nothing else: the author's rule (28 September 2026). The
+  // portraits, details and scale figures of the earlier sheets are gone; what a panel needs is the
+  // design seen from the front, the side and the back.
+  const THREE_VIEWS =
+    "EXACTLY THREE VIEWS, side by side on one row, evenly spaced, the same size and the same scale, in the same neutral pose: on the left the FRONT view, in the middle the SIDE view in strict profile, on the right the BACK view. Each view shows the whole subject, nothing cropped. Nothing else on the sheet: no fourth view, no three-quarter view, no portrait, no close-up, no expression, no detail inset, no second figure, no prop lying around.";
   if (kind === "character") {
-    lines.push(
-      `CHARACTER MODEL SHEET of ${name}, in the webtoon style described above. Top row: the whole body four times at the same scale and in the same neutral standing pose, arms slightly away from the body: front view, three-quarter view, side view, back view, evenly spaced. Bottom row: three head-and-shoulders portraits of the same character, larger: a calm face, a gentle smile, a worried face. Every view shows exactly the same design, clothes, colours and proportions.`,
-    );
+    lines.push(`CHARACTER TURNAROUND SHEET of ${name}, in the webtoon style described above. ${THREE_VIEWS} Full body, standing, arms slightly away from the body. Every view shows exactly the same design, clothes, colours and proportions.`);
   } else if (kind === "creature") {
-    lines.push(
-      `CREATURE OR MACHINE DESIGN SHEET of ${name}, in the webtoon style described above. Top row: the whole body from the front, from three-quarter and from the side, at the same scale, exactly as the reference images show it. Bottom row: a large detail of its most striking part (an eye, a claw, a lens, a mouth, a joint)${input.scale ? `, and a small silhouette of ${input.scaleFigure ?? "an adult human"} standing next to one of its feet, drawn at true relative scale (${input.scale}), so the sheet says how big it is` : ""}.`,
-    );
+    lines.push(`CREATURE OR MACHINE TURNAROUND SHEET of ${name}, in the webtoon style described above, exactly as the reference images show it. ${THREE_VIEWS} Every view shows exactly the same design, parts, colours and proportions${input.scale ? ` (its true size: ${input.scale})` : ""}.`);
   } else if (kind === "object") {
-    lines.push(
-      `OBJECT DESIGN SHEET of ${name}, in the webtoon style described above. The object large and centred, seen from the front and from three-quarter. When it opens or changes state, each state side by side (closed, open, with what is inside drawn exactly as the reference images show it). Below, a small detail of its most important part. Same shape, same materials, same colours and same size relation to a hand as in the reference images. No hand, unless one is needed to show how it is held.`,
-    );
+    lines.push(`OBJECT TURNAROUND SHEET of ${name}, in the webtoon style described above, exactly as the reference images show it. ${THREE_VIEWS} The object alone, large, no hand holding it. Same shape, materials and colours in every view.`);
   } else {
     lines.push(
-      `LOCATION DESIGN SHEET of ${name}, in the webtoon style described above: one wide establishing illustration of the place, empty of characters, composed as a reference for future panels (main volumes, light sources, palette, ground, what surrounds it), exactly as the reference images show the place.`,
+      `AERIAL ESTABLISHING VIEW of ${name}, in the webtoon style described above: the place seen from high above at a three-quarter angle, wide enough to show the whole place and what surrounds it, its main volumes, its ground, its light sources and its atmosphere (mist, glow, depth), empty of characters, exactly as the reference images show the place. One single illustration, a reference for every future panel set here.`,
     );
   }
   lines.push(`DESIGN LOCKED, copy exactly: ${asset.must_keep.trim()}`);
