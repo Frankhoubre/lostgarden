@@ -589,9 +589,9 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             />
           </div>
           {tab === "scenario" ? (project ? <StudioProjectText project={project} notify={notify} /> : <StudioScreenplay panels={panels} />) : null}
-          {tab === "personnages" ? <StudioCharacters script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} withDocs={!project} /> : null}
+          {tab === "personnages" ? <StudioCharacters script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "objets" ? <StudioObjects script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
-          {tab === "decors" ? <StudioLocations script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} withDocs={!project} /> : null}
+          {tab === "decors" ? <StudioLocations script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "film" ? <StudioFrames panels={panels} onCreatePanel={createFromFrame} frames={frames} /> : null}
         </main>
       </div>
