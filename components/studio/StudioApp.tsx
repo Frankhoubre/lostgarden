@@ -55,6 +55,63 @@ const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "film", label: "Images du film", hint: "Une image toutes les 5 s" },
 ];
 
+/** The icons of the left bar: the name of each tab is in its tooltip. */
+function NavIcon({ tab }: { tab: Tab }) {
+  const common = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+  switch (tab) {
+    case "webtoon":
+      // A vertical strip of three panels.
+      return (
+        <svg {...common}>
+          <rect x="6" y="2.5" width="12" height="5.5" rx="1.2" />
+          <rect x="6" y="9.5" width="12" height="5.5" rx="1.2" />
+          <rect x="6" y="16.5" width="12" height="5" rx="1.2" />
+        </svg>
+      );
+    case "scenario":
+      // A page of script.
+      return (
+        <svg {...common}>
+          <path d="M14 2.5H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.5z" />
+          <path d="M14 2.5v5h5M9 12h6M9 15.5h6M9 8.5h2" />
+        </svg>
+      );
+    case "personnages":
+      // A figure.
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="7.5" r="3.5" />
+          <path d="M5 21v-1.5a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6V21" />
+        </svg>
+      );
+    case "objets":
+      // A pendant on its chain.
+      return (
+        <svg {...common}>
+          <path d="M8 3.5l4 6 4-6" />
+          <circle cx="12" cy="15" r="5.5" />
+          <circle cx="12" cy="15" r="2" />
+        </svg>
+      );
+    case "decors":
+      // Mountains under a moon.
+      return (
+        <svg {...common}>
+          <path d="M2.5 20l6.5-10 4.5 6.5 3-4 5 7.5z" />
+          <circle cx="17.5" cy="6" r="2" />
+        </svg>
+      );
+    default:
+      // A film strip.
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M7 4v16M17 4v16M3 8.5h4M3 15.5h4M17 8.5h4M17 15.5h4" />
+        </svg>
+      );
+  }
+}
+
 type StudioAppProps = {
   script: WebtoonScript;
   /** A project of its own (not Lost Garden): its film, its screenplay, its own empty library to start. */
@@ -569,9 +626,16 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
       <div className="studio-body">
         <nav className="studio-nav" aria-label="Sections du studio">
           {TABS.map((entry) => (
-            <button key={entry.id} type="button" className={`studio-nav-item ${tab === entry.id ? "is-active" : ""}`} onClick={() => setTab(entry.id)}>
-              <span>{entry.label}</span>
-              <small>{entry.hint}</small>
+            <button
+              key={entry.id}
+              type="button"
+              className={`studio-nav-item studio-nav-icon ${tab === entry.id ? "is-active" : ""}`}
+              onClick={() => setTab(entry.id)}
+              title={`${entry.label} · ${entry.hint}`}
+              aria-label={entry.label}
+              aria-current={tab === entry.id ? "page" : undefined}
+            >
+              <NavIcon tab={entry.id} />
             </button>
           ))}
         </nav>
