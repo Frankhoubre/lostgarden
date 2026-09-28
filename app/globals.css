@@ -6062,3 +6062,92 @@ select.studio-input {
   margin: 0 0.15rem;
   background: var(--st-line-2, rgba(255, 255, 255, 0.14));
 }
+
+/* "@" in a prompt: the list of references, grouped by characters, places, objects and panels. */
+.studio-mention {
+  position: relative;
+  width: 100%;
+}
+
+.studio-mention > textarea {
+  width: 100%;
+}
+
+.studio-mention-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  width: min(22rem, 100%);
+  min-width: 15rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--st-line-2, rgba(255, 255, 255, 0.14));
+  border-radius: 10px;
+  background: var(--st-panel, #14161a);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+}
+
+.studio-director .studio-mention-list {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.studio-mention-group {
+  margin: 0.35rem 0.45rem 0.2rem;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border-radius: 7px;
+  text-align: left;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-mention-item.is-active {
+  background: var(--st-accent-bg, rgba(94, 180, 255, 0.13));
+}
+
+.studio-mention-thumb {
+  flex: none;
+  width: 40px;
+  height: 28px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: var(--st-raised, #1b1e24);
+}
+
+.studio-mention-text {
+  display: grid;
+  min-width: 0;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.studio-mention-text b {
+  font-weight: 600;
+}
+
+.studio-mention-text small {
+  overflow: hidden;
+  font-size: 0.66rem;
+  color: var(--st-faint, #6c7280);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-mention-empty {
+  margin: 0.4rem 0.5rem;
+  font-size: 0.74rem;
+  color: var(--st-muted, #a3a9b5);
+}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getFirebaseAuth } from "@/lib/firebase";
 import type { LibraryOverlay, WebtoonPanel } from "@/lib/webtoon/types";
+import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 
 /** What the window hands over when the retouch is launched: the work goes on after it closes. */
 export type RetouchRequest = {
@@ -10,6 +11,8 @@ export type RetouchRequest = {
   /** The painted zone at the image's size, or null to change the whole panel. */
   mask: HTMLCanvasElement | null;
   brush: number;
+  /** References called with "@" in the instruction: their images go with the retouch. */
+  references?: { name: string; image: string; kind: MentionItem["kind"] }[];
 };
 
 type PanelInpaintProps = {
@@ -18,6 +21,8 @@ type PanelInpaintProps = {
   /** Launch the retouch; the window closes right after and the panel shows it is being worked on. */
   onSubmit: (request: RetouchRequest) => void;
   onClose: () => void;
+  /** What "@" can call in the instruction. */
+  mentions?: MentionItem[];
 };
 
 const SIZES: [number, number][] = [
@@ -67,7 +72,7 @@ type RetouchInput = RetouchRequest & {
  * original, with a soft edge. Returns the new image as a PNG data URL at the
  * original size.
  */
-export async function retouchImage({ slug, panel, library, quality = "high", prompt, mask, brush }: RetouchInput): Promise<string> {
+export async function retouchImage({ slug, panel, library, quality = "high", prompt, mask, brush, references = [] }: RetouchInput): Promise<string> {
   const image = await loadImage(panel.image.src);
   const w = image.naturalWidth;
   const h = image.naturalHeight;
@@ -99,7 +104,7 @@ export async function retouchImage({ slug, panel, library, quality = "high", pro
   const response = await fetch(`/api/webtoon/${slug}/inpaint`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-    body: JSON.stringify({ panel, image: source.toDataURL("image/jpeg", 0.92), ...(apiMask ? { mask: apiMask } : {}), prompt, size: `${sw}x${sh}`, library, quality }),
+    body: JSON.stringify({ panel, image: source.toDataURL("image/jpeg", 0.92), ...(apiMask ? { mask: apiMask } : {}), prompt, size: `${sw}x${sh}`, library, quality, extra_references: references }),
   });
   const payload = (await response.json().catch(() => ({}))) as { data_url?: string; error?: string };
   if (!response.ok || !payload.data_url) throw new Error(payload.error ?? `erreur ${response.status}`);
@@ -145,7 +150,7 @@ export async function retouchImage({ slug, panel, library, quality = "high", pro
  * (the previous one stays in the panel's history) and the notification
  * center says when it is done.
  */
-export function PanelInpaint({ panel, notify, onSubmit, onClose }: PanelInpaintProps) {
+export function PanelInpaint({ panel, notify, onSubmit, onClose, mentions = [] }: PanelInpaintProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const maskRef = useRef<HTMLCanvasElement | null>(null);
@@ -156,6 +161,8 @@ export function PanelInpaint({ panel, notify, onSubmit, onClose }: PanelInpaintP
   const [brush, setBrush] = useState(90);
   const [prompt, setPrompt] = useState("");
   const [painted, setPainted] = useState(false);
+  /** The references called with "@", kept while their name is still in the instruction. */
+  const [called, setCalled] = useState<MentionItem[]>([]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -250,7 +257,10 @@ export function PanelInpaint({ panel, notify, onSubmit, onClose }: PanelInpaintP
       zone.height = mask.height;
       zone.getContext("2d")?.drawImage(mask, 0, 0);
     }
-    onSubmit({ prompt: prompt.trim(), mask: zone, brush });
+    const references = called
+      .filter((item) => item.image && prompt.includes(`@${item.name}`))
+      .map((item) => ({ name: item.name, image: item.image!.split("#")[0], kind: item.kind }));
+    onSubmit({ prompt: prompt.trim(), mask: zone, brush, references });
     onClose();
   };
 
@@ -297,11 +307,13 @@ export function PanelInpaint({ panel, notify, onSubmit, onClose }: PanelInpaintP
           </label>
           <label className="webtoon-field">
             <span>{painted ? "Ce qui doit apparaître dans la zone" : "Ce qui doit changer dans la case"}</span>
-            <textarea
+            <MentionTextarea
+              items={mentions}
+              onMention={(item) => setCalled((list) => [...list.filter((x) => !(x.kind === item.kind && x.id === item.id)), item])}
               rows={5}
               value={prompt}
               placeholder={painted ? "Par exemple : le casque posé dans la mousse, vu de près, avec son anneau ; ou : retire la branche, ne laisse que la brume bleue." : "Par exemple : la scène de nuit, seulement la lueur des champignons ; ou : Lanterne tourne la tête vers la gauche ; ou : retire le deuxième lapin."}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(value) => setPrompt(value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) launch();
               }}

@@ -470,7 +470,30 @@ export function findReference(id: string, overlay?: LibraryOverlay | null): Refe
  * image path (or https URL) listed in `visual_references` becomes a
  * source-frame reference on the fly, attached last like the others.
  */
+/** An image of another panel of the strip, called with "@" in a prompt: its URL marked with the panel's number. */
+export function panelReferenceSrc(panel: { order: number; image: { src: string } }): string {
+  return `${panel.image.src.split("#")[0]}#case=${panel.order}`;
+}
+
+/** The panel number of an image attached with "@", or null for a film frame. */
+export function panelReferenceNumber(src: string): number | null {
+  const match = /#case=(\d+)/.exec(src);
+  return match ? Number(match[1]) : null;
+}
+
 export function frameReference(image: string): ReferenceAsset {
+  const panelNumber = panelReferenceNumber(image);
+  if (panelNumber !== null) {
+    return {
+      id: image,
+      kind: "source_frame",
+      name: `Panel ${panelNumber} of the strip`,
+      image: image.split("#")[0],
+      must_keep: "The same characters, clothes, place, light and palette as this earlier panel of the strip.",
+      description: `Panel ${panelNumber} of the strip, called in the studio for continuity.`,
+      tags: ["source_frame", "studio", "panel"],
+    };
+  }
   const match = /(\d{2})m(\d{2})s/.exec(image);
   const label = match ? `${Number(match[1])}:${match[2]}` : image.split("/").pop() ?? image;
   return {

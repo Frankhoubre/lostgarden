@@ -47,7 +47,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string };
+  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string; extra_references?: { name?: string; image?: string; kind?: string }[] };
   const instruction = (body.prompt ?? "").trim();
   if (!body.image?.startsWith("data:image/")) return Response.json({ error: "image attendue" }, { status: 400 });
   if (body.mask && !body.mask.startsWith("data:image/png")) return Response.json({ error: "masque PNG attendu" }, { status: 400 });
@@ -69,6 +69,13 @@ export async function POST(request: Request, { params }: RouteContext) {
     const sheet = library.find((a) => a.kind === "object" && (a.id === object || a.id === `obj.${object}`) && a.image);
     if (sheet && references.length < 6) references.push({ id: sheet.id, name: sheet.name, image: sheet.image, role: "object" });
   }
+  // What the author called with "@" in the instruction: a sheet, a place, an object, another panel.
+  const ROLE_OF = { character: "character", object: "object", location: "location", panel: "panel" } as const;
+  for (const extra of (Array.isArray(body.extra_references) ? body.extra_references : []).slice(0, 4)) {
+    if (!extra || typeof extra.image !== "string" || !/^(\/[\w./%-]+\.(jpe?g|png|webp)|https:\/\/firebasestorage\.googleapis\.com\/\S+)$/i.test(extra.image)) continue;
+    if (references.some((r) => r.image === extra.image) || references.length >= 7) continue;
+    references.push({ id: `mention-${references.length}`, name: String(extra.name ?? "a reference").slice(0, 80), image: extra.image, role: ROLE_OF[extra.kind as keyof typeof ROLE_OF] ?? "character" });
+  }
   const locks = references.slice(1).map((r) => library.find((a) => a.id === r.id)?.must_keep).filter(Boolean);
 
   const prompt = [
@@ -77,7 +84,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       ? `RETOUCH of an existing webtoon panel. Image 1 is the panel; the mask marks one zone of it. Inside that zone, and only there: ${instruction}. Everything outside the zone stays exactly as drawn in image 1: same composition, same lines, same flat colours, same light. The new content matches the flatness, the line weight and the palette of the rest of the panel and connects seamlessly at the edge of the zone.`
       : `EDIT of an existing webtoon panel. Image 1 is the panel. Apply this change: ${instruction}. Everything the change does not name stays exactly as drawn in image 1: the same framing and camera angle, the same composition, the same characters in the same places and poses, the same lines, flat colours and light. Redraw the whole image at the same quality, not a collage. The black bands at the edges of image 1, if any, are padding: keep them black.`,
     locks.length ? `DESIGN LOCKED: ${locks.join(" ")}` : "",
-    references.length > 1 ? `REFERENCE IMAGES: image 1 is the panel to ${zone ? "retouch" : "edit"}; ${references.slice(1).map((r, i) => `image ${i + 2} is ${r.name} (${r.role === "object" ? "object" : "character"} design to copy exactly)`).join("; ")}.` : "",
+    references.length > 1 ? `REFERENCE IMAGES: image 1 is the panel to ${zone ? "retouch" : "edit"}; ${references.slice(1).map((r, i) => `image ${i + 2} is ${r.name} (${r.role === "object" ? "object design to copy exactly" : r.role === "location" ? "the place: its design, light and palette" : r.role === "panel" ? "another panel of the strip: keep its characters, clothes, place and light" : "character design to copy exactly"})`).join("; ")}.` : "",
     bible.rendering.filter((rule) => !rule.startsWith("Composition designed")).join(" "),
     "DO NOT: " + bible.negative.join(" "),
   ]

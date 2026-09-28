@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type Set
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
+import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
 import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
@@ -42,7 +43,7 @@ import {
 } from "@/lib/webtoon/editor-ops";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { computeLayout } from "@/lib/webtoon/layout";
-import { libraryCharacters, libraryLocations, libraryObjects, libraryWith, referencesForPanel } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryLocations, libraryObjects, libraryWith, panelReferenceNumber, panelReferenceSrc, referencesForPanel } from "@/lib/webtoon/references";
 import { imageSize, readFileAsDataUrl, uploadPanelImage } from "@/lib/webtoon/studio";
 import { studioFilmFrames } from "@/lib/webtoon/studio-assets";
 import { applyTranslations, itemsToTranslate, type LetteringItem } from "@/lib/webtoon/translate";
@@ -207,6 +208,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
   const LOCATIONS = useMemo(() => libraryLocations(library), [library]);
   const OBJECTS = useMemo(() => libraryObjects(library), [library]);
+  /** What "@" calls in a prompt: the characters, places and objects of the library, and the panels drawn so far. */
+  const MENTIONS = useMemo<MentionItem[]>(
+    () => [
+      ...CHARACTERS.map((c) => ({ kind: "character" as const, id: c.id, name: c.name, image: c.image, avatar: c.avatar })),
+      ...LOCATIONS.map((l) => ({ kind: "location" as const, id: l.id, name: l.name, image: l.image })),
+      ...OBJECTS.map((o) => ({ kind: "object" as const, id: o.id, name: o.name, image: o.image })),
+      ...panels
+        .filter((p) => p.image.src && p.image.status !== "missing")
+        .map((p) => ({ kind: "panel" as const, id: p.panel_id, name: `Case ${p.order}`, image: p.image.src, hint: p.description.slice(0, 70) })),
+    ],
+    [CHARACTERS, LOCATIONS, OBJECTS, panels],
+  );
   const { user } = useAuth();
   /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it, editable in place. */
   const [view, setView] = useState<"panel" | "strip">(() => {
@@ -1074,6 +1087,25 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     }
   };
 
+  /** "@" in a prompt of the selected panel: the reference goes with it (sheet, place, object, or the image of another panel). */
+  const attachMention = (item: MentionItem) => {
+    if (!selected) return;
+    if (item.kind === "character") {
+      if (!selected.characters.includes(item.id)) setCharacters(item.id, true);
+    } else if (item.kind === "location") {
+      patch({ location: item.id });
+    } else if (item.kind === "object") {
+      const current = selected.objects ?? [];
+      if (!current.includes(item.id)) patch({ objects: [...current, item.id] });
+    } else {
+      const other = panelsRef.current.find((p) => p.panel_id === item.id);
+      if (!other || other.panel_id === selected.panel_id) return;
+      const src = panelReferenceSrc(other);
+      if (!selected.visual_references.some((r) => r.split("#")[0] === other.image.src.split("#")[0])) patch({ visual_references: [...selected.visual_references, src] });
+    }
+    notify(`${item.name} ${item.kind === "panel" ? "jointe comme référence" : "joint à la case"}`);
+  };
+
   const setCharacters = (id: string, on: boolean) => {
     if (!selected) return;
     const characters = on ? [...new Set([...selected.characters, id])] : selected.characters.filter((c) => c !== id);
@@ -1599,6 +1631,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             notify={notify}
             onClose={() => setInpaintOpen(false)}
             onSubmit={(request) => void runRetouch(selected, request)}
+            mentions={MENTIONS.filter((m) => !(m.kind === "panel" && m.id === selected.panel_id))}
           />
         ) : null}
 
@@ -1622,15 +1655,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         {inspectorTab === "scene" ? (
           <div className="studio-section">
             <h3 className="studio-group-title">La case</h3>
-            <label className="webtoon-field"><span>Description de la case</span><textarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt." onChange={(e) => patch({ description: e.target.value })} /></label>
-            <label className="webtoon-field"><span>Action</span><textarea rows={2} value={selected.action} onChange={(e) => patch({ action: e.target.value })} /></label>
+            <label className="webtoon-field"><span>Description de la case</span><MentionTextarea rows={4} value={selected.description} placeholder="Ce que montre la case, en une ou deux phrases. C'est le cœur du prompt. Tapez @ pour appeler un personnage, un lieu, un objet ou une case." onChange={(value) => patch({ description: value })} items={MENTIONS} onMention={attachMention} /></label>
+            <label className="webtoon-field"><span>Action</span><MentionTextarea rows={2} value={selected.action} onChange={(value) => patch({ action: value })} items={MENTIONS} onMention={attachMention} /></label>
             <div className="grid grid-cols-2 gap-3">
               <label className="webtoon-field"><span>Émotion</span><input value={selected.emotion} onChange={(e) => patch({ emotion: e.target.value })} /></label>
               <label className="webtoon-field"><span>Rôle narratif</span>
                 <select value={selected.narrative_role} onChange={(e) => patch({ narrative_role: e.target.value as NarrativeRole })}>{ROLES.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select>
               </label>
             </div>
-            <label className="webtoon-field"><span>Composition</span><textarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(e) => patch({ composition: e.target.value })} /></label>
+            <label className="webtoon-field"><span>Composition</span><MentionTextarea rows={2} value={selected.composition} placeholder="Où est le sujet dans le cadre, ce qui est au premier plan, où va l'œil." onChange={(value) => patch({ composition: value })} items={MENTIONS} onMention={attachMention} /></label>
             <h3 className="studio-group-title">Personnages <small>leurs fiches sont jointes au prompt</small></h3>
             <CastPicker items={CHARACTERS} selected={selected.characters} onToggle={(id, on) => setCharacters(id, on)} />
             <input
@@ -1683,7 +1716,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                     <li key={src} className="webtoon-ref">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={src} alt="" loading="lazy" />
-                      <span>{FILM_FRAMES.find((f) => f.src === src)?.label ?? src.split("/").pop()}</span>
+                      <span>{panelReferenceNumber(src) !== null ? `Case ${panelReferenceNumber(src)}` : FILM_FRAMES.find((f) => f.src === src)?.label ?? src.split("/").pop()}</span>
                       <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={() => setPanels((c) => toggleFrame(c, selected.panel_id, src))}>Retirer</button>
                     </li>
                   ))}
@@ -1699,10 +1732,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   </label>
                   <button type="button" className="webtoon-mini" onClick={recompose}>Recomposer</button>
                 </div>
-                <textarea
+                <MentionTextarea
                   rows={12}
                   value={needsComposition(selected) ? preview.generation_prompt : selected.generation_prompt}
-                  onChange={(e) => patch({ generation_prompt: e.target.value, prompt_auto: false })}
+                  onChange={(value) => patch({ generation_prompt: value, prompt_auto: false })}
+                  items={MENTIONS}
+                  onMention={attachMention}
                 />
                 {needsComposition(selected) ? <p className="text-xs text-ivory/50">Aperçu du prompt composé. Le modifier à la main fige le texte ; « Recomposer » repart des champs.</p> : null}
                 <span className="webtoon-field-label">Références jointes, dans l&apos;ordre</span>
@@ -1854,7 +1889,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </div>
         ) : null}
       </aside>
-      <StudioDirector ask={askDirector} busy={busy} />
+      <StudioDirector ask={askDirector} busy={busy} mentions={MENTIONS} />
     </div>
   );
 }
