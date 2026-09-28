@@ -53,6 +53,8 @@ export type ReferenceAsset = {
    * "Webtoniser" redraws it as a webtoon sheet, so it can be redrawn again or brought back.
    */
   imported_image?: string;
+  /** Kept without a sheet on purpose ("Conserver vide"): the design lock alone describes it, no sheet is drawn. */
+  keep_empty?: boolean;
 };
 
 /**

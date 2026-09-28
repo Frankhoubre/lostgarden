@@ -6021,3 +6021,11 @@ select.studio-input {
   height: 100%;
   object-fit: contain;
 }
+
+.studio-bible-empty.is-kept-empty {
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--st-muted, #a3a9b5);
+  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 10px, transparent 10px 20px);
+}
