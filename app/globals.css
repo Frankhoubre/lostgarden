@@ -6151,3 +6151,18 @@ select.studio-input {
   font-size: 0.74rem;
   color: var(--st-muted, #a3a9b5);
 }
+
+.studio-hole-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.studio-list-link {
+  color: var(--st-accent-2, #9fd2ff);
+  font-size: inherit;
+}
+
+.studio-list-link:hover {
+  text-decoration: underline;
+}

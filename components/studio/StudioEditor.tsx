@@ -626,10 +626,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (index === 0) return null;
     const prev = panels[index - 1];
     const next = panels[index];
-    if (prev.source_time_start === null || next.source_time_start === null) return null;
+    if (prev.source_time_start === null || next.source_time_start === null || next.gap_ignored) return null;
     const from = coveredUntil([prev]);
     return next.source_time_start - from >= HOLE_SECONDS ? { from, to: next.source_time_start } : null;
   };
+  /** "Ignorer": the stretch stays untold on purpose; the choice is saved with the strip. */
+  const ignoreHole = (index: number, ignored = true) => {
+    const panel = panels[index];
+    if (!panel) return;
+    setPanels((current) => current.map((p) => (p.panel_id === panel.panel_id ? { ...p, gap_ignored: ignored || undefined } : p)));
+    onAutosave?.();
+  };
+  const ignoredHoles = panels.filter((p) => p.gap_ignored).length;
   const formatSeconds = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
   const fillHole = async (index: number) => {
     const hole = holeBefore(index);
@@ -1278,7 +1286,25 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   return (
     <div className="studio-editor webtoon-editor">
       <aside className="studio-list" ref={listRef}>
-        <p className="studio-list-total">{panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px</p>
+        <p className="studio-list-total">
+          {panels.length} cases · {layout.total_height.toLocaleString("fr-FR")} px
+          {ignoredHoles ? (
+            <>
+              {" · "}
+              <button
+                type="button"
+                className="studio-list-link"
+                onClick={() => {
+                  setPanels((current) => current.map((p) => (p.gap_ignored ? { ...p, gap_ignored: undefined } : p)));
+                  onAutosave?.();
+                }}
+                title="Réafficher les trous dans le film que vous aviez ignorés"
+              >
+                {ignoredHoles} trou{ignoredHoles > 1 ? "s" : ""} ignoré{ignoredHoles > 1 ? "s" : ""} · réafficher
+              </button>
+            </>
+          ) : null}
+        </p>
         <div className="studio-list-actions">
           {job ? (
             <div className="studio-job" role="status" aria-live="polite">
@@ -1359,9 +1385,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 <span>
                   Trou dans le film : {formatSeconds(holeBefore(index)!.from)} → {formatSeconds(holeBefore(index)!.to)} ({Math.round(holeBefore(index)!.to - holeBefore(index)!.from)} s sans case)
                 </span>
-                <button type="button" className="webtoon-mini" onClick={() => void fillHole(index)} disabled={busy} title="Écrit, dessine et traduit les cases qui manquent entre ces deux cases">
-                  Combler
-                </button>
+                <span className="studio-hole-actions">
+                  <button type="button" className="webtoon-mini" onClick={() => void fillHole(index)} disabled={busy} title="Écrit, dessine et traduit les cases qui manquent entre ces deux cases">
+                    Combler
+                  </button>
+                  <button type="button" className="webtoon-mini" onClick={() => ignoreHole(index)} title="Laisser ce passage du film sans case, volontairement : le signal disparaît">
+                    Ignorer
+                  </button>
+                </span>
               </li>
             ) : null}
             <li className={`studio-thumb-item ${checked.has(panel.panel_id) ? "is-checked" : ""} ${dropClass(listDrag, panel.panel_id)}`} {...listDrag.bind(panel.panel_id, "list")} title={busy ? undefined : "Maintenir le clic et glisser pour déplacer la case"}>
