@@ -5946,3 +5946,7 @@ select.studio-input {
 .studio-next-guide b {
   color: var(--st-text, #eceef2);
 }
+
+.studio-bible-pbar {
+  margin-top: 0.5rem;
+}

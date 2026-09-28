@@ -124,6 +124,34 @@ export function cleanWindow(raw: { beats?: unknown[]; sequences?: unknown[]; con
   return { beats, sequences: tiled, continues: raw.continues_previous === true };
 }
 
+/**
+ * Sequences at the scale of a scene. Two neighbours of the same kind are one
+ * sequence (windows are read apart, a scene often spans two of them); a
+ * quiet piece of three seconds or less (a fade to black, a breath between
+ * two shots) joins the sequence before it. A short action, tension,
+ * dialogue, memory or title keeps its own place: a fall of two seconds is
+ * exactly what must get its panels.
+ */
+export function consolidate(sequences: GuideSequence[]): GuideSequence[] {
+  const quiet = (s: GuideSequence) => (s.kind === "transition" || s.kind === "calm" || s.kind === "contemplation") && s.intensity <= 2;
+  const merge = (a: GuideSequence, b: GuideSequence): GuideSequence => ({
+    ...a,
+    to: Math.max(a.to, b.to),
+    intensity: Math.max(a.intensity, b.intensity),
+    summary: b.summary && !a.summary.includes(b.summary) ? `${a.summary} ${b.summary}`.trim().slice(0, 700) : a.summary,
+    characters: [...new Set([...(a.characters ?? []), ...(b.characters ?? [])])],
+  });
+  const out: GuideSequence[] = [];
+  for (const sequence of sequences) {
+    const last = out[out.length - 1];
+    if (last && (last.kind === sequence.kind || (quiet(sequence) && sequence.to - sequence.from < 3))) out[out.length - 1] = merge(last, sequence);
+    else out.push({ ...sequence });
+  }
+  // A quiet piece at the very start takes the kind of what follows it.
+  if (out.length > 1 && quiet(out[0]) && out[0].to - out[0].from < 3) out.splice(0, 2, { ...out[1], from: out[0].from });
+  return out;
+}
+
 /** The guide with one more window: its beats added, its first sequence merged into the last one when it continues it. */
 export function appendWindow(guide: FilmGuide, window: { beats: GuideBeat[]; sequences: GuideSequence[]; continues: boolean }, to: number): FilmGuide {
   const beats = [...guide.beats.filter((b) => !window.beats.some((w) => w.seconds === b.seconds)), ...window.beats].sort((a, b) => a.seconds - b.seconds);
@@ -140,7 +168,7 @@ export function appendWindow(guide: FilmGuide, window: { beats: GuideBeat[]; seq
     };
   } else if (first) sequences.push(first);
   sequences.push(...rest);
-  return { ...guide, beats, sequences, analyzed_until: Math.max(guide.analyzed_until, to + 1), updated_at: new Date().toISOString() };
+  return { ...guide, beats, sequences: consolidate(sequences), analyzed_until: Math.max(guide.analyzed_until, to + 1), updated_at: new Date().toISOString() };
 }
 
 /** The sequence a second belongs to (the next one when the second falls before the first). */
