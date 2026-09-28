@@ -32,6 +32,10 @@ type PanelCanvasProps = {
   onSelect?: () => void;
   /** Set while the panel's image is being drawn, retouched or waits its turn: a loader covers it. */
   busy?: PanelBusy;
+  /** On the strip: in front of or behind the panels around it. */
+  onLayer?: (direction: "front" | "back") => void;
+  /** On the strip: delete this panel. */
+  onDelete?: () => void;
 };
 
 /** What covers a panel while its image is made: the word shown, and the timing of its progress bar. */
@@ -52,7 +56,7 @@ const canvasWidth = (from: HTMLElement) => from.closest<HTMLElement>(".studio-ca
  * left and right edges widen or narrow it; "Recadrer" pans and zooms the
  * image inside its frame (drag, wheel, slider), in both views.
  */
-export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect, busy }: PanelCanvasProps) {
+export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect, busy, onLayer, onDelete }: PanelCanvasProps) {
   const surface = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -309,12 +313,38 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
               Déplacer
             </button>
           ) : null}
+          {canPlace && onLayer ? (
+            <>
+              <button type="button" className="studio-place-crop" title="Mettre au-dessus : devant les cases voisines, là où elles se chevauchent" onClick={(event) => { event.stopPropagation(); onLayer("front"); }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M12 3l9 5-9 5-9-5 9-5z" />
+                  <path d="M3 16l9 5 9-5" opacity="0.45" />
+                </svg>
+                Au-dessus
+              </button>
+              <button type="button" className="studio-place-crop" title="Mettre en dessous : derrière les cases voisines, là où elles se chevauchent" onClick={(event) => { event.stopPropagation(); onLayer("back"); }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M12 3l9 5-9 5-9-5 9-5z" opacity="0.45" />
+                  <path d="M3 16l9 5 9-5" />
+                </svg>
+                En dessous
+              </button>
+            </>
+          ) : null}
           {hasImage ? (
             <button type="button" className="studio-place-crop" title="Recadrer l'image dans la case : glisser pour la déplacer, molette pour zoomer" onClick={(event) => { event.stopPropagation(); setCropping(true); }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2" />
               </svg>
               Recadrer
+            </button>
+          ) : null}
+          {canPlace && onDelete ? (
+            <button type="button" className="studio-place-crop studio-place-delete" title="Supprimer cette case (touche Suppr)" onClick={(event) => { event.stopPropagation(); onDelete(); }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+              </svg>
+              Supprimer
             </button>
           ) : null}
         </div>

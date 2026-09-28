@@ -53,7 +53,17 @@ export function frameStyle(panel: Pick<WebtoonPanel, "bleed" | "frame">): CSSPro
   if (clip) style.clipPath = clip;
   if (frame.overlap) style.marginTop = `-${(frame.overlap / WEBTOON_WIDTH) * 100}%`;
   if (frame.tilt) style.transform = `rotate(${Math.max(-6, Math.min(6, frame.tilt))}deg)`;
+  // Every panel of the strip has its plane: 3 by default, one more for a panel laid over the previous one,
+  // the author's choice otherwise. Always positive, so a panel set behind never slips under the page.
+  style.zIndex = 3 + frameLayer(panel);
   return style;
+}
+
+/** The plane of a panel on the strip, -2 to 6 (the higher in front where panels overlap). */
+export function frameLayer(panel: Pick<WebtoonPanel, "frame">): number {
+  const z = panel.frame?.z;
+  if (typeof z === "number" && Number.isFinite(z)) return Math.max(-2, Math.min(6, Math.round(z)));
+  return panel.frame?.overlap ? 1 : 0;
 }
 
 /** The panel's centre, in percent of the strip from its middle, whatever set it (free place or side). */

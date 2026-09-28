@@ -6029,3 +6029,36 @@ select.studio-input {
   color: var(--st-muted, #a3a9b5);
   background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 10px, transparent 10px 20px);
 }
+
+/* Panels now carry a plane (z-index 1 to 9, frameStyle): the controls laid on the strip stay above every panel. */
+.studio-canvas-strip .studio-resize,
+.studio-place-bar,
+.studio-edge {
+  z-index: 20;
+}
+
+.studio-strip-insert {
+  z-index: 20;
+}
+
+.studio-stage-actions.is-sticky {
+  z-index: 30;
+}
+
+.studio-place-bar {
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 96%;
+}
+
+.studio-place-delete:hover {
+  border-color: #ff7b7b;
+  color: #ffb3b3;
+}
+
+.studio-stage-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 0 0.15rem;
+  background: var(--st-line-2, rgba(255, 255, 255, 0.14));
+}
