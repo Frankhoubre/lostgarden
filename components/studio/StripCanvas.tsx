@@ -24,6 +24,8 @@ type StripCanvasProps = {
   dragDisabled?: boolean;
   /** Checked panels move together with the one dragged. */
   checkedIds?: ReadonlySet<string>;
+  /** Panels being drawn, retouched or waiting their turn, with the word shown on their loader. */
+  busyIds?: ReadonlyMap<string, string>;
 };
 
 const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black: "#020409", abyss: "#020817" };
@@ -34,7 +36,7 @@ const BG: Record<WebtoonPanel["background"], string> = { white: "#f6f4ef", black
  * bubbles, sounds, captions, focal point, bottom edge for the height). A
  * click selects a panel; the inspector and the image actions follow.
  */
-export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, showFocal, frames = [], onInsertAfter, onInsertFrameAfter, onMove, dragDisabled, checkedIds }: StripCanvasProps) {
+export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, showFocal, frames = [], onInsertAfter, onInsertFrameAfter, onMove, dragDisabled, checkedIds, busyIds }: StripCanvasProps) {
   // In the strip a press is often a scroll or the start of a handle drag: the panel lifts only after a hold.
   const drag = usePanelDrag({ onDrop: (id, target) => onMove?.(id, target), holdMs: 350, disabled: dragDisabled || !onMove });
   const together = (id: string) => Boolean(drag.dragId && checkedIds?.has(drag.dragId) && checkedIds.has(id));
@@ -76,6 +78,7 @@ export function StripCanvas({ panels, locale, selectedId, onSelect, onChange, sh
                 onSelect(panel.panel_id);
               }}
               onChange={(changes) => onChange(panel.panel_id, changes)}
+              busyLabel={busyIds?.get(panel.panel_id)}
             />
             <div style={{ paddingTop: pct(placement.gap_after) }} aria-hidden="true" />
             {onInsertAfter ? (

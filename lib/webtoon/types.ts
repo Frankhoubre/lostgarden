@@ -180,6 +180,10 @@ export type PanelImage = {
   cost_usd?: number;
   /** `stale` means the prompt changed after the image was made. */
   status: "generated" | "stale" | "missing";
+  /** How the image was made: drawn from the panel, retouched from the previous one, or imported. */
+  origin?: "generate" | "inpaint" | "upload";
+  /** The instruction of a retouch, shown in the panel's image history. */
+  note?: string;
 };
 
 export type WebtoonPanel = {
@@ -232,6 +236,11 @@ export type WebtoonPanel = {
    */
   prompt_auto?: boolean;
   image: PanelImage;
+  /**
+   * The images the panel had before its current one, newest first, so any
+   * earlier drawing or retouch can be brought back (`lib/webtoon/image-history.ts`).
+   */
+  image_history?: PanelImage[];
 };
 
 /** A narrative beat groups panels that share one dramatic intention. */

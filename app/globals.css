@@ -2311,9 +2311,16 @@ h3 {
   z-index: 1;
   fill: #fff;
   stroke: var(--wt-ink);
-  /* As strong as the bubble's border: at 0.32 the outline was a hairline and the tail looked slipped behind the bubble. */
-  stroke-width: 1.4px;
+  /* Twice the bubble's border (0.3cqw): the fill drawn on top hides the inner half of the stroke, so the
+     line left around the tail is exactly as thick as the oval's. PanelLettering sets the measured border
+     of each bubble on the path, this is the value before the first measure. */
+  stroke-width: 0.6cqw;
   stroke-linejoin: round;
+}
+
+/* \`vector-effect\` is not inherited: set on the <svg> it left the path's stroke scaled with the
+   stretched 100x100 viewBox, several times thicker than the bubble's border. */
+.webtoon-tail path {
   vector-effect: non-scaling-stroke;
 }
 
@@ -2358,7 +2365,7 @@ h3 {
 
 .webtoon-lettering:has(.webtoon-bubble-whisper) .webtoon-tail-under {
   stroke: #7b8190;
-  stroke-width: 1px;
+  stroke-width: 0.44cqw;
 }
 
 .webtoon-bubble-thought {
@@ -3006,28 +3013,34 @@ h3 {
   background: #fff;
 }
 
+/* The handle of the panel height: a labelled pill at the bottom edge, dragged up or down. */
 .studio-resize {
   position: absolute;
   left: 50%;
-  bottom: 0.3rem;
+  bottom: 0.35rem;
   transform: translateX(-50%);
-  width: 46%;
-  height: 12px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.35);
-  border: 1px solid rgba(56, 189, 248, 0.6);
+  background: rgba(6, 16, 24, 0.88);
+  border: 1px solid rgba(125, 223, 255, 0.75);
+  color: var(--lily);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(2, 4, 9, 0.55);
   cursor: ns-resize;
   touch-action: none;
 }
 
-.studio-resize span {
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  transform: translateX(-50%);
-  font-size: 0.6rem;
-  color: rgba(216, 210, 194, 0.6);
-  white-space: nowrap;
+.studio-resize:hover,
+.studio-resize.is-active {
+  background: rgba(14, 44, 64, 0.95);
+  border-color: var(--magic);
 }
 
 .studio-strip-preview {
@@ -3650,19 +3663,13 @@ h3 {
   cursor: default;
 }
 
+/* In the strip only the selected panel shows its height handle. */
 .studio-canvas-strip .studio-resize {
-  position: absolute;
-  left: 50%;
-  bottom: 0.3rem;
-  transform: translateX(-50%);
-  z-index: 6;
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  display: none;
 }
 
-.studio-canvas-strip:hover .studio-resize,
 .studio-canvas-strip.is-selected .studio-resize {
-  opacity: 1;
+  display: inline-flex;
 }
 
 .studio-canvas-strip:not(.is-selected) .studio-handles {
@@ -4692,4 +4699,262 @@ select.studio-input {
   background: rgba(255, 176, 60, 0.1);
   color: #ffd9a0;
   font-size: 0.7rem;
+}
+
+/* The notification center: the bell at the top right and its panel. */
+.studio-notif {
+  position: relative;
+}
+
+.studio-notif-bell {
+  position: relative;
+  gap: 0.3rem;
+}
+
+.studio-notif-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #f472b6;
+  color: #061018;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.studio-notif-count.is-running {
+  background: rgba(125, 223, 255, 0.95);
+}
+
+.studio-notif-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: min(70vh, 36rem);
+  padding: 0.5rem;
+  border: 1px solid rgba(125, 223, 255, 0.3);
+  border-radius: 0.8rem;
+  background: #061018;
+  box-shadow: 0 14px 40px rgba(2, 4, 9, 0.75);
+}
+
+.studio-notif-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.studio-notif-clear {
+  margin-right: 0.4rem;
+  font-size: 0.7rem;
+  color: rgba(216, 210, 194, 0.7);
+}
+
+.studio-notif-clear:hover {
+  color: var(--lily);
+}
+
+.studio-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.studio-notif-item > button,
+.studio-notif-item > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.55rem;
+  text-align: left;
+  color: rgba(216, 210, 194, 0.95);
+}
+
+.studio-notif-item > button:hover {
+  background: rgba(125, 223, 255, 0.08);
+}
+
+.studio-notif-item.is-unread > button,
+.studio-notif-item.is-unread > div {
+  background: rgba(125, 223, 255, 0.06);
+}
+
+.studio-notif-item.is-running > button,
+.studio-notif-item.is-running > div {
+  background: rgba(125, 223, 255, 0.1);
+}
+
+.studio-notif-state {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-top: 0.05rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.studio-notif-state.is-done {
+  background: rgba(74, 222, 128, 0.18);
+  color: #86efac;
+}
+
+.studio-notif-state.is-error {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+}
+
+.studio-notif-state.is-info {
+  background: rgba(125, 223, 255, 0.12);
+  color: rgba(125, 223, 255, 0.85);
+  font-style: italic;
+}
+
+.studio-notif-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.studio-notif-text b {
+  font-weight: 700;
+  color: var(--lily);
+}
+
+.studio-notif-text span {
+  overflow-wrap: anywhere;
+  color: rgba(216, 210, 194, 0.85);
+}
+
+.studio-notif-text small {
+  font-size: 0.66rem;
+  color: rgba(216, 210, 194, 0.55);
+}
+
+.studio-notif-thumb {
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+}
+
+.studio-notif-empty {
+  margin: 0.4rem 0.6rem 0.6rem;
+  font-size: 0.78rem;
+  color: rgba(216, 210, 194, 0.7);
+}
+
+/* A panel of the strip being drawn or retouched. */
+.studio-panel-busy {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: rgba(2, 4, 9, 0.62);
+  color: rgba(216, 210, 194, 0.95);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.studio-panel-busy.is-soft {
+  background: rgba(2, 4, 9, 0.3);
+  font-size: 0.7rem;
+  color: rgba(216, 210, 194, 0.75);
+}
+
+/* Every image the panel had, the current one first: a click brings one back. */
+.studio-versions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+
+.studio-versions-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(125, 223, 255, 0.7);
+}
+
+.studio-versions-row {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+}
+
+.studio-version {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  width: 4.6rem;
+  padding: 0.2rem;
+  border: 1px solid rgba(125, 223, 255, 0.18);
+  border-radius: 0.5rem;
+  background: rgba(2, 8, 23, 0.6);
+  cursor: pointer;
+}
+
+.studio-version img {
+  width: 100%;
+  height: 4.2rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+}
+
+.studio-version span {
+  font-size: 0.62rem;
+  color: rgba(216, 210, 194, 0.8);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-version:hover:not(:disabled) {
+  border-color: rgba(125, 223, 255, 0.6);
+}
+
+.studio-version.is-current {
+  border-color: var(--magic);
+  box-shadow: 0 0 0 1px var(--magic);
+  cursor: default;
+}
+
+.studio-version:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

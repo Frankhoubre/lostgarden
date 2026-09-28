@@ -11,6 +11,7 @@ import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioLocations } from "@/components/studio/StudioLocations";
+import { StudioNotifications } from "@/components/studio/StudioNotifications";
 import { StudioObjects } from "@/components/studio/StudioObjects";
 import { StudioProjectText } from "@/components/studio/StudioProjectText";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
@@ -21,6 +22,7 @@ import { computeLayout } from "@/lib/webtoon/layout";
 import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/webtoon/project";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
+import { NOTIFICATION_LIMIT, loadNotifications, looksLikeError, saveNotifications, type StudioNotification, type TrackTask } from "@/lib/webtoon/notifications";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
@@ -146,12 +148,67 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [conflict, setConflict] = useState<DraftMeta | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const notify = useCallback((message: string) => {
+  /** The notification center (the bell at the top right): every message and every task of the session. */
+  const [notifications, setNotifications] = useState<StudioNotification[]>([]);
+  const notificationsLoaded = useRef(false);
+  // Read after the first render (the server has no storage), merged under what this visit already added.
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      const stored = loadNotifications(script.slug);
+      notificationsLoaded.current = true;
+      if (stored.length) setNotifications((current) => [...current, ...stored.filter((entry) => !current.some((c) => c.id === entry.id))].slice(0, NOTIFICATION_LIMIT));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [script.slug]);
+  useEffect(() => {
+    if (notificationsLoaded.current) saveNotifications(script.slug, notifications);
+  }, [script.slug, notifications]);
+
+  const toast = useCallback((message: string) => {
     setNotice(message);
     // An error stays long enough to be read; a confirmation goes away quickly.
-    const isError = /erreur|impossible|Storage|Gateway|\d{3}\b|refus|échec/i.test(message);
-    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), isError ? 12000 : 2600);
+    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), looksLikeError(message) ? 12000 : 2600);
   }, []);
+
+  const notify = useCallback(
+    (message: string) => {
+      toast(message);
+      const at = Date.now();
+      setNotifications((current) =>
+        [{ id: `n${at}-${Math.random().toString(36).slice(2, 7)}`, title: message, status: looksLikeError(message) ? ("error" as const) : ("info" as const), started_at: at, ended_at: at, read: false }, ...current].slice(0, NOTIFICATION_LIMIT),
+      );
+    },
+    [toast],
+  );
+
+  /** A task that shows as running in the center until the editor ends it. */
+  const track = useCallback<TrackTask>(
+    (title, panelId) => {
+      const id = `t${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      setNotifications((current) => [{ id, title, status: "running" as const, panel_id: panelId, started_at: Date.now(), read: false }, ...current].slice(0, NOTIFICATION_LIMIT));
+      let ended = false;
+      const end = (status: "done" | "error", detail?: string, thumb?: string) => {
+        if (ended) return;
+        ended = true;
+        setNotifications((current) => current.map((entry) => (entry.id === id ? { ...entry, status, detail, thumb, ended_at: Date.now(), read: false } : entry)));
+        toast(detail ? `${title} : ${detail}` : title);
+      };
+      return { done: (detail, thumb) => end("done", detail ?? "terminé", thumb), fail: (detail) => end("error", detail) };
+    },
+    [toast],
+  );
+  const markNotificationsRead = useCallback(
+    () =>
+      setNotifications((current) =>
+        current.some((entry) => !entry.read && entry.status !== "running") ? current.map((entry) => (entry.status === "running" ? entry : { ...entry, read: true })) : current,
+      ),
+    [],
+  );
+  const clearNotifications = useCallback(() => setNotifications((current) => current.filter((entry) => entry.status === "running")), []);
 
   // The studio's library of characters and locations, saved a moment after
   // each change so a sheet edit or a new character never needs a click.
@@ -425,6 +482,15 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
           <span className={`studio-status ${dirty ? "is-dirty" : ""}`}>{status}</span>
           {publishedAt ? <span className="studio-status">Publié le {formatTime(publishedAt)}</span> : null}
           {notice ? <span className="studio-notice">{notice}</span> : null}
+          <StudioNotifications
+            items={notifications}
+            onOpenPanel={(panelId) => {
+              setSelectedId(panelId);
+              setTab("webtoon");
+            }}
+            onMarkRead={markNotificationsRead}
+            onClear={clearNotifications}
+          />
           <button type="button" className="webtoon-mini" onClick={() => void save()} disabled={working !== null} title="Enregistre le brouillon (Cmd+S)">Enregistrer</button>
           {project ? null : (
             <>
@@ -513,6 +579,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               selectedId={selectedId}
               setSelectedId={setSelectedId}
               notify={notify}
+              track={track}
               onAutosave={requestAutosave}
               library={library}
               setLibrary={setLibrary}

@@ -3,7 +3,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { Avatar } from "@/components/studio/Avatar";
-import { PanelInpaint } from "@/components/studio/PanelInpaint";
+import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
+import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
+import type { TrackTask } from "@/lib/webtoon/notifications";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -174,6 +176,8 @@ type StudioEditorProps = {
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
   notify: (message: string) => void;
+  /** Opens a running entry in the notification center, ended by the editor when the work is done. */
+  track?: TrackTask;
   /** Ask the studio to write the draft once the current panels are rendered. */
   onAutosave?: () => void;
   /** The studio's characters and locations, attached to every generation. */
@@ -193,7 +197,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const locale = previewLocale;
@@ -240,7 +244,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    * state, so several can be drawn at once, while a long run goes on too.
    * The studio's lock (`busy`) is only for the long runs.
    */
-  const [drawing, setDrawing] = useState<Set<string>>(() => new Set());
+  const [drawing, setDrawing] = useState<Map<string, "generate" | "retouch">>(() => new Map());
+  const startDrawing = (id: string, kind: "generate" | "retouch") => setDrawing((current) => new Map(current).set(id, kind));
+  const stopDrawing = (id: string) =>
+    setDrawing((current) => {
+      const next = new Map(current);
+      next.delete(id);
+      return next;
+    });
   // A long run in a background tab was frozen by Chrome mid-run (fetches left pending, nothing saved).
   // Chrome does not freeze a page that holds a Web Lock: hold one while a job runs.
   const working = busy || drawing.size > 0;
@@ -340,7 +351,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /** Store an image on a panel: uploaded to Storage when signed in, kept in the session otherwise. */
-  const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}, cost?: number) => {
+  /** Put a new image on the panel; the one it replaces stays in the panel's history. Returns the image's URL. */
+  const applyImage = async (panel: WebtoonPanel, dataUrl: string, model?: string, extra: Partial<WebtoonPanel> = {}, cost?: number, origin: "generate" | "inpaint" | "upload" = "generate", note?: string): Promise<string> => {
     let src = dataUrl;
     if (user && dataUrl.startsWith("data:")) {
       try {
@@ -350,17 +362,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       }
     }
     const size = await imageSize(dataUrl).catch(() => ({ width: 1080, height: panel.panel_height }));
-    setPanels((current) =>
-      current.map((p) =>
-        p.panel_id === panel.panel_id
-          ? { ...p, ...extra, image: { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated", ...(cost ? { cost_usd: cost } : {}) } }
-          : p,
-      ),
-    );
+    const image = { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" as const, origin, ...(note ? { note } : {}), ...(cost ? { cost_usd: cost } : {}) };
+    setPanels((current) => current.map((p) => (p.panel_id === panel.panel_id ? withNewImage({ ...p, ...extra }, image) : p)));
+    return src;
   };
 
   /** One generation call for one panel; the composed prompt comes back with the image. */
-  const generateOne = async (panel: WebtoonPanel): Promise<boolean> => {
+  /** The image's URL when it worked, null otherwise. */
+  const generateOne = async (panel: WebtoonPanel, onFailure?: (reason: string) => void): Promise<string | null> => {
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
@@ -372,7 +381,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       if (!response.ok || !received) {
         notify(`${panel.panel_id} : ${payload.error ?? `erreur ${response.status}`}`);
         setPanels((current) => markForRegeneration(current, panel.panel_id));
-        return false;
+        onFailure?.(payload.error ?? `erreur ${response.status}`);
+        return null;
       }
       const composed: Partial<WebtoonPanel> = {
         ...(needsComposition(panel) && payload.generation_prompt
@@ -383,11 +393,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         ...(payload.panel_height && payload.panel_height > panel.panel_height ? { panel_height: payload.panel_height } : {}),
       };
       if (payload.check?.remaining.length) notify(`${panel.panel_id} : ${payload.check.remaining.join(" ")}`);
-      await applyImage(panel, received, payload.model, composed, payload.cost_usd);
-      return true;
+      return await applyImage(panel, received, payload.model, composed, payload.cost_usd, "generate");
     } catch (error) {
+      onFailure?.(error instanceof Error ? error.message : "erreur de génération");
       notify(error instanceof Error ? error.message : "Erreur de génération");
-      return false;
+      return null;
     }
   };
 
@@ -398,16 +408,52 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       return;
     }
     const panel = selected;
-    setDrawing((current) => new Set(current).add(panel.panel_id));
+    startDrawing(panel.panel_id, "generate");
+    const task = track?.(`Case ${panel.order} · ${panel.image.src ? "nouvelle image" : "première image"}`, panel.panel_id);
+    let failure = "la génération a échoué";
     try {
-      if (await generateOne(panel)) notify(`${panel.panel_id} : ${panel.image.src ? "image regénérée" : "image générée"}`);
-    } finally {
-      setDrawing((current) => {
-        const next = new Set(current);
-        next.delete(panel.panel_id);
-        return next;
+      const src = await generateOne(panel, (reason) => {
+        failure = reason;
       });
+      if (src) {
+        task?.done(panel.image.src ? "image regénérée, l'ancienne est dans l'historique" : "image générée", src);
+        onAutosave?.();
+      } else task?.fail(failure);
+    } finally {
+      stopDrawing(panel.panel_id);
     }
+  };
+
+  /**
+   * A retouch launched from the window, which is already closed: the panel
+   * shows a loader, the notification center a running entry, and the new
+   * image takes the place of the current one when it arrives (the current
+   * one goes to the history). Several panels can be retouched at once.
+   */
+  const runRetouch = async (panel: WebtoonPanel, request: RetouchRequest) => {
+    startDrawing(panel.panel_id, "retouch");
+    const short = request.prompt.length > 70 ? `${request.prompt.slice(0, 67)}…` : request.prompt;
+    const task = track?.(`Case ${panel.order} · ${request.mask ? "retouche d'une zone" : "modification"}`, panel.panel_id);
+    try {
+      const dataUrl = await retouchImage({ ...request, slug: script.slug, panel, library: libraryRef.current, quality });
+      const src = await applyImage(panel, dataUrl, "inpaint", {}, undefined, "inpaint", request.prompt);
+      onAutosave?.();
+      if (task) task.done(`« ${short} »`, src);
+      else notify(request.mask ? "Zone retouchée" : "Case modifiée");
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "retouche impossible";
+      if (task) task.fail(reason);
+      else notify(`Retouche impossible : ${reason}`);
+    } finally {
+      stopDrawing(panel.panel_id);
+    }
+  };
+
+  /** Bring back an earlier image of the panel; the current one goes to the history. */
+  const pickVersion = (panel: WebtoonPanel, src: string) => {
+    setPanels((current) => current.map((p) => (p.panel_id === panel.panel_id ? restoreImage(p, src) : p)));
+    onAutosave?.();
+    notify(`Case ${panel.order} : autre version de l'image remise`);
   };
 
   /** Generate every panel without a current image, one after the other, in strip order. */
@@ -887,7 +933,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     if (!selected) return;
     setBusy(true);
     try {
-      await applyImage(selected, await readFileAsDataUrl(file), "manual-upload");
+      await applyImage(selected, await readFileAsDataUrl(file), "manual-upload", {}, undefined, "upload");
       onAutosave?.();
       notify("Image remplacée");
     } finally {
@@ -1110,6 +1156,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const pending = pendingPanels(panels).length;
   const isTitleCard = selected.caption.some((c) => c.style === "title") && !selected.image.src;
+  const versions = imageVersions(selected);
+  const stripBusy = new Map<string, string>([
+    ...(job?.running ?? (job?.current ? [job.current] : [])).map((id) => [id, "Génération…"] as [string, string]),
+    ...(job?.queue ?? []).map((id) => [id, "En attente"] as [string, string]),
+    ...[...drawing].map(([id, kind]) => [id, kind === "retouch" ? "Retouche…" : "Génération…"] as [string, string]),
+  ]);
   const preview = panelForGeneration(selected, script, library);
   const frames = attachedFrames(selected);
 
@@ -1223,7 +1275,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <span className="studio-thumb-empty">{panel.caption.some((c) => c.style === "title") ? panel.caption[0].text.en : "sans image"}</span>
                 )}
                 {job?.current === panel.panel_id || job?.running?.includes(panel.panel_id) || drawing.has(panel.panel_id) ? (
-                  <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />Génération…</span>
+                  <span className="studio-thumb-overlay"><span className="studio-spinner studio-spinner-lg" aria-hidden />{drawing.get(panel.panel_id) === "retouch" ? "Retouche…" : "Génération…"}</span>
                 ) : job?.queue.includes(panel.panel_id) ? (
                   <span className="studio-thumb-overlay studio-thumb-overlay-soft">en attente</span>
                 ) : null}
@@ -1358,6 +1410,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               onMove={dropPanels}
               dragDisabled={busy}
               checkedIds={checked}
+              busyIds={stripBusy}
               frames={FILM_FRAMES}
               onInsertAfter={(id) => {
                 const next = insertAfter(panels, id);
@@ -1377,10 +1430,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ) : (
             <PanelCanvas panel={selected} locale={locale} onChange={patch} showFocal={showFocal} />
           )}
-          {view === "panel" && (job?.current === selected.panel_id || drawing.has(selected.panel_id)) ? (
+          {view === "panel" && (job?.current === selected.panel_id || job?.running?.includes(selected.panel_id) || drawing.has(selected.panel_id)) ? (
             <div className="studio-stage-overlay" role="status">
               <span className="studio-spinner studio-spinner-lg" aria-hidden />
-              <span>Génération de l&apos;image…</span>
+              <span>{drawing.get(selected.panel_id) === "retouch" ? "Retouche de l'image…" : "Génération de l'image…"}</span>
               <small>{job && job.deadline > now ? `≈ ${remaining(job.deadline - now)}` : "≈ 1 min"}</small>
             </div>
           ) : null}
@@ -1395,32 +1448,54 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           {!isTitleCard ? (
             <>
               <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={drawing.has(selected.panel_id)} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références ; d'autres cases peuvent être redessinées en même temps" : "Dessine la case à partir de sa description et de ses références"}>
-                {drawing.has(selected.panel_id) ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
+                {drawing.get(selected.panel_id) === "generate" ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">Modifier / retoucher</button>
+              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">
+                {drawing.get(selected.panel_id) === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : "Modifier / retoucher"}
+              </button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
           ) : null}
           <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
         </div>
+        {versions.length > 1 ? (
+          <div className="studio-versions" role="group" aria-label="Historique des images de la case">
+            <span className="studio-versions-label">Historique · {versions.length} images</span>
+            <div className="studio-versions-row">
+              {versions.map(({ image, current }, index) => {
+                const when = image.generated_at ? new Date(image.generated_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "date inconnue";
+                const title = `${originLabel(image)} · ${when}${image.note ? `\n« ${image.note} »` : ""}${image.cost_usd ? `\n${image.cost_usd.toFixed(3)} $` : ""}${current ? "\nImage actuelle" : "\nCliquer pour la remettre sur la case"}`;
+                return (
+                  <button
+                    key={image.src}
+                    type="button"
+                    className={`studio-version ${current ? "is-current" : ""}`}
+                    onClick={() => (current ? undefined : pickVersion(selected, image.src))}
+                    disabled={drawing.has(selected.panel_id)}
+                    title={title}
+                    aria-pressed={current}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image.src} alt="" loading="lazy" />
+                    <span>{current ? "Actuelle" : index === 1 ? "Précédente" : originLabel(image)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
         <p className="studio-hint">
           {view === "strip" ? "Clique une case pour la sélectionner. " : ""}
-          Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, barre du bas = hauteur de la case.
+          Glisse les poignées sur l&apos;image : rond = bulle, losange = pointe de la bulle, carré = son, pastille « Hauteur » en bas = hauteur de la case (l&apos;image est recadrée, pas étirée).
         </p>
 
         {inpaintOpen && selected.image.src ? (
           <PanelInpaint
-            slug={script.slug}
             panel={selected}
-            library={library}
             notify={notify}
-            quality={quality}
             onClose={() => setInpaintOpen(false)}
-            onDone={async (dataUrl) => {
-              await applyImage(selected, dataUrl, "inpaint");
-              onAutosave?.();
-            }}
+            onSubmit={(request) => void runRetouch(selected, request)}
           />
         ) : null}
 

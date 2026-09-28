@@ -53,6 +53,8 @@ export function tailPath(
 function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
   const ref = useRef<HTMLDivElement>(null);
   const [tail, setTail] = useState<string | null>(null);
+  /** The bubble's own border, in px: the tail's outline is drawn exactly as thick. */
+  const [border, setBorder] = useState<number | null>(null);
   const target: Anchor | undefined = line.style === "off" ? undefined : line.tail;
 
   useEffect(() => {
@@ -63,6 +65,8 @@ function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
       const pr = panel.getBoundingClientRect();
       const br = el.getBoundingClientRect();
       if (!pr.width || !br.width) return;
+      const width = parseFloat(getComputedStyle(el).borderTopWidth);
+      setBorder(Number.isFinite(width) && width > 0 ? width : null);
       setTail(
         tailPath(
           {
@@ -91,7 +95,8 @@ function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
     <div className="webtoon-lettering">
       {tail ? (
         <svg className="webtoon-tail webtoon-tail-under" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path d={tail} />
+          {/* Twice the bubble's border: the fill drawn over the bubble hides the inner half of the stroke. */}
+          <path d={tail} style={border ? { strokeWidth: `${border * 2}px` } : undefined} />
         </svg>
       ) : null}
       <div
