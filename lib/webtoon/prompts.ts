@@ -84,7 +84,7 @@ export function buildGenerationPrompt(input: PromptInput): {
     lines.push(
       "REFERENCE IMAGES, in order: " +
         references
-          .map((r, i) => `image ${i + 1} is ${r.name} (${ROLE_LABEL[r.kind]})`)
+          .map((r, i) => `image ${i + 1} is ${r.name} (${r.tags?.includes("panel") ? "an earlier panel of this strip: keep its characters, clothes, place, light and palette, not its framing" : ROLE_LABEL[r.kind]})`)
           .join("; ") +
         ". Source frames give framing, light and palette; character sheets give the design; a style reference gives the rendering only: match its flatness, line weight and colour treatment exactly, and take nothing of its content. Redraw the scene for the requested vertical aspect ratio instead of stretching or cropping a reference.",
     );

@@ -1,10 +1,13 @@
 "use client";
 
+import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 import { useEffect, useRef, useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string; note?: string };
 
 type StudioDirectorProps = {
+  /** What "@" can call in a message: the names of the characters, places, objects and panels. */
+  mentions?: MentionItem[];
   /** Sends the conversation, runs the actions the director returns, and gives back its reply and what was done. */
   ask: (messages: { role: "user" | "assistant"; content: string }[]) => Promise<{ reply: string; done: string[] }>;
   busy: boolean;
@@ -15,7 +18,7 @@ type StudioDirectorProps = {
  * the studio. The editor runs its actions; this component only holds the
  * thread and the input.
  */
-export function StudioDirector({ ask, busy }: StudioDirectorProps) {
+export function StudioDirector({ ask, busy, mentions = [] }: StudioDirectorProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -76,11 +79,12 @@ export function StudioDirector({ ask, busy }: StudioDirectorProps) {
               void send();
             }}
           >
-            <textarea
+            <MentionTextarea
+              items={mentions}
               rows={2}
               value={text}
               placeholder={busy ? "Une génération est en cours, je répondrai mais j'attendrai pour agir." : "Que voulez-vous changer ?"}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(value) => setText(value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
