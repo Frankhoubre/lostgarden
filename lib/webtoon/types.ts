@@ -235,6 +235,8 @@ export type WebtoonPanel = {
   focal_point: Anchor;
   /** Zoom of the image inside its frame (1 = the whole frame covered, up to 3), centred on the focal point. */
   image_zoom?: number;
+  /** The author chose to leave the stretch of film before this panel untold: no "Trou dans le film" warning. */
+  gap_ignored?: boolean;
   transition_type: TransitionType;
   spacing_before: number;
   spacing_after: number;
