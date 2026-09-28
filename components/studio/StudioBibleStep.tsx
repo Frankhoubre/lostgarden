@@ -56,7 +56,12 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
   const [open, setOpen] = useState<{ src: string; label: string } | null>(null);
   const [picked, setPicked] = useState<Record<string, string[]>>({});
   const [manual, setManual] = useState<{ name: string; must_keep: string } | null>(null);
-  const uploadTarget = useRef<string | null>(null);
+  /** What the next chosen file is for: a reference of the sheet, or the sheet itself. */
+  const uploadTarget = useRef<{ id: string; as: "source" | "sheet" } | null>(null);
+  const pickFile = (id: string, as: "source" | "sheet") => {
+    uploadTarget.current = { id, as };
+    fileInput.current?.click();
+  };
   /** Who and what the author's other projects hold: recognised by the detection, or added by hand. */
   const [previousCast, setPreviousCast] = useState<PreviousEntry[]>([]);
   useEffect(() => {
@@ -115,10 +120,11 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
     }
   };
 
-  const keep = (candidate: BibleCandidate) => {
-    const asset = { ...candidateAsset(candidate), sources: chosen(candidate), seen_seconds: candidate.seconds };
+  const keep = (candidate: BibleCandidate, extra: Partial<ReferenceAsset> = {}) => {
+    const asset = { ...candidateAsset(candidate), sources: chosen(candidate), seen_seconds: candidate.seconds, ...extra };
     updateLibrary((current) => upsertAsset(current, asset));
     changeCandidates((list) => list.filter((c) => c.id !== candidate.id));
+    return asset.id;
   };
   const reject = (candidate: BibleCandidate) => changeCandidates((list) => list.filter((c) => c.id !== candidate.id));
   const matchOf = (candidate: BibleCandidate) => (candidate.same_as ? previousCast.find((p) => p.asset.id === candidate.same_as) : undefined);
@@ -197,7 +203,7 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
       const received = payload.src ?? payload.data_url;
       if (!response.ok || !received) return notify(`${asset.name.split(",")[0]} : ${payload.error ?? `erreur ${response.status}`}`);
       // The library changed while the sheet was drawn (other sheets, edits): only the image is set, on the latest entry.
-      updateAsset(asset, webtonize ? { image: received, imported_image: webtonize } : { image: received });
+      updateAsset(asset, webtonize ? { image: received, imported_image: webtonize, keep_empty: undefined } : { image: received, keep_empty: undefined });
       notify(`${webtonize ? `${asset.name.split(",")[0]} webtonisé` : `Fiche de ${asset.name.split(",")[0]} prête`}${payload.attempts && payload.attempts > 1 ? " (redessinée une fois : texte ou fond à corriger)" : ""}`);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Génération impossible");
@@ -212,7 +218,7 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
 
   const generateMissing = async () => {
     // Two at a time: each sheet waits most of its minute on the image model.
-    const queue = kept.filter((a) => !a.image);
+    const queue = kept.filter((a) => !a.image && !a.keep_empty);
     const worker = async () => {
       for (let next = queue.shift(); next; next = queue.shift()) await generate(next);
     };
@@ -220,16 +226,21 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
   };
 
   const onUpload = async (file: File) => {
-    const id = uploadTarget.current;
+    const target = uploadTarget.current;
     uploadTarget.current = null;
-    if (!id) return;
+    if (!target) return;
+    const id = target.id;
     const asset = all.find((a) => a.id === id);
     if (!asset) return;
     if (!user) return notify("Connectez-vous pour envoyer une image");
     setBusy((b) => new Set(b).add(id));
     try {
       const src = await uploadReference(project.id, id, file);
-      updateAsset(asset, (latest) => ({ sources: [...(latest.sources ?? []), src].slice(-MAX_SOURCES) }));
+      if (target.as === "sheet") {
+        // The author's image is the sheet as it is; "Webtoniser mon image" can redraw it in the style afterwards.
+        updateAsset(asset, { image: src, imported_image: src, keep_empty: undefined });
+        notify(`Image importée comme fiche de ${asset.name.split(",")[0]}`);
+      } else updateAsset(asset, (latest) => ({ sources: [...(latest.sources ?? []), src].slice(-MAX_SOURCES) }));
     } catch (error) {
       notify(`Envoi impossible : ${error instanceof Error ? error.message : "erreur"}`);
     } finally {
@@ -367,8 +378,10 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                       Vu {c.seconds.length} fois{c.scale ? ` · échelle : ${c.scale}` : ""} · {sel.length} image{sel.length > 1 ? "s" : ""} de référence
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button type="button" className={`webtoon-mini ${matchOf(c) ? "" : "studio-primary"}`} onClick={() => keep(c)}>{matchOf(c) ? "Garder comme nouveau" : "Garder"}</button>
+                    <button type="button" className="webtoon-mini" onClick={() => pickFile(keep(c), "sheet")} title="Le garder, avec une image de votre ordinateur comme fiche">Garder avec une image</button>
+                    <button type="button" className="webtoon-mini" onClick={() => keep(c, { keep_empty: true })} title="Le garder sans fiche : seul le verrou de design le décrit">Garder vide</button>
                     <button type="button" className="webtoon-mini" onClick={() => reject(c)}>Écarter</button>
                   </div>
                 </article>
@@ -413,9 +426,9 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-base text-lily">Dans la bible · {kept.length}</h3>
-          {kept.some((a) => !a.image) ? (
+          {kept.some((a) => !a.image && !a.keep_empty) ? (
             <button type="button" className="webtoon-mini studio-primary" onClick={() => void generateMissing()} disabled={busy.size > 0}>
-              Générer les fiches manquantes ({kept.filter((a) => !a.image).length})
+              Générer les fiches manquantes ({kept.filter((a) => !a.image && !a.keep_empty).length})
             </button>
           ) : null}
         </div>
@@ -437,7 +450,17 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                       <img src={asset.image} alt={asset.name} />
                     </button>
                   ) : (
-                    <div className="studio-bible-empty">{working ? <><span className="studio-spinner studio-spinner-lg" aria-hidden /> Dessin de la fiche…</> : "Pas encore de fiche"}</div>
+                    <div className={`studio-bible-empty ${asset.keep_empty ? "is-kept-empty" : ""}`}>
+                      {working ? (
+                        <>
+                          <span className="studio-spinner studio-spinner-lg" aria-hidden /> Dessin de la fiche…
+                        </>
+                      ) : asset.keep_empty ? (
+                        <span>Conservé sans fiche : le verrou de design suffit, aucune fiche ne sera dessinée</span>
+                      ) : (
+                        "Pas encore de fiche"
+                      )}
+                    </div>
                   )}
                   {working && busySince[asset.id] ? <ProgressBar key={busySince[asset.id]} startedAt={busySince[asset.id]} estimateMs={75_000} label="Fiche en cours" className="studio-bible-pbar" /> : null}
                 </div>
@@ -476,7 +499,7 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                         <span>{isFilm(src) ? "film" : "vous"}</span>
                       </button>
                     ))}
-                    <button type="button" className="studio-bible-add" onClick={() => { uploadTarget.current = asset.id; fileInput.current?.click(); }} disabled={working}>+ Vos images</button>
+                    <button type="button" className="studio-bible-add" onClick={() => pickFile(asset.id, "source")} disabled={working}>+ Vos images</button>
                   </div>
                   {seen.length ? (
                     <>
@@ -514,6 +537,20 @@ export function StudioBibleStep({ step, project, updateProject, frames, library,
                       </button>
                     ) : null;
                   })()}
+                  <button type="button" className="webtoon-mini" onClick={() => pickFile(asset.id, "sheet")} disabled={working} title="Choisir une image de votre ordinateur : elle devient la fiche telle quelle">
+                    Importer une image
+                  </button>
+                  {!asset.image ? (
+                    <button
+                      type="button"
+                      className={`webtoon-mini ${asset.keep_empty ? "is-active" : ""}`}
+                      onClick={() => updateAsset(asset, { keep_empty: asset.keep_empty ? undefined : true })}
+                      disabled={working}
+                      title={asset.keep_empty ? "Remettre dans les fiches à dessiner" : "Garder sans fiche : seul le verrou de design le décrit, « Générer les fiches manquantes » le laisse de côté"}
+                    >
+                      {asset.keep_empty ? "Conservé vide · annuler" : "Conserver vide"}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="webtoon-mini webtoon-mini-danger"
