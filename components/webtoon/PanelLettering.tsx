@@ -37,8 +37,19 @@ export function tailPath(
   const length = Math.hypot(dx, dy);
   const nx = -dy / length;
   const ny = dx / length;
-  const half = Math.min(panel.w * 0.032, bubble.rx * 0.45);
-  const base = { x: bubble.cx + dx * t * 0.82, y: bubble.cy + dy * t * 0.82 };
+  // Both corners of the base stay inside the oval: a corner past the edge left the outline of the base
+  // visible outside the bubble, a small dark notch where the tail met it (the "cassure" of 28 September).
+  // The base narrows until it fits; when that leaves a thread, it sits a little deeper in the bubble.
+  const inside = (x: number, y: number) => ((x - bubble.cx) / bubble.rx) ** 2 + ((y - bubble.cy) / bubble.ry) ** 2 <= 0.94;
+  const wanted = Math.min(panel.w * 0.032, bubble.rx * 0.45);
+  let base = { x: bubble.cx, y: bubble.cy };
+  let half = wanted;
+  for (const depth of [0.82, 0.76, 0.7]) {
+    base = { x: bubble.cx + dx * t * depth, y: bubble.cy + dy * t * depth };
+    half = wanted;
+    while (half > 1 && !(inside(base.x + nx * half, base.y + ny * half) && inside(base.x - nx * half, base.y - ny * half))) half *= 0.88;
+    if (half >= wanted * 0.6) break;
+  }
   const tip = { x: bubble.cx + dx * 0.9, y: bubble.cy + dy * 0.9 };
   const bow = panel.w * 0.014;
   const mid = { x: (base.x + tip.x) / 2, y: (base.y + tip.y) / 2 };
