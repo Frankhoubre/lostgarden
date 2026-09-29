@@ -2,10 +2,10 @@
 
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { fill, formatSeconds } from "@/lib/webtoon/text";
-import type { WebtoonScript } from "@/lib/webtoon/types";
+import type { NotesScript } from "@/lib/webtoon/notes";
 
 /** Why each panel exists: the engine's notes, readable under the strip. */
-export function StoryboardNotes({ script }: { script: WebtoonScript }) {
+export function StoryboardNotes({ script }: { script: NotesScript }) {
   const { dict } = useLocale();
   const w = dict.webtoon;
   const fidelity = {

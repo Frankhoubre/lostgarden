@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { StoryboardNotes } from "@/components/webtoon/StoryboardNotes";
+import { notesOf } from "@/lib/webtoon/notes";
 import { WebtoonPageShell } from "@/components/webtoon/WebtoonPageShell";
 import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import { forReader } from "@/lib/webtoon/reader-panels";
@@ -104,7 +105,7 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
         <EpisodeNav locale={locale} previous={previous} next={next} />
         {mailConfigured() ? <EpisodeAlerts locale={locale} words={w.alerts} privacyHref={localePath(locale, "/privacy-policy")} /> : null}
 
-        <StoryboardNotes script={script} />
+        <StoryboardNotes script={notesOf(script)} />
       </WebtoonPageShell>
     </>
   );
