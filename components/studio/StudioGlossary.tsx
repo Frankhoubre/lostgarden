@@ -55,13 +55,16 @@ export function StudioGlossary({ slug, series, user, panels, setPanels, characte
   const speakers = useMemo(() => {
     const ids = new Map<string, string>();
     for (const c of characters) ids.set(c.id, c.name);
-    for (const p of panels) for (const d of p.dialogue) if (d.speaker && d.speaker !== "voice" && !ids.has(d.speaker)) ids.set(d.speaker, d.speaker);
+    // A speaker written by name ("Rose") is the character of that name, not another one.
+    const known = (speaker: string) => ids.has(speaker) || [...ids].some(([id, name]) => id.toLowerCase() === speaker.toLowerCase() || name.toLowerCase() === speaker.toLowerCase());
+    for (const p of panels) for (const d of p.dialogue) if (d.speaker && d.speaker !== "voice" && d.speaker !== "unknown" && !known(d.speaker)) ids.set(d.speaker, d.speaker);
     return [...ids].map(([id, name]) => ({ id, name }));
   }, [characters, panels]);
 
   useEffect(() => {
     let cancelled = false;
-    void loadGlossary(series).then((value) => {
+    // Without an account (local work), the glossary starts empty instead of waiting forever.
+    void loadGlossary(series).catch(() => ({ terms: [], voices: [] }) as Glossary).then((value) => {
       if (cancelled) return;
       const voices: CharacterVoice[] = speakers.map((s) => value.voices.find((v) => v.id === s.id) ?? { id: s.id, name: s.name, voice: CANON_VOICES[s.id] ?? "" });
       const next = { ...value, voices: [...voices, ...value.voices.filter((v) => !voices.some((w) => w.id === v.id))] };
