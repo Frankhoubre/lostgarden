@@ -24,6 +24,9 @@ import { StudioObjects } from "@/components/studio/StudioObjects";
 import { StudioProjectText } from "@/components/studio/StudioProjectText";
 import { StudioReads } from "@/components/studio/StudioReads";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
+import { StudioBackgroundJob } from "@/components/studio/StudioBackgroundJob";
+import { cancelJob, kickJob, watchJob } from "@/lib/webtoon/job-client";
+import { JOB_SESSION_PREFIX, mergeStrips, type StudioJob } from "@/lib/webtoon/studio-job";
 import { getDb, getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
 import { appendFromFrame } from "@/lib/webtoon/editor-ops";
@@ -374,13 +377,72 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     };
   }, [script.slug, user, isProject]);
 
+  const panelsRef = useRef(panels);
+  const conflictRef = useRef<DraftMeta | null>(null);
+  /** What is stored now, merged into what this tab shows (lib/webtoon/studio-job.ts mergeStrips). */
+  const baselineRef = useRef(baseline);
+  useEffect(() => {
+    baselineRef.current = baseline;
+  }, [baseline]);
+  const mergeRemote = useCallback(async (): Promise<WebtoonPanel[] | null> => {
+    const draft = await loadStrip(DRAFTS_COLLECTION, script.slug).catch(() => null);
+    if (!draft) return null;
+    // From the ref, not a state updater: the autosave needs the merged strip now, an updater runs later.
+    const current = panelsRef.current;
+    const merged = current === baselineRef.current ? draft.panels : mergeStrips(baselineRef.current, current, draft.panels);
+    panelsRef.current = merged;
+    setPanels(merged);
+    setBaseline(draft.panels);
+    baselineRef.current = draft.panels;
+    syncedAt.current = draft.updated_at;
+    setSavedAt(draft.updated_at);
+    return merged;
+  }, [script.slug]);
+
+  /** The background job of this project, followed live; a chain of steps that broke is resumed when the tab opens. */
+  const [bgJob, setBgJob] = useState<StudioJob | null>(null);
+  const [bgHidden, setBgHidden] = useState<string | null>(null);
+  const bgJobRef = useRef<StudioJob | null>(null);
+  const lastPhase = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    return watchJob(script.slug, (next) => {
+      bgJobRef.current = next;
+      // A finished job stays in view for a day, then only a new one shows.
+      setBgJob(next && (next.status === "running" || Date.now() - Date.parse(next.updated_at) < 24 * 3600_000) ? next : null);
+      // The job drew sheets: the library of this tab takes them, or its next save would drop them.
+      const phase = next ? `${next.id}:${next.phase}` : null;
+      if (next && lastPhase.current && lastPhase.current !== phase && lastPhase.current.endsWith(":sheets")) {
+        void loadLibrary(script.slug).then((stored) => {
+          if (!stored) return;
+          setLibraryState((local) => ({ ...local, assets: [...local.assets.filter((a) => !stored.assets.some((b) => b.id === a.id && b.image && !a.image)), ...stored.assets.filter((b) => !local.assets.some((a) => a.id === b.id) || (b.image && !local.assets.find((a) => a.id === b.id)?.image))] }));
+        });
+      }
+      lastPhase.current = phase;
+    });
+  }, [user, script.slug]);
+  useEffect(() => {
+    if (!user || bgJob?.status !== "running") return;
+    const check = () => {
+      if (Date.now() - Date.parse(bgJobRef.current?.heartbeat_at ?? "") > 6 * 60_000) void kickJob(script.slug);
+    };
+    check();
+    const timer = window.setInterval(check, 90_000);
+    return () => window.clearInterval(timer);
+  }, [user, bgJob?.status, bgJob?.id, script.slug]);
+
   useEffect(() => {
     if (!user) return;
     return watchDraftMeta(DRAFTS_COLLECTION, script.slug, (meta) => {
       if (!meta?.updated_at || meta.session_id === STUDIO_SESSION_ID) return;
+      // A background job saved: its panels and images come into this tab, nothing typed here is lost.
+      if (meta.session_id?.startsWith(JOB_SESSION_PREFIX)) {
+        if (!syncedAt.current || meta.updated_at > syncedAt.current) void mergeRemote();
+        return;
+      }
       if (syncedAt.current && meta.updated_at > syncedAt.current) setConflict(meta);
     });
-  }, [user, script.slug]);
+  }, [user, script.slug, mergeRemote]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -396,8 +458,6 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   // gathered for a second and a half and only one save runs at a time: with
   // several images landing together, one save per image queued more writes
   // than Firestore accepts ("Write stream exhausted").
-  const panelsRef = useRef(panels);
-  const conflictRef = useRef<DraftMeta | null>(null);
   useEffect(() => {
     panelsRef.current = panels;
     conflictRef.current = conflict;
@@ -412,8 +472,10 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
       return;
     }
     autosaving.current = true;
-    const snapshot = panelsRef.current;
+    let snapshot = panelsRef.current;
     try {
+      // A job is writing too: take its latest save in first, so this save never drops its panels.
+      if (bgJobRef.current?.status === "running") snapshot = (await mergeRemote()) ?? snapshot;
       const at = await saveStrip(DRAFTS_COLLECTION, script.slug, snapshot, user);
       syncedAt.current = at;
       setSavedAt(at);
@@ -427,7 +489,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
         void runAutosave();
       }
     }
-  }, [user, script.slug, notify]);
+  }, [user, script.slug, notify, mergeRemote]);
   const requestAutosave = useCallback(() => {
     if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
     autosaveTimer.current = window.setTimeout(() => void runAutosave(), 1500);
@@ -810,6 +872,17 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             <button type="button" className="webtoon-mini" onClick={() => void save()}>Garder la version de cet onglet</button>
           </div>
         </div>
+      ) : null}
+
+      {bgJob && bgHidden !== bgJob.id ? (
+        <StudioBackgroundJob
+          job={bgJob}
+          onCancel={() => {
+            if (!window.confirm("Arrêter le travail en arrière-plan après l'étape en cours ?")) return;
+            void cancelJob(script.slug).then((r) => notify(r.ok ? "Arrêt demandé : l'étape en cours se termine" : `Arrêt impossible : ${r.error}`));
+          }}
+          onDismiss={() => setBgHidden(bgJob.id)}
+        />
       ) : null}
 
       <div className="studio-body">

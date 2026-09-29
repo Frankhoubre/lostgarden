@@ -3856,6 +3856,87 @@ h3 {
   color: var(--st-muted, #a3a9b5);
 }
 
+.studio-bg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-bgjob {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 1rem 0.5rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 10px;
+  background: rgba(125, 211, 252, 0.07);
+  font-size: 0.78rem;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-bgjob.is-done {
+  border-color: rgba(99, 230, 190, 0.35);
+  background: rgba(99, 230, 190, 0.07);
+}
+
+.studio-bgjob.is-failed,
+.studio-bgjob.is-cancelled {
+  border-color: rgba(255, 169, 77, 0.35);
+  background: rgba(255, 169, 77, 0.07);
+}
+
+.studio-bgjob-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.studio-bgjob-row > span:not(.studio-spinner):not(.studio-bgjob-actions) {
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-bgjob-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.studio-bgjob-bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.studio-bgjob-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #7dd3fc;
+  transition: width 0.6s ease;
+}
+
+.studio-bgjob-last {
+  font-size: 0.72rem;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-bgjob-log {
+  display: grid;
+  gap: 0.15rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-bgjob-log .is-failed {
+  color: #ffa94d;
+}
+
 .studio-handoff {
   display: grid;
   gap: 0.5rem;
