@@ -2466,6 +2466,128 @@ h3 {
     0.4cqw 0.5cqw 0 rgba(2, 8, 23, 0.6);
 }
 
+/* Drawn sounds (lib/webtoon/sfx-library.ts): letters that wobble, a burst behind an impact, steel on
+   metal, speed lines behind a rush of air. Everything in cqw, so it scales with the strip. */
+
+.webtoon-sfx-letter {
+  display: inline-block;
+  transform-origin: 50% 70%;
+}
+
+.webtoon-sfx-impact {
+  color: #ffe066;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 1.2cqw var(--wt-ink);
+  text-shadow: 0.8cqw 1cqw 0 var(--wt-ink);
+  isolation: isolate;
+}
+
+/* The burst: a jagged star behind the word, pale so the word reads on any image. */
+.webtoon-sfx-impact::before {
+  content: "";
+  position: absolute;
+  inset: -45% -22%;
+  z-index: -1;
+  background: #fffbe8;
+  clip-path: polygon(50% 0, 58% 26%, 80% 6%, 72% 32%, 100% 26%, 78% 48%, 98% 70%, 70% 64%, 76% 96%, 56% 72%, 44% 100%, 38% 72%, 14% 92%, 24% 62%, 0 64%, 20% 46%, 2% 22%, 30% 32%, 24% 4%, 44% 26%);
+  opacity: 0.92;
+}
+
+.webtoon-sfx-metal {
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  filter: drop-shadow(0.35cqw 0.35cqw 0 var(--wt-ink)) drop-shadow(-0.35cqw -0.35cqw 0 var(--wt-ink)) drop-shadow(0.35cqw -0.35cqw 0 var(--wt-ink)) drop-shadow(-0.35cqw 0.35cqw 0 var(--wt-ink)) drop-shadow(0.6cqw 0.9cqw 0 rgba(11, 15, 26, 0.45));
+}
+
+.webtoon-sfx-metal,
+.webtoon-sfx-metal .webtoon-sfx-letter {
+  background: linear-gradient(180deg, #ffffff 0%, #dfe4ea 38%, #7c8594 50%, #c9d0da 64%, #f4f6f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.webtoon-sfx-metal:has(.webtoon-sfx-letter) {
+  background: none;
+}
+
+.webtoon-sfx-whoosh {
+  color: #f1f8ff;
+  font-style: italic;
+  letter-spacing: 0.14em;
+  -webkit-text-stroke: 0.6cqw rgba(11, 15, 26, 0.85);
+  text-shadow: none;
+  transform-origin: center;
+  isolation: isolate;
+}
+
+/* Speed lines trailing behind the word, the way the object came. */
+.webtoon-sfx-whoosh::before {
+  content: "";
+  position: absolute;
+  top: 18%;
+  right: 96%;
+  z-index: -1;
+  width: 70%;
+  height: 64%;
+  /* Ink lines with a pale edge: they read on the white lily field as on the black cavern. */
+  background: repeating-linear-gradient(180deg, rgba(11, 15, 26, 0.7) 0 0.3cqw, rgba(241, 248, 255, 0.8) 0.3cqw 0.55cqw, transparent 0.55cqw 1.6cqw);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000);
+  mask-image: linear-gradient(90deg, transparent, #000);
+}
+
+.webtoon-sfx-crack {
+  color: #ff7a45;
+  letter-spacing: 0.01em;
+  -webkit-text-stroke: 1cqw var(--wt-ink);
+  text-shadow: 0.6cqw 0.8cqw 0 var(--wt-ink), 0 0 2cqw rgba(255, 122, 69, 0.45);
+}
+
+.studio-sfx-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.6rem, 1fr));
+  gap: 0.35rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.studio-sfx-chip {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.45rem 0.3rem 0.35rem;
+  overflow: hidden;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 8px;
+  background: #2b3140;
+  container-type: inline-size;
+  cursor: pointer;
+}
+
+.studio-sfx-chip:hover {
+  border-color: var(--st-accent, #7dd3fc);
+}
+
+.studio-sfx-chip-sample {
+  position: relative;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  font-family: var(--font-sfx), "Bangers", var(--font-oswald), sans-serif;
+  --wt-ink: #0b0f1a;
+  -webkit-text-stroke-width: 1px;
+}
+
+.studio-sfx-chip-sample.webtoon-sfx-impact::before,
+.studio-sfx-chip-sample.webtoon-sfx-whoosh::before {
+  display: none;
+}
+
+.studio-sfx-chip small {
+  font-size: 0.62rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
 /* Index cards and notes */
 
 .webtoon-card {
