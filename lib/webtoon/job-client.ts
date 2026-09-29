@@ -35,7 +35,7 @@ async function call(slug: string, body: Record<string, unknown>): Promise<{ ok: 
   return { ok: response.ok, ...payload, error: response.ok ? undefined : payload.error ?? `erreur ${response.status}` };
 }
 
-export function startJob(slug: string, input: { kind: StudioJob["kind"]; params?: Partial<StudioJob["params"]>; panel_ids?: string[]; label: string }) {
+export function startJob(slug: string, input: { kind: StudioJob["kind"]; params?: Partial<StudioJob["params"]>; panel_ids?: string[]; prompts?: Record<string, string>; label: string }) {
   return call(slug, { action: "start", ...input });
 }
 

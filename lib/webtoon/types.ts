@@ -205,6 +205,8 @@ export type PanelImage = {
   cost_usd?: number;
   /** `stale` means the prompt changed after the image was made. */
   status: "generated" | "stale" | "missing";
+  /** The quality tier it was drawn at: "low" is a sketch, to be finished in HD once the panel is approved. */
+  quality?: "low" | "medium" | "high";
   /** How the image was made: drawn from the panel, retouched from the previous one, or imported. */
   origin?: "generate" | "inpaint" | "upload";
   /** The instruction of a retouch, shown in the panel's image history. */
@@ -248,6 +250,11 @@ export type WebtoonPanel = {
   focal_point: Anchor;
   /** Zoom of the image inside its frame (1 = the whole frame covered, up to 3), centred on the focal point. */
   image_zoom?: number;
+  /**
+   * The author's review of the panel ("Validée", "À refaire", with a note). `of` is the image reviewed: a new
+   * image puts the panel back to review, except the HD finish of an approved sketch, which keeps it.
+   */
+  review?: { status: "approved" | "redo"; note?: string; at: string; of: string };
   /**
    * The last check of the image against the model sheets ("Contrôler la cohérence"): what departs from the
    * design of each character. `of` is the image checked; a new image makes the result stale.
