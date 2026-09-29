@@ -61,6 +61,7 @@ import type {
   Fidelity,
   LibraryOverlay,
   LocalizedText,
+  PanelAuditIssue,
   PanelFrame,
   NarrativeRole,
   PanelBackground,
@@ -348,6 +349,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   /** Bubbles and captions too big for their panel in some language, from the last check (null: not checked). */
   const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
+  /** The summary of the check against the sheets, closed by the author until the next check. */
+  const [hideAudit, setHideAudit] = useState(false);
   const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
   /** Measured image durations, so the estimate learns from the real speed (kept in the browser across visits). */
@@ -1321,6 +1324,81 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     onAutosave?.();
   };
 
+  /** The panel's check against the sheets, when it is about its current image (a new image makes it stale). */
+  const auditOf = (panel: WebtoonPanel) => (panel.audit && panel.image.src && panel.audit.of === panel.image.src ? panel.audit : null);
+
+  /**
+   * "Contrôler la cohérence": the drawn panels next to the model sheets of their characters, six at a time
+   * (app/api/webtoon/[slug]/audit). What departs from a sheet stays on the panel, listed above the strip and
+   * in the inspector, where a retouch can fix it. A panel already checked on this image is not sent again.
+   */
+  const auditPanels = async (targets: WebtoonPanel[], force = false) => {
+    if (busy) return;
+    const list = targets.filter((p) => p.image.src && p.image.status !== "missing" && p.characters.length && (force || !auditOf(p)));
+    if (!list.length) {
+      notify("Ces cases sont déjà contrôlées sur leur image actuelle");
+      return;
+    }
+    const BATCH = 6;
+    const batches: WebtoonPanel[][] = [];
+    for (let i = 0; i < list.length; i += BATCH) batches.push(list.slice(i, i + BATCH));
+    if (!window.confirm(`Comparer ${list.length} case${list.length > 1 ? "s" : ""} aux fiches des personnages (costume, couleurs, casque, proportions) ? Environ ${Math.max(1, Math.round(batches.length * 0.35))} min, ${(batches.length * 0.02).toFixed(2)} $.`)) return;
+    setBusy(true);
+    stopBatch.current = false;
+    let done = 0;
+    let flagged = 0;
+    const started = Date.now();
+    setJob({ started, phase: "images", label: `Contrôle de cohérence : 0/${list.length} cases`, done: 0, total: list.length, queue: [], current: null, placeholders: 0, deadline: started + Math.ceil(batches.length / 2) * 33_000 });
+    const queue = [...batches];
+    const worker = async () => {
+      for (let batch = queue.shift(); batch && !stopBatch.current; batch = queue.shift()) {
+        try {
+          const response = await fetch(`/api/webtoon/${script.slug}/audit`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+            body: JSON.stringify({ panels: batch.map((p) => ({ panel_id: p.panel_id, order: p.order, description: p.description, characters: p.characters, image: p.image.src })), library: libraryRef.current }),
+          });
+          const payload = (await response.json().catch(() => ({}))) as { results?: Record<string, PanelAuditIssue[]>; error?: string };
+          if (response.ok && payload.results) {
+            const at = new Date().toISOString();
+            const results = payload.results;
+            flagged += batch.filter((p) => results[p.panel_id]?.length).length;
+            // Only onto the image that was checked: a panel redrawn meanwhile keeps its old result out.
+            setPanels((current) => current.map((p) => {
+              const sent = batch.find((b) => b.panel_id === p.panel_id);
+              return sent && results[p.panel_id] && p.image.src === sent.image.src ? { ...p, audit: { of: sent.image.src, at, issues: results[p.panel_id] } } : p;
+            }));
+          } else {
+            notify(`Contrôle d'un lot impossible : ${payload.error ?? response.status}`);
+          }
+        } catch (error) {
+          notify(`Contrôle d'un lot impossible : ${error instanceof Error ? error.message : "erreur"}`);
+        }
+        done += batch.length;
+        setJob((job) => (job ? { ...job, done, label: `Contrôle de cohérence : ${done}/${list.length} cases` } : job));
+      }
+    };
+    try {
+      await Promise.all(Array.from({ length: Math.min(2, batches.length) }, worker));
+      onAutosave?.();
+      setHideAudit(false);
+      notify(flagged ? `${flagged} case${flagged > 1 ? "s" : ""} sur ${done} s'écarte${flagged > 1 ? "nt" : ""} des fiches : voir en haut de la liste` : `${done} cases contrôlées : toutes suivent leurs fiches`);
+    } finally {
+      setJob(null);
+      setBusy(false);
+    }
+  };
+
+  /** A retouch that applies the remarks of the check, with the sheets of the characters concerned as references. */
+  const fixFromAudit = (panel: WebtoonPanel) => {
+    const audit = auditOf(panel);
+    if (!audit?.issues.length) return;
+    const who = [...new Set(audit.issues.map((i) => i.who))];
+    const references = who.map((id) => CHARACTERS.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => Boolean(c?.image)).map((c) => ({ name: c.name, image: c.image!, kind: "character" as const }));
+    const prompt = `Corriger le dessin pour suivre la fiche du personnage, sans rien changer d'autre (cadrage, pose, décor, lumière) : ${audit.issues.map((i) => i.issue).join(" ")}`;
+    void runRetouch(panel, { prompt, mask: null, brush: 0, references });
+  };
+
   const regenerateChecked = async () => {
     if (busy || !checkedPanels.length) return;
     if (checkBudget && !checkBudget()) return;
@@ -1491,6 +1569,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               >
                 Réécrire
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => void auditPanels(checkedPanels, true)} disabled={busy} title="Compare les cases cochées aux fiches de leurs personnages, même déjà contrôlées">Contrôler</button>
               <button type="button" className="webtoon-mini" onClick={() => rhythmStrip(new Set(checkedPanels.map((p) => p.panel_id)))} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case cochée suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>Rythmer</button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
@@ -1513,6 +1592,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => void checkLettering()} disabled={busy} title="Mesure chaque bulle et cartouche dans les quatre langues et signale celles qui débordent de leur case ou en chevauchent une autre">
                 Vérifier les bulles
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => void auditPanels(panels)} disabled={busy} title="Compare chaque case dessinée aux fiches de ses personnages (costume, couleurs, casque, proportions) et liste celles qui s'en écartent">
+                Contrôler la cohérence
+              </button>
             </>
           )}
         </div>
@@ -1533,6 +1615,27 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             </div>
           </div>
         ) : null}
+        {(() => {
+          const off = panels.filter((p) => auditOf(p)?.issues.length);
+          if (hideAudit || !off.length) return null;
+          const byWho = new Map<string, number>();
+          for (const p of off) for (const who of new Set(auditOf(p)!.issues.map((i) => i.who))) byWho.set(who, (byWho.get(who) ?? 0) + 1);
+          const glaring = off.filter((p) => auditOf(p)!.issues.some((i) => i.severity === "high")).length;
+          return (
+            <div className="studio-letter-issues studio-audit-issues" role="status">
+              <p>
+                <b>Écarts aux fiches</b> dans {off.length > 1 ? `${off.length} cases` : "1 case"}
+                {glaring ? `, dont ${glaring} visible${glaring > 1 ? "s" : ""} au premier coup d'œil` : ""} :{" "}
+                {[...byWho].map(([id, n]) => `${CHARACTERS.find((c) => c.id === id)?.name ?? id} ${n}`).join(" · ")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(off.map((p) => p.panel_id)))} title="Puis « Regénérer », ou une case à la fois : « Retoucher avec ces remarques » dans l'inspecteur">Cocher ces cases</button>
+                <button type="button" className="webtoon-mini" onClick={() => select(off.find((p) => auditOf(p)!.issues.some((i) => i.severity === "high"))?.panel_id ?? off[0].panel_id)}>Voir la première</button>
+                <button type="button" className="webtoon-mini" onClick={() => setHideAudit(true)}>Masquer</button>
+              </div>
+            </div>
+          );
+        })()}
         <ol>
           {panels.map((panel, index) => (
             <Fragment key={panel.panel_id}>
@@ -1586,6 +1689,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
                   {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
+                  {auditOf(panel)?.issues.length ? (
+                    <i className={auditOf(panel)!.issues.some((i) => i.severity === "high") ? "studio-thumb-bad" : "studio-thumb-warn"} title={auditOf(panel)!.issues.map((i) => i.issue).join("\n")}>
+                      {" "}· écart fiche
+                    </i>
+                  ) : null}
                   {letterIssues?.some((i) => i.panel_id === panel.panel_id) ? (
                     <i className="studio-thumb-warn" title={letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => `${i.locale} : « ${i.text} » ${i.reason === "out" ? "dépasse de la case" : i.reason === "tall" ? "plus haute que la case" : "chevauche une autre bulle"}`).join("\n")}>
                       {" "}· bulles {[...new Set(letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => i.locale))].join(", ")}
@@ -1875,6 +1983,27 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             </button>
           ))}
         </nav>
+
+        {auditOf(selected)?.issues.length ? (
+          <div className="studio-audit-card" role="status">
+            <b>Écarts à la fiche</b>
+            <ul>
+              {auditOf(selected)!.issues.map((issue, i) => (
+                <li key={i} className={issue.severity === "high" ? "is-high" : ""}>
+                  {issue.issue}
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => fixFromAudit(selected)} disabled={drawing.has(selected.panel_id)} title="Une retouche de toute l'image qui applique ces remarques, avec la fiche des personnages en référence ; l'image actuelle reste dans l'historique">
+                Retoucher avec ces remarques
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => patch({ audit: { ...auditOf(selected)!, issues: [] } })} title="L'image est juste : les remarques disparaissent jusqu'au prochain contrôle d'une nouvelle image">
+                Ignorer
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {inspectorTab === "scene" ? (
           <div className="studio-section">

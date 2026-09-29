@@ -241,6 +241,11 @@ export type WebtoonPanel = {
   focal_point: Anchor;
   /** Zoom of the image inside its frame (1 = the whole frame covered, up to 3), centred on the focal point. */
   image_zoom?: number;
+  /**
+   * The last check of the image against the model sheets ("Contrôler la cohérence"): what departs from the
+   * design of each character. `of` is the image checked; a new image makes the result stale.
+   */
+  audit?: { of: string; at: string; issues: PanelAuditIssue[] };
   /** The author chose to leave the stretch of film before this panel untold: no "Trou dans le film" warning. */
   gap_ignored?: boolean;
   transition_type: TransitionType;
@@ -269,6 +274,9 @@ export type WebtoonPanel = {
    */
   image_history?: PanelImage[];
 };
+
+/** A departure of a drawn panel from the model sheet of one of its characters, in French. */
+export type PanelAuditIssue = { who: string; issue: string; severity: "high" | "low" };
 
 /** A narrative beat groups panels that share one dramatic intention. */
 export type WebtoonBeat = {
