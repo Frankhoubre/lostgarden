@@ -1,6 +1,9 @@
 import { completeJson } from "./providers/gateway-text";
 import type { Figure } from "./lettering";
 import type { ReferenceAsset, WebtoonPanel } from "./types";
+import { stateOf } from "./panel-state";
+
+export { stateOf };
 
 /**
  * THE DRAWN IMAGE, CHECKED. Frank found panels where the image contradicts
@@ -15,11 +18,18 @@ import type { ReferenceAsset, WebtoonPanel } from "./types";
 
 export type ImageCheck = { figures: Figure[]; issues: string[]; cost_usd: number };
 
+
 export async function checkPanelImage(input: {
   image: string;
   panel: Pick<WebtoonPanel, "characters" | "description" | "dialogue" | "objects">;
   library: ReferenceAsset[];
   canon?: Record<string, string[]>;
+  /**
+   * The panel just before in the strip: its image and what it says of the characters' state. When this
+   * panel's own description is silent about a state (a helmet, what the hands hold), the state goes on
+   * from the previous panel: a close-up on a fist does not put the helmet back on.
+   */
+  previous?: { image?: string; state?: string; description?: string };
 }): Promise<ImageCheck> {
   const { panel } = input;
   const cast = panel.characters.map((id) => {
@@ -27,19 +37,32 @@ export async function checkPanelImage(input: {
     return { id, name: sheet?.name.split(",")[0] ?? id, looks: (sheet?.must_keep ?? "").slice(0, 260) };
   });
   const canon = panel.characters.flatMap((id) => input.canon?.[id] ?? []);
-  const state = /STATE TO KEEP EXACTLY:([^]*?)(?=MOTION:|EFFECTS|SCALE:|$)/.exec(panel.description)?.[1]?.trim() ?? "";
+  const own = stateOf(panel.description);
+  const inherited = !own && input.previous?.state ? input.previous.state : "";
+  const state = own || inherited;
   let usd = 0;
   try {
     const answer = await completeJson<{ figures?: { who?: string; head?: { x?: number; y?: number } }[]; issues?: string[] }>({
       system: [
         "You check one drawn webtoon panel against what it must show, like a strict continuity supervisor.",
         "1. FIGURES: every character or creature drawn in the image, with `who` (one of the expected ids when it is that character, else \"unknown\") and `head`: the centre of its head, helmet or face, in percent of the image (x from the left, y from the top). A character seen from behind still has a head position.",
+        input.previous?.image
+          ? "The second image is the PANEL JUST BEFORE in the strip. The same characters keep the same state from one panel to the next (a helmet on or off, the same clothes, what the hands hold) unless THIS panel's description says it changes. A state that differs from the panel before without the description saying so is a fault of the state kind."
+          : "",
         "2. ISSUES: only real faults of these kinds, each in one short English sentence an illustrator can act on: a person, knight or creature that is NOT in the expected cast (not a background silhouette of scenery); an expected character missing; the same character drawn twice; a canon rule broken; the state broken (a helmet on when it must be off, or off when it must be on); letters or text drawn in the image. NOT faults, never listed: the side of a flower, a pose, a colour, a missing detail, anything about bubbles or subtitles, style or beauty. Never write a doubt, a note or a sentence saying there is no fault: when everything is right, `issues` is an empty list.",
         'Answer with JSON only: {"figures": [{"who", "head": {"x", "y"}}], "issues": [..]}.',
-      ].join("\n\n"),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       user: [
-        { type: "text", text: `EXPECTED CAST (id, name, design):\n${JSON.stringify(cast)}${canon.length ? `\n\nCANON:\n- ${canon.join("\n- ")}` : ""}${state ? `\n\nSTATE: ${state}` : ""}\n\nPANEL: ${panel.description.split("STATE TO KEEP")[0].slice(0, 500)}` },
+        { type: "text", text: `EXPECTED CAST (id, name, design):\n${JSON.stringify(cast)}${canon.length ? `\n\nCANON:\n- ${canon.join("\n- ")}` : ""}${state ? `\n\nSTATE${inherited ? " (carried on from the panel before, this panel does not change it)" : ""}: ${state}` : ""}\n\nPANEL: ${panel.description.split("STATE TO KEEP")[0].slice(0, 500)}` },
         { type: "image_url", image_url: { url: input.image } },
+        ...(input.previous?.image
+          ? [
+              { type: "text" as const, text: `The panel just before${input.previous.description ? ` (${input.previous.description.split("STATE TO KEEP")[0].slice(0, 200)})` : ""}:` },
+              { type: "image_url" as const, image_url: { url: input.previous.image } },
+            ]
+          : []),
         { type: "text", text: "Check the image now, as JSON." },
       ],
       maxTokens: 1500,

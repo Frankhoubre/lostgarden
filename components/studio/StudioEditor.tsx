@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
 import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/webtoon/image-history";
 import type { TrackTask } from "@/lib/webtoon/notifications";
+import { stateOf } from "@/lib/webtoon/panel-state";
 import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
@@ -415,13 +416,28 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /** One generation call for one panel; the composed prompt comes back with the image. */
+  /**
+   * The panel before in the strip, for the continuity of the image check: the nearest earlier panel with
+   * an image, and the nearest earlier state line (a helmet off stays off until a panel says otherwise).
+   */
+  const previousFor = (id: string): { image?: string; state?: string; description?: string } | undefined => {
+    const list = panelsRef.current;
+    const at = list.findIndex((p) => p.panel_id === id);
+    if (at <= 0) return undefined;
+    const before = list.slice(Math.max(0, at - 8), at).reverse();
+    const withImage = before.find((p) => p.image.src && p.image.status !== "missing");
+    const withState = before.find((p) => stateOf(p.description));
+    if (!withImage && !withState) return undefined;
+    return { image: withImage?.image.src, state: withState ? stateOf(withState.description) : undefined, description: withImage?.description };
+  };
+
   /** The image's URL when it worked, null otherwise. */
   const generateOne = async (panel: WebtoonPanel, onFailure?: (reason: string) => void): Promise<string | null> => {
     try {
       const response = await fetch(`/api/webtoon/${script.slug}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
-        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current, quality }),
+        body: JSON.stringify({ panel_id: panel.panel_id, panel, library: libraryRef.current, quality, previous: previousFor(panel.panel_id) }),
       });
       const payload = (await response.json().catch(() => ({}))) as GeneratePayload;
       const received = payload.src ?? payload.data_url;
