@@ -662,6 +662,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               previewLocale={previewLocale}
               onJob={setJob}
               filmFrames={frames ? sparseFrames(frames) : undefined}
+              allFrames={frames}
               guide={filmGuide.guide}
             />
           </div>
