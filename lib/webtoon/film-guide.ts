@@ -41,8 +41,20 @@ export type GuideSequence = {
   characters?: string[];
 };
 
+/** A gesture seen in the close re-reading of an action sequence: each one must get its own panel. */
+export type GuideGesture = {
+  seconds: number;
+  /** What is done, in one short sentence ("il lance le médaillon au loin"). */
+  gesture: string;
+  kind: "throw" | "blow" | "fall" | "take" | "drop" | "open" | "appear" | "leave" | "move" | "other";
+};
+
 export type FilmGuide = {
   version: 1;
+  /** The gestures of the action and tension sequences, read closely a second time. */
+  gestures?: GuideGesture[];
+  /** The starts of the sequences already re-read closely. */
+  detailed?: number[];
   /** Seconds read so far (the next window starts here). */
   analyzed_until: number;
   duration: number;
@@ -178,21 +190,120 @@ export function sequenceAt(guide: Pick<FilmGuide, "sequences"> | null | undefine
 }
 
 /** What the writer needs of the guide around a stretch of film: the sequences that touch it and its lines. */
-export function guideSlice(guide: FilmGuide | null | undefined, from: number, to: number): Pick<FilmGuide, "sequences" | "beats"> | undefined {
+export function guideSlice(guide: FilmGuide | null | undefined, from: number, to: number): (Pick<FilmGuide, "sequences" | "beats"> & { gestures?: GuideGesture[] }) | undefined {
   if (!guide?.sequences.length) return undefined;
   return {
     sequences: guide.sequences.filter((s) => s.to >= from && s.from <= to),
     beats: guide.beats.filter((b) => b.seconds >= from && b.seconds <= to),
+    gestures: (guide.gestures ?? []).filter((g) => g.seconds >= from && g.seconds <= to),
   };
 }
 
 /** The guide as the writer reads it, for the seconds of its window. */
-export function guideBrief(slice: Pick<FilmGuide, "sequences" | "beats"> | undefined, from: number, to: number): string {
+export function guideBrief(slice: (Pick<FilmGuide, "sequences" | "beats"> & { gestures?: GuideGesture[] }) | undefined, from: number, to: number): string {
   if (!slice?.sequences.length) return "";
   const tc = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, "0")}`;
   const sequences = slice.sequences
     .filter((s) => s.to >= from && s.from <= to)
     .map((s) => `${tc(s.from)} to ${tc(s.to)}: ${s.kind.toUpperCase()} sequence, intensity ${s.intensity}/5, "${s.title}": ${s.summary}`);
   const beats = slice.beats.filter((b) => b.seconds >= from && b.seconds <= to).map((b) => `${tc(b.seconds)} ${b.what}${b.change && b.change !== "rien" ? ` (changed: ${b.change})` : ""}`);
-  return [`Sequences:\n${sequences.join("\n")}`, beats.length ? `Second by second:\n${beats.join("\n")}` : ""].filter(Boolean).join("\n\n");
+  const gestures = (slice.gestures ?? []).filter((g) => g.seconds >= from && g.seconds <= to).map((g) => `${tc(g.seconds)} ${g.gesture}`);
+  return [
+    `Sequences:\n${sequences.join("\n")}`,
+    gestures.length ? `GESTURES noted in a close re-reading of the action (read by a model, they can be misread: check each against the frames; a gesture the frames confirm gets its own panel):\n${gestures.join("\n")}` : "",
+    beats.length ? `Second by second:\n${beats.join("\n")}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+
+/** The sequences that deserve the close re-reading: action, and tension of some intensity, not re-read yet. */
+export function sequencesToDetail(guide: FilmGuide): GuideSequence[] {
+  const done = new Set(guide.detailed ?? []);
+  return guide.sequences.filter((s) => !done.has(s.from) && (s.kind === "action" || (s.kind === "tension" && s.intensity >= 3) || (s.to - s.from <= 12 && s.intensity >= 4)));
+}
+
+const GESTURE_KINDS = ["throw", "blow", "fall", "take", "drop", "open", "appear", "leave", "move", "other"] as const;
+
+/** The kind of a gesture, English or the French a model sometimes answers with. */
+function gestureKind(value: unknown): GuideGesture["kind"] {
+  const v = String(value ?? "").toLowerCase();
+  if ((GESTURE_KINDS as readonly string[]).includes(v)) return v as GuideGesture["kind"];
+  if (/jet|lanc/.test(v)) return "throw";
+  if (/coup|frapp/.test(v)) return "blow";
+  if (/chut|tomb|effondr/.test(v)) return "fall";
+  if (/pris|prend|ramass/.test(v)) return "take";
+  if (/l[aâ]ch|laiss|abandon/.test(v)) return "drop";
+  if (/ouvr/.test(v)) return "open";
+  if (/appar/.test(v)) return "appear";
+  if (/part|dispar|quitt/.test(v)) return "leave";
+  if (/mouv|brusq/.test(v)) return "move";
+  return "other";
+}
+
+/** The guide with one sequence re-read: its lines replaced by the close ones, its gestures added. */
+export function applyDetail(guide: FilmGuide, sequence: Pick<GuideSequence, "from" | "to">, answer: { beats?: unknown[]; gestures?: unknown[] }): FilmGuide {
+  const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+  const inside = (s: number) => Number.isFinite(s) && s >= sequence.from && s <= sequence.to;
+  const beats = (answer.beats ?? [])
+    .map((b) => b as Record<string, unknown>)
+    .map((b) => ({ seconds: Math.round(Number(b.seconds)), what: text(b.what), change: text(b.change) || "rien" }))
+    .filter((b) => inside(b.seconds) && b.what);
+  const gestures = (answer.gestures ?? [])
+    .map((g) => g as Record<string, unknown>)
+    .map((g) => ({ seconds: Math.round(parseFloat(String(g.seconds))), gesture: text(g.gesture), kind: gestureKind(g.kind) }))
+    .filter((g) => inside(g.seconds) && g.gesture);
+  const replaced = new Set(beats.map((b) => b.seconds));
+  return {
+    ...guide,
+    beats: [...guide.beats.filter((b) => !replaced.has(b.seconds)), ...beats].sort((a, b) => a.seconds - b.seconds),
+    gestures: [...(guide.gestures ?? []).filter((g) => !inside(g.seconds)), ...gestures].sort((a, b) => a.seconds - b.seconds),
+    detailed: [...new Set([...(guide.detailed ?? []), sequence.from])],
+    updated_at: new Date().toISOString(),
+  };
+}
+
+/** The moments, four per second, of the stretches worth a close re-reading, each stretch at most `max` seconds. */
+export function detailSpans(guide: FilmGuide, max = 20): { from: number; to: number; kind: SequenceKind; summary: string; start: number }[] {
+  const spans: { from: number; to: number; kind: SequenceKind; summary: string; start: number }[] = [];
+  for (const s of sequencesToDetail(guide)) {
+    for (let from = s.from; from <= s.to; from += max) spans.push({ from, to: Math.min(s.to, from + max - 1), kind: s.kind, summary: s.summary, start: s.from });
+  }
+  // Busy stretches the quick reading labelled calm: something changes almost every second (2:20 to 2:31 of
+  // episode 1, a throw and blows on the ground read as "contemplation"). Eight seconds with five action changes or more.
+  const covered = (sec: number) => spans.some((sp) => sec >= sp.from && sec <= sp.to);
+  const done = new Set(guide.detailed ?? []);
+  // A change of framing (a cut, a closer shot, a new angle) is not an action; what the characters do is.
+  const CAMERA = /^(rien|coupe|cadrage|recadrage|changement (de plan|d'angle|de cadrage)|plan |nouveau plan|vue |zoom|même |retour |fondu|l[ée]g[èe]re? variation)/i;
+  const changed = new Set(guide.beats.filter((b) => b.change && !CAMERA.test(b.change.trim())).map((b) => b.seconds));
+  const busy: { from: number; to: number }[] = [];
+  const seconds = guide.beats.map((b) => b.seconds);
+  for (const start of seconds) {
+    let n = 0;
+    for (let t = start; t < start + 8; t += 1) if (changed.has(t)) n += 1;
+    if (n < 5) continue;
+    // Two seconds of margin before: the gesture that starts the stretch (the throw at 2:20) comes just ahead of it.
+    const from = Math.max(0, start - 2);
+    const last = busy[busy.length - 1];
+    if (last && from <= last.to + 1) last.to = Math.max(last.to, start + 7);
+    else busy.push({ from, to: start + 7 });
+  }
+  for (const b of busy) {
+    const seq = sequenceAt(guide, b.from);
+    if (done.has(b.from)) continue;
+    for (let from = b.from; from <= b.to; from += max) {
+      const to = Math.min(b.to, from + max - 1);
+      if (covered(from) && covered(to)) continue;
+      spans.push({ from, to, kind: seq?.kind ?? "calm", summary: seq?.summary ?? "", start: from });
+    }
+  }
+  return spans.sort((a, b) => a.from - b.from);
+}
+
+/** Four moments per second over the stretches: what the dense extraction reads. */
+export function denseTimes(spans: { from: number; to: number }[], perSecond = 4): number[] {
+  const out = new Set<number>();
+  for (const span of spans) for (let t = span.from; t <= span.to + 0.76; t += 1 / perSecond) out.add(Math.round(t * 1000) / 1000);
+  return [...out].sort((a, b) => a - b);
 }

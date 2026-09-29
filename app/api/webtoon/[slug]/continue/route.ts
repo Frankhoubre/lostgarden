@@ -643,9 +643,12 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
   if (!context.frames.length) return Response.json({ error: "Ce projet n'a pas encore d'images du film : importez la vidéo dans l'accueil du projet." }, { status: 400 });
 
-  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "auto" | "calm" | "normal" | "action"; until_seconds?: number; guide?: Pick<FilmGuide, "sequences" | "beats"> };
+  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "auto" | "calm" | "normal" | "action"; until_seconds?: number; guide?: Pick<FilmGuide, "sequences" | "beats" | "gestures"> };
   // The film guide around the stretch (sent by the studio): its sequences set the pace in "auto", its lines go to the writer.
-  const guide = body.guide && Array.isArray(body.guide.sequences) ? { sequences: body.guide.sequences, beats: Array.isArray(body.guide.beats) ? body.guide.beats : [] } : undefined;
+  const guide =
+    body.guide && Array.isArray(body.guide.sequences)
+      ? { sequences: body.guide.sequences, beats: Array.isArray(body.guide.beats) ? body.guide.beats : [], gestures: Array.isArray(body.guide.gestures) ? body.guide.gestures : [] }
+      : undefined;
   const startSeconds = coveredUntil(Array.isArray(body.panels) && body.panels.length ? body.panels : []);
   const sequence = sequenceAt(guide, startSeconds);
   const pace: "calm" | "normal" | "action" =

@@ -28,3 +28,36 @@ export async function saveGuide(slug: string, guide: FilmGuide, user: User): Pro
     touched: serverTimestamp(),
   });
 }
+
+/** The dense frames (four per second) of the action scenes: `webtoon_library/<slug>~dense`. */
+export const denseDocId = (slug: string) => `${slug}~dense`;
+
+export type DenseFrame = { src: string; seconds: number };
+
+export async function loadDense(slug: string): Promise<DenseFrame[]> {
+  const snapshot = await getDoc(doc(getDb(), LIBRARY_COLLECTION, denseDocId(slug)));
+  if (!snapshot.exists()) return [];
+  try {
+    const list = JSON.parse((snapshot.data() as { dense_json?: string }).dense_json ?? "[]") as DenseFrame[];
+    return Array.isArray(list) ? list.sort((a, b) => a.seconds - b.seconds) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function saveDense(slug: string, frames: DenseFrame[], user: User): Promise<void> {
+  await setDoc(doc(getDb(), LIBRARY_COLLECTION, denseDocId(slug)), {
+    dense_json: JSON.stringify([...frames].sort((a, b) => a.seconds - b.seconds)),
+    count: frames.length,
+    updated_at_iso: new Date().toISOString(),
+    updated_by: user.email ?? null,
+    touched: serverTimestamp(),
+  });
+}
+
+/** Where a dense frame goes in Storage: `webtoon/<slug>/film-dense/01m23s250.jpg`. */
+export function densePath(slug: string, seconds: number): string {
+  const whole = Math.floor(seconds);
+  const ms = Math.round((seconds - whole) * 1000);
+  return `webtoon/${slug}/film-dense/${String(Math.floor(whole / 60)).padStart(2, "0")}m${String(whole % 60).padStart(2, "0")}s${String(ms).padStart(3, "0")}.jpg`;
+}

@@ -9,6 +9,11 @@ import { assetStep, BIBLE_STEPS, type BibleStep } from "@/lib/webtoon/bible";
 import { extractFrames, formatDuration, loadVideo } from "@/lib/webtoon/extract-frames";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { useFilmGuide } from "@/components/studio/useFilmGuide";
+import { ProgressBar } from "@/components/studio/ProgressBar";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { getFirebaseApp } from "@/lib/firebase";
+import { detailSpans, denseTimes } from "@/lib/webtoon/film-guide";
+import { densePath, loadDense, saveDense, type DenseFrame } from "@/lib/webtoon/film-guide-client";
 import { localePath } from "@/lib/i18n/navigation";
 import { loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { EMPTY_PROJECT_LIBRARY, labelledFrames, ONBOARDING_STEPS, type OnboardingStep, type ProjectFrame, type ProjectSource, type StudioProject } from "@/lib/webtoon/project";
@@ -393,6 +398,37 @@ function FramesStep({
   // Every frame extracted, with the film guide: the whole film is visible and readable from here, before the bible.
   const labelled = useMemo(() => labelledFrames(frames), [frames]);
   const filmGuide = useFilmGuide({ slug: project.id, user, duration: labelled.length ? labelled[labelled.length - 1].seconds : 0, notify });
+  const [denseProgress, setDenseProgress] = useState<{ started: number; estimate: number; done: number; total: number } | null>(null);
+  /** Four frames per second over the stretches the guide wants re-read closely, from the chosen video. */
+  const extractDense = async () => {
+    const guide = filmGuide.guide;
+    if (!file || !user || !guide) return notify("Choisissez d'abord la vidéo");
+    const times = denseTimes(detailSpans(guide));
+    if (!times.length) return;
+    const started = Date.now();
+    setDenseProgress({ started, estimate: times.length * 250, done: 0, total: times.length });
+    const list: DenseFrame[] = await loadDense(project.id).catch(() => []);
+    const have = new Set(list.map((f) => f.seconds));
+    try {
+      await extractFrames({
+        file,
+        times: times.filter((t) => !have.has(t)),
+        onFrame: async (seconds, blob) => {
+          const target = ref(getStorage(getFirebaseApp()), densePath(project.id, seconds));
+          await uploadBytes(target, blob, { contentType: "image/jpeg", cacheControl: "public, max-age=31536000" });
+          list.push({ src: await getDownloadURL(target), seconds });
+        },
+        onProgress: (state) => setDenseProgress((p) => (p ? { ...p, done: state.sent, total: state.total } : p)),
+      });
+      await saveDense(project.id, list, user);
+      notify(`${list.length} images des passages d'action extraites : « Relire les passages d'action »`);
+    } catch (error) {
+      await saveDense(project.id, list, user).catch(() => undefined);
+      notify(`Extraction interrompue : ${error instanceof Error ? error.message : "erreur"}`);
+    } finally {
+      setDenseProgress(null);
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -436,6 +472,26 @@ function FramesStep({
           </div>
         )}
       </section>
+      {filmGuide.guide && detailSpans(filmGuide.guide).length ? (
+        <section className="studio-card space-y-2">
+          <p className="anime-label text-xs">Passages d&apos;action en détail</p>
+          <p className="text-xs text-ivory/70">
+            Le guide a repéré {detailSpans(filmGuide.guide).length} passages d&apos;action ou agités. Pour les relire de près, le studio en extrait quatre images par seconde depuis la vidéo ({denseTimes(detailSpans(filmGuide.guide)).length} images), puis « Relire les passages d&apos;action » y cherche les gestes (un jet, un coup, une chute). Choisissez la vidéo ci-dessus si ce n&apos;est pas déjà fait.
+          </p>
+          {denseProgress ? (
+            <ProgressBar startedAt={denseProgress.started} estimateMs={denseProgress.estimate} label="Extraction des passages d'action" done={denseProgress.done} total={denseProgress.total} />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini" onClick={() => void extractDense()} disabled={!file || !info || Boolean(progress)}>
+                Extraire les passages d&apos;action (4 images/s)
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => void filmGuide.refine()} disabled={Boolean(filmGuide.run)}>
+                Relire les passages d&apos;action
+              </button>
+            </div>
+          )}
+        </section>
+      ) : null}
       {labelled.length ? (
         <StudioFrames
           panels={[]}
