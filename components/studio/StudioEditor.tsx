@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { sfxFont } from "@/components/webtoon/fonts";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
@@ -13,6 +14,10 @@ import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/we
 import type { TrackTask } from "@/lib/webtoon/notifications";
 import { stateOf } from "@/lib/webtoon/panel-state";
 import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
+import { applyRhythm } from "@/lib/webtoon/rhythm";
+import { SFX_LIBRARY, SFX_STYLES, SFX_STYLE_LABEL, freeSpot, type SfxStyle } from "@/lib/webtoon/sfx-library";
+import { PhonePreview } from "@/components/studio/PhonePreview";
+import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -56,6 +61,7 @@ import type {
   Fidelity,
   LibraryOverlay,
   LocalizedText,
+  PanelAuditIssue,
   PanelFrame,
   NarrativeRole,
   PanelBackground,
@@ -232,15 +238,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   );
   const { user } = useAuth();
   /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it; `review`: the strip against the film. */
-  const [view, setView] = useState<"panel" | "strip" | "review">(() => {
+  const [view, setView] = useState<"panel" | "strip" | "review" | "phone">(() => {
     try {
       const stored = window.localStorage.getItem("studio.view");
-      return stored === "strip" || stored === "review" ? stored : "panel";
+      return stored === "strip" || stored === "review" || stored === "phone" ? stored : "panel";
     } catch {
       return "panel";
     }
   });
-  const chooseView = (next: "panel" | "strip" | "review") => {
+  const chooseView = (next: "panel" | "strip" | "review" | "phone") => {
     setView(next);
     try {
       window.localStorage.setItem("studio.view", next);
@@ -343,6 +349,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   }, [panelMenuOpen]);
   /** Panels ticked in the list for a batch action (regenerate, translate, delete). */
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
+  /** Bubbles and captions too big for their panel in some language, from the last check (null: not checked). */
+  const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
+  /** The summary of the check against the sheets, closed by the author until the next check. */
+  const [hideAudit, setHideAudit] = useState(false);
   const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
   /** Measured image durations, so the estimate learns from the real speed (kept in the browser across visits). */
@@ -718,6 +728,22 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /**
+   * The gaps between panels from the film guide (lib/webtoon/rhythm.ts): the checked panels, or the whole
+   * strip. The first panel and the panels laid over the one before keep theirs; "Annuler" brings them back.
+   */
+  const rhythmStrip = (ids?: Set<string>) => {
+    if (!guide?.sequences.length) return;
+    const { panels: next, changed } = applyRhythm(panelsRef.current, guide, ids);
+    if (!changed) {
+      notify("Les espaces suivent déjà le guide du film");
+      return;
+    }
+    setPanels(next);
+    onAutosave?.();
+    notify(`Espaces rythmés sur ${changed} case${changed > 1 ? "s" : ""} : serrés dans l'action, larges dans la contemplation`);
+  };
+
+  /**
    * Continue the story: the writer model drafts the next N panels from the
    * frames that follow the last one, the engine composes them, then the
    * images are generated one by one and the lettering is translated.
@@ -869,8 +895,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           break;
         }
         failures = 0;
-        created.push(...payload.panels);
-        current = [...current, ...payload.panels];
+        // The new panels get the gaps of their scene right away (a film not read yet leaves the writer's).
+        const written = applyRhythm([...current, ...payload.panels], guide, new Set(payload.panels.map((p) => p.panel_id))).panels.slice(current.length);
+        created.push(...written);
+        current = [...current, ...written];
         setPanels(assemble());
         onAutosave?.();
         if (created.length === payload.panels.length) select(created[0].panel_id);
@@ -1156,14 +1184,54 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         bucket[itemKey] = value;
         byPanel.set(panelId, bucket);
       }
+      const translated = targets.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p));
       setPanels((current) => current.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p)));
       onAutosave?.();
       notify(`${batchItems.length} texte${batchItems.length > 1 ? "s" : ""} traduit${batchItems.length > 1 ? "s" : ""} en fr, en, ja, ko`);
+      // A translation longer than the French can push a bubble out of its panel: said now, not at the export.
+      void checkLettering(translated.filter((p) => byPanel.has(p.panel_id)), true);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de traduction");
     } finally {
       setBusy(false);
     }
+  };
+
+  /**
+   * Measures the bubbles and captions of these panels (the whole strip when omitted) in every language and
+   * keeps what overflows (components/studio/lettering-fit.ts). `quiet`: only speaks when something overflows.
+   */
+  const checkLettering = async (targets?: WebtoonPanel[], quiet = false) => {
+    const list = targets ?? panelsRef.current;
+    const issues = letteringIssues(list, await measureLettering(list));
+    const ids = new Set(list.map((p) => p.panel_id));
+    // A partial check replaces what it re-measured and keeps the rest of the last one.
+    setLetterIssues((current) => (targets ? [...(current ?? []).filter((i) => !ids.has(i.panel_id)), ...issues] : issues));
+    if (!issues.length) {
+      if (!quiet) notify("Toutes les bulles tiennent dans leur case, dans les quatre langues");
+      return;
+    }
+    const byLocale = new Map<string, number>();
+    for (const issue of issues) byLocale.set(issue.locale, (byLocale.get(issue.locale) ?? 0) + 1);
+    const cases = new Set(issues.map((i) => i.panel_id)).size;
+    notify(`Bulles trop pleines dans ${cases} case${cases > 1 ? "s" : ""} (${[...byLocale].map(([l, n]) => `${l} ${n}`).join(", ")}) : voir en haut de la liste`);
+  };
+
+  /** Moves the overflowing lettering back inside its panel, for every language at once; overlaps stay flagged. */
+  const fitOverflowing = async () => {
+    if (!letterIssues?.length) return;
+    const ids = new Set(letterIssues.filter((i) => i.reason !== "overlap").map((i) => i.panel_id));
+    const targets = panelsRef.current.filter((p) => ids.has(p.panel_id));
+    if (!targets.length) {
+      notify("Il ne reste que des bulles qui se chevauchent : « Replacer les bulles » les place d'après l'image");
+      return;
+    }
+    const sizes = await measureLettering(targets);
+    const fitted = new Map(targets.map((p) => [p.panel_id, fitLettering(p, sizes)]));
+    setPanels((current) => current.map((p) => fitted.get(p.panel_id) ?? p));
+    onAutosave?.();
+    notify(`Bulles recadrées dans ${fitted.size} case${fitted.size > 1 ? "s" : ""}`);
+    await checkLettering([...fitted.values()], true);
   };
 
   /** "@" in a prompt of the selected panel: the reference goes with it (sheet, place, object, or the image of another panel). */
@@ -1259,6 +1327,81 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     setChecked(new Set(faulty));
     notify(faulty.length ? `Bulles replacées. ${faulty.length} image${faulty.length > 1 ? "s" : ""} à redessiner, restée${faulty.length > 1 ? "s" : ""} cochée${faulty.length > 1 ? "s" : ""} : ${reports.slice(0, 3).join(" · ")}` : "Bulles replacées, aucune image fautive");
     onAutosave?.();
+  };
+
+  /** The panel's check against the sheets, when it is about its current image (a new image makes it stale). */
+  const auditOf = (panel: WebtoonPanel) => (panel.audit && panel.image.src && panel.audit.of === panel.image.src ? panel.audit : null);
+
+  /**
+   * "Contrôler la cohérence": the drawn panels next to the model sheets of their characters, six at a time
+   * (app/api/webtoon/[slug]/audit). What departs from a sheet stays on the panel, listed above the strip and
+   * in the inspector, where a retouch can fix it. A panel already checked on this image is not sent again.
+   */
+  const auditPanels = async (targets: WebtoonPanel[], force = false) => {
+    if (busy) return;
+    const list = targets.filter((p) => p.image.src && p.image.status !== "missing" && p.characters.length && (force || !auditOf(p)));
+    if (!list.length) {
+      notify("Ces cases sont déjà contrôlées sur leur image actuelle");
+      return;
+    }
+    const BATCH = 6;
+    const batches: WebtoonPanel[][] = [];
+    for (let i = 0; i < list.length; i += BATCH) batches.push(list.slice(i, i + BATCH));
+    if (!window.confirm(`Comparer ${list.length} case${list.length > 1 ? "s" : ""} aux fiches des personnages (costume, couleurs, casque, proportions) ? Environ ${Math.max(1, Math.round(batches.length * 0.35))} min, ${(batches.length * 0.02).toFixed(2)} $.`)) return;
+    setBusy(true);
+    stopBatch.current = false;
+    let done = 0;
+    let flagged = 0;
+    const started = Date.now();
+    setJob({ started, phase: "images", label: `Contrôle de cohérence : 0/${list.length} cases`, done: 0, total: list.length, queue: [], current: null, placeholders: 0, deadline: started + Math.ceil(batches.length / 2) * 33_000 });
+    const queue = [...batches];
+    const worker = async () => {
+      for (let batch = queue.shift(); batch && !stopBatch.current; batch = queue.shift()) {
+        try {
+          const response = await fetch(`/api/webtoon/${script.slug}/audit`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+            body: JSON.stringify({ panels: batch.map((p) => ({ panel_id: p.panel_id, order: p.order, description: p.description, characters: p.characters, image: p.image.src })), library: libraryRef.current }),
+          });
+          const payload = (await response.json().catch(() => ({}))) as { results?: Record<string, PanelAuditIssue[]>; error?: string };
+          if (response.ok && payload.results) {
+            const at = new Date().toISOString();
+            const results = payload.results;
+            flagged += batch.filter((p) => results[p.panel_id]?.length).length;
+            // Only onto the image that was checked: a panel redrawn meanwhile keeps its old result out.
+            setPanels((current) => current.map((p) => {
+              const sent = batch.find((b) => b.panel_id === p.panel_id);
+              return sent && results[p.panel_id] && p.image.src === sent.image.src ? { ...p, audit: { of: sent.image.src, at, issues: results[p.panel_id] } } : p;
+            }));
+          } else {
+            notify(`Contrôle d'un lot impossible : ${payload.error ?? response.status}`);
+          }
+        } catch (error) {
+          notify(`Contrôle d'un lot impossible : ${error instanceof Error ? error.message : "erreur"}`);
+        }
+        done += batch.length;
+        setJob((job) => (job ? { ...job, done, label: `Contrôle de cohérence : ${done}/${list.length} cases` } : job));
+      }
+    };
+    try {
+      await Promise.all(Array.from({ length: Math.min(2, batches.length) }, worker));
+      onAutosave?.();
+      setHideAudit(false);
+      notify(flagged ? `${flagged} case${flagged > 1 ? "s" : ""} sur ${done} s'écarte${flagged > 1 ? "nt" : ""} des fiches : voir en haut de la liste` : `${done} cases contrôlées : toutes suivent leurs fiches`);
+    } finally {
+      setJob(null);
+      setBusy(false);
+    }
+  };
+
+  /** A retouch that applies the remarks of the check, with the sheets of the characters concerned as references. */
+  const fixFromAudit = (panel: WebtoonPanel) => {
+    const audit = auditOf(panel);
+    if (!audit?.issues.length) return;
+    const who = [...new Set(audit.issues.map((i) => i.who))];
+    const references = who.map((id) => CHARACTERS.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => Boolean(c?.image)).map((c) => ({ name: c.name, image: c.image!, kind: "character" as const }));
+    const prompt = `Corriger le dessin pour suivre la fiche du personnage, sans rien changer d'autre (cadrage, pose, décor, lumière) : ${audit.issues.map((i) => i.issue).join(" ")}`;
+    void runRetouch(panel, { prompt, mask: null, brush: 0, references });
   };
 
   const regenerateChecked = async () => {
@@ -1431,6 +1574,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               >
                 Réécrire
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => void auditPanels(checkedPanels, true)} disabled={busy} title="Compare les cases cochées aux fiches de leurs personnages, même déjà contrôlées">Contrôler</button>
+              <button type="button" className="webtoon-mini" onClick={() => rhythmStrip(new Set(checkedPanels.map((p) => p.panel_id)))} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case cochée suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>Rythmer</button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
@@ -1446,9 +1591,56 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => void polishStrip(false)} disabled={busy} title="Donne une forme de webtoon à chaque case et ajoute les cases de liaison qui manquent">
                 Peaufiner la bande
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => rhythmStrip()} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>
+                Rythmer les espaces
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => void checkLettering()} disabled={busy} title="Mesure chaque bulle et cartouche dans les quatre langues et signale celles qui débordent de leur case ou en chevauchent une autre">
+                Vérifier les bulles
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => void auditPanels(panels)} disabled={busy} title="Compare chaque case dessinée aux fiches de ses personnages (costume, couleurs, casque, proportions) et liste celles qui s'en écartent">
+                Contrôler la cohérence
+              </button>
             </>
           )}
         </div>
+        {letterIssues?.length ? (
+          <div className="studio-letter-issues" role="status">
+            <p>
+              <b>Bulles trop pleines</b> dans {new Set(letterIssues.map((i) => i.panel_id)).size > 1 ? `${new Set(letterIssues.map((i) => i.panel_id)).size} cases` : "1 case"} :{" "}
+              {(["fr", "en", "ja", "ko"] as Locale[])
+                .map((l) => [l, letterIssues.filter((i) => i.locale === l).length] as const)
+                .filter(([, n]) => n)
+                .map(([l, n]) => `${l} ${n}`)
+                .join(" · ")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(letterIssues.map((i) => i.panel_id)))}>Cocher ces cases</button>
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void fitOverflowing()} disabled={busy} title="Déplace chaque bulle qui dépasse juste assez pour tenir dans la case avec son texte le plus long, et agrandit la case si une bulle est plus haute qu'elle">Recadrer les bulles</button>
+              <button type="button" className="webtoon-mini" onClick={() => setLetterIssues(null)}>Masquer</button>
+            </div>
+          </div>
+        ) : null}
+        {(() => {
+          const off = panels.filter((p) => auditOf(p)?.issues.length);
+          if (hideAudit || !off.length) return null;
+          const byWho = new Map<string, number>();
+          for (const p of off) for (const who of new Set(auditOf(p)!.issues.map((i) => i.who))) byWho.set(who, (byWho.get(who) ?? 0) + 1);
+          const glaring = off.filter((p) => auditOf(p)!.issues.some((i) => i.severity === "high")).length;
+          return (
+            <div className="studio-letter-issues studio-audit-issues" role="status">
+              <p>
+                <b>Écarts aux fiches</b> dans {off.length > 1 ? `${off.length} cases` : "1 case"}
+                {glaring ? `, dont ${glaring} visible${glaring > 1 ? "s" : ""} au premier coup d'œil` : ""} :{" "}
+                {[...byWho].map(([id, n]) => `${CHARACTERS.find((c) => c.id === id)?.name ?? id} ${n}`).join(" · ")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(off.map((p) => p.panel_id)))} title="Puis « Regénérer », ou une case à la fois : « Retoucher avec ces remarques » dans l'inspecteur">Cocher ces cases</button>
+                <button type="button" className="webtoon-mini" onClick={() => select(off.find((p) => auditOf(p)!.issues.some((i) => i.severity === "high"))?.panel_id ?? off[0].panel_id)}>Voir la première</button>
+                <button type="button" className="webtoon-mini" onClick={() => setHideAudit(true)}>Masquer</button>
+              </div>
+            </div>
+          );
+        })()}
         <ol>
           {panels.map((panel, index) => (
             <Fragment key={panel.panel_id}>
@@ -1502,6 +1694,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
                   {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
+                  {auditOf(panel)?.issues.length ? (
+                    <i className={auditOf(panel)!.issues.some((i) => i.severity === "high") ? "studio-thumb-bad" : "studio-thumb-warn"} title={auditOf(panel)!.issues.map((i) => i.issue).join("\n")}>
+                      {" "}· écart fiche
+                    </i>
+                  ) : null}
+                  {letterIssues?.some((i) => i.panel_id === panel.panel_id) ? (
+                    <i className="studio-thumb-warn" title={letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => `${i.locale} : « ${i.text} » ${i.reason === "out" ? "dépasse de la case" : i.reason === "tall" ? "plus haute que la case" : "chevauche une autre bulle"}`).join("\n")}>
+                      {" "}· bulles {[...new Set(letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => i.locale))].join(", ")}
+                    </i>
+                  ) : null}
                 </span>
               </button>
               <button
@@ -1579,6 +1781,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
               <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
               <button type="button" className={`webtoon-mini ${view === "review" ? "is-active" : ""}`} onClick={() => chooseView("review")} title="La bande face au film : chaque case à côté de l'image de sa seconde, les gestes et les passages sans case">Relecture</button>
+              <button type="button" className={`webtoon-mini ${view === "phone" ? "is-active" : ""}`} onClick={() => chooseView("phone")} title="Le lecteur public sur un écran de téléphone, à sa vraie largeur">Téléphone</button>
             </div>
             <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
               <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
@@ -1629,7 +1832,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
 
         <div className={`studio-stage-wrap ${view === "strip" ? "is-strip" : ""}`}>
-          {view === "review" ? (
+          {view === "phone" ? (
+            <PhonePreview panels={panels} locale={locale} selectedId={selected.panel_id} onSelect={select} />
+          ) : view === "review" ? (
             <StudioReview
               panels={panels}
               frames={ALL_FRAMES}
@@ -1784,6 +1989,27 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ))}
         </nav>
 
+        {auditOf(selected)?.issues.length ? (
+          <div className="studio-audit-card" role="status">
+            <b>Écarts à la fiche</b>
+            <ul>
+              {auditOf(selected)!.issues.map((issue, i) => (
+                <li key={i} className={issue.severity === "high" ? "is-high" : ""}>
+                  {issue.issue}
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => fixFromAudit(selected)} disabled={drawing.has(selected.panel_id)} title="Une retouche de toute l'image qui applique ces remarques, avec la fiche des personnages en référence ; l'image actuelle reste dans l'historique">
+                Retoucher avec ces remarques
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => patch({ audit: { ...auditOf(selected)!, issues: [] } })} title="L'image est juste : les remarques disparaissent jusqu'au prochain contrôle d'une nouvelle image">
+                Ignorer
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {inspectorTab === "scene" ? (
           <div className="studio-section">
             <h3 className="studio-group-title">La case</h3>
@@ -1922,14 +2148,31 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
             <div className="studio-section-head mt-4">
               <span className="webtoon-field-label">Sons (SFX)</span>
-              <button type="button" className="webtoon-mini" onClick={() => patch({ sfx: [...selected.sfx, { text: { en: "whoosh" }, anchor: { x: 60, y: 30 }, style: "soft", rotate: -10, size: 90 }] })}>+ Son</button>
+              <button type="button" className="webtoon-mini" onClick={() => patch({ sfx: [...selected.sfx, { text: { en: "whoosh" }, anchor: freeSpot(selected), style: "soft", rotate: -10, size: 90 }] })}>+ Son libre</button>
+            </div>
+            <div className={`studio-sfx-library ${sfxFont.variable}`} role="group" aria-label="Bibliothèque de sons">
+              {SFX_LIBRARY.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="studio-sfx-chip"
+                  title={`${preset.hint} · ${preset.effect.text.fr} / ${preset.effect.text.en} / ${preset.effect.text.ja} / ${preset.effect.text.ko}`}
+                  onClick={() => {
+                    patch({ sfx: [...selected.sfx, { ...preset.effect, text: { ...preset.effect.text }, anchor: freeSpot(selected) }] });
+                    notify(`Son « ${preset.effect.text.fr} » posé : glissez-le sur l'image pour le placer`);
+                  }}
+                >
+                  <span className={`studio-sfx-chip-sample webtoon-sfx-${preset.effect.style}`}>{preset.effect.text.fr}</span>
+                  <small>{preset.label}</small>
+                </button>
+              ))}
             </div>
             {selected.sfx.map((effect, i) => (
               <div key={i} className="webtoon-subcard">
                 {textInputs(effect.text, (text) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, text } : s)) }))}
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={effect.style} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, style: e.target.value as "soft" | "hard" | "rumble" } : s)) })}>
-                    {(["soft", "hard", "rumble"] as const).map((v) => <option key={v} value={v}>{label(v)}</option>)}
+                  <select value={effect.style} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, style: e.target.value as SfxStyle } : s)) })}>
+                    {SFX_STYLES.map((v) => <option key={v} value={v}>{SFX_STYLE_LABEL[v]}</option>)}
                   </select>
                   <label className="webtoon-field"><span>Taille {effect.size ?? 96}</span><input type="range" min={30} max={260} value={effect.size ?? 96} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, size: Number(e.target.value) } : s)) })} /></label>
                 </div>

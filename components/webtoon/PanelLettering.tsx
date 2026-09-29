@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n/config";
+import { letterJitter } from "@/lib/webtoon/sfx-library";
 import { localizedText } from "@/lib/webtoon/text";
 import type { Anchor, Caption, Dialogue, Sfx } from "@/lib/webtoon/types";
 
@@ -132,6 +133,32 @@ function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
   );
 }
 
+/** How much a style's letters wobble: none on the smooth ones, a little on a blow, a lot on a crack. */
+const WOBBLE: Partial<Record<Sfx["style"], number>> = { hard: 0.6, impact: 1, metal: 0.45, crack: 1.5 };
+
+/**
+ * A sound drawn letter by letter: each letter turned, scaled and lifted a
+ * little, seeded on the text so it keeps its shape. Smooth styles (a breath,
+ * a hum, a rush of air) stay one piece of text.
+ */
+function SfxLetters({ text, style }: { text: string; style: Sfx["style"] }) {
+  const strength = WOBBLE[style];
+  if (!strength) return <>{text}</>;
+  return (
+    <>
+      {Array.from(text).map((char, index) => {
+        if (char === " ") return <span key={index}> </span>;
+        const j = letterJitter(text, index, strength);
+        return (
+          <span key={index} className="webtoon-sfx-letter" style={{ transform: `translateY(${j.lift}em) rotate(${j.rotate.toFixed(1)}deg) scale(${j.scale.toFixed(3)})` }}>
+            {char}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function PanelLettering({ dialogue, caption, sfx, locale }: LetteringProps) {
   return (
     <>
@@ -159,7 +186,7 @@ export function PanelLettering({ dialogue, caption, sfx, locale }: LetteringProp
           }}
           aria-hidden="true"
         >
-          {localizedText(effect.text, locale)}
+          <SfxLetters text={localizedText(effect.text, locale)} style={effect.style} />
         </div>
       ))}
     </>

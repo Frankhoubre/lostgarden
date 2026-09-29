@@ -33,6 +33,37 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // Anonymous reading statistics (lib/webtoon/reads.ts): one document per
+    // reading session, nothing personal. Anyone creates and moves forward a
+    // session with exactly these fields; only the studio reads or deletes.
+    function isReadSession(slug, sessionId) {
+      let d = request.resource.data;
+      return sessionId.size() <= 80
+        && d.keys().hasOnly(['slug', 'locale', 'max_index', 'total', 'panel_id', 'device', 'started_at', 'updated_at'])
+        && d.keys().hasAll(['slug', 'locale', 'max_index', 'total', 'panel_id', 'device', 'started_at', 'updated_at'])
+        && d.slug is string && d.slug == slug && d.slug.size() <= 80
+        && d.locale is string && d.locale.size() <= 80
+        && d.panel_id is string && d.panel_id.size() <= 80
+        && d.max_index is int && d.max_index >= 0 && d.max_index <= 5000
+        && d.total is int && d.total >= 1 && d.total <= 5000
+        && d.device in ['mobile', 'desktop']
+        && d.started_at is timestamp
+        && d.updated_at == request.time;
+    }
+
+    match /webtoon_reads/{slug} {
+      allow read, delete: if isStudio();
+      match /sessions/{sessionId} {
+        allow read, delete: if isStudio();
+        allow create: if isReadSession(slug, sessionId)
+          && request.resource.data.started_at == request.time;
+        allow update: if isReadSession(slug, sessionId)
+          && request.resource.data.max_index >= resource.data.max_index
+          && request.resource.data.slug == resource.data.slug
+          && request.resource.data.started_at == resource.data.started_at;
+      }
+    }
+
     // The version the public reader shows: anyone reads, the studio writes.
     match /webtoon_published/{slug} {
       allow read: if true;
