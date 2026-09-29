@@ -11,6 +11,8 @@ import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioExport } from "@/components/studio/StudioExport";
+import { seriesOfTitle } from "@/lib/webtoon/series";
+import { upsertSeriesEpisode } from "@/lib/webtoon/series-client";
 import { StudioCost, budgetLevel, type StripCost } from "@/components/studio/StudioCost";
 import { useFilmGuide } from "@/components/studio/useFilmGuide";
 import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
@@ -523,6 +525,22 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
       const at = await saveStrip(DRAFTS_COLLECTION, script.slug, ready, user);
       syncedAt.current = at;
       await saveStrip(PUBLISHED_COLLECTION, script.slug, ready, user);
+      // The episode in the public list of the series: its card, its place between the others.
+      const title = project ? project.title : `${localizedText(script.title, "fr")}`;
+      const place = project ? seriesOfTitle(project.title) : { series: script.series, episode: script.episode };
+      const coverPanel = ready.find((p) => p.image.src && p.image.status !== "missing" && !p.caption.some((c) => c.style === "title")) ?? ready[0];
+      await upsertSeriesEpisode(
+        {
+          slug: script.slug,
+          series: place.series,
+          episode: place.episode,
+          title,
+          cover: coverPanel?.image.web?.src ?? coverPanel?.image.src,
+          panels: ready.length,
+          published_at: at,
+        },
+        user,
+      ).catch(() => undefined);
       setSavedAt(at);
       setPublishedAt(at);
       setBaseline(ready);

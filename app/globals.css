@@ -6691,3 +6691,103 @@ select.studio-input {
 .studio-cost-note {
   color: var(--st-faint, #6c7280);
 }
+
+/* Reading a series: resume where the reader stopped, episodes before and after. */
+.webtoon-resume {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  transform: translateX(-50%);
+  padding: 0.3rem;
+  border: 1px solid rgba(125, 223, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(2, 8, 23, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.webtoon-resume button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  color: var(--cyan-pale);
+  font-size: 0.85rem;
+}
+
+.webtoon-resume button:first-child {
+  background: rgba(56, 189, 248, 0.18);
+}
+
+.webtoon-resume-close {
+  padding: 0.35rem 0.6rem !important;
+  color: rgba(216, 210, 194, 0.7) !important;
+}
+
+.webtoon-episode-nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1080px;
+  margin: 2rem auto 0;
+}
+
+.webtoon-episode-link {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 0.8rem;
+  color: var(--lily);
+}
+
+.webtoon-episode-link small {
+  color: var(--cyan-pale);
+  font-size: 0.72rem;
+}
+
+.webtoon-episode-link.is-next {
+  text-align: right;
+}
+
+.webtoon-episode-link:hover {
+  border-color: rgba(125, 223, 255, 0.6);
+}
+
+.webtoon-episode-all {
+  color: var(--cyan-pale);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.webtoon-series-resume {
+  display: inline-block;
+  margin-top: 1.2rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(125, 223, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--cyan-pale);
+  font-size: 0.88rem;
+}
+
+.webtoon-card-progress {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.6rem;
+}
+
+.webtoon-card-progress i {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--magic);
+}
+
+.webtoon-card-progress small {
+  color: rgba(216, 210, 194, 0.6);
+  font-size: 0.7rem;
+}
