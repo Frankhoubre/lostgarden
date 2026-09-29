@@ -3883,6 +3883,145 @@ h3 {
   color: var(--st-muted, #a3a9b5);
 }
 
+.studio-sketch {
+  width: min(1180px, 97vw);
+  max-width: none;
+}
+
+.studio-sketch-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  height: min(94vh, 1100px);
+  padding: 0.8rem;
+  border-radius: 14px;
+  background: var(--st-panel, #14161a);
+  color: var(--st-text, #eceef2);
+}
+
+.studio-sketch-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+}
+
+.studio-sketch-colors {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.studio-sketch-color {
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.studio-sketch-color.is-active {
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.35);
+}
+
+.studio-sketch-colors input[type="color"] {
+  width: 1.6rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.studio-sketch-range {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.66rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-sketch-range input {
+  width: 7rem;
+}
+
+.studio-sketch-history {
+  display: flex;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+.studio-sketch-stage {
+  overflow: auto;
+  border-radius: 10px;
+  background: #0b0c0f;
+  display: grid;
+  place-items: start center;
+  padding: 0.8rem;
+}
+
+.studio-sketch-paper {
+  position: relative;
+  max-width: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: #fff;
+}
+
+.studio-sketch-bg,
+.studio-sketch-ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.studio-sketch-ink {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.studio-sketch-ink.is-eraser {
+  cursor: cell;
+}
+
+.studio-sketch-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.studio-sketch-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.studio-sketch-foot textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  background: #0f1115;
+  font-size: 0.78rem;
+  color: var(--st-text, #eceef2);
+  resize: none;
+}
+
+.studio-sketch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 800px) {
+  .studio-sketch-foot {
+    grid-template-columns: 1fr;
+  }
+}
+
 .studio-publish,
 .studio-snapshots {
   width: min(880px, 94vw);

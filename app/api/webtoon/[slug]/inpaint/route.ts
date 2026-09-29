@@ -47,12 +47,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string; extra_references?: { name?: string; image?: string; kind?: string }[]; /** The HD finish of an approved sketch: the same image, drawn clean at full quality. */ finish?: boolean };
+  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string; extra_references?: { name?: string; image?: string; kind?: string }[]; /** The HD finish of an approved sketch: the same image, drawn clean at full quality. */ finish?: boolean; /** The author's drawing: "blank", a sketch on an empty page; "over", strokes drawn over the panel to show a change. */ sketch?: "blank" | "over" };
   const instruction = (body.prompt ?? "").trim();
   if (!body.image?.startsWith("data:image/")) return Response.json({ error: "image attendue" }, { status: 400 });
   if (body.mask && !body.mask.startsWith("data:image/png")) return Response.json({ error: "masque PNG attendu" }, { status: 400 });
   const zone = Boolean(body.mask);
-  if (!instruction && !body.finish) return Response.json({ error: zone ? "Dis ce qui doit apparaître dans la zone" : "Dis ce qui doit changer dans la case" }, { status: 400 });
+  if (!instruction && !body.finish && !body.sketch) return Response.json({ error: zone ? "Dis ce qui doit apparaître dans la zone" : "Dis ce qui doit changer dans la case" }, { status: 400 });
   const size = body.size && SIZES.has(body.size) ? body.size : "1024x1536";
   const panel = body.panel;
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
@@ -80,7 +80,11 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const prompt = [
     bible.base,
-    body.finish && !zone
+    body.sketch === "blank" && !zone
+      ? `FINAL PANEL FROM THE AUTHOR'S SKETCH. Image 1 is a rough drawing by the author of the series (pencil lines, scribbles, maybe flat colour blobs or an imported rough). It is the layout to follow: keep exactly its framing and camera angle, where each figure and object stands, their size in the frame, their poses and gestures, the horizon and the big shapes. Turn it into a finished webtoon panel of the series: the characters exactly as on their reference sheets, the place as described, clean ink lines, flat colours, one hard cel shadow per element. Do not copy the sketch's rough lines, its paper, its handwriting or any text or arrow: they are the author's notes.${instruction ? ` What the panel shows: ${instruction}.` : ""} The black bands at the edges of image 1, if any, are padding: keep them black.`
+      : body.sketch === "over" && !zone
+      ? `EDIT FROM THE AUTHOR'S MARKS. Image 1 is the panel with rough strokes the author drew over it (lines, scribbles, arrows, silhouettes) to show a change. Apply what the marks show${instruction ? `, as the author says: ${instruction}` : ""}: a scribbled silhouette becomes that figure or object drawn in the series style, a line shows a new outline or position, an arrow shows a movement or a direction to turn. Then remove every mark: no stroke, arrow or handwriting stays visible. Everything the marks do not touch stays exactly as drawn in image 1: the same framing, characters, lines, flat colours and light, and the background keeps its exact colour and tone (a white background stays white, never tinted). The black bands at the edges of image 1, if any, are padding: keep them black.`
+      : body.finish && !zone
       ? `FINAL RENDER of an approved webtoon panel. Image 1 is its rough draft, drawn fast at low quality. Keep exactly its framing and camera angle, its composition, every character in the same place and pose, the same expressions, the same palette and light. Redraw it clean at full final quality: crisp even ink lines, clean flat colours, one hard cel shadow per element, the details finished. Nothing added, nothing removed, nothing moved.${instruction ? ` Also: ${instruction}.` : ""} The black bands at the edges of image 1, if any, are padding: keep them black.`
       : zone
       ? `RETOUCH of an existing webtoon panel. Image 1 is the panel; the mask marks one zone of it. Inside that zone, and only there: ${instruction}. Everything outside the zone stays exactly as drawn in image 1: same composition, same lines, same flat colours, same light. The new content matches the flatness, the line weight and the palette of the rest of the panel and connects seamlessly at the edge of the zone.`
