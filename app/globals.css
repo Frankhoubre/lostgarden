@@ -6518,3 +6518,55 @@ select.studio-input {
   align-items: center;
   padding: 0.36rem 0.5rem;
 }
+
+/* Export for the platforms: the strip is rendered off screen at 1080 px to be captured. */
+.studio-export {
+  width: min(560px, 94vw);
+}
+
+.studio-export-body {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.2rem;
+  border-radius: 14px;
+  background: var(--st-panel, #14161a);
+  color: var(--st-text, #eceef2);
+  font-size: 0.84rem;
+}
+
+.studio-export-body fieldset {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 10px;
+}
+
+.studio-export-body legend {
+  padding: 0 0.3rem;
+  font-size: 0.72rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-export-body label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-export-body small {
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-export-stage {
+  position: fixed;
+  top: 0;
+  left: -20000px;
+  width: 1080px;
+  pointer-events: none;
+}
+
+.studio-export-stage .webtoon-strip {
+  width: 1080px;
+  max-width: none;
+}

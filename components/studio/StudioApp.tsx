@@ -10,6 +10,7 @@ import { useLocale } from "@/components/providers/LocaleProvider";
 import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
+import { StudioExport } from "@/components/studio/StudioExport";
 import { useFilmGuide } from "@/components/studio/useFilmGuide";
 import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { StudioLocations } from "@/components/studio/StudioLocations";
@@ -176,6 +177,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [working, setWorking] = useState<"save" | "publish" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
@@ -702,6 +704,10 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             {menuOpen ? (
               <div className="studio-gear-menu" role="menu">
                 <p className="studio-gear-title">Fichier</p>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setExportOpen(true); }}>
+                  <b>Exporter pour les plateformes</b>
+                  <small>WEBTOON Canvas, Tapas, archive : la bande découpée aux bons formats, dans chaque langue, en un ZIP.</small>
+                </button>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); exportJson(); }}>
                   <b>Exporter la bande en JSON</b>
                   <small>Télécharge toutes les cases, textes et réglages : pour une sauvegarde ou pour repasser par le dépôt.</small>
@@ -769,6 +775,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             </button>
           ))}
         </nav>
+        {exportOpen ? <StudioExport slug={script.slug} title={project ? project.title : localizedText(script.title, locale)} panels={panels} onClose={() => setExportOpen(false)} /> : null}
         <main className="studio-main">
           {/* The editor stays mounted behind the other tabs: a running generation goes on and its progress is still there when coming back. */}
           <div className="studio-editor-host" style={{ display: tab === "webtoon" ? "contents" : "none" }} aria-hidden={tab !== "webtoon"}>
