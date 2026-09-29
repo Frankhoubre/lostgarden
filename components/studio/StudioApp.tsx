@@ -27,6 +27,7 @@ import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/w
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { NOTIFICATION_LIMIT, loadNotifications, looksLikeError, saveNotifications, type StudioNotification, type TrackTask } from "@/lib/webtoon/notifications";
 import { libraryWith } from "@/lib/webtoon/references";
+import { studioHeaders } from "@/lib/webtoon/studio-headers";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
@@ -434,6 +435,51 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     }
   }, [job, script.slug, notify]);
 
+  /**
+   * The light versions the public reader loads (WebP at reading width), made for every image that has none
+   * or whose image changed since, a dozen per call and three calls at once.
+   */
+  const optimizeForReader = async (list: WebtoonPanel[]): Promise<WebtoonPanel[]> => {
+    const todo = list.filter((p) => p.image.src && p.image.status !== "missing" && (!p.image.web || p.image.web.of !== p.image.src));
+    if (!todo.length) return list;
+    const task = track(`Images légères pour le lecteur · ${todo.length}`, undefined, Math.ceil(todo.length / 36) * 9000);
+    const made = new Map<string, NonNullable<WebtoonPanel["image"]["web"]>>();
+    let before = 0;
+    let after = 0;
+    const batches: WebtoonPanel[][] = [];
+    for (let i = 0; i < todo.length; i += 12) batches.push(todo.slice(i, i + 12));
+    let next = 0;
+    const worker = async () => {
+      while (next < batches.length) {
+        const batch = batches[next];
+        next += 1;
+        try {
+          const response = await fetch(`/api/webtoon/${script.slug}/optimize`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+            body: JSON.stringify({ items: batch.map((p) => ({ panel_id: p.panel_id, src: p.image.src })) }),
+          });
+          const payload = (await response.json().catch(() => ({}))) as { results?: { panel_id: string; of: string; web?: NonNullable<WebtoonPanel["image"]["web"]>; original_bytes?: number }[] };
+          for (const r of payload.results ?? []) {
+            if (!r.web) continue;
+            made.set(r.panel_id, r.web);
+            before += r.original_bytes ?? 0;
+            after += r.web.bytes;
+          }
+        } catch {
+          // A batch that failed keeps its full images; the next publication tries again.
+        }
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    const mb = (n: number) => `${(n / 1e6).toFixed(0)} Mo`;
+    task.done(`${made.size} images allégées, ${mb(before)} → ${mb(after)}`);
+    return list.map((p) => {
+      const web = made.get(p.panel_id);
+      return web && web.of === p.image.src ? { ...p, image: { ...p.image, web } } : p;
+    });
+  };
+
   const publish = async () => {
     if (!user) {
       notify("Pas de compte connecté : publication impossible.");
@@ -446,12 +492,15 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     if (!window.confirm("Publier cette version sur lostgarden.world/webtoon ? Elle remplace la version en ligne.")) return;
     setWorking("publish");
     try {
-      const at = await saveStrip(DRAFTS_COLLECTION, script.slug, panels, user);
+      // The reader loads light WebP versions: made now for the images that have none yet.
+      const ready = await optimizeForReader(panels);
+      if (ready !== panels) setPanels(ready);
+      const at = await saveStrip(DRAFTS_COLLECTION, script.slug, ready, user);
       syncedAt.current = at;
-      await saveStrip(PUBLISHED_COLLECTION, script.slug, panels, user);
+      await saveStrip(PUBLISHED_COLLECTION, script.slug, ready, user);
       setSavedAt(at);
       setPublishedAt(at);
-      setBaseline(panels);
+      setBaseline(ready);
       notify("Publié. Le lecteur public se met à jour dans la minute.");
     } catch (error) {
       notify(`Publication impossible : ${error instanceof Error ? error.message : "erreur"}`);
