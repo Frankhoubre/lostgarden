@@ -13,6 +13,7 @@ import { imageVersions, originLabel, restoreImage, withNewImage } from "@/lib/we
 import type { TrackTask } from "@/lib/webtoon/notifications";
 import { stateOf } from "@/lib/webtoon/panel-state";
 import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
+import { applyRhythm } from "@/lib/webtoon/rhythm";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -713,6 +714,22 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /**
+   * The gaps between panels from the film guide (lib/webtoon/rhythm.ts): the checked panels, or the whole
+   * strip. The first panel and the panels laid over the one before keep theirs; "Annuler" brings them back.
+   */
+  const rhythmStrip = (ids?: Set<string>) => {
+    if (!guide?.sequences.length) return;
+    const { panels: next, changed } = applyRhythm(panelsRef.current, guide, ids);
+    if (!changed) {
+      notify("Les espaces suivent déjà le guide du film");
+      return;
+    }
+    setPanels(next);
+    onAutosave?.();
+    notify(`Espaces rythmés sur ${changed} case${changed > 1 ? "s" : ""} : serrés dans l'action, larges dans la contemplation`);
+  };
+
+  /**
    * Continue the story: the writer model drafts the next N panels from the
    * frames that follow the last one, the engine composes them, then the
    * images are generated one by one and the lettering is translated.
@@ -864,8 +881,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           break;
         }
         failures = 0;
-        created.push(...payload.panels);
-        current = [...current, ...payload.panels];
+        // The new panels get the gaps of their scene right away (a film not read yet leaves the writer's).
+        const written = applyRhythm([...current, ...payload.panels], guide, new Set(payload.panels.map((p) => p.panel_id))).panels.slice(current.length);
+        created.push(...written);
+        current = [...current, ...written];
         setPanels(assemble());
         onAutosave?.();
         if (created.length === payload.panels.length) select(created[0].panel_id);
@@ -1426,6 +1445,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               >
                 Réécrire
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => rhythmStrip(new Set(checkedPanels.map((p) => p.panel_id)))} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case cochée suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>Rythmer</button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
@@ -1440,6 +1460,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </button>
               <button type="button" className="webtoon-mini" onClick={() => void polishStrip(false)} disabled={busy} title="Donne une forme de webtoon à chaque case et ajoute les cases de liaison qui manquent">
                 Peaufiner la bande
+              </button>
+              <button type="button" className="webtoon-mini" onClick={() => rhythmStrip()} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>
+                Rythmer les espaces
               </button>
             </>
           )}
