@@ -183,6 +183,8 @@ type StudioEditorProps = {
   notify: (message: string) => void;
   /** Opens a running entry in the notification center, ended by the editor when the work is done. */
   track?: TrackTask;
+  /** Past the episode's budget, asks the author before a batch or a continuation; true to go on. */
+  checkBudget?: () => boolean;
   /** Ask the studio to write the draft once the current panels are rendered. */
   onAutosave?: () => void;
   /** The studio's characters and locations, attached to every generation. */
@@ -206,7 +208,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, allFrames, guide = null }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, checkBudget, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, allFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const ALL_FRAMES = useMemo(() => allFrames ?? studioFilmFramesDense(), [allFrames]);
@@ -585,6 +587,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   /** Generate every panel without a current image, one after the other, in strip order. */
   const generatePending = async () => {
     if (busy) return;
+    if (checkBudget && !checkBudget()) return;
     const todo = pendingPanels(panels);
     if (!todo.length) {
       notify("Toutes les cases ont une image à jour");
@@ -716,6 +719,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    */
   const continueStory = async () => {
     if (busy) return;
+    if (checkBudget && !checkBudget()) return;
     if (nextUnit === "seconds") {
       // A stretch of film: written to its end, the number of panels follows the pace.
       const seconds = Math.max(5, Math.min(600, Math.round(nextCount) || 30));
@@ -1254,6 +1258,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
   const regenerateChecked = async () => {
     if (busy || !checkedPanels.length) return;
+    if (checkBudget && !checkBudget()) return;
     const withText = checkedPanels.filter((p) => p.description.trim() || p.generation_prompt.trim());
     if (!withText.length) {
       notify("Aucune des cases cochées n'a de description");

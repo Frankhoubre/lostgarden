@@ -11,6 +11,7 @@ import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioExport } from "@/components/studio/StudioExport";
+import { StudioCost, budgetLevel, type StripCost } from "@/components/studio/StudioCost";
 import { useFilmGuide } from "@/components/studio/useFilmGuide";
 import { studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { StudioLocations } from "@/components/studio/StudioLocations";
@@ -40,9 +41,6 @@ const PREVIEW_LOCALES: { id: Locale; label: string }[] = [
 ];
 
 /** Running cost of the strip's generations, as the routes record it in Firestore. */
-type StripCost = { total_usd: number; images_usd?: number; sheets_usd?: number; writer_usd?: number; translate_usd?: number; count?: number; images_count?: number; sheets_count?: number; writer_count?: number; translate_count?: number; /** Part of the total estimated for what was generated before the counter existed. */ estimated_usd?: number };
-
-const usd = (value: number | undefined) => `${(value ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
 
 /** What the editor reports about its running job, shown in the bar from every tab. */
 export type JobSummary = { label: string; done: number; total: number; deadline: number; started?: number } | null;
@@ -161,6 +159,12 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   // The cost of the strip so far, live: every generation adds what the gateway billed.
   const [cost, setCost] = useState<StripCost | null>(null);
+  // Alerts once per session when the spending reaches 80 % then 100 % of the episode's budget.
+  const budgetAlerted = useRef<{ close: boolean; over: boolean }>({ close: false, over: false });
+  const costRef = useRef<StripCost | null>(null);
+  useEffect(() => {
+    costRef.current = cost;
+  }, [cost]);
   useEffect(() => {
     if (!user) return;
     const unsubscribe = onSnapshot(
@@ -265,6 +269,25 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     return list.length ? list[list.length - 1].seconds : 0;
   }, [frames]);
   const filmGuide = useFilmGuide({ slug: script.slug, user, duration: filmDuration, notify, track });
+
+  useEffect(() => {
+    const level = budgetLevel(cost);
+    if (!cost?.budget_usd) return;
+    const spent = `${cost.total_usd.toFixed(2)} $ sur ${cost.budget_usd.toFixed(2)} $`;
+    if (level === "over" && !budgetAlerted.current.over) {
+      budgetAlerted.current = { close: true, over: true };
+      notify(`Budget de l'épisode dépassé : ${spent}`);
+    } else if (level === "close" && !budgetAlerted.current.close) {
+      budgetAlerted.current.close = true;
+      notify(`80 % du budget de l'épisode atteint : ${spent}`);
+    }
+  }, [cost, notify]);
+  /** Before a batch or a continuation: past the budget, the author confirms. */
+  const checkBudget = useCallback(() => {
+    const current = costRef.current;
+    if (budgetLevel(current) !== "over" || !current?.budget_usd) return true;
+    return window.confirm(`Le budget de l'épisode est dépassé (${current.total_usd.toFixed(2)} $ dépensés sur ${current.budget_usd.toFixed(2)} $). Lancer quand même ?`);
+  }, []);
 
   const markNotificationsRead = useCallback(
     () =>
@@ -634,14 +657,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
           {project ? (
             <Link href={`${localePath(locale, `/convert-video-to-webtoon/${project.id}`)}?bible=1`} className="webtoon-mini" title="Personnages, objets et lieux du projet, les images du film">Bible du projet</Link>
           ) : null}
-          {cost ? (
-            <span
-              className="studio-cost"
-              title={`Coût des générations de ce webtoon, tel que facturé par le Gateway.\nImages : ${usd(cost.images_usd)} (${cost.images_count ?? 0})\nFiches : ${usd(cost.sheets_usd)} (${cost.sheets_count ?? 0})\nÉcriture de la suite : ${usd(cost.writer_usd)} (${cost.writer_count ?? 0} lots)\nTraductions : ${usd(cost.translate_usd)} (${cost.translate_count ?? 0})${cost.estimated_usd ? `\nDont ${usd(cost.estimated_usd)} estimés pour ce qui a été généré avant le compteur (20 septembre 2026).` : ""}`}
-            >
-              {usd(cost.total_usd)}
-            </span>
-          ) : null}
+          {cost ? <StudioCost slug={script.slug} cost={cost} notify={notify} /> : null}
         </div>
         <div className="studio-bar-actions">
           <div className="studio-langswitch" role="group" aria-label="Langue d'affichage">
@@ -787,6 +803,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               setSelectedId={setSelectedId}
               notify={notify}
               track={track}
+              checkBudget={checkBudget}
               onAutosave={requestAutosave}
               library={library}
               setLibrary={setLibrary}
