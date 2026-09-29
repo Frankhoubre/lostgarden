@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { StoryboardNotes } from "@/components/webtoon/StoryboardNotes";
 import { WebtoonPageShell } from "@/components/webtoon/WebtoonPageShell";
 import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
+import { forReader } from "@/lib/webtoon/reader-panels";
 import { isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
@@ -94,7 +95,7 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
         </div>
 
         <div className="webtoon-stage mt-8">
-          <WebtoonReader panels={script.panels} />
+          <WebtoonReader panels={forReader(script.panels)} />
         </div>
         <ReadingProgress slug={slug} locale={locale} />
         <ReadingStats slug={slug} locale={locale} />
@@ -131,7 +132,7 @@ async function ProjectEpisode({ locale, episode, summary: found, panels, previou
           {fill(w.panels, { count: panels.length })} · {fill(w.height, { px: layout.total_height })}
         </p>
         <div className="webtoon-stage mt-8">
-          <WebtoonReader panels={panels} />
+          <WebtoonReader panels={forReader(panels)} />
         </div>
         <ReadingProgress slug={episode.slug} locale={locale} />
         <ReadingStats slug={episode.slug} locale={locale} />
