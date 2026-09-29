@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { panelForGeneration } from "@/lib/webtoon/compose";
 import { buildGenerationRequest } from "@/lib/webtoon/generation";
-import { checkPanelImage } from "@/lib/webtoon/image-check";
+import { checkPanelImage, stateOf } from "@/lib/webtoon/image-check";
 import { autoPlaced, fixLettering, imageToPanel, layoutBubbles, moveSfxOffBubbles, type Figure } from "@/lib/webtoon/lettering";
 import { libraryWith } from "@/lib/webtoon/references";
 import { bibleFor } from "@/lib/webtoon/style-bible";
@@ -60,6 +60,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     library?: LibraryOverlay;
     /** Image quality: "medium" costs about a third of "high" at the same size. */
     quality?: "low" | "medium" | "high";
+    /** The panel just before in the strip (its image, its state), so the check keeps the continuity. */
+    previous?: { image?: string; state?: string; description?: string };
   };
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
   const requested = body.panel ?? script.panels.find((p) => p.panel_id === body.panel_id);
@@ -77,7 +79,10 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const generation = buildGenerationRequest(panel, body.model, overlay);
+    const built = buildGenerationRequest(panel, body.model, overlay);
+    // A panel silent about the state (a close-up on a hand) keeps the state of the panel before.
+    const carried = !stateOf(panel.description) && typeof body.previous?.state === "string" && body.previous.state.trim() ? body.previous.state.trim().slice(0, 600) : "";
+    const generation = carried ? { ...built, prompt: `${built.prompt}\n\nCONTINUITY, carried on from the panel before (this panel does not change it): ${carried}` } : built;
     const options = {
       model: body.model,
       quality: body.quality === "low" || body.quality === "medium" || body.quality === "high" ? body.quality : undefined,
@@ -88,14 +93,29 @@ export async function POST(request: Request, { params }: RouteContext) {
     // The drawn image, checked against the panel: cast, canon, state. One redraw with the faults named.
     const library = libraryWith(overlay);
     const canon = bibleFor(script.style_bible_id).canon;
-    let check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon });
+    // The panel before, small: its image and its state carry on unless this panel changes them.
+    let previous: { image?: string; state?: string; description?: string } | undefined;
+    if (body.previous && (body.previous.image || body.previous.state)) {
+      let prevImage: string | undefined;
+      if (typeof body.previous.image === "string" && /^(\/[\w./%-]+\.(jpe?g|png|webp)|https:\/\/firebasestorage\.googleapis\.com\/\S+)$/i.test(body.previous.image.split("#")[0])) {
+        try {
+          const full = await referenceAsDataUrl(body.previous.image.split("#")[0]);
+          const bytes = await sharp(Buffer.from(full.split(",")[1], "base64")).resize({ width: 640, withoutEnlargement: true }).jpeg({ quality: 78 }).toBuffer();
+          prevImage = `data:image/jpeg;base64,${bytes.toString("base64")}`;
+        } catch {
+          prevImage = undefined;
+        }
+      }
+      previous = { image: prevImage, state: String(body.previous.state ?? "").slice(0, 600), description: String(body.previous.description ?? "").slice(0, 400) };
+    }
+    let check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon, previous });
     let checkCost = check.cost_usd;
     const firstIssues = check.issues;
     if (check.issues.length) {
       const again = await generateWithGateway({ ...generation, prompt: `${generation.prompt}\n\nFIX: the previous drawing of this panel was wrong: ${check.issues.join(" ")} Draw it again without these faults.` }, options);
       spent += again.cost_usd;
       image = again;
-      check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon });
+      check = await checkPanelImage({ image: `data:${image.media_type};base64,${image.base64}`, panel, library, canon, previous });
       checkCost += check.cost_usd;
     }
     void recordCost({ idToken: identity.idToken, slug, usd: spent, kind: "images" });
