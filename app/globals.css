@@ -7862,6 +7862,8 @@ select.studio-input {
   font-size: 10px;
   letter-spacing: 0.04em;
   pointer-events: none;
+}
+
 /* Episode alerts: the subscription form at the end of an episode and on the series page. */
 .webtoon-alerts {
   max-width: 1080px;
