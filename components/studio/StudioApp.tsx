@@ -12,6 +12,7 @@ import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioExport } from "@/components/studio/StudioExport";
 import { StudioTeaser } from "@/components/studio/StudioTeaser";
+import { StudioSubscribers } from "@/components/studio/StudioSubscribers";
 import { seriesOfTitle } from "@/lib/webtoon/series";
 import { upsertSeriesEpisode } from "@/lib/webtoon/series-client";
 import { StudioCost, budgetLevel, type StripCost } from "@/components/studio/StudioCost";
@@ -25,6 +26,11 @@ import { StudioProjectText } from "@/components/studio/StudioProjectText";
 import { StudioReads } from "@/components/studio/StudioReads";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { StudioBackgroundJob } from "@/components/studio/StudioBackgroundJob";
+import { StudioPublishDiff } from "@/components/studio/StudioPublishDiff";
+import { StudioSnapshots } from "@/components/studio/StudioSnapshots";
+import { StudioGlossary } from "@/components/studio/StudioGlossary";
+import { publishDiff, type PublishDiff } from "@/lib/webtoon/publish-diff";
+import { createSnapshot } from "@/lib/webtoon/snapshots-client";
 import { cancelJob, kickJob, watchJob } from "@/lib/webtoon/job-client";
 import { JOB_SESSION_PREFIX, mergeStrips, type StudioJob } from "@/lib/webtoon/studio-job";
 import { getDb, getFirebaseAuth } from "@/lib/firebase";
@@ -35,7 +41,7 @@ import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/webtoon/project";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { NOTIFICATION_LIMIT, loadNotifications, looksLikeError, saveNotifications, type StudioNotification, type TrackTask } from "@/lib/webtoon/notifications";
-import { libraryWith } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryWith } from "@/lib/webtoon/references";
 import { studioHeaders } from "@/lib/webtoon/studio-headers";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
@@ -198,7 +204,12 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
+  /** "Publier" opens what the publication changes first; the online version read for it is kept as a save point. */
+  const [publishReview, setPublishReview] = useState<{ diff: PublishDiff | null; error: string | null; online: WebtoonPanel[] | null } | null>(null);
   const [teaserOpen, setTeaserOpen] = useState(false);
+  const [subscribersOpen, setSubscribersOpen] = useState(false);
   /** The panels ticked in the editor, for the teaser; the same array while the ticks do not change. */
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
   const onCheckedChange = useCallback((ids: string[]) => setCheckedIds((current) => (current.join("\n") === ids.join("\n") ? current : ids)), []);
@@ -593,8 +604,22 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
       notify("Un autre onglet a enregistré une autre version : choisissez d'abord laquelle garder.");
       return;
     }
-    if (!window.confirm("Publier cette version sur lostgarden.world/webtoon ? Elle remplace la version en ligne.")) return;
+    setPublishReview({ diff: null, error: null, online: null });
+    try {
+      const online = await loadStrip(PUBLISHED_COLLECTION, script.slug);
+      setPublishReview({ diff: publishDiff(online?.panels ?? [], panels), error: null, online: online?.panels ?? [] });
+    } catch (error) {
+      setPublishReview({ diff: null, error: error instanceof Error ? error.message : "lecture impossible", online: null });
+    }
+  };
+
+  const publishNow = async () => {
+    if (!user) return;
+    const online = publishReview?.online;
+    setPublishReview(null);
     setWorking("publish");
+    // What was online stays reachable: a save point of it, before it is replaced.
+    if (online?.length) await createSnapshot(script.slug, `En ligne jusqu'au ${new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`, online, user, true).catch(() => undefined);
     try {
       // The reader loads light WebP versions: made now for the images that have none yet.
       const ready = await optimizeForReader(panels);
@@ -823,6 +848,14 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
                   <b>Teaser réseaux</b>
                   <small>Un reel vertical qui fait défiler une suite de cases et un carrousel 4:5, en un ZIP.</small>
                 </button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setGlossaryOpen(true); }}>
+                  <b>Glossaire et voix</b>
+                  <small>Les noms et mots clés fixés dans chaque langue, la voix de chaque personnage ; vérifier les bulles et relire les répliques.</small>
+                </button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setSnapshotsOpen(true); }}>
+                  <b>Points de sauvegarde</b>
+                  <small>Garder la bande sous un nom (« Avant peaufinage ») et y revenir des jours plus tard.</small>
+                </button>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); exportJson(); }}>
                   <b>Exporter la bande en JSON</b>
                   <small>Télécharge toutes les cases, textes et réglages : pour une sauvegarde ou pour repasser par le dépôt.</small>
@@ -844,6 +877,11 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
                 >
                   <b>Repartir de la version du code</b>
                   <small>Les {script.panels.length} cases d&apos;origine, telles que le moteur les produit depuis le dépôt, sans les modifications du studio.</small>
+                </button>
+                <p className="studio-gear-title">Lecteurs</p>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setSubscribersOpen(true); }}>
+                  <b>Prévenir les abonnés</b>
+                  <small>Les lecteurs inscrits aux alertes : leur nombre, et l&apos;annonce d&apos;un épisode publié, envoyée à la main après confirmation.</small>
                 </button>
                 {user ? (
                   <>
@@ -901,7 +939,53 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             </button>
           ))}
         </nav>
+        {glossaryOpen ? (
+          <StudioGlossary
+            slug={script.slug}
+            series={project ? project.title : script.series}
+            user={user}
+            panels={panels}
+            setPanels={(update) => {
+              setPanels(update);
+              requestAutosave();
+            }}
+            characters={libraryCharacters(library).map((c) => ({ id: c.id, name: c.name }))}
+            notify={notify}
+            onClose={() => setGlossaryOpen(false)}
+            onOpenPanel={(id) => {
+              setSelectedId(id);
+              setTab("webtoon");
+            }}
+          />
+        ) : null}
+        {snapshotsOpen ? (
+          <StudioSnapshots
+            slug={script.slug}
+            user={user}
+            panels={panels}
+            notify={notify}
+            onClose={() => setSnapshotsOpen(false)}
+            onRestore={(restored, name) => {
+              setPanels(restored);
+              setSelectedId((current) => (restored.some((p) => p.panel_id === current) ? current : restored[0]?.panel_id ?? null));
+              notify(`Bande revenue au point « ${name} » : « Annuler » ramène la précédente, pensez à enregistrer`);
+            }}
+          />
+        ) : null}
+        {publishReview ? (
+          <StudioPublishDiff
+            diff={publishReview.diff}
+            error={publishReview.error}
+            onClose={() => setPublishReview(null)}
+            onPublish={() => void publishNow()}
+            onOpenPanel={(id) => {
+              setSelectedId(id);
+              setTab("webtoon");
+            }}
+          />
+        ) : null}
         {exportOpen ? <StudioExport slug={script.slug} title={project ? project.title : localizedText(script.title, locale)} panels={panels} onClose={() => setExportOpen(false)} /> : null}
+        {subscribersOpen ? <StudioSubscribers onClose={() => setSubscribersOpen(false)} /> : null}
         {teaserOpen ? (
           <StudioTeaser
             slug={script.slug}

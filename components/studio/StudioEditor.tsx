@@ -22,6 +22,7 @@ import { EpisodeHandoffCard } from "@/components/studio/EpisodeHandoffCard";
 import { HANDOFF_PANELS, loadHandoff, type EpisodeHandoff } from "@/lib/webtoon/handoff-client";
 import { BUILT_IN_PROJECT_ID } from "@/lib/webtoon/project";
 import { startJob } from "@/lib/webtoon/job-client";
+import { REVIEW_LABEL, needsFinish, reviewOf, reviewProgress, withReview, type ReviewState } from "@/lib/webtoon/review";
 import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
@@ -260,14 +261,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     }
   };
   /** Image quality: same 1K size either way; "medium" saves about 0.03 $ a panel and half the time (measured 23 September 2026). */
-  const [quality, setQuality] = useState<"high" | "medium">(() => {
+  // "low": a sketch, to judge framing and layout for a few cents; the approved ones are finished in HD later.
+  const [quality, setQuality] = useState<"high" | "medium" | "low">(() => {
     try {
-      return window.localStorage.getItem("studio.quality") === "medium" ? "medium" : "high";
+      const stored = window.localStorage.getItem("studio.quality");
+      return stored === "medium" || stored === "low" ? stored : "high";
     } catch {
       return "high";
     }
   });
-  const chooseQuality = (next: "high" | "medium") => {
+  const chooseQuality = (next: "high" | "medium" | "low") => {
     setQuality(next);
     try {
       window.localStorage.setItem("studio.quality", next);
@@ -329,6 +332,28 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   useEffect(() => {
     deleteRef.current = deleteSelected;
   });
+  // V validates the selected panel and X sends it back, both moving to the next one: a whole episode reviewed from the keyboard.
+  const reviewKeyRef = useRef<(status: ReviewState) => void>(() => {});
+  useEffect(() => {
+    reviewKeyRef.current = (status) => {
+      const current = panelsRef.current.find((p) => p.panel_id === selectedId);
+      if (current) review(current, status, undefined, true);
+    };
+  });
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const k = event.key.toLowerCase();
+      if (k !== "v" && k !== "x") return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true'], dialog")) return;
+      if (document.querySelector("dialog[open]")) return;
+      event.preventDefault();
+      reviewKeyRef.current(k === "v" ? "approved" : "redo");
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key !== "Delete" && event.key !== "Backspace") return;
@@ -358,6 +383,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
   /** The summary of the check against the sheets, closed by the author until the next check. */
   const [hideAudit, setHideAudit] = useState(false);
+  /** The list shows every panel, or those of one review state. */
+  const [listFilter, setListFilter] = useState<"all" | ReviewState | "sketch">("all");
   /** Long runs on the server, so the tab can be closed (lib/webtoon/studio-job.ts). Remembered per browser. */
   const [background, setBackground] = useState(() => {
     try {
@@ -480,7 +507,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       }
     }
     const size = await imageSize(dataUrl).catch(() => ({ width: 1080, height: panel.panel_height }));
-    const image = { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" as const, origin, ...(note ? { note } : {}), ...(cost ? { cost_usd: cost } : {}) };
+    const image = { src, width: size.width, height: size.height, model, generated_at: new Date().toISOString(), status: "generated" as const, origin, ...(origin === "generate" ? { quality } : {}), ...(note ? { note } : {}), ...(cost ? { cost_usd: cost } : {}) };
     setPanels((current) => current.map((p) => (p.panel_id === panel.panel_id ? withNewImage({ ...p, ...extra }, image) : p)));
     return src;
   };
@@ -630,7 +657,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     const short = request.prompt.length > 70 ? `${request.prompt.slice(0, 67)}…` : request.prompt;
     const task = track?.(`Case ${panel.order} · ${request.mask ? "retouche d'une zone" : "modification"}`, panel.panel_id, ESTIMATE.retouch);
     try {
-      const dataUrl = await retouchImage({ ...request, slug: script.slug, panel, library: libraryRef.current, quality });
+      // A retouch has no sketch tier: an edit at low quality would coarsen the panel.
+      const dataUrl = await retouchImage({ ...request, slug: script.slug, panel, library: libraryRef.current, quality: quality === "low" ? "medium" : quality });
       const src = await applyImage(panel, dataUrl, "inpaint", {}, undefined, "inpaint", request.prompt);
       onAutosave?.();
       if (task) task.done(`« ${short} »`, src);
@@ -1470,14 +1498,47 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     void runRetouch(panel, { prompt, mask: null, brush: 0, references });
   };
 
+  /** Sets the review of a panel; "Validée" and "À refaire" from the keyboard move on to the next panel. */
+  const review = (panel: WebtoonPanel, status: ReviewState, note?: string, next = false) => {
+    if (!panel.image.src) return;
+    setPanels((current) => current.map((p) => (p.panel_id === panel.panel_id ? withReview(p, status, note ?? (status === reviewOf(p).status ? reviewOf(p).note : undefined)) : p)));
+    onAutosave?.();
+    if (next) {
+      const at = panelsRef.current.findIndex((p) => p.panel_id === panel.panel_id);
+      const following = panelsRef.current.slice(at + 1).find((p) => p.image.src);
+      if (following) select(following.panel_id);
+    }
+  };
+
+  /** The approved sketches drawn clean at full quality, on the server, the composition kept (lib/webtoon/job-runner.ts). */
+  const finishApproved = async () => {
+    const list = panelsRef.current.filter(needsFinish);
+    if (!list.length) return;
+    if (!window.confirm(`Finir en HD ${list.length} case${list.length > 1 ? "s" : ""} validée${list.length > 1 ? "s" : ""} ? Chaque esquisse est redessinée au propre, même cadrage et même composition, sur le serveur (environ ${(list.length * 0.19).toFixed(2)} $). Vous pouvez fermer l'onglet.`)) return;
+    await runInBackground({ kind: "finalize", label: `Finition HD de ${list.length} case${list.length > 1 ? "s" : ""}`, panel_ids: list.map((p) => p.panel_id) });
+  };
+
+  /** Every panel the check against the sheets flagged, retouched on the server with its remarks. */
+  const fixAllFromAudit = async () => {
+    const list = panelsRef.current.filter((p) => auditOf(p)?.issues.length && reviewOf(p).status !== "approved");
+    if (!list.length) return;
+    if (!window.confirm(`Corriger ${list.length} case${list.length > 1 ? "s" : ""} en écart avec leurs fiches ? Chaque image est retouchée avec ses remarques, sur le serveur (environ ${(list.length * 0.19).toFixed(2)} $). Les cases validées ne sont pas touchées. Vous pouvez fermer l'onglet.`)) return;
+    const prompts = Object.fromEntries(list.map((p) => [p.panel_id, `Corriger le dessin pour suivre la fiche du personnage, sans rien changer d'autre (cadrage, pose, décor, lumière) : ${auditOf(p)!.issues.map((i) => i.issue).join(" ")}`]));
+    await runInBackground({ kind: "retouch", label: `Correction de ${list.length} écart${list.length > 1 ? "s" : ""} aux fiches`, panel_ids: list.map((p) => p.panel_id), prompts });
+  };
+
   const regenerateChecked = async () => {
     if (busy || !checkedPanels.length) return;
     if (checkBudget && !checkBudget()) return;
-    const withText = checkedPanels.filter((p) => p.description.trim() || p.generation_prompt.trim());
+    let withText = checkedPanels.filter((p) => p.description.trim() || p.generation_prompt.trim());
     if (!withText.length) {
       notify("Aucune des cases cochées n'a de description");
       return;
     }
+    // An approved panel is never redrawn by a batch without the author saying so.
+    const approved = withText.filter((p) => reviewOf(p).status === "approved");
+    if (approved.length && !window.confirm(`${approved.length} des cases cochées sont validées. Les regénérer aussi ? (Annuler : seules les autres le sont.)`)) withText = withText.filter((p) => reviewOf(p).status !== "approved");
+    if (!withText.length) return;
     if (!window.confirm(`Regénérer ${withText.length} case${withText.length > 1 ? "s" : ""} (${withText.map((p) => p.panel_id).join(", ")}) ?`)) return;
     setBusy(true);
     stopBatch.current = false;
@@ -1703,13 +1764,44 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(off.map((p) => p.panel_id)))} title="Puis « Regénérer », ou une case à la fois : « Retoucher avec ces remarques » dans l'inspecteur">Cocher ces cases</button>
                 <button type="button" className="webtoon-mini" onClick={() => select(off.find((p) => auditOf(p)!.issues.some((i) => i.severity === "high"))?.panel_id ?? off[0].panel_id)}>Voir la première</button>
+                <button type="button" className="webtoon-mini studio-primary" onClick={() => void fixAllFromAudit()} disabled={!user} title="Chaque case en écart est retouchée avec ses remarques, fiches en référence, sur le serveur ; les cases validées ne sont pas touchées">Tout corriger</button>
                 <button type="button" className="webtoon-mini" onClick={() => setHideAudit(true)}>Masquer</button>
               </div>
             </div>
           );
         })()}
+        {(() => {
+          const progress = reviewProgress(panels);
+          const toFinish = panels.filter(needsFinish).length;
+          const sketches = panels.filter((p) => p.image.src && p.image.quality === "low").length;
+          return (
+            <div className="studio-rv-head">
+              <div className="studio-rv-gauge" title={`${progress.approved} validées, ${progress.redo} à refaire, ${progress.total - progress.approved - progress.redo} à revoir`}>
+                <span className="is-approved" style={{ width: `${progress.total ? (progress.approved / progress.total) * 100 : 0}%` }} />
+                <span className="is-redo" style={{ width: `${progress.total ? (progress.redo / progress.total) * 100 : 0}%` }} />
+              </div>
+              <div className="studio-rv-row">
+                <span>
+                  <b>{progress.approved}</b>/{progress.total} validées{progress.redo ? ` · ${progress.redo} à refaire` : ""}{sketches ? ` · ${sketches} esquisses` : ""}
+                </span>
+                <select value={listFilter} onChange={(e) => setListFilter(e.target.value as typeof listFilter)} aria-label="Filtrer la liste">
+                  <option value="all">Toutes les cases</option>
+                  <option value="todo">À revoir</option>
+                  <option value="approved">Validées</option>
+                  <option value="redo">À refaire</option>
+                  <option value="sketch">Esquisses</option>
+                </select>
+                {toFinish ? (
+                  <button type="button" className="webtoon-mini studio-primary" onClick={() => void finishApproved()} disabled={!user} title="Les esquisses validées redessinées au propre en HD, même cadrage et même composition, sur le serveur">
+                    Finir en HD ({toFinish})
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })()}
         <ol>
-          {panels.map((panel, index) => (
+          {panels.map((panel, index) => (listFilter !== "all" && (listFilter === "sketch" ? !(panel.image.src && panel.image.quality === "low") : reviewOf(panel).status !== listFilter)) ? null : (
             <Fragment key={panel.panel_id}>
             {holeBefore(index) ? (
               <li className="studio-hole">
@@ -1761,6 +1853,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
                   {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
+                  {reviewOf(panel).status === "approved" ? <i className="studio-thumb-ok" title={reviewOf(panel).note ?? "Validée"}> · validée</i> : reviewOf(panel).status === "redo" ? <i className="studio-thumb-warn" title={reviewOf(panel).note ?? "À refaire"}> · à refaire</i> : null}
+                  {panel.image.src && panel.image.quality === "low" ? <i> · esquisse</i> : null}
                   {auditOf(panel)?.issues.length ? (
                     <i className={auditOf(panel)!.issues.some((i) => i.severity === "high") ? "studio-thumb-bad" : "studio-thumb-warn"} title={auditOf(panel)!.issues.map((i) => i.issue).join("\n")}>
                       {" "}· écart fiche
@@ -1858,6 +1952,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
               <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
               <button type="button" className={`webtoon-mini ${quality === "medium" ? "is-active" : ""}`} onClick={() => chooseQuality("medium")} title="Qualité moyenne, même taille 1K : environ 0,03 $ de moins par case et deux fois plus rapide, un peu moins de détail">Éco</button>
+              <button type="button" className={`webtoon-mini ${quality === "low" ? "is-active" : ""}`} onClick={() => chooseQuality("low")} title="Esquisse : quelques centimes par case, pour juger le cadrage et la mise en page. Validez les cases, puis « Finir en HD » les redessine au propre sans changer leur composition.">Esquisse</button>
             </div>
             <label className="flex items-center gap-2"><input type="checkbox" checked={showFocal} onChange={(e) => setShowFocal(e.target.checked)} /> Point focal</label>
             <div className="studio-gear" ref={panelMenuRef}>
@@ -2060,6 +2155,30 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             </button>
           ))}
         </nav>
+
+        {selected.image.src ? (
+          <div className={`studio-rv-card is-${reviewOf(selected).status}`}>
+            <div className="studio-rv-states" role="group" aria-label="Relecture de la case">
+              {(["todo", "approved", "redo"] as ReviewState[]).map((state) => (
+                <button key={state} type="button" className={`webtoon-mini ${reviewOf(selected).status === state ? "is-active" : ""}`} onClick={() => review(selected, state)} title={state === "approved" ? "Raccourci : V (valide et passe à la suivante)" : state === "redo" ? "Raccourci : X (à refaire et passe à la suivante)" : "Remet la case à revoir"}>
+                  {REVIEW_LABEL[state]}
+                </button>
+              ))}
+            </div>
+            {reviewOf(selected).status !== "todo" ? (
+              <input
+                key={`${selected.panel_id}-${selected.review?.at ?? ""}`}
+                className="studio-rv-note"
+                defaultValue={reviewOf(selected).note ?? ""}
+                placeholder={reviewOf(selected).status === "redo" ? "Ce qui ne va pas (pour vous, ou pour la retouche)" : "Une note, si besoin"}
+                onBlur={(e) => {
+                  if (e.target.value.trim() !== (reviewOf(selected).note ?? "")) review(selected, reviewOf(selected).status, e.target.value);
+                }}
+              />
+            ) : null}
+            {selected.image.quality === "low" ? <p className="studio-rv-hint">Esquisse : une fois validée, « Finir en HD » la redessine au propre sans changer sa composition.</p> : null}
+          </div>
+        ) : null}
 
         {auditOf(selected)?.issues.length ? (
           <div className="studio-audit-card" role="status">

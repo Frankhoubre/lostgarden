@@ -28,6 +28,14 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // Named save points of a strip (lib/webtoon/snapshots-client.ts), sliced like the drafts: studio only.
+    match /webtoon_snapshots/{key} {
+      allow read, write: if isStudio();
+      match /chunks/{chunk} {
+        allow read, write: if isStudio();
+      }
+    }
+
     // Background jobs of the studio (lib/webtoon/studio-job.ts): studio only.
     // The account's refresh token is kept there encrypted with a server secret.
     match /webtoon_jobs/{slug} {
@@ -68,6 +76,43 @@ service cloud.firestore {
           && request.resource.data.slug == resource.data.slug
           && request.resource.data.started_at == resource.data.started_at;
       }
+    }
+
+    // Episode alerts (lib/webtoon/alerts.ts), double opt-in. The document id
+    // is an HMAC of the address that only the server can compute, and it
+    // travels only in the links of the emails: whoever holds it may read,
+    // confirm or delete that one document. Nobody lists the collection but the
+    // studio. A new document is always pending, with exactly these fields.
+    function isSubscriber(id) {
+      let d = request.resource.data;
+      return id.matches('^[A-Za-z0-9_-]{43}$')
+        && d.keys().hasOnly(['email', 'locale', 'status', 'created_at', 'updated_at'])
+        && d.keys().hasAll(['email', 'locale', 'status', 'created_at', 'updated_at'])
+        && d.email is string && d.email.size() >= 6 && d.email.size() <= 254
+        && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && d.locale in ['en', 'fr', 'ja', 'ko']
+        && d.status in ['pending', 'confirmed']
+        && d.created_at is timestamp
+        && d.updated_at == request.time;
+    }
+
+    match /webtoon_subscribers/{id} {
+      allow get: if true;
+      allow list: if isStudio();
+      allow delete: if true;
+      allow create: if isSubscriber(id)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.created_at == request.time;
+      // pending -> pending (a new link) or confirmed; confirmed stays confirmed.
+      allow update: if isSubscriber(id)
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.created_at == resource.data.created_at
+        && (request.resource.data.status == 'confirmed' || resource.data.status == 'pending');
+    }
+
+    // When each episode was announced to the subscribers, and to how many: studio only.
+    match /webtoon_announcements/{slug} {
+      allow read, write: if isStudio();
     }
 
     // The version the public reader shows: anyone reads, the studio writes.

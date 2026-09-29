@@ -5,6 +5,7 @@ import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { PanelMotionVideo } from "@/components/webtoon/PanelMotionVideo";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { panelAlt } from "@/lib/webtoon/alt-text";
 import { frameClass, frameStyle, imageStyle } from "@/lib/webtoon/frame";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { freshMotion } from "@/lib/webtoon/motion";
@@ -107,7 +108,7 @@ export function WebtoonReader({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={still}
-                    alt={panel.description}
+                    alt={panelAlt(panel.description)}
                     width={panel.image.width || WEBTOON_WIDTH}
                     height={panel.image.height || panel.panel_height}
                     loading={index < 2 ? "eager" : "lazy"}

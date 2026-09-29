@@ -212,3 +212,14 @@ export async function loadOpening(slug: string, idToken: string): Promise<Openin
     return null;
   }
 }
+
+/** The glossary and voices of a series (lib/webtoon/glossary.ts), for the translation. */
+export async function loadGlossaryDoc(docId: string, idToken: string): Promise<import("./glossary").Glossary | null> {
+  const fields = await getFields(`webtoon_library/${encodeURIComponent(docId)}`, idToken).catch(() => null);
+  try {
+    const value = JSON.parse(fields?.glossary_json?.stringValue ?? "null") as import("./glossary").Glossary | null;
+    return value ? { terms: value.terms ?? [], voices: value.voices ?? [] } : null;
+  } catch {
+    return null;
+  }
+}

@@ -82,8 +82,8 @@ type BuildPageMetadataOptions = {
   title: string;
   description: string;
   path: string;
-  /** Used for hreflang when different from inferring from `path`. */
-  pathSuffix?: IndexablePathSuffix;
+  /** Locale-neutral path for hreflang, e.g. `/webtoon` or `/webtoon/ep1-opening`. */
+  pathSuffix?: IndexablePathSuffix | `/${string}`;
   /** Bypass root title template when the full title is already composed. */
   absoluteTitle?: boolean;
   noIndex?: boolean;
@@ -95,7 +95,7 @@ type BuildPageMetadataOptions = {
 };
 
 export function localeHreflangAlternates(
-  pathSuffix: IndexablePathSuffix,
+  pathSuffix: IndexablePathSuffix | `/${string}`,
 ): Record<string, string> {
   const languages: Record<string, string> = {};
   for (const loc of locales) {

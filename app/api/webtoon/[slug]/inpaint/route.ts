@@ -47,12 +47,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "AI_GATEWAY_API_KEY is not configured on this deployment" }, { status: 503 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string; extra_references?: { name?: string; image?: string; kind?: string }[] };
+  const body = (await request.json().catch(() => ({}))) as { panel?: WebtoonPanel; image?: string; mask?: string; prompt?: string; size?: string; library?: LibraryOverlay; quality?: string; extra_references?: { name?: string; image?: string; kind?: string }[]; /** The HD finish of an approved sketch: the same image, drawn clean at full quality. */ finish?: boolean };
   const instruction = (body.prompt ?? "").trim();
   if (!body.image?.startsWith("data:image/")) return Response.json({ error: "image attendue" }, { status: 400 });
   if (body.mask && !body.mask.startsWith("data:image/png")) return Response.json({ error: "masque PNG attendu" }, { status: 400 });
   const zone = Boolean(body.mask);
-  if (!instruction) return Response.json({ error: zone ? "Dis ce qui doit apparaître dans la zone" : "Dis ce qui doit changer dans la case" }, { status: 400 });
+  if (!instruction && !body.finish) return Response.json({ error: zone ? "Dis ce qui doit apparaître dans la zone" : "Dis ce qui doit changer dans la case" }, { status: 400 });
   const size = body.size && SIZES.has(body.size) ? body.size : "1024x1536";
   const panel = body.panel;
   const overlay = body.library && Array.isArray(body.library.assets) ? { assets: body.library.assets, hidden: body.library.hidden ?? [] } : null;
@@ -80,7 +80,9 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const prompt = [
     bible.base,
-    zone
+    body.finish && !zone
+      ? `FINAL RENDER of an approved webtoon panel. Image 1 is its rough draft, drawn fast at low quality. Keep exactly its framing and camera angle, its composition, every character in the same place and pose, the same expressions, the same palette and light. Redraw it clean at full final quality: crisp even ink lines, clean flat colours, one hard cel shadow per element, the details finished. Nothing added, nothing removed, nothing moved.${instruction ? ` Also: ${instruction}.` : ""} The black bands at the edges of image 1, if any, are padding: keep them black.`
+      : zone
       ? `RETOUCH of an existing webtoon panel. Image 1 is the panel; the mask marks one zone of it. Inside that zone, and only there: ${instruction}. Everything outside the zone stays exactly as drawn in image 1: same composition, same lines, same flat colours, same light. The new content matches the flatness, the line weight and the palette of the rest of the panel and connects seamlessly at the edge of the zone.`
       : `EDIT of an existing webtoon panel. Image 1 is the panel. Apply this change: ${instruction}. Everything the change does not name stays exactly as drawn in image 1: the same framing and camera angle, the same composition, the same characters in the same places and poses, the same lines, flat colours and light. Redraw the whole image at the same quality, not a collage. The black bands at the edges of image 1, if any, are padding: keep them black.`,
     locks.length ? `DESIGN LOCKED: ${locks.join(" ")}` : "",

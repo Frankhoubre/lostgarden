@@ -1,4 +1,6 @@
 import { recordCost } from "@/lib/webtoon/cost-server";
+import { glossaryBrief, glossaryDocId } from "@/lib/webtoon/glossary";
+import { loadGlossaryDoc } from "@/lib/webtoon/job-server";
 import { completeJson } from "@/lib/webtoon/providers/gateway-text";
 import { getProjectContext } from "@/lib/webtoon/project-server";
 import { verifyStudioRequest } from "@/lib/webtoon/studio-server";
@@ -37,13 +39,19 @@ export async function POST(request: Request, { params }: RouteContext) {
   if (!items.length) return Response.json({ error: "nothing to translate" }, { status: 400 });
   const locales = (body.locales ?? LETTERING_LOCALES).filter((l) => LETTERING_LOCALES.includes(l));
 
+  // The glossary and voices of the series: the same names and the same voices in every batch.
+  const glossary = identity.idToken ? await loadGlossaryDoc(glossaryDocId(script.series), identity.idToken).catch(() => null) : null;
+  const brief = glossaryBrief(glossary, locales);
   const system = [
     `You translate the lettering of "${script.series}", ${context.lostGarden ? "an original poetic dark fantasy anime by Frank Houbre" : "an animated film"}, adapted as a vertical webtoon. Episode ${script.episode}.`,
     "Speakers: Lanterne is a hollow suit of armour who never speaks. Rose is a small, calm child who speaks softly and simply. The Unhooker, the King of the Vault and the other creatures of the Below speak in short, low sentences.",
     "Rules: write natural spoken language, the way a person would say it out loud, never a word-for-word transfer. Keep each line as short as the original so it fits in a bubble. Keep the register (whisper, shout, thought). Captions are narration or a place or a time. Sound effects (sfx) are onomatopoeia: give the natural onomatopoeia of each language (Japanese in katakana, Korean in hangul), not a translation of the word.",
     "In English and French, use the second person singular only when a child or a close companion is addressed. Never use an em dash. Use plain punctuation.",
+    brief,
     'Answer with JSON only, shaped {"translations": {"<key>": {"fr": "...", "en": "...", "ja": "...", "ko": "..."}}}. Include every key you were given and every requested language, including the source language copied as is.',
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const user = JSON.stringify(
     {
