@@ -5,6 +5,7 @@ import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
+import { StudioReview } from "@/components/studio/StudioReview";
 import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import type { PanelBusy } from "@/components/studio/PanelCanvas";
@@ -47,7 +48,7 @@ import { buildGenerationRequest } from "@/lib/webtoon/generation";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { libraryCharacters, libraryLocations, libraryObjects, libraryWith, panelReferenceNumber, panelReferenceSrc, referencesForPanel } from "@/lib/webtoon/references";
 import { imageSize, readFileAsDataUrl, uploadPanelImage } from "@/lib/webtoon/studio";
-import { studioFilmFrames } from "@/lib/webtoon/studio-assets";
+import { studioFilmFrames, studioFilmFramesDense } from "@/lib/webtoon/studio-assets";
 import { applyTranslations, itemsToTranslate, type LetteringItem } from "@/lib/webtoon/translate";
 import type {
   BubbleStyle,
@@ -193,6 +194,8 @@ type StudioEditorProps = {
   onJob?: (job: JobSummary) => void;
   /** The film guide (sequences, second by second lines): the "auto" pace follows it and the writer reads it. */
   guide?: FilmGuide | null;
+  /** The whole film, one frame per second, for the review against the strip; Lost Garden's when unset. */
+  allFrames?: { src: string; seconds: number; label: string }[];
   /** Frames of the project's film offered by the pickers (every five seconds); Lost Garden's when unset. */
   filmFrames?: { src: string; seconds: number; label: string }[];
 };
@@ -203,9 +206,10 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, guide = null }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, allFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
+  const ALL_FRAMES = useMemo(() => allFrames ?? studioFilmFramesDense(), [allFrames]);
   const locale = previewLocale;
   const CHARACTERS = useMemo(() => libraryCharacters(library), [library]);
   const LOCATIONS = useMemo(() => libraryLocations(library), [library]);
@@ -223,15 +227,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
     [CHARACTERS, LOCATIONS, OBJECTS, panels],
   );
   const { user } = useAuth();
-  /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it, editable in place. */
-  const [view, setView] = useState<"panel" | "strip">(() => {
+  /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it; `review`: the strip against the film. */
+  const [view, setView] = useState<"panel" | "strip" | "review">(() => {
     try {
-      return window.localStorage.getItem("studio.view") === "strip" ? "strip" : "panel";
+      const stored = window.localStorage.getItem("studio.view");
+      return stored === "strip" || stored === "review" ? stored : "panel";
     } catch {
       return "panel";
     }
   });
-  const chooseView = (next: "panel" | "strip") => {
+  const chooseView = (next: "panel" | "strip" | "review") => {
     setView(next);
     try {
       window.localStorage.setItem("studio.view", next);
@@ -461,6 +466,43 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       onFailure?.(error instanceof Error ? error.message : "erreur de génération");
       notify(error instanceof Error ? error.message : "Erreur de génération");
       return null;
+    }
+  };
+
+  /**
+   * The review adds a panel from the film: the frame of that second, after that panel, described by the
+   * gesture or the guide line, then drawn right away (the panel before gives the continuity).
+   */
+  const addFromFilm = async (input: { seconds: number; afterId: string; description: string }) => {
+    const frame = ALL_FRAMES.find((f) => f.seconds === input.seconds);
+    if (!frame) return;
+    const before = panelsRef.current;
+    const next = appendFromFrame(before, { src: frame.src, seconds: frame.seconds }, input.afterId);
+    const created = next.find((p) => !before.some((q) => q.panel_id === p.panel_id));
+    if (!created) return;
+    const panel: WebtoonPanel = { ...created, description: input.description.trim() || created.description, prompt_auto: true };
+    const list = next.map((p) => (p.panel_id === panel.panel_id ? panel : p));
+    panelsRef.current = list;
+    setPanels(list);
+    select(panel.panel_id);
+    onAutosave?.();
+    if (!panel.description.trim()) {
+      notify(`Case ${panel.order} ajoutée à ${frame.label} : écrivez sa description, puis « Générer l'image »`);
+      return;
+    }
+    startDrawing(panel.panel_id, "generate");
+    const task = track?.(`Case ${panel.order} · ajoutée depuis le film (${frame.label})`, panel.panel_id, imageEstimate());
+    let failure = "la génération a échoué";
+    try {
+      const src = await generateOne(panel, (reason) => {
+        failure = reason;
+      });
+      if (src) {
+        task?.done("case dessinée depuis l'image du film", src);
+        onAutosave?.();
+      } else task?.fail(failure);
+    } finally {
+      stopDrawing(panel.panel_id);
     }
   };
 
@@ -1526,6 +1568,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             <div className="studio-viewswitch" role="group" aria-label="Vue">
               <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
               <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
+              <button type="button" className={`webtoon-mini ${view === "review" ? "is-active" : ""}`} onClick={() => chooseView("review")} title="La bande face au film : chaque case à côté de l'image de sa seconde, les gestes et les passages sans case">Relecture</button>
             </div>
             <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
               <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
@@ -1576,7 +1619,18 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
 
         <div className={`studio-stage-wrap ${view === "strip" ? "is-strip" : ""}`}>
-          {view === "strip" ? (
+          {view === "review" ? (
+            <StudioReview
+              panels={panels}
+              frames={ALL_FRAMES}
+              guide={guide}
+              selectedId={selected.panel_id}
+              onSelect={select}
+              onAdd={(input) => void addFromFilm(input)}
+              busyIds={stripBusy}
+              holeSeconds={HOLE_SECONDS}
+            />
+          ) : view === "strip" ? (
             <StripCanvas
               panels={panels}
               locale={locale}
