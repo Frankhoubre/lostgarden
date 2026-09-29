@@ -27,6 +27,7 @@ import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { StudioBackgroundJob } from "@/components/studio/StudioBackgroundJob";
 import { StudioPublishDiff } from "@/components/studio/StudioPublishDiff";
 import { StudioSnapshots } from "@/components/studio/StudioSnapshots";
+import { StudioGlossary } from "@/components/studio/StudioGlossary";
 import { publishDiff, type PublishDiff } from "@/lib/webtoon/publish-diff";
 import { createSnapshot } from "@/lib/webtoon/snapshots-client";
 import { cancelJob, kickJob, watchJob } from "@/lib/webtoon/job-client";
@@ -39,7 +40,7 @@ import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/webtoon/project";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { NOTIFICATION_LIMIT, loadNotifications, looksLikeError, saveNotifications, type StudioNotification, type TrackTask } from "@/lib/webtoon/notifications";
-import { libraryWith } from "@/lib/webtoon/references";
+import { libraryCharacters, libraryWith } from "@/lib/webtoon/references";
 import { studioHeaders } from "@/lib/webtoon/studio-headers";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
@@ -203,6 +204,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
   /** "Publier" opens what the publication changes first; the online version read for it is kept as a save point. */
   const [publishReview, setPublishReview] = useState<{ diff: PublishDiff | null; error: string | null; online: WebtoonPanel[] | null } | null>(null);
   const [teaserOpen, setTeaserOpen] = useState(false);
@@ -844,6 +846,10 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
                   <b>Teaser réseaux</b>
                   <small>Un reel vertical qui fait défiler une suite de cases et un carrousel 4:5, en un ZIP.</small>
                 </button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setGlossaryOpen(true); }}>
+                  <b>Glossaire et voix</b>
+                  <small>Les noms et mots clés fixés dans chaque langue, la voix de chaque personnage ; vérifier les bulles et relire les répliques.</small>
+                </button>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setSnapshotsOpen(true); }}>
                   <b>Points de sauvegarde</b>
                   <small>Garder la bande sous un nom (« Avant peaufinage ») et y revenir des jours plus tard.</small>
@@ -926,6 +932,25 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             </button>
           ))}
         </nav>
+        {glossaryOpen ? (
+          <StudioGlossary
+            slug={script.slug}
+            series={project ? project.title : script.series}
+            user={user}
+            panels={panels}
+            setPanels={(update) => {
+              setPanels(update);
+              requestAutosave();
+            }}
+            characters={libraryCharacters(library).map((c) => ({ id: c.id, name: c.name }))}
+            notify={notify}
+            onClose={() => setGlossaryOpen(false)}
+            onOpenPanel={(id) => {
+              setSelectedId(id);
+              setTab("webtoon");
+            }}
+          />
+        ) : null}
         {snapshotsOpen ? (
           <StudioSnapshots
             slug={script.slug}
