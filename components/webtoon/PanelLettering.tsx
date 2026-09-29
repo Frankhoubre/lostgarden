@@ -121,7 +121,8 @@ function Bubble({ line, locale }: { line: Dialogue; locale: Locale }) {
         className={`webtoon-bubble webtoon-bubble-${line.style}`}
         style={{ left: `${line.anchor.x}%`, top: `${line.anchor.y}%` }}
       >
-        <span className="sr-only">{line.speaker}: </span>
+        {/* "off" and "unknown" are the engine's words, not names: a screen reader hears only real speakers. */}
+        {line.speaker && line.speaker !== "off" && line.speaker !== "unknown" && line.speaker !== "voice" ? <span className="sr-only">{line.speaker}: </span> : null}
         {localizedText(line.text, locale)}
       </div>
       {tail ? (
