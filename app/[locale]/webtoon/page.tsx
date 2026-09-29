@@ -13,6 +13,7 @@ import { EpisodeProgress, SeriesResume } from "@/components/webtoon/SeriesProgre
 import { EpisodeAlerts } from "@/components/webtoon/EpisodeAlerts";
 import { mailConfigured } from "@/lib/webtoon/alerts-server";
 import { fill, localizedText } from "@/lib/webtoon/text";
+import { comicSeriesJsonLd, listEpisodes, withSegmentImages } from "@/lib/webtoon/episode-seo";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -23,14 +24,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
-  return buildPageMetadata({
-    locale,
-    title: dict.meta.webtoon.title,
-    description: dict.meta.webtoon.description,
-    path: localePath(locale, "/webtoon"),
-    pathSuffix: "/webtoon",
-    absoluteTitle: true,
-  });
+  // The shared image comes from this segment's opengraph-image (latest episode's cover).
+  return withSegmentImages(
+    buildPageMetadata({
+      locale,
+      title: dict.meta.webtoon.title,
+      description: dict.meta.webtoon.description,
+      path: localePath(locale, "/webtoon"),
+      pathSuffix: "/webtoon",
+      absoluteTitle: true,
+    }),
+  );
 }
 
 export default async function WebtoonIndexPage({ params }: PageProps) {
@@ -42,6 +46,7 @@ export default async function WebtoonIndexPage({ params }: PageProps) {
   const scripts = listWebtoonScripts();
   // The episodes the studio published, in series order; a built-in episode not published yet keeps its card.
   const series = await fetchSeries();
+  const episodes = await listEpisodes(locale, series);
   const cards = [
     ...series.map((e) => {
       const built = scripts.find((sc) => sc.slug === e.slug);
@@ -64,6 +69,7 @@ export default async function WebtoonIndexPage({ params }: PageProps) {
         ])}
       />
       <JsonLd data={webPageJsonLd({ locale, name: w.headline, description: dict.meta.webtoon.description, path })} />
+      <JsonLd data={comicSeriesJsonLd({ locale, episodes, description: dict.meta.webtoon.description })} />
       <WebtoonPageShell>
         <h1 className="anime-heading font-display text-3xl text-lily sm:text-4xl">{w.headline}</h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ivory/85 sm:text-base">{w.lead}</p>

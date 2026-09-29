@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { panelAlt } from "@/lib/webtoon/alt-text";
 import { frameClass, frameStyle, imageStyle } from "@/lib/webtoon/frame";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { WEBTOON_WIDTH, type PanelBackground, type WebtoonPanel } from "@/lib/webtoon/types";
@@ -99,7 +100,7 @@ export function WebtoonReader({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={panel.image.web && panel.image.web.of === panel.image.src ? panel.image.web.src : panel.image.src}
-                  alt={panel.description}
+                  alt={panelAlt(panel.description)}
                   width={panel.image.width || WEBTOON_WIDTH}
                   height={panel.image.height || panel.panel_height}
                   loading={index < 2 ? "eager" : "lazy"}

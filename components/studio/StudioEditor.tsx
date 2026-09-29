@@ -1774,12 +1774,12 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           const toFinish = panels.filter(needsFinish).length;
           const sketches = panels.filter((p) => p.image.src && p.image.quality === "low").length;
           return (
-            <div className="studio-review-head">
-              <div className="studio-review-gauge" title={`${progress.approved} validées, ${progress.redo} à refaire, ${progress.total - progress.approved - progress.redo} à revoir`}>
+            <div className="studio-rv-head">
+              <div className="studio-rv-gauge" title={`${progress.approved} validées, ${progress.redo} à refaire, ${progress.total - progress.approved - progress.redo} à revoir`}>
                 <span className="is-approved" style={{ width: `${progress.total ? (progress.approved / progress.total) * 100 : 0}%` }} />
                 <span className="is-redo" style={{ width: `${progress.total ? (progress.redo / progress.total) * 100 : 0}%` }} />
               </div>
-              <div className="studio-review-row">
+              <div className="studio-rv-row">
                 <span>
                   <b>{progress.approved}</b>/{progress.total} validées{progress.redo ? ` · ${progress.redo} à refaire` : ""}{sketches ? ` · ${sketches} esquisses` : ""}
                 </span>
@@ -2156,8 +2156,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </nav>
 
         {selected.image.src ? (
-          <div className={`studio-review-card is-${reviewOf(selected).status}`}>
-            <div className="studio-review-states" role="group" aria-label="Relecture de la case">
+          <div className={`studio-rv-card is-${reviewOf(selected).status}`}>
+            <div className="studio-rv-states" role="group" aria-label="Relecture de la case">
               {(["todo", "approved", "redo"] as ReviewState[]).map((state) => (
                 <button key={state} type="button" className={`webtoon-mini ${reviewOf(selected).status === state ? "is-active" : ""}`} onClick={() => review(selected, state)} title={state === "approved" ? "Raccourci : V (valide et passe à la suivante)" : state === "redo" ? "Raccourci : X (à refaire et passe à la suivante)" : "Remet la case à revoir"}>
                   {REVIEW_LABEL[state]}
@@ -2167,7 +2167,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             {reviewOf(selected).status !== "todo" ? (
               <input
                 key={`${selected.panel_id}-${selected.review?.at ?? ""}`}
-                className="studio-review-note"
+                className="studio-rv-note"
                 defaultValue={reviewOf(selected).note ?? ""}
                 placeholder={reviewOf(selected).status === "redo" ? "Ce qui ne va pas (pour vous, ou pour la retouche)" : "Une note, si besoin"}
                 onBlur={(e) => {
@@ -2175,7 +2175,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 }}
               />
             ) : null}
-            {selected.image.quality === "low" ? <p className="studio-review-hint">Esquisse : une fois validée, « Finir en HD » la redessine au propre sans changer sa composition.</p> : null}
+            {selected.image.quality === "low" ? <p className="studio-rv-hint">Esquisse : une fois validée, « Finir en HD » la redessine au propre sans changer sa composition.</p> : null}
           </div>
         ) : null}
 
