@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type Set
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { sfxFont } from "@/components/webtoon/fonts";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
+import { PanelSketch, transformSketch, type SketchRequest } from "@/components/studio/PanelSketch";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
 import { PanelMotion } from "@/components/studio/PanelMotion";
@@ -319,6 +320,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
   const paceWord = (value: "calm" | "normal" | "action") => (value === "action" ? "action" : value === "calm" ? "calme" : "normal");
   const [inpaintOpen, setInpaintOpen] = useState(false);
+  const [sketchOpen, setSketchOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   // Latest panels and library, for the director's actions that run one after the other.
   const panelsRef = useRef(panels);
@@ -652,6 +654,34 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
    * image takes the place of the current one when it arrives (the current
    * one goes to the history). Several panels can be retouched at once.
    */
+  /**
+   * The author's drawing on the panel (components/studio/PanelSketch.tsx): it becomes the image first, so the
+   * panel shows it while the final one is drawn, then stays in the history under the result.
+   */
+  const runSketch = async (panel: WebtoonPanel, request: SketchRequest) => {
+    startDrawing(panel.panel_id, "retouch");
+    const label = request.mode === "over" ? "traits appliqués" : "croquis transformé en case";
+    const task = request.keepOnly ? undefined : track?.(`Case ${panel.order} · ${label}`, panel.panel_id, ESTIMATE.retouch);
+    try {
+      await applyImage(panel, request.composite, "sketch", {}, undefined, "upload", request.mode === "over" ? "Traits de l'auteur sur l'image" : "Croquis de l'auteur");
+      onAutosave?.();
+      if (request.keepOnly) {
+        notify(`Case ${panel.order} : votre dessin est l'image de la case`);
+        return;
+      }
+      const result = await transformSketch({ slug: script.slug, panel, library: libraryRef.current, quality: quality === "low" ? "medium" : quality, composite: request.composite, mode: request.mode, prompt: request.prompt });
+      const src = await applyImage(panel, result, "inpaint", {}, undefined, "inpaint", request.prompt || (request.mode === "over" ? "Traits de l'auteur appliqués" : "Case finale depuis le croquis"));
+      onAutosave?.();
+      if (task) task.done(request.mode === "over" ? "Traits appliqués" : "Croquis transformé", src);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "transformation impossible";
+      if (task) task.fail(`${reason} (le dessin reste l'image de la case)`);
+      else notify(`Dessin : ${reason}`);
+    } finally {
+      stopDrawing(panel.panel_id);
+    }
+  };
+
   const runRetouch = async (panel: WebtoonPanel, request: RetouchRequest) => {
     startDrawing(panel.panel_id, "retouch");
     const short = request.prompt.length > 70 ? `${request.prompt.slice(0, 67)}…` : request.prompt;
@@ -2071,6 +2101,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">
                 {drawing.get(selected.panel_id)?.kind === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : "Modifier / retoucher"}
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => setSketchOpen(true)} disabled={drawing.has(selected.panel_id)} title="Dessinez la case (page blanche, par-dessus l'image ou sur un croquis importé), puis transformez-la en case finale">Dessiner</button>
               <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
               <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
             </>
@@ -2129,6 +2160,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             }}
           />
         ) : null}
+        {sketchOpen ? <PanelSketch panel={selected} notify={notify} onClose={() => setSketchOpen(false)} onSubmit={(request) => void runSketch(selected, request)} /> : null}
         {inpaintOpen && selected.image.src ? (
           <PanelInpaint
             panel={selected}

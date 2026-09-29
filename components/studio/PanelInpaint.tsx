@@ -31,14 +31,14 @@ const SIZES: [number, number][] = [
   [1024, 1024],
 ];
 
-async function studioHeaders(): Promise<Record<string, string>> {
+export async function studioHeaders(): Promise<Record<string, string>> {
   const token = (await getFirebaseAuth().currentUser?.getIdToken().catch(() => "")) ?? "";
   if (token) return { Authorization: `Bearer ${token}` };
   if (process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).has("dev")) return { "x-studio-dev": "1" };
   return {};
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
+export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     if (!src.startsWith("data:")) image.crossOrigin = "anonymous";
@@ -49,7 +49,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /** The OpenAI size closest to the panel's aspect, and where the panel sits inside it (letterboxed). */
-function fit(width: number, height: number) {
+export function fit(width: number, height: number) {
   const ratio = width / height;
   const [sw, sh] = ratio < 0.85 ? SIZES[0] : ratio > 1.18 ? SIZES[1] : SIZES[2];
   const scale = Math.min(sw / width, sh / height);
