@@ -509,16 +509,77 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     }
   };
 
+  /**
+   * Undo and redo on the strip (Cmd+Z, Cmd+Shift+Z): every change of the panels is a step, changes less
+   * than 0.7 s apart are one (typing a description is one step, not one per letter). The history starts
+   * when the draft is loaded; inside a text field, Cmd+Z stays the field's own.
+   */
+  const past = useRef<WebtoonPanel[][]>([]);
+  const future = useRef<WebtoonPanel[][]>([]);
+  const lastPanels = useRef<WebtoonPanel[] | null>(null);
+  const lastChange = useRef(0);
+  const restoring = useRef(false);
+  const [steps, setSteps] = useState({ undo: 0, redo: 0 });
+  // Without an account (local work) there is no draft to load: the history starts at once.
+  const historyOn = loaded || !user;
+  useEffect(() => {
+    if (!historyOn) return;
+    const previous = lastPanels.current;
+    lastPanels.current = panels;
+    if (!previous || previous === panels) return;
+    if (restoring.current) {
+      restoring.current = false;
+      return;
+    }
+    const now = Date.now();
+    if (now - lastChange.current > 700) {
+      past.current = [...past.current, previous].slice(-80);
+      future.current = [];
+      setSteps({ undo: past.current.length, redo: 0 });
+    }
+    lastChange.current = now;
+  }, [panels, historyOn]);
+  const undo = useCallback(() => {
+    const previous = past.current[past.current.length - 1];
+    if (!previous) return;
+    past.current = past.current.slice(0, -1);
+    future.current = [...future.current, panels].slice(-80);
+    restoring.current = true;
+    lastChange.current = 0;
+    setPanels(previous);
+    setSteps({ undo: past.current.length, redo: future.current.length });
+    requestAutosave();
+  }, [panels, requestAutosave]);
+  const redo = useCallback(() => {
+    const next = future.current[future.current.length - 1];
+    if (!next) return;
+    future.current = future.current.slice(0, -1);
+    past.current = [...past.current, panels].slice(-80);
+    restoring.current = true;
+    lastChange.current = 0;
+    setPanels(next);
+    setSteps({ undo: past.current.length, redo: future.current.length });
+    requestAutosave();
+  }, [panels, requestAutosave]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
         void save();
+        return;
       }
+      const z = (event.metaKey || event.ctrlKey) && (event.key.toLowerCase() === "z" || event.key.toLowerCase() === "y");
+      if (!z) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      event.preventDefault();
+      if (event.key.toLowerCase() === "y" || event.shiftKey) redo();
+      else undo();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [save]);
+  }, [save, undo, redo]);
 
   /** From the film tab: a new panel at the end of the strip, then straight to the editor on it. */
   const createFromFrame = (frame: { src: string; seconds: number }) => {
@@ -609,6 +670,20 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
             onMarkRead={markNotificationsRead}
             onClear={clearNotifications}
           />
+          <span className="studio-undo" role="group" aria-label="Annuler, rétablir">
+            <button type="button" className="webtoon-mini" onClick={undo} disabled={!steps.undo} title="Annuler la dernière modification (Cmd+Z)" aria-label="Annuler">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M9 14L4 9l5-5" />
+                <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+              </svg>
+            </button>
+            <button type="button" className="webtoon-mini" onClick={redo} disabled={!steps.redo} title="Rétablir (Cmd+Maj+Z)" aria-label="Rétablir">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M15 14l5-5-5-5" />
+                <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+              </svg>
+            </button>
+          </span>
           <button type="button" className="webtoon-mini" onClick={() => void save()} disabled={working !== null} title="Enregistre le brouillon (Cmd+S)">Enregistrer</button>
           {project ? null : (
             <>
