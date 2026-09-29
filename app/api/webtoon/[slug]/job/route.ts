@@ -33,6 +33,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     kind?: StudioJob["kind"];
     params?: Partial<StudioJob["params"]>;
     panel_ids?: string[];
+    prompts?: Record<string, string>;
     refresh_token?: string;
     label?: string;
   };
@@ -75,17 +76,17 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (current?.job.status === "running" && Date.now() - Date.parse(current.job.heartbeat_at) < STALE_MS) {
       return Response.json({ error: "Un travail tourne déjà en arrière-plan sur ce webtoon : attendez sa fin ou arrêtez-le." }, { status: 409 });
     }
-    if (!body.refresh_token || (body.kind !== "continue" && body.kind !== "images")) return Response.json({ error: "demande incomplète" }, { status: 400 });
+    if (!body.refresh_token || !["continue", "images", "finalize", "retouch"].includes(String(body.kind))) return Response.json({ error: "demande incomplète" }, { status: 400 });
     const now = new Date().toISOString();
     const p = body.params ?? {};
-    const todo = body.kind === "images" ? [...new Set(body.panel_ids ?? [])] : [];
-    if (body.kind === "images" && !todo.length) return Response.json({ error: "aucune case à générer" }, { status: 400 });
+    const todo = body.kind === "continue" ? [] : [...new Set(body.panel_ids ?? [])];
+    if (body.kind !== "continue" && !todo.length) return Response.json({ error: "aucune case à générer" }, { status: 400 });
     const job: StudioJob = {
       id: `j${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       slug,
-      kind: body.kind,
       status: "running",
-      phase: body.kind === "images" ? "images" : "write",
+      kind: body.kind as StudioJob["kind"],
+      phase: body.kind === "continue" ? "write" : "images",
       label: body.label ?? (body.kind === "images" ? `${todo.length} images` : "La suite"),
       created_at: now,
       updated_at: now,
@@ -96,7 +97,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         until: typeof p.until === "number" && Number.isFinite(p.until) ? p.until : null,
         pace: p.pace === "calm" || p.pace === "normal" || p.pace === "action" ? p.pace : "auto",
         insert_after: typeof p.insert_after === "string" ? p.insert_after : null,
-        quality: p.quality === "medium" ? "medium" : "high",
+        quality: p.quality === "medium" || p.quality === "low" ? p.quality : "high",
       },
       created: [],
       todo,
@@ -106,6 +107,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       write_failures: 0,
       log: [],
       cost_usd: 0,
+      ...(body.kind === "retouch" && body.prompts ? { prompts: Object.fromEntries(Object.entries(body.prompts).filter(([id]) => todo.includes(id)).map(([id, text]) => [id, String(text).slice(0, 1500)])) } : {}),
     };
     log(job, "Lancé depuis le studio");
     let sealed: string;

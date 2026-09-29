@@ -1,5 +1,8 @@
 import "server-only";
 
+import sharp from "sharp";
+import { withNewImage } from "./image-history";
+import { uploadToStorage } from "./storage-server";
 import { coveredUntil } from "./continuity";
 import { guideSlice } from "./film-guide";
 import {
@@ -84,6 +87,52 @@ function upsert(library: LibraryOverlay, asset: ReferenceAsset): LibraryOverlay 
   const custom = { ...asset, custom: true };
   const exists = library.assets.some((a) => a.id === asset.id);
   return { ...library, hidden: library.hidden.filter((id) => id !== asset.id), assets: exists ? library.assets.map((a) => (a.id === asset.id ? custom : a)) : [...library.assets, custom] };
+}
+
+/** The OpenAI edit sizes: the one closest to the image's shape. */
+function editSize(width: number, height: number): { sw: number; sh: number } {
+  const ratio = width / height;
+  if (ratio < 0.8) return { sw: 1024, sh: 1536 };
+  if (ratio > 1.25) return { sw: 1536, sh: 1024 };
+  return { sw: 1024, sh: 1024 };
+}
+
+/**
+ * An edit of a whole panel on the server, as the studio's retouch does in the browser: the image letterboxed
+ * to the model's size, sent to the inpaint route, the letterbox cropped away and the result stored at the
+ * original size. `finish`: the HD finish of an approved sketch.
+ */
+async function editWhole(origin: string, slug: string, idToken: string, panel: WebtoonPanel, library: LibraryOverlay, prompt: string, finish: boolean): Promise<{ src: string; width: number; height: number; cost?: number }> {
+  const response = await fetch(panel.image.src);
+  if (!response.ok) throw new Error(`image ${response.status}`);
+  const original = Buffer.from(await response.arrayBuffer());
+  const meta = await sharp(original).metadata();
+  const w = meta.width ?? 1024;
+  const h = meta.height ?? 1536;
+  const { sw, sh } = editSize(w, h);
+  const scale = Math.min(sw / w, sh / h);
+  const dw = Math.round(w * scale);
+  const dh = Math.round(h * scale);
+  const ox = Math.round((sw - dw) / 2);
+  const oy = Math.round((sh - dh) / 2);
+  const inner = await sharp(original).resize(dw, dh).toBuffer();
+  const boxed = await sharp({ create: { width: sw, height: sh, channels: 3, background: "#000" } }).composite([{ input: inner, left: ox, top: oy }]).jpeg({ quality: 92 }).toBuffer();
+  const answer = await callRoute<{ data_url?: string; cost_usd?: number; error?: string }>(origin, slug, "inpaint", idToken, {
+    panel,
+    image: `data:image/jpeg;base64,${boxed.toString("base64")}`,
+    prompt,
+    size: `${sw}x${sh}`,
+    library,
+    quality: "high",
+    finish,
+  });
+  if (!answer.ok || !answer.payload.data_url) throw new Error(answer.payload.error ?? `erreur ${answer.status}`);
+  const edited = Buffer.from(answer.payload.data_url.slice(answer.payload.data_url.indexOf(",") + 1), "base64");
+  // Two pipelines: sharp keeps a single resize per pipeline, so the crop of the letterbox goes first on its own.
+  const atSize = await sharp(edited).resize(sw, sh, { fit: "fill" }).toBuffer();
+  const out = await sharp(atSize).extract({ left: ox, top: oy, width: dw, height: dh }).resize(w, h, { fit: "fill" }).png().toBuffer();
+  const src = await uploadToStorage({ idToken, path: `webtoon/${slug}/${panel.panel_id}/${Date.now()}.png`, bytes: out, contentType: "image/png" });
+  return { src, width: w, height: h, cost: answer.payload.cost_usd };
 }
 
 /** One step of the job, by phase. Returns once the job is saved. */
@@ -180,6 +229,47 @@ export async function runStep(origin: string, slug: string, jobId: string, seale
         }
       }
       if (!job.pending_assets.length) job.phase = "images";
+    } else if (job.phase === "images" && (job.kind === "finalize" || job.kind === "retouch")) {
+      // Edits of existing images: the HD finish of approved sketches, or the fixes the check asked for.
+      const batch = job.todo.splice(0, IMAGES_PER_STEP);
+      if (batch.length) {
+        const { panels } = await loadDraft(slug, idToken);
+        const results = await Promise.all(
+          batch.map(async (id) => {
+            const panel = panels.find((p) => p.panel_id === id);
+            if (!panel?.image.src) return { id, error: null };
+            const finish = job.kind === "finalize";
+            const prompt = finish ? "" : job.prompts?.[id] ?? "";
+            if (!finish && !prompt) return { id, error: null };
+            try {
+              return { id, of: panel.image.src, edit: await editWhole(origin, slug, idToken, panel, library, prompt, finish), note: finish ? "Finition HD de l'esquisse validée" : prompt };
+            } catch (error) {
+              return { id, error: error instanceof Error ? error.message : "erreur" };
+            }
+          }),
+        );
+        const fresh = await loadDraft(slug, idToken);
+        let next = fresh.panels;
+        for (const result of results) {
+          if (!("edit" in result) || !result.edit) {
+            if (result.error) job.failed.push({ panel_id: result.id, reason: result.error });
+            continue;
+          }
+          const { edit, of, note } = result;
+          next = next.map((p) => {
+            // Redrawn meanwhile in the studio: that image wins, the edit goes to its history only through a new run.
+            if (p.panel_id !== result.id || p.image.src !== of) return p;
+            const updated = withNewImage(p, { src: edit.src, width: edit.width, height: edit.height, model: "inpaint", generated_at: new Date().toISOString(), status: "generated", origin: "inpaint", note, quality: "high", ...(edit.cost ? { cost_usd: edit.cost } : {}) });
+            // The HD finish is the approved image drawn clean: the approval follows it.
+            return job.kind === "finalize" && p.review?.of === of ? { ...updated, review: { ...p.review, of: edit.src } } : updated;
+          });
+          job.made.push(result.id);
+          job.cost_usd += edit.cost ?? 0;
+        }
+        await saveDraft(slug, next, fresh.chunks, session, job.by, idToken);
+        log(job, `${job.kind === "finalize" ? "Finitions HD" : "Corrections"} : ${job.made.length} faites${job.failed.length ? `, ${job.failed.length} en échec` : ""}, ${job.todo.length} restantes`);
+      }
+      if (!job.todo.length) job.phase = "done";
     } else if (job.phase === "images") {
       const batch = job.todo.splice(0, IMAGES_PER_STEP);
       if (batch.length) {
@@ -208,7 +298,7 @@ export async function runStep(origin: string, slug: string, jobId: string, seale
             }
             continue;
           }
-          next = next.map((p) => (p.panel_id === result.id ? applyGenerated(p, answer.payload, src, { width: answer.payload.width ?? 1024, height: answer.payload.height ?? 1536 }) : p));
+          next = next.map((p) => (p.panel_id === result.id ? applyGenerated(p, answer.payload, src, { width: answer.payload.width ?? 1024, height: answer.payload.height ?? 1536 }, job.params.quality) : p));
           job.made.push(result.id);
           job.cost_usd += answer.payload.cost_usd ?? 0;
         }
@@ -240,7 +330,7 @@ export async function runStep(origin: string, slug: string, jobId: string, seale
     }
     if (job.phase === "done" && job.status === "running") {
       job.status = "done";
-      log(job, job.kind === "continue" ? `Terminé : ${job.created.length} cases, ${job.made.length} images` : `Terminé : ${job.made.length} images`);
+      log(job, job.kind === "continue" ? `Terminé : ${job.created.length} cases, ${job.made.length} images` : job.kind === "finalize" ? `Terminé : ${job.made.length} cases finies en HD` : job.kind === "retouch" ? `Terminé : ${job.made.length} cases corrigées` : `Terminé : ${job.made.length} images`);
     }
   } catch (error) {
     log(job, `Étape interrompue (${error instanceof Error ? error.message : "erreur"}), reprise à l'étape suivante`);

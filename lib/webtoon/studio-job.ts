@@ -20,7 +20,12 @@ export const JOBS_COLLECTION = "webtoon_jobs";
 /** The session id a job saves the draft with: a tab that sees it merges instead of stopping its saves. */
 export const JOB_SESSION_PREFIX = "job:";
 
-export type JobKind = "continue" | "images";
+/**
+ * `continue`: write, draw and translate the next panels; `images`: draw panels; `finalize`: the HD finish of
+ * approved sketches (an edit that keeps the image); `retouch`: fix panels with a prompt each (the remarks of
+ * the check against the sheets).
+ */
+export type JobKind = "continue" | "images" | "finalize" | "retouch";
 export type JobPhase = "write" | "sheets" | "images" | "translate" | "done";
 export type JobStatus = "running" | "done" | "failed" | "cancelled";
 
@@ -44,7 +49,7 @@ export type StudioJob = {
     pace: "auto" | "calm" | "normal" | "action";
     /** Written after this panel, or at the end of the strip. */
     insert_after: string | null;
-    quality: "high" | "medium";
+    quality: "high" | "medium" | "low";
   };
   /** Panels written by this job, in order. */
   created: string[];
@@ -60,6 +65,8 @@ export type StudioJob = {
   cost_usd: number;
   /** Held by the step at work, so a resume never runs a second step beside it. */
   lease_until?: string;
+  /** The instruction of each panel of a `retouch` job. */
+  prompts?: Record<string, string>;
   /** Panels whose image failed once and went back to the queue. */
   retried?: string[];
   /** Steps in a row that stopped on an error: past five, the job stops. */
@@ -138,7 +145,7 @@ export type GenerateAnswer = {
 };
 
 /** The panel with the image a generation made, and what the generation composed or placed with it. */
-export function applyGenerated(panel: WebtoonPanel, answer: GenerateAnswer, src: string, size: { width: number; height: number }): WebtoonPanel {
+export function applyGenerated(panel: WebtoonPanel, answer: GenerateAnswer, src: string, size: { width: number; height: number }, quality?: PanelImage["quality"]): WebtoonPanel {
   const composed: Partial<WebtoonPanel> = {
     ...(needsComposition(panel) && answer.generation_prompt
       ? { generation_prompt: answer.generation_prompt, negative_constraints: answer.negative_constraints ?? panel.negative_constraints, visual_references: answer.visual_references ?? panel.visual_references, prompt_auto: true }
@@ -147,7 +154,7 @@ export function applyGenerated(panel: WebtoonPanel, answer: GenerateAnswer, src:
     ...(answer.sfx ? { sfx: answer.sfx } : {}),
     ...(answer.panel_height && answer.panel_height > panel.panel_height ? { panel_height: answer.panel_height } : {}),
   };
-  const image: PanelImage = { src, width: size.width, height: size.height, model: answer.model, generated_at: new Date().toISOString(), status: "generated", origin: "generate", ...(answer.cost_usd ? { cost_usd: answer.cost_usd } : {}) };
+  const image: PanelImage = { src, width: size.width, height: size.height, model: answer.model, generated_at: new Date().toISOString(), status: "generated", origin: "generate", ...(quality ? { quality } : {}), ...(answer.cost_usd ? { cost_usd: answer.cost_usd } : {}) };
   return withNewImage({ ...panel, ...composed }, image);
 }
 
