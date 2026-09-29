@@ -17,6 +17,9 @@ import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } fr
 import { applyRhythm } from "@/lib/webtoon/rhythm";
 import { SFX_LIBRARY, SFX_STYLES, SFX_STYLE_LABEL, freeSpot, type SfxStyle } from "@/lib/webtoon/sfx-library";
 import { PhonePreview } from "@/components/studio/PhonePreview";
+import { EpisodeHandoffCard } from "@/components/studio/EpisodeHandoffCard";
+import { HANDOFF_PANELS, loadHandoff, type EpisodeHandoff } from "@/lib/webtoon/handoff-client";
+import { BUILT_IN_PROJECT_ID } from "@/lib/webtoon/project";
 import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
@@ -353,6 +356,23 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
   /** The summary of the check against the sheets, closed by the author until the next check. */
   const [hideAudit, setHideAudit] = useState(false);
+  /** Where the episode before left the characters (a project's own episode only, never the first one). */
+  const [handoff, setHandoff] = useState<EpisodeHandoff | null>(null);
+  const handoffRef = useRef<EpisodeHandoff | null>(null);
+  handoffRef.current = handoff;
+  const opensSeries = script.slug === BUILT_IN_PROJECT_ID;
+  useEffect(() => {
+    if (opensSeries || !user) return;
+    let cancelled = false;
+    void loadHandoff(script.slug)
+      .then((value) => {
+        if (!cancelled) setHandoff(value);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [script.slug, user, opensSeries]);
   const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
   /** Measured image durations, so the estimate learns from the real speed (kept in the browser across visits). */
@@ -445,10 +465,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const previousFor = (id: string): { image?: string; state?: string; description?: string } | undefined => {
     const list = panelsRef.current;
     const at = list.findIndex((p) => p.panel_id === id);
-    if (at <= 0) return undefined;
-    const before = list.slice(Math.max(0, at - 8), at).reverse();
+    const before = at > 0 ? list.slice(Math.max(0, at - 8), at).reverse() : [];
     const withImage = before.find((p) => p.image.src && p.image.status !== "missing");
     const withState = before.find((p) => stateOf(p.description));
+    // The opening of an episode: nothing before says the state yet, the end of the episode before does.
+    const opening = handoffRef.current;
+    if (opening?.text && at >= 0 && at < HANDOFF_PANELS && !withState) {
+      return { image: withImage?.image.src ?? (at === 0 ? opening.image : undefined), state: opening.text, description: withImage?.description ?? `the last panel of ${opening.from_title}` };
+    }
     if (!withImage && !withState) return undefined;
     return { image: withImage?.image.src, state: withState ? stateOf(withState.description) : undefined, description: withImage?.description };
   };
@@ -873,6 +897,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
             until_seconds: until,
             // The guide around the stretch to write: its sequences drive the "auto" pace and its lines go to the writer.
             guide: guideSlice(guide, Math.max(0, coveredUntil(current) - 2), coveredUntil(current) + 180),
+            // The opening of an episode after the first: the writer starts from where the episode before left everyone.
+            ...(handoffRef.current?.text && current.length < 30 ? { handoff: handoffRef.current.text } : {}),
           }),
         });
         const payload = (await response.json().catch(() => ({}))) as { panels?: WebtoonPanel[]; new_assets?: { asset: ReferenceAsset; frames: string[] }[]; error?: string };
@@ -1460,6 +1486,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         <p className="text-sm text-ivory/75">
           Le studio lit le film depuis le début avec le scénario et la bible du projet, écrit les cases, joint à chacune les fiches de ce qu&apos;elle montre, puis dessine les images et traduit les textes.
         </p>
+        {!opensSeries ? <EpisodeHandoffCard slug={script.slug} title={`${script.series} · Épisode ${script.episode}`} handoff={handoff} onChange={setHandoff} cast={CHARACTERS.map((c) => ({ id: c.id, name: c.name }))} headers={studioHeaders} notify={notify} /> : null}
         {job ? (
           <p className="text-sm text-lily"><span className="studio-spinner" aria-hidden /> {job.label}</p>
         ) : (
@@ -1732,6 +1759,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               ))
             : null}
           <li>
+            {!opensSeries && panels.length < 40 ? <EpisodeHandoffCard slug={script.slug} title={`${script.series} · Épisode ${script.episode}`} handoff={handoff} onChange={setHandoff} cast={CHARACTERS.map((c) => ({ id: c.id, name: c.name }))} headers={studioHeaders} notify={notify} /> : null}
             <div className="studio-next">
               <span className="studio-thumb-empty">Suite de l&apos;histoire</span>
               <p>
