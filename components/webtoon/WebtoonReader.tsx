@@ -1,5 +1,6 @@
 "use client";
 
+import type { Locale } from "@/lib/i18n/config";
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -21,6 +22,8 @@ type WebtoonReaderProps = {
   onSelect?: (panelId: string) => void;
   selectedId?: string | null;
   className?: string;
+  /** The language of the lettering, instead of the page's (the studio's export renders every language). */
+  locale?: Locale;
 };
 
 /**
@@ -34,8 +37,10 @@ export function WebtoonReader({
   onSelect,
   selectedId = null,
   className = "",
+  locale: forcedLocale,
 }: WebtoonReaderProps) {
-  const { locale, dict } = useLocale();
+  const { locale: pageLocale, dict } = useLocale();
+  const locale = forcedLocale ?? pageLocale;
   const layout = computeLayout(panels);
   const pct = (px: number) => `${(px / WEBTOON_WIDTH) * 100}%`;
 
