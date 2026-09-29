@@ -182,7 +182,8 @@ export type Sfx = {
   /** Rotation in degrees, size in canvas px. */
   rotate?: number;
   size?: number;
-  style: "soft" | "hard" | "rumble";
+  /** How the sound is drawn: see `lib/webtoon/sfx-library.ts` (a burst behind an impact, steel on metal, speed lines on a rush of air). */
+  style: "soft" | "hard" | "rumble" | "impact" | "metal" | "whoosh" | "crack";
 };
 
 /** Output of the generation step for a panel. */

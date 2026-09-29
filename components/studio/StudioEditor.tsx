@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { PanelCanvas } from "@/components/studio/PanelCanvas";
+import { sfxFont } from "@/components/webtoon/fonts";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
@@ -14,6 +15,7 @@ import type { TrackTask } from "@/lib/webtoon/notifications";
 import { stateOf } from "@/lib/webtoon/panel-state";
 import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { applyRhythm } from "@/lib/webtoon/rhythm";
+import { SFX_LIBRARY, SFX_STYLES, SFX_STYLE_LABEL, freeSpot, type SfxStyle } from "@/lib/webtoon/sfx-library";
 import { PhonePreview } from "@/components/studio/PhonePreview";
 import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
@@ -2012,14 +2014,31 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
 
             <div className="studio-section-head mt-4">
               <span className="webtoon-field-label">Sons (SFX)</span>
-              <button type="button" className="webtoon-mini" onClick={() => patch({ sfx: [...selected.sfx, { text: { en: "whoosh" }, anchor: { x: 60, y: 30 }, style: "soft", rotate: -10, size: 90 }] })}>+ Son</button>
+              <button type="button" className="webtoon-mini" onClick={() => patch({ sfx: [...selected.sfx, { text: { en: "whoosh" }, anchor: freeSpot(selected), style: "soft", rotate: -10, size: 90 }] })}>+ Son libre</button>
+            </div>
+            <div className={`studio-sfx-library ${sfxFont.variable}`} role="group" aria-label="Bibliothèque de sons">
+              {SFX_LIBRARY.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="studio-sfx-chip"
+                  title={`${preset.hint} · ${preset.effect.text.fr} / ${preset.effect.text.en} / ${preset.effect.text.ja} / ${preset.effect.text.ko}`}
+                  onClick={() => {
+                    patch({ sfx: [...selected.sfx, { ...preset.effect, text: { ...preset.effect.text }, anchor: freeSpot(selected) }] });
+                    notify(`Son « ${preset.effect.text.fr} » posé : glissez-le sur l'image pour le placer`);
+                  }}
+                >
+                  <span className={`studio-sfx-chip-sample webtoon-sfx-${preset.effect.style}`}>{preset.effect.text.fr}</span>
+                  <small>{preset.label}</small>
+                </button>
+              ))}
             </div>
             {selected.sfx.map((effect, i) => (
               <div key={i} className="webtoon-subcard">
                 {textInputs(effect.text, (text) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, text } : s)) }))}
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={effect.style} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, style: e.target.value as "soft" | "hard" | "rumble" } : s)) })}>
-                    {(["soft", "hard", "rumble"] as const).map((v) => <option key={v} value={v}>{label(v)}</option>)}
+                  <select value={effect.style} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, style: e.target.value as SfxStyle } : s)) })}>
+                    {SFX_STYLES.map((v) => <option key={v} value={v}>{SFX_STYLE_LABEL[v]}</option>)}
                   </select>
                   <label className="webtoon-field"><span>Taille {effect.size ?? 96}</span><input type="range" min={30} max={260} value={effect.size ?? 96} onChange={(e) => patch({ sfx: selected.sfx.map((s, k) => (k === i ? { ...s, size: Number(e.target.value) } : s)) })} /></label>
                 </div>

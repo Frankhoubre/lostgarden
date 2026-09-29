@@ -2,6 +2,7 @@ import { ASPECT_BY_SHOT, SPACING_BY_TRANSITION } from "./adaptation";
 import { composePanel, panelFromFrame, type FramePick } from "./compose";
 import { effectCues, motionCues } from "./continuity";
 import { heightForAspect } from "./layout";
+import { SFX_STYLES } from "./sfx-library";
 import type {
   Anchor,
   LibraryOverlay,
@@ -235,7 +236,7 @@ export function panelsFromIntents(
         .map((effect, i) => ({
           text: text(effect),
           anchor: anchor(effect.anchor, { x: 62, y: 30 + i * 20 }),
-          style: pick(effect.style, new Set(["soft", "hard", "rumble"] as const), "soft"),
+          style: pick(effect.style, new Set(SFX_STYLES), "soft"),
           rotate: Number.isFinite(Number(effect.rotate)) ? Math.max(-90, Math.min(90, Number(effect.rotate))) : -10,
           size: Number.isFinite(Number(effect.size)) ? Math.max(30, Math.min(320, Number(effect.size))) : 96,
         })),
