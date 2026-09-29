@@ -201,6 +201,11 @@ export type PanelImage = {
   origin?: "generate" | "inpaint" | "upload";
   /** The instruction of a retouch, shown in the panel's image history. */
   note?: string;
+  /**
+   * The light version the public reader loads: WebP at reading width, made at publication. `of` is the
+   * `src` it was made from; a new image makes it stale and the next publication makes another.
+   */
+  web?: { src: string; of: string; width: number; height: number; bytes: number };
 };
 
 export type WebtoonPanel = {

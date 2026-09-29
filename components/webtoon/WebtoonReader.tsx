@@ -93,7 +93,7 @@ export function WebtoonReader({
                 // canvas is fixed, so the Next image pipeline adds nothing here.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={panel.image.src}
+                  src={panel.image.web && panel.image.web.of === panel.image.src ? panel.image.web.src : panel.image.src}
                   alt={panel.description}
                   width={panel.image.width || WEBTOON_WIDTH}
                   height={panel.image.height || panel.panel_height}
