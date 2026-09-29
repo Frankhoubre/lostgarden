@@ -173,7 +173,7 @@ export function StudioExport({ slug, title, panels, onClose }: Props) {
       {rendering
         ? createPortal(
             <div ref={host} className="studio-export-stage" aria-hidden="true">
-              <WebtoonReader panels={panels} locale={rendering} />
+              <WebtoonReader panels={panels} locale={rendering} stills />
             </div>,
             document.body,
           )

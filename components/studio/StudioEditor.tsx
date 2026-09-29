@@ -6,6 +6,7 @@ import { sfxFont } from "@/components/webtoon/fonts";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
+import { PanelMotion } from "@/components/studio/PanelMotion";
 import { StudioReview } from "@/components/studio/StudioReview";
 import { MentionTextarea, type MentionItem } from "@/components/studio/MentionTextarea";
 import { ProgressBar } from "@/components/studio/ProgressBar";
@@ -2181,6 +2182,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 </ul>
               </div>
             </details>
+            <PanelMotion slug={script.slug} panel={selected} notify={notify} onPatch={(id, changes) => setPanels((current) => updatePanel(current, id, changes))} />
           </div>
         ) : null}
 

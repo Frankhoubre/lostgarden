@@ -598,7 +598,7 @@ export function StudioTeaser({ slug, series, episode, panels, checkedIds, onClos
       {stage
         ? createPortal(
             <div ref={host} className="studio-export-stage" aria-hidden="true">
-              <WebtoonReader panels={stage.panels} locale={stage.locale} />
+              <WebtoonReader panels={stage.panels} locale={stage.locale} stills />
             </div>,
             document.body,
           )

@@ -3,9 +3,11 @@
 import type { Locale } from "@/lib/i18n/config";
 import { bubbleFont, sfxFont } from "@/components/webtoon/fonts";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
+import { PanelMotionVideo } from "@/components/webtoon/PanelMotionVideo";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { frameClass, frameStyle, imageStyle } from "@/lib/webtoon/frame";
 import { computeLayout } from "@/lib/webtoon/layout";
+import { freshMotion } from "@/lib/webtoon/motion";
 import { WEBTOON_WIDTH, type PanelBackground, type WebtoonPanel } from "@/lib/webtoon/types";
 
 const BG: Record<PanelBackground, string> = {
@@ -24,6 +26,8 @@ type WebtoonReaderProps = {
   className?: string;
   /** The language of the lettering, instead of the page's (the studio's export renders every language). */
   locale?: Locale;
+  /** Still images only, without the loops of animated panels (the offscreen captures of the export and the teaser). */
+  stills?: boolean;
 };
 
 /**
@@ -38,6 +42,7 @@ export function WebtoonReader({
   selectedId = null,
   className = "",
   locale: forcedLocale,
+  stills = false,
 }: WebtoonReaderProps) {
   const { locale: pageLocale, dict } = useLocale();
   const locale = forcedLocale ?? pageLocale;
@@ -56,6 +61,8 @@ export function WebtoonReader({
         const previous = index > 0 ? panels[index - 1] : null;
         const interactive = Boolean(onSelect);
         const selected = selectedId === panel.panel_id;
+        const still = panel.image.web && panel.image.web.of === panel.image.src ? panel.image.web.src : panel.image.src;
+        const motion = stills ? null : freshMotion(panel);
         const newBeat = previous !== null && previous.beat_id !== panel.beat_id;
         const worldChange = previous !== null && previous.background !== panel.background;
         // The gap before a panel: a soft fall when the world changes, a small
@@ -94,19 +101,22 @@ export function WebtoonReader({
                   <span className="webtoon-placeholder-desc">{panel.description}</span>
                 </div>
               ) : (
-                // Plain <img>: the strip is a single tall document and the
-                // canvas is fixed, so the Next image pipeline adds nothing here.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={panel.image.web && panel.image.web.of === panel.image.src ? panel.image.web.src : panel.image.src}
-                  alt={panel.description}
-                  width={panel.image.width || WEBTOON_WIDTH}
-                  height={panel.image.height || panel.panel_height}
-                  loading={index < 2 ? "eager" : "lazy"}
-                  decoding="async"
-                  style={imageStyle(panel)}
-                  className={panel.image.status === "stale" ? "webtoon-img-stale" : ""}
-                />
+                <>
+                  {/* Plain <img>: the strip is a single tall document and the
+                      canvas is fixed, so the Next image pipeline adds nothing here. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={still}
+                    alt={panel.description}
+                    width={panel.image.width || WEBTOON_WIDTH}
+                    height={panel.image.height || panel.panel_height}
+                    loading={index < 2 ? "eager" : "lazy"}
+                    decoding="async"
+                    style={imageStyle(panel)}
+                    className={panel.image.status === "stale" ? "webtoon-img-stale" : ""}
+                  />
+                  {motion ? <PanelMotionVideo src={motion.src} poster={still} panel={panel} /> : null}
+                </>
               )}
               <PanelLettering
                 dialogue={panel.dialogue}
