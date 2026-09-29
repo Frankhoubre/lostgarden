@@ -6942,6 +6942,233 @@ select.studio-input {
   color: var(--st-faint, #6c7280);
 }
 
+/* Where the readers stop: sessions, retention curve over the panels, steepest drops. */
+.studio-reads {
+  display: grid;
+  gap: 1rem;
+  max-width: 64rem;
+}
+
+.studio-reads-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.studio-reads-head h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-reads-head p {
+  max-width: 38rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-reads-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-reads-empty {
+  padding: 1.2rem;
+  border: 1px dashed var(--st-line-2, rgba(255, 255, 255, 0.14));
+  border-radius: 12px;
+  font-size: 0.82rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-reads-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.6rem;
+}
+
+.studio-reads-tile {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 12px;
+  background: var(--st-panel, #14161a);
+}
+
+.studio-reads-tile span {
+  font-size: 0.72rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-reads-tile b {
+  font-size: 1.5rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-reads-tile small {
+  font-size: 0.7rem;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-reads-chart {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.8rem 0.9rem 0.6rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 12px;
+  background: var(--st-panel, #14161a);
+}
+
+.studio-reads-chart figcaption {
+  font-size: 0.78rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-reads-plot {
+  position: relative;
+}
+
+.studio-reads-plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.studio-reads-grid {
+  stroke: var(--st-line, rgba(255, 255, 255, 0.07));
+  stroke-width: 1;
+}
+
+.studio-reads-axis {
+  fill: var(--st-faint, #6c7280);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.studio-reads-area {
+  fill: rgba(94, 180, 255, 0.12);
+}
+
+.studio-reads-line {
+  fill: none;
+  stroke: var(--st-accent, #5eb4ff);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.studio-reads-dot {
+  fill: #ffa94d;
+  stroke: var(--st-panel, #14161a);
+  stroke-width: 2;
+}
+
+.studio-reads-dot.is-hover {
+  fill: var(--st-accent-2, #9fd2ff);
+}
+
+.studio-reads-cross {
+  stroke: var(--st-line-2, rgba(255, 255, 255, 0.14));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.studio-reads-tip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--st-line-2, rgba(255, 255, 255, 0.14));
+  border-radius: 8px;
+  background: var(--st-raised, #1b1e24);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.studio-reads-tip span {
+  color: var(--st-muted, #a3a9b5);
+  font-variant-numeric: tabular-nums;
+}
+
+.studio-reads-drops {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.studio-reads-drops h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-reads-drop {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 10px;
+  background: var(--st-panel, #14161a);
+  text-align: left;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-reads-drop:hover:not(:disabled) {
+  background: var(--st-raised, #1b1e24);
+  border-color: rgba(94, 180, 255, 0.45);
+}
+
+.studio-reads-drop:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.studio-reads-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #0b0c0f;
+  font-size: 0.66rem;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-reads-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.studio-reads-drop-text {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+
+.studio-reads-drop-text b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.studio-reads-drop-text small {
+  font-size: 0.72rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
 /* Reading a series: resume where the reader stopped, episodes before and after. */
 .webtoon-resume {
   position: fixed;
