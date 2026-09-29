@@ -3856,6 +3856,34 @@ h3 {
   color: var(--st-muted, #a3a9b5);
 }
 
+.studio-handoff {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 10px;
+  background: var(--st-raised, #1b1e24);
+  font-size: 0.76rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-handoff textarea,
+.studio-handoff select {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  background: #0f1115;
+  font-size: 0.74rem;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-handoff select {
+  width: auto;
+  flex: 1;
+}
+
 .studio-letter-issues {
   display: grid;
   gap: 0.5rem;

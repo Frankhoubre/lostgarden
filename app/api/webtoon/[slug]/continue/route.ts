@@ -643,7 +643,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
   if (!context.frames.length) return Response.json({ error: "Ce projet n'a pas encore d'images du film : importez la vidéo dans l'accueil du projet." }, { status: 400 });
 
-  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "auto" | "calm" | "normal" | "action"; until_seconds?: number; guide?: Pick<FilmGuide, "sequences" | "beats" | "gestures"> };
+  const body = (await request.json().catch(() => ({}))) as { count?: number; panels?: WebtoonPanel[]; library?: LibraryOverlay; pace?: "auto" | "calm" | "normal" | "action"; until_seconds?: number; guide?: Pick<FilmGuide, "sequences" | "beats" | "gestures">; /** Where the episode before left the characters (lib/webtoon/handoff-client.ts), for the opening of this one. */ handoff?: string };
   // The film guide around the stretch (sent by the studio): its sequences set the pace in "auto", its lines go to the writer.
   const guide =
     body.guide && Array.isArray(body.guide.sequences)
@@ -768,6 +768,14 @@ export async function POST(request: Request, { params }: RouteContext) {
             {
               type: "text" as const,
               text: `FILM GUIDE of these seconds (the whole film was read once, sequence by sequence; it says what kind of scene this is and what changes from one second to the next). Tell the scene in its nature: an ACTION sequence in many dynamic panels (impacts, speed lines, sounds, diagonal and tall frames), a TENSION sequence by holding on the threat, a CONTEMPLATION or CALM sequence in few large quiet panels, a DIALOGUE by the faces of who speaks. Every change it notes is a candidate panel:\n${guideBrief(guide, frames[0]?.seconds ?? adaptedUntil, cut.end)}`,
+            },
+          ]
+        : []),
+      ...(typeof body.handoff === "string" && body.handoff.trim() && start.length < 30
+        ? [
+            {
+              type: "text" as const,
+              text: `WHERE THE PREVIOUS EPISODE LEFT THE CHARACTERS. This episode opens after it: their state carries on (helmet, torn or missing pieces, wounds, what the hands hold) unless the frames show a change, a time skip or a memory. Write it in the STATE TO KEEP EXACTLY line of the first panels of each character:\n${body.handoff.trim().slice(0, 800)}`,
             },
           ]
         : []),
