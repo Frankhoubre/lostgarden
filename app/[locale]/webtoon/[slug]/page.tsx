@@ -8,7 +8,8 @@ import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import { isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
-import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/seo";
+import { comicIssueJsonLd, episodeDescription, episodeIntro, episodeMetadata, findEpisode, type EpisodeSummary } from "@/lib/webtoon/episode-seo";
 import { computeLayout } from "@/lib/webtoon/layout";
 import { fetchPublishedStrip, withPublishedPanels } from "@/lib/webtoon/published";
 import { fetchSeries } from "@/lib/webtoon/series-server";
@@ -32,17 +33,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: localeParam, slug } = await params;
   if (!isLocale(localeParam)) return {};
   const locale = localeParam as Locale;
-  const script = getWebtoonScript(slug);
-  const episode = script ? null : (await fetchSeries()).find((e) => e.slug === slug);
-  if (!script && !episode) return {};
+  const episode = await findEpisode(slug, locale);
+  if (!episode) return {};
   const dict = await getDictionary(locale);
-  return buildPageMetadata({
-    locale,
-    title: `${script ? localizedText(script.title, locale) : episode!.title} · ${dict.webtoon.headline} | Lost Garden`,
-    description: dict.meta.webtoon.description,
-    path: localePath(locale, `/webtoon/${slug}`),
-    absoluteTitle: true,
-  });
+  // The same reads as the page (deduplicated by the fetch cache): the description quotes the first line.
+  const script = getWebtoonScript(slug);
+  const panels = script ? (await withPublishedPanels(script)).panels : (await fetchPublishedStrip(slug))?.panels;
+  return episodeMetadata({ locale, dict, episode, description: episodeDescription(dict, episode, locale, panels) });
 }
 
 export default async function WebtoonReaderPage({ params }: PageProps) {
@@ -57,7 +54,8 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
     const episode = episodes.find((e) => e.slug === slug);
     const published = episode ? await fetchPublishedStrip(slug) : null;
     if (!episode || !published) notFound();
-    return <ProjectEpisode locale={locale} episode={episode} panels={published.panels} previous={previous} next={next} />;
+    const summary = await findEpisode(slug, locale);
+    return <ProjectEpisode locale={locale} episode={episode} summary={summary} panels={published.panels} previous={previous} next={next} />;
   }
   // The studio can publish an edited version; the reader shows it when it exists.
   const script = await withPublishedPanels(engineScript);
@@ -66,6 +64,7 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
   const layout = computeLayout(script.panels);
   const path = localePath(locale, `/webtoon/${slug}`);
   const title = localizedText(script.title, locale);
+  const summary: EpisodeSummary = (await findEpisode(slug, locale)) ?? { slug, series: script.series, episode: script.episode, title, panels: script.panels.length };
 
   return (
     <>
@@ -76,10 +75,12 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
           { name: title, path },
         ])}
       />
-      <JsonLd data={webPageJsonLd({ locale, name: title, description: dict.meta.webtoon.description, path })} />
+      <JsonLd data={webPageJsonLd({ locale, name: title, description: episodeIntro(dict, summary, script.panels.length), path })} />
+      <JsonLd data={comicIssueJsonLd({ locale, episode: summary, description: episodeDescription(dict, summary, locale, script.panels) })} />
       <WebtoonPageShell>
         <p className="anime-label text-xs text-cyan-pale">{localizedText(script.subtitle, locale)}</p>
         <h1 className="anime-heading mt-1 font-display text-3xl text-lily sm:text-4xl">{title}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ivory/85">{episodeIntro(dict, summary, script.panels.length)}</p>
         <p className="mt-2 text-xs text-ivory/60">
           {fill(w.panels, { count: script.panels.length })} · {fill(w.height, { px: layout.total_height })}
         </p>
@@ -106,11 +107,12 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
 }
 
 /** An episode of a studio project: the published strip, with the series around it. */
-async function ProjectEpisode({ locale, episode, panels, previous, next }: { locale: Locale; episode: SeriesEpisode; panels: WebtoonPanel[]; previous?: SeriesEpisode; next?: SeriesEpisode }) {
+async function ProjectEpisode({ locale, episode, summary: found, panels, previous, next }: { locale: Locale; episode: SeriesEpisode; summary: EpisodeSummary | null; panels: WebtoonPanel[]; previous?: SeriesEpisode; next?: SeriesEpisode }) {
   const dict = await getDictionary(locale);
   const w = dict.webtoon;
   const layout = computeLayout(panels);
   const path = localePath(locale, `/webtoon/${episode.slug}`);
+  const summary: EpisodeSummary = found ?? { slug: episode.slug, series: episode.series, episode: episode.episode, title: episode.title, cover: episode.cover, panels: panels.length, publishedAt: episode.published_at };
   return (
     <>
       <JsonLd
@@ -120,9 +122,11 @@ async function ProjectEpisode({ locale, episode, panels, previous, next }: { loc
           { name: episode.title, path },
         ])}
       />
+      <JsonLd data={comicIssueJsonLd({ locale, episode: summary, description: episodeDescription(dict, summary, locale, panels) })} />
       <WebtoonPageShell>
         <p className="anime-label text-xs text-cyan-pale">{episode.series}</p>
         <h1 className="anime-heading mt-1 font-display text-3xl text-lily sm:text-4xl">{episode.title}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ivory/85">{episodeIntro(dict, summary, panels.length)}</p>
         <p className="mt-2 text-xs text-ivory/60">
           {fill(w.panels, { count: panels.length })} · {fill(w.height, { px: layout.total_height })}
         </p>
