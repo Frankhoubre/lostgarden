@@ -14,6 +14,8 @@ import type { TrackTask } from "@/lib/webtoon/notifications";
 import { stateOf } from "@/lib/webtoon/panel-state";
 import { SEQUENCE_LABEL, guideSlice, paceOfKind, sequenceAt, type FilmGuide } from "@/lib/webtoon/film-guide";
 import { applyRhythm } from "@/lib/webtoon/rhythm";
+import { PhonePreview } from "@/components/studio/PhonePreview";
+import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
 import type { DirectorAction } from "@/app/api/webtoon/[slug]/director/route";
@@ -231,15 +233,15 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   );
   const { user } = useAuth();
   /** `panel`: the selected panel alone; `strip`: the whole strip as the reader sees it; `review`: the strip against the film. */
-  const [view, setView] = useState<"panel" | "strip" | "review">(() => {
+  const [view, setView] = useState<"panel" | "strip" | "review" | "phone">(() => {
     try {
       const stored = window.localStorage.getItem("studio.view");
-      return stored === "strip" || stored === "review" ? stored : "panel";
+      return stored === "strip" || stored === "review" || stored === "phone" ? stored : "panel";
     } catch {
       return "panel";
     }
   });
-  const chooseView = (next: "panel" | "strip" | "review") => {
+  const chooseView = (next: "panel" | "strip" | "review" | "phone") => {
     setView(next);
     try {
       window.localStorage.setItem("studio.view", next);
@@ -342,6 +344,8 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   }, [panelMenuOpen]);
   /** Panels ticked in the list for a batch action (regenerate, translate, delete). */
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
+  /** Bubbles and captions too big for their panel in some language, from the last check (null: not checked). */
+  const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
   const lastChecked = useRef<string | null>(null);
   const stopBatch = useRef(false);
   /** Measured image durations, so the estimate learns from the real speed (kept in the browser across visits). */
@@ -1170,14 +1174,54 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         bucket[itemKey] = value;
         byPanel.set(panelId, bucket);
       }
+      const translated = targets.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p));
       setPanels((current) => current.map((p) => (byPanel.has(p.panel_id) ? applyTranslations(p, byPanel.get(p.panel_id)!, all) : p)));
       onAutosave?.();
       notify(`${batchItems.length} texte${batchItems.length > 1 ? "s" : ""} traduit${batchItems.length > 1 ? "s" : ""} en fr, en, ja, ko`);
+      // A translation longer than the French can push a bubble out of its panel: said now, not at the export.
+      void checkLettering(translated.filter((p) => byPanel.has(p.panel_id)), true);
     } catch (error) {
       notify(error instanceof Error ? error.message : "Erreur de traduction");
     } finally {
       setBusy(false);
     }
+  };
+
+  /**
+   * Measures the bubbles and captions of these panels (the whole strip when omitted) in every language and
+   * keeps what overflows (components/studio/lettering-fit.ts). `quiet`: only speaks when something overflows.
+   */
+  const checkLettering = async (targets?: WebtoonPanel[], quiet = false) => {
+    const list = targets ?? panelsRef.current;
+    const issues = letteringIssues(list, await measureLettering(list));
+    const ids = new Set(list.map((p) => p.panel_id));
+    // A partial check replaces what it re-measured and keeps the rest of the last one.
+    setLetterIssues((current) => (targets ? [...(current ?? []).filter((i) => !ids.has(i.panel_id)), ...issues] : issues));
+    if (!issues.length) {
+      if (!quiet) notify("Toutes les bulles tiennent dans leur case, dans les quatre langues");
+      return;
+    }
+    const byLocale = new Map<string, number>();
+    for (const issue of issues) byLocale.set(issue.locale, (byLocale.get(issue.locale) ?? 0) + 1);
+    const cases = new Set(issues.map((i) => i.panel_id)).size;
+    notify(`Bulles trop pleines dans ${cases} case${cases > 1 ? "s" : ""} (${[...byLocale].map(([l, n]) => `${l} ${n}`).join(", ")}) : voir en haut de la liste`);
+  };
+
+  /** Moves the overflowing lettering back inside its panel, for every language at once; overlaps stay flagged. */
+  const fitOverflowing = async () => {
+    if (!letterIssues?.length) return;
+    const ids = new Set(letterIssues.filter((i) => i.reason !== "overlap").map((i) => i.panel_id));
+    const targets = panelsRef.current.filter((p) => ids.has(p.panel_id));
+    if (!targets.length) {
+      notify("Il ne reste que des bulles qui se chevauchent : « Replacer les bulles » les place d'après l'image");
+      return;
+    }
+    const sizes = await measureLettering(targets);
+    const fitted = new Map(targets.map((p) => [p.panel_id, fitLettering(p, sizes)]));
+    setPanels((current) => current.map((p) => fitted.get(p.panel_id) ?? p));
+    onAutosave?.();
+    notify(`Bulles recadrées dans ${fitted.size} case${fitted.size > 1 ? "s" : ""}`);
+    await checkLettering([...fitted.values()], true);
   };
 
   /** "@" in a prompt of the selected panel: the reference goes with it (sheet, place, object, or the image of another panel). */
@@ -1464,9 +1508,29 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className="webtoon-mini" onClick={() => rhythmStrip()} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>
                 Rythmer les espaces
               </button>
+              <button type="button" className="webtoon-mini" onClick={() => void checkLettering()} disabled={busy} title="Mesure chaque bulle et cartouche dans les quatre langues et signale celles qui débordent de leur case ou en chevauchent une autre">
+                Vérifier les bulles
+              </button>
             </>
           )}
         </div>
+        {letterIssues?.length ? (
+          <div className="studio-letter-issues" role="status">
+            <p>
+              <b>Bulles trop pleines</b> dans {new Set(letterIssues.map((i) => i.panel_id)).size > 1 ? `${new Set(letterIssues.map((i) => i.panel_id)).size} cases` : "1 case"} :{" "}
+              {(["fr", "en", "ja", "ko"] as Locale[])
+                .map((l) => [l, letterIssues.filter((i) => i.locale === l).length] as const)
+                .filter(([, n]) => n)
+                .map(([l, n]) => `${l} ${n}`)
+                .join(" · ")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(letterIssues.map((i) => i.panel_id)))}>Cocher ces cases</button>
+              <button type="button" className="webtoon-mini studio-primary" onClick={() => void fitOverflowing()} disabled={busy} title="Déplace chaque bulle qui dépasse juste assez pour tenir dans la case avec son texte le plus long, et agrandit la case si une bulle est plus haute qu'elle">Recadrer les bulles</button>
+              <button type="button" className="webtoon-mini" onClick={() => setLetterIssues(null)}>Masquer</button>
+            </div>
+          </div>
+        ) : null}
         <ol>
           {panels.map((panel, index) => (
             <Fragment key={panel.panel_id}>
@@ -1520,6 +1584,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   <b>{panel.order}</b> {panel.panel_id}
                   {panel.fidelity !== "direct" ? <i> · {label(panel.fidelity)}</i> : null}
                   {panel.image.status === "stale" ? <i> · à regénérer</i> : panel.image.status === "missing" && !panel.caption.some((c) => c.style === "title") ? <i> · à générer</i> : null}
+                  {letterIssues?.some((i) => i.panel_id === panel.panel_id) ? (
+                    <i className="studio-thumb-warn" title={letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => `${i.locale} : « ${i.text} » ${i.reason === "out" ? "dépasse de la case" : i.reason === "tall" ? "plus haute que la case" : "chevauche une autre bulle"}`).join("\n")}>
+                      {" "}· bulles {[...new Set(letterIssues.filter((i) => i.panel_id === panel.panel_id).map((i) => i.locale))].join(", ")}
+                    </i>
+                  ) : null}
                 </span>
               </button>
               <button
@@ -1597,6 +1666,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               <button type="button" className={`webtoon-mini ${view === "panel" ? "is-active" : ""}`} onClick={() => chooseView("panel")} title="La case sélectionnée seule, en grand">Case</button>
               <button type="button" className={`webtoon-mini ${view === "strip" ? "is-active" : ""}`} onClick={() => chooseView("strip")} title="Toute la bande comme le lecteur la voit, éditable directement">Bande</button>
               <button type="button" className={`webtoon-mini ${view === "review" ? "is-active" : ""}`} onClick={() => chooseView("review")} title="La bande face au film : chaque case à côté de l'image de sa seconde, les gestes et les passages sans case">Relecture</button>
+              <button type="button" className={`webtoon-mini ${view === "phone" ? "is-active" : ""}`} onClick={() => chooseView("phone")} title="Le lecteur public sur un écran de téléphone, à sa vraie largeur">Téléphone</button>
             </div>
             <div className="studio-viewswitch" role="group" aria-label="Qualité des images">
               <button type="button" className={`webtoon-mini ${quality === "high" ? "is-active" : ""}`} onClick={() => chooseQuality("high")} title="Qualité haute, environ 0,09 $ par image">HD</button>
@@ -1647,7 +1717,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
         </div>
 
         <div className={`studio-stage-wrap ${view === "strip" ? "is-strip" : ""}`}>
-          {view === "review" ? (
+          {view === "phone" ? (
+            <PhonePreview panels={panels} locale={locale} selectedId={selected.panel_id} onSelect={select} />
+          ) : view === "review" ? (
             <StudioReview
               panels={panels}
               frames={ALL_FRAMES}
