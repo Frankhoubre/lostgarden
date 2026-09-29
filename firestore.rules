@@ -28,6 +28,14 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // Named save points of a strip (lib/webtoon/snapshots-client.ts), sliced like the drafts: studio only.
+    match /webtoon_snapshots/{key} {
+      allow read, write: if isStudio();
+      match /chunks/{chunk} {
+        allow read, write: if isStudio();
+      }
+    }
+
     // Background jobs of the studio (lib/webtoon/studio-job.ts): studio only.
     // The account's refresh token is kept there encrypted with a server secret.
     match /webtoon_jobs/{slug} {
