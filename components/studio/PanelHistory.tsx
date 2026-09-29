@@ -1,7 +1,7 @@
 "use client";
 
 import { getDownloadURL, getMetadata, getStorage, listAll, ref } from "firebase/storage";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { getFirebaseApp } from "@/lib/firebase";
 import { originLabel } from "@/lib/webtoon/image-history";
 import type { PanelImage, WebtoonPanel } from "@/lib/webtoon/types";
@@ -23,6 +23,61 @@ function storagePath(src: string): string {
 }
 
 /**
+ * Two versions over each other, cut by a line the author drags: the version
+ * looked at on the left of the line, the one it is compared with on the
+ * right. Both are fitted in the same box, so a retouch lines up pixel for
+ * pixel and the change shows where the line crosses it.
+ */
+function CompareSlider({ left, right, leftLabel, rightLabel }: { left: string; right: string; leftLabel: string; rightLabel: string }) {
+  const [split, setSplit] = useState(50);
+  const [ratio, setRatio] = useState<number | null>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const moveTo = (clientX: number) => {
+    const rect = box.current?.getBoundingClientRect();
+    if (!rect?.width) return;
+    setSplit(Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)));
+  };
+  const onDown = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    moveTo(e.clientX);
+  };
+  const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowLeft") setSplit((v) => Math.max(0, v - 5));
+    else if (e.key === "ArrowRight") setSplit((v) => Math.min(100, v + 5));
+    else return;
+    e.preventDefault();
+  };
+  return (
+    <div
+      ref={box}
+      className="studio-compare"
+      style={{ aspectRatio: ratio ?? undefined }}
+      onPointerDown={onDown}
+      onPointerMove={(e) => dragging.current && moveTo(e.clientX)}
+      onPointerUp={() => (dragging.current = false)}
+      onPointerCancel={() => (dragging.current = false)}
+      onKeyDown={onKey}
+      role="slider"
+      tabIndex={0}
+      aria-label="Ligne de comparaison"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(split)}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={right} alt="" draggable={false} onLoad={(e) => setRatio(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight || null)} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={left} alt="" draggable={false} style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }} />
+      <span className="studio-compare-line" style={{ left: `${split}%` }} aria-hidden="true" />
+      <span className="studio-compare-tag is-left">{leftLabel}</span>
+      <span className="studio-compare-tag is-right">{rightLabel}</span>
+    </div>
+  );
+}
+
+/**
  * Every image a panel has ever had: the files the studio stored for it (each
  * drawing, retouch and import since the panel exists, even before the
  * history was kept), merged with its recorded history (what made each one,
@@ -34,6 +89,8 @@ export function PanelHistory({ slug, panel, onClose, onPick }: PanelHistoryProps
   const [versions, setVersions] = useState<Version[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [shown, setShown] = useState<string | null>(null);
+  /** Compare the version shown with another one: the current image, or the previous one when the current is shown. */
+  const [comparing, setComparing] = useState(false);
 
   useEffect(() => {
     const el = dialog.current;
@@ -77,12 +134,16 @@ export function PanelHistory({ slug, panel, onClose, onPick }: PanelHistoryProps
 
   const selected = versions?.find((v) => v.src === shown) ?? versions?.[0];
   const when = (at: string | null) => (at ? new Date(at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "date inconnue");
+  const other = selected && versions ? (selected.current ? versions.find((v) => !v.current) : versions.find((v) => v.current) ?? versions.find((v) => v !== selected)) : undefined;
+  const label = (v: Version) => (v.current ? "Actuelle" : when(v.at));
 
   return (
     <dialog ref={dialog} className="studio-lightbox studio-history" onClose={onClose} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="studio-history-body">
         <div className="studio-history-stage">
-          {selected ? (
+          {selected && comparing && other ? (
+            <CompareSlider left={selected.src} right={other.src} leftLabel={label(selected)} rightLabel={label(other)} />
+          ) : selected ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={selected.src} alt="" />
           ) : (
@@ -103,6 +164,11 @@ export function PanelHistory({ slug, panel, onClose, onPick }: PanelHistoryProps
                 {selected.image?.cost_usd ? ` · ${selected.image.cost_usd.toFixed(3)} $` : ""}
               </span>
               {selected.image?.note ? <q>{selected.image.note}</q> : null}
+              {other ? (
+                <button type="button" className={`webtoon-mini ${comparing ? "is-on" : ""}`} onClick={() => setComparing((v) => !v)} title="Glissez la ligne sur l'image pour voir ce qui a changé">
+                  {comparing ? "Arrêter la comparaison" : `Comparer avec ${other.current ? "l'actuelle" : "la précédente"}`}
+                </button>
+              ) : null}
               {!selected.current ? (
                 <button
                   type="button"
