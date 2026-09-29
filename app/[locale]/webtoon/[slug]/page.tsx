@@ -13,7 +13,9 @@ import { computeLayout } from "@/lib/webtoon/layout";
 import { fetchPublishedStrip, withPublishedPanels } from "@/lib/webtoon/published";
 import { fetchSeries } from "@/lib/webtoon/series-server";
 import { neighbours, type SeriesEpisode } from "@/lib/webtoon/series";
+import { EpisodeAlerts } from "@/components/webtoon/EpisodeAlerts";
 import { EpisodeNav } from "@/components/webtoon/EpisodeNav";
+import { mailConfigured } from "@/lib/webtoon/alerts-server";
 import { ReadingProgress } from "@/components/webtoon/ReadingProgress";
 import { ReadingStats } from "@/components/webtoon/ReadingStats";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
@@ -98,6 +100,7 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
         <ReadingProgress slug={slug} locale={locale} />
         <ReadingStats slug={slug} locale={locale} />
         <EpisodeNav locale={locale} previous={previous} next={next} />
+        {mailConfigured() ? <EpisodeAlerts locale={locale} words={w.alerts} privacyHref={localePath(locale, "/privacy-policy")} /> : null}
 
         <StoryboardNotes script={script} />
       </WebtoonPageShell>
@@ -132,6 +135,7 @@ async function ProjectEpisode({ locale, episode, panels, previous, next }: { loc
         <ReadingProgress slug={episode.slug} locale={locale} />
         <ReadingStats slug={episode.slug} locale={locale} />
         <EpisodeNav locale={locale} previous={previous} next={next} />
+        {mailConfigured() ? <EpisodeAlerts locale={locale} words={w.alerts} privacyHref={localePath(locale, "/privacy-policy")} /> : null}
       </WebtoonPageShell>
     </>
   );

@@ -7712,3 +7712,117 @@ select.studio-input {
   color: rgba(216, 210, 194, 0.6);
   font-size: 0.7rem;
 }
+
+/* Episode alerts: the subscription form at the end of an episode and on the series page. */
+.webtoon-alerts {
+  max-width: 1080px;
+  margin: 2.5rem auto 0;
+  padding: 1.2rem 1.2rem 1rem;
+  border: 1px solid rgba(125, 223, 255, 0.25);
+  border-radius: 0.9rem;
+  background: rgba(2, 8, 23, 0.55);
+}
+
+.webtoon-alerts-form {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.webtoon-alerts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.webtoon-alerts-row input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid rgba(125, 223, 255, 0.3);
+  border-radius: 0.6rem;
+  background: rgba(2, 8, 23, 0.8);
+  color: var(--ivory);
+  font-size: 0.95rem;
+}
+
+.webtoon-alerts-row input:focus {
+  outline: 2px solid var(--cyan-pale);
+  outline-offset: 1px;
+}
+
+.webtoon-alerts-row button {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid rgba(125, 223, 255, 0.45);
+  border-radius: 0.6rem;
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--cyan-pale);
+  font-size: 0.9rem;
+}
+
+.webtoon-alerts-row button:disabled {
+  opacity: 0.55;
+}
+
+.webtoon-alerts-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: rgba(216, 210, 194, 0.85);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.webtoon-alerts-consent input {
+  margin-top: 0.2rem;
+  accent-color: var(--cyan-pale);
+}
+
+.webtoon-alerts-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.webtoon-alerts-error {
+  color: #fca5a5;
+  font-size: 0.82rem;
+}
+
+.webtoon-alerts-done {
+  margin-top: 0.8rem;
+  color: var(--cyan-pale);
+  font-size: 0.9rem;
+}
+
+.webtoon-alerts-privacy {
+  color: rgba(216, 210, 194, 0.6);
+  font-size: 0.72rem;
+}
+
+.webtoon-alerts-privacy a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Studio, "Prévenir les abonnés": the announcement fields, one per line. */
+.studio-export-body label.studio-subscribers-field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-subscribers-field input,
+.studio-subscribers-field textarea,
+.studio-subscribers-select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--st-text, #eceef2);
+  font-size: 0.84rem;
+}
