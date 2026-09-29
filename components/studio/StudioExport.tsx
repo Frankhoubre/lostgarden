@@ -1,10 +1,10 @@
 "use client";
 
 import { strToU8, zip } from "fflate";
-import { createContext, destroyContext, domToCanvas } from "modern-screenshot";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ProgressBar } from "@/components/studio/ProgressBar";
+import { openRowCapture, readyStrip } from "@/components/studio/strip-capture";
 import { WebtoonReader } from "@/components/webtoon/WebtoonReader";
 import type { Locale } from "@/lib/i18n/config";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
@@ -25,8 +25,6 @@ const LANGUAGES: { id: Locale; label: string }[] = [
 ];
 
 type Props = { slug: string; title: string; panels: WebtoonPanel[]; onClose: () => void };
-
-const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 async function toJpeg(canvas: HTMLCanvasElement, maxBytes: number): Promise<Uint8Array> {
   for (const quality of [0.92, 0.85, 0.78, 0.7, 0.6]) {
@@ -72,33 +70,9 @@ export function StudioExport({ slug, title, panels, onClose }: Props) {
     try {
       for (const locale of languages) {
         setRendering(locale);
-        // Let the strip render in this language, its images load and its lettering settle.
-        await wait(400);
-        const strip = host.current?.querySelector<HTMLElement>(".webtoon-strip");
-        if (!strip) throw new Error("rendu de la bande introuvable");
-        // The reader loads its images lazily, and off screen they would never load: all of them now.
-        const images = [...strip.querySelectorAll("img")];
-        for (const img of images) img.loading = "eager";
-        const loaded = (img: HTMLImageElement) =>
-          img.complete && img.naturalWidth > 0
-            ? Promise.resolve()
-            : new Promise<void>((resolve) => {
-                img.addEventListener("load", () => resolve(), { once: true });
-                img.addEventListener("error", () => resolve(), { once: true });
-                window.setTimeout(resolve, 30_000);
-              });
-        await Promise.all(images.map(loaded));
-        await document.fonts?.ready;
-        await wait(300);
-        const rows = [...strip.children] as HTMLElement[];
-        // One capture context for the whole language: fonts, styles and images are read once, not per row
+        // The strip in this language, its images loaded; one capture context for the whole language
         // (a fresh capture per row fetched the fonts every time: forty seconds a row).
-        const context = await createContext(rows[0], {
-          scale: 1,
-          autoDestruct: false,
-          backgroundColor: "#020409",
-          fetch: { requestInit: { mode: "cors", cache: "force-cache" } },
-        });
+        const { rows, capture, close } = await openRowCapture(await readyStrip(() => host.current));
         // One piece being filled per platform.
         const state = chosen.map((p) => ({ platform: p, canvas: null as HTMLCanvasElement | null, y: 0, count: 0 }));
         const flush = async (s: (typeof state)[number]) => {
@@ -114,9 +88,7 @@ export function StudioExport({ slug, title, panels, onClose }: Props) {
         };
         for (const row of rows) {
           if (stop.current) throw new Error("export arrêté");
-          context.node = row;
-          context.backgroundColor = getComputedStyle(row).backgroundColor || "#020409";
-          const shot = await domToCanvas(context);
+          const shot = await capture(row);
           for (const s of state) {
             const scale = s.platform.width / shot.width;
             const height = shot.height * scale;
@@ -141,7 +113,7 @@ export function StudioExport({ slug, title, panels, onClose }: Props) {
           setProgress({ started, estimate: rowsDone ? (elapsed / rowsDone) * rowsTotal : rowsTotal * 400, done: rowsDone, total: rowsTotal, label: `Rendu en ${LANGUAGES.find((l) => l.id === locale)?.label}` });
         }
         for (const s of state) await flush(s);
-        destroyContext(context);
+        close();
       }
       setRendering(null);
       files[`${slug}/LISEZ-MOI.txt`] = strToU8(

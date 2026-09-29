@@ -194,6 +194,8 @@ type StudioEditorProps = {
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
   onJob?: (job: JobSummary) => void;
+  /** Reports the panels ticked in the list, in strip order (the social teaser starts from them). */
+  onCheckedChange?: (ids: string[]) => void;
   /** The film guide (sequences, second by second lines): the "auto" pace follows it and the writer reads it. */
   guide?: FilmGuide | null;
   /** The whole film, one frame per second, for the review against the strip; Lost Garden's when unset. */
@@ -208,7 +210,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, checkBudget, onAutosave, library, setLibrary, previewLocale, onJob, filmFrames, allFrames, guide = null }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, checkBudget, onAutosave, library, setLibrary, previewLocale, onJob, onCheckedChange, filmFrames, allFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const ALL_FRAMES = useMemo(() => allFrames ?? studioFilmFramesDense(), [allFrames]);
@@ -357,6 +359,9 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   useEffect(() => {
     onJob?.(job ? { label: job.label, done: job.done, total: job.total, deadline: job.deadline, started: job.started } : null);
   }, [job, onJob]);
+  useEffect(() => {
+    onCheckedChange?.(panels.filter((p) => checked.has(p.panel_id)).map((p) => p.panel_id));
+  }, [checked, panels, onCheckedChange]);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => panels.find((p) => p.panel_id === selectedId) ?? panels[0] ?? null, [panels, selectedId]);

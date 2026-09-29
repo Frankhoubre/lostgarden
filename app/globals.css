@@ -6571,6 +6571,73 @@ select.studio-input {
   max-width: none;
 }
 
+/* The social teaser: the run of panels, the live reel and the carousel thumbnails. */
+.studio-teaser {
+  width: min(760px, 94vw);
+}
+
+.studio-teaser-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.studio-teaser-range input {
+  width: 5.5rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--st-line-2, rgba(255, 255, 255, 0.14));
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+}
+
+.studio-teaser-link {
+  margin-right: 0.6rem;
+  color: var(--st-accent, #7dd3fc);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.studio-teaser-preview {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.studio-teaser .studio-teaser-reel {
+  flex: none;
+  width: 150px;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  border-radius: 8px;
+  background: #020817;
+}
+
+.studio-teaser-reel[hidden] {
+  display: none;
+}
+
+.studio-teaser-slides {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.studio-lightbox .studio-teaser-slides img {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
 /* The spending of the episode and its budget. */
 .studio-cost-host {
   position: relative;

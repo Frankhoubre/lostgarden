@@ -127,6 +127,13 @@ export type Fidelity =
 
 export type PanelBackground = "white" | "black" | "abyss";
 
+/** The colour of each strip background, as the reader paints it. */
+export const PANEL_BACKGROUND_COLORS: Record<PanelBackground, string> = {
+  white: "#f6f4ef",
+  black: "#020409",
+  abyss: "#020817",
+};
+
 /**
  * How a panel sits on the strip, the way a real webtoon breaks the stack of
  * rectangles: narrower panels pushed to a side, slanted edges, a panel that

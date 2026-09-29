@@ -11,6 +11,7 @@ import { StudioCharacters } from "@/components/studio/StudioCharacters";
 import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioExport } from "@/components/studio/StudioExport";
+import { StudioTeaser } from "@/components/studio/StudioTeaser";
 import { seriesOfTitle } from "@/lib/webtoon/series";
 import { upsertSeriesEpisode } from "@/lib/webtoon/series-client";
 import { StudioCost, budgetLevel, type StripCost } from "@/components/studio/StudioCost";
@@ -184,6 +185,10 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [teaserOpen, setTeaserOpen] = useState(false);
+  /** The panels ticked in the editor, for the teaser; the same array while the ticks do not change. */
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const onCheckedChange = useCallback((ids: string[]) => setCheckedIds((current) => (current.join("\n") === ids.join("\n") ? current : ids)), []);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
@@ -742,6 +747,10 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
                   <b>Exporter pour les plateformes</b>
                   <small>WEBTOON Canvas, Tapas, archive : la bande découpée aux bons formats, dans chaque langue, en un ZIP.</small>
                 </button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setTeaserOpen(true); }}>
+                  <b>Teaser réseaux</b>
+                  <small>Un reel vertical qui fait défiler une suite de cases et un carrousel 4:5, en un ZIP.</small>
+                </button>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); exportJson(); }}>
                   <b>Exporter la bande en JSON</b>
                   <small>Télécharge toutes les cases, textes et réglages : pour une sauvegarde ou pour repasser par le dépôt.</small>
@@ -810,6 +819,15 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
           ))}
         </nav>
         {exportOpen ? <StudioExport slug={script.slug} title={project ? project.title : localizedText(script.title, locale)} panels={panels} onClose={() => setExportOpen(false)} /> : null}
+        {teaserOpen ? (
+          <StudioTeaser
+            slug={script.slug}
+            {...(project ? seriesOfTitle(project.title) : { series: script.series, episode: script.episode })}
+            panels={panels}
+            checkedIds={checkedIds}
+            onClose={() => setTeaserOpen(false)}
+          />
+        ) : null}
         <main className="studio-main">
           {/* The editor stays mounted behind the other tabs: a running generation goes on and its progress is still there when coming back. */}
           <div className="studio-editor-host" style={{ display: tab === "webtoon" ? "contents" : "none" }} aria-hidden={tab !== "webtoon"}>
@@ -827,6 +845,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               setLibrary={setLibrary}
               previewLocale={previewLocale}
               onJob={setJob}
+              onCheckedChange={onCheckedChange}
               filmFrames={frames ? sparseFrames(frames) : undefined}
               allFrames={frames}
               guide={filmGuide.guide}
