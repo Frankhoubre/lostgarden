@@ -3688,6 +3688,68 @@ h3 {
   box-shadow: 0 8px 24px rgba(2, 4, 9, 0.6);
 }
 
+.studio-phone-wrap {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.studio-phone {
+  position: relative;
+  padding: 34px 12px 22px;
+  border-radius: 44px;
+  background: #0a0b0e;
+  box-shadow: 0 0 0 2px #2a2d35, 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.studio-phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 92px;
+  height: 14px;
+  border-radius: 99px;
+  background: #1b1d22;
+  transform: translateX(-50%);
+}
+
+.studio-phone-screen {
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 26px;
+  background: #020409;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.studio-phone-screen::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-phone-note {
+  max-width: 30rem;
+  font-size: 0.74rem;
+  text-align: center;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-letter-issues {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(255, 169, 77, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 169, 77, 0.08);
+  font-size: 0.78rem;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-thumb-warn {
+  color: #ffa94d;
+}
+
 .studio-viewswitch {
   display: inline-flex;
   gap: 0.15rem;
