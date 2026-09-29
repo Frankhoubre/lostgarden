@@ -10,11 +10,13 @@ export type StripCost = {
   sheets_usd?: number;
   writer_usd?: number;
   translate_usd?: number;
+  video_usd?: number;
   count?: number;
   images_count?: number;
   sheets_count?: number;
   writer_count?: number;
   translate_count?: number;
+  video_count?: number;
   /** Part of the total estimated: what was generated before the counter existed, and what scripts did not record. */
   estimated_usd?: number;
   /** The budget of the episode, set by the author; alerts at 80 % and 100 %. */
@@ -32,7 +34,7 @@ export function budgetLevel(cost: StripCost | null): "none" | "ok" | "close" | "
 
 /**
  * The spending of the episode in the bar: its total, a click for the detail
- * (images, sheets, writing, translation, the estimated part) and the budget,
+ * (images, sheets, writing, translation, animated panels, the estimated part) and the budget,
  * which the author sets here; the chip turns orange at 80 % of it, red past it.
  */
 export function StudioCost({ slug, cost, notify }: { slug: string; cost: StripCost; notify: (message: string) => void }) {
@@ -67,6 +69,7 @@ export function StudioCost({ slug, cost, notify }: { slug: string; cost: StripCo
     ["Fiches", cost.sheets_usd, cost.sheets_count],
     ["Écriture, guide, contrôles", cost.writer_usd, cost.writer_count],
     ["Traductions", cost.translate_usd, cost.translate_count],
+    ["Cases animées", cost.video_usd, cost.video_count],
   ];
 
   return (

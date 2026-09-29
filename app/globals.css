@@ -2196,6 +2196,33 @@ h3 {
   display: block;
 }
 
+/* The loop of an animated panel sits on its still, framed like it, and fades in on its first frame. */
+.webtoon-motion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.webtoon-motion-rect {
+  position: absolute;
+}
+
+.webtoon-motion video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.webtoon-motion.is-playing {
+  opacity: 1;
+}
+
 .webtoon-img-stale {
   filter: saturate(0.6);
 }
@@ -7791,6 +7818,50 @@ select.studio-input {
 .webtoon-card-progress small {
   color: rgba(216, 210, 194, 0.6);
   font-size: 0.7rem;
+}
+
+/* Animated panel, in the inspector: the loop, and the badge on the studio canvases. */
+.studio-motion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.studio-motion-preview video {
+  display: block;
+  width: 100%;
+  max-height: 22rem;
+  object-fit: contain;
+  background: #020409;
+  border-radius: 8px;
+}
+
+.studio-motion-prompt {
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: rgba(216, 210, 194, 0.55);
+  white-space: pre-line;
+}
+
+.studio-motion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.studio-motion-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 6;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(2, 4, 9, 0.72);
+  color: #b9f3ff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 /* Episode alerts: the subscription form at the end of an episode and on the series page. */

@@ -8,7 +8,7 @@ import "server-only";
  * rules apply as from the studio. Nothing is recorded behind the dev bypass.
  */
 
-export type CostKind = "images" | "sheets" | "writer" | "translate";
+export type CostKind = "images" | "sheets" | "writer" | "translate" | "video";
 
 export async function recordCost(input: { idToken: string | null; slug: string; usd: number; kind: CostKind }): Promise<void> {
   if (!input.idToken || !(input.usd > 0)) return;

@@ -2,7 +2,7 @@
 
 import type { User } from "firebase/auth";
 import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, writeBatch } from "firebase/firestore";
-import { getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytes, uploadString } from "firebase/storage";
 import { getDb, getFirebaseApp } from "@/lib/firebase";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
 
@@ -163,6 +163,15 @@ export async function uploadPanelImage(slug: string, panelId: string, dataUrl: s
   const path = `webtoon/${slug}/${panelId}/${Date.now()}.${extension}`;
   const target = ref(storage, path);
   await uploadString(target, dataUrl, "data_url");
+  return getDownloadURL(target);
+}
+
+/** The loop of an animated panel, imported from a file: to Storage, next to the panel's images. */
+export async function uploadPanelMotion(slug: string, panelId: string, file: Blob): Promise<string> {
+  const storage = getStorage(getFirebaseApp());
+  const type = file.type === "video/webm" ? "video/webm" : "video/mp4";
+  const target = ref(storage, `webtoon/${slug}/${panelId}/motion/${Date.now()}.${type === "video/webm" ? "webm" : "mp4"}`);
+  await uploadBytes(target, file, { contentType: type, cacheControl: "public, max-age=31536000" });
   return getDownloadURL(target);
 }
 

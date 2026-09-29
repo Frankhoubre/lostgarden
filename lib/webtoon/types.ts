@@ -287,7 +287,15 @@ export type WebtoonPanel = {
    * earlier drawing or retouch can be brought back (`lib/webtoon/image-history.ts`).
    */
   image_history?: PanelImage[];
+  /** A short muted loop made from the image, played by the reader while the panel is on screen (`lib/webtoon/motion.ts`). */
+  motion?: PanelMotion;
 };
+
+/**
+ * An animated panel: an MP4 loop of 2 to 6 s. `of` is the image it was made from; a new image makes
+ * it stale and the reader shows the still again. `prompt` is empty for an imported video.
+ */
+export type PanelMotion = { src: string; of: string; prompt: string; seconds: number; model?: string; cost_usd?: number; created_at: string };
 
 /** A departure of a drawn panel from the model sheet of one of its characters, in French. */
 export type PanelAuditIssue = { who: string; issue: string; severity: "high" | "low" };

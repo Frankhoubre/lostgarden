@@ -6,6 +6,7 @@ import { ProgressBar } from "@/components/studio/ProgressBar";
 import { PanelLettering } from "@/components/webtoon/PanelLettering";
 import type { Locale } from "@/lib/i18n/config";
 import { frameCenter, frameClass, frameStyle, frameWidth, imageStyle } from "@/lib/webtoon/frame";
+import { freshMotion } from "@/lib/webtoon/motion";
 import { WEBTOON_WIDTH, type Anchor, type WebtoonPanel } from "@/lib/webtoon/types";
 
 type Drag =
@@ -219,6 +220,7 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
           </div>
         )}
         <PanelLettering dialogue={panel.dialogue} caption={panel.caption} sfx={panel.sfx} locale={locale} />
+        {freshMotion(panel) ? <span className="studio-motion-badge" title="Case animée : une boucle joue dans le lecteur quand la case est à l'écran">animée</span> : null}
         {busy ? (
           <div className={`studio-panel-busy ${busy.started ? "" : "is-soft"}`} role="status">
             {busy.started ? <span className="studio-spinner studio-spinner-lg" aria-hidden /> : null}
