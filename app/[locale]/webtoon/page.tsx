@@ -10,6 +10,8 @@ import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
 import { listWebtoonScripts } from "@/lib/webtoon/scripts";
 import { fetchSeries } from "@/lib/webtoon/series-server";
 import { EpisodeProgress, SeriesResume } from "@/components/webtoon/SeriesProgress";
+import { EpisodeAlerts } from "@/components/webtoon/EpisodeAlerts";
+import { mailConfigured } from "@/lib/webtoon/alerts-server";
 import { fill, localizedText } from "@/lib/webtoon/text";
 import { comicSeriesJsonLd, listEpisodes, withSegmentImages } from "@/lib/webtoon/episode-seo";
 
@@ -95,6 +97,7 @@ export default async function WebtoonIndexPage({ params }: PageProps) {
             </li>
           ))}
         </ul>
+        {mailConfigured() ? <EpisodeAlerts locale={locale} words={w.alerts} privacyHref={localePath(locale, "/privacy-policy")} /> : null}
 
         <section className="mt-12">
           <h2 className="anime-heading font-display text-xl text-lily">{w.pipelineTitle}</h2>

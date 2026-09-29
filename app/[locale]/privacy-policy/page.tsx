@@ -98,6 +98,10 @@ export default async function PrivacyPolicyPage({ params }: PrivacyPolicyPagePro
             <li>
               Cookie preference: your choice stored locally in your browser.
             </li>
+            <li>
+              Episode alerts: if you ask to be told about new episodes, your email
+              address and your language, stored in Firestore.
+            </li>
           </ul>
         </LegalSection>
 
@@ -113,6 +117,11 @@ export default async function PrivacyPolicyPage({ params }: PrivacyPolicyPagePro
               your consent at sign-up).
             </li>
             <li>
+              Episode alerts: one email when a new episode comes out, only after you
+              confirm your address (your consent, which you can withdraw at any time
+              with the one-click link in every email).
+            </li>
+            <li>
               Security, maintenance, and improvement of the site (legitimate
               interest).
             </li>
@@ -126,6 +135,11 @@ export default async function PrivacyPolicyPage({ params }: PrivacyPolicyPagePro
             anonymized within a reasonable period after account deletion, unless a
             longer retention period is required by law.
           </p>
+          <p>
+            An episode alert address is deleted as soon as you unsubscribe. An
+            address that is never confirmed stops being usable after 7 days and is
+            then deleted.
+          </p>
         </LegalSection>
 
         <LegalSection title="Recipients and processors">
@@ -137,6 +151,10 @@ export default async function PrivacyPolicyPage({ params }: PrivacyPolicyPagePro
               </li>
             ))}
           </ul>
+          <p>
+            Episode alert emails are sent through Resend (Resend, Inc.), our email
+            delivery provider.
+          </p>
           <p>
             Some providers may be located outside the European Union. Where
             applicable, appropriate safeguards (such as standard contractual clauses)

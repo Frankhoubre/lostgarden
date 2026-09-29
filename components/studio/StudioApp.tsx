@@ -12,6 +12,7 @@ import { StudioEditor } from "@/components/studio/StudioEditor";
 import { StudioFrames } from "@/components/studio/StudioFrames";
 import { StudioExport } from "@/components/studio/StudioExport";
 import { StudioTeaser } from "@/components/studio/StudioTeaser";
+import { StudioSubscribers } from "@/components/studio/StudioSubscribers";
 import { seriesOfTitle } from "@/lib/webtoon/series";
 import { upsertSeriesEpisode } from "@/lib/webtoon/series-client";
 import { StudioCost, budgetLevel, type StripCost } from "@/components/studio/StudioCost";
@@ -208,6 +209,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   /** "Publier" opens what the publication changes first; the online version read for it is kept as a save point. */
   const [publishReview, setPublishReview] = useState<{ diff: PublishDiff | null; error: string | null; online: WebtoonPanel[] | null } | null>(null);
   const [teaserOpen, setTeaserOpen] = useState(false);
+  const [subscribersOpen, setSubscribersOpen] = useState(false);
   /** The panels ticked in the editor, for the teaser; the same array while the ticks do not change. */
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
   const onCheckedChange = useCallback((ids: string[]) => setCheckedIds((current) => (current.join("\n") === ids.join("\n") ? current : ids)), []);
@@ -876,6 +878,11 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
                   <b>Repartir de la version du code</b>
                   <small>Les {script.panels.length} cases d&apos;origine, telles que le moteur les produit depuis le dépôt, sans les modifications du studio.</small>
                 </button>
+                <p className="studio-gear-title">Lecteurs</p>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setSubscribersOpen(true); }}>
+                  <b>Prévenir les abonnés</b>
+                  <small>Les lecteurs inscrits aux alertes : leur nombre, et l&apos;annonce d&apos;un épisode publié, envoyée à la main après confirmation.</small>
+                </button>
                 {user ? (
                   <>
                     <p className="studio-gear-title">Compte</p>
@@ -978,6 +985,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
           />
         ) : null}
         {exportOpen ? <StudioExport slug={script.slug} title={project ? project.title : localizedText(script.title, locale)} panels={panels} onClose={() => setExportOpen(false)} /> : null}
+        {subscribersOpen ? <StudioSubscribers onClose={() => setSubscribersOpen(false)} /> : null}
         {teaserOpen ? (
           <StudioTeaser
             slug={script.slug}
