@@ -2,7 +2,8 @@
 
 import type { User } from "firebase/auth";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { appendWindow, emptyGuide, GUIDE_WINDOW, type FilmGuide, type GuideBeat, type GuideSequence } from "@/lib/webtoon/film-guide";
+import { appendWindow, applyDetail, detailSpans, emptyGuide, GUIDE_WINDOW, type FilmGuide, type GuideBeat, type GuideSequence } from "@/lib/webtoon/film-guide";
+import { loadDense } from "@/lib/webtoon/film-guide-client";
 import { loadGuide, saveGuide } from "@/lib/webtoon/film-guide-client";
 import type { TrackTask } from "@/lib/webtoon/notifications";
 import { studioHeaders } from "@/lib/webtoon/studio-headers";
@@ -123,5 +124,64 @@ export function useFilmGuide(input: { slug: string; user: User | null; duration:
     [run, duration, slug, user, notify, track],
   );
 
-  return { guide, setGuide, run, start, stop: () => (stop.current = true) };
+  /**
+   * The close re-reading of the action and of the busy stretches: four frames per second when the dense
+   * frames were extracted, one otherwise; the gestures go into the guide, stretch after stretch.
+   */
+  const refine = useCallback(
+    async (cast: { name: string; looks: string }[] = []) => {
+      if (run || !guideRef.current) return;
+      stop.current = false;
+      let current = guideRef.current;
+      const spans = detailSpans(current);
+      if (!spans.length) {
+        notify("Aucun passage d'action à relire");
+        return;
+      }
+      const dense = await loadDense(slug).catch(() => []);
+      const began = Date.now();
+      const estimate = Math.ceil(spans.length / 2) * 25_000;
+      setRun({ started: began, estimate, done: 0, total: spans.length });
+      const task = track?.(`Relecture fine · ${spans.length} passage${spans.length > 1 ? "s" : ""}`, undefined, estimate);
+      let next = 0;
+      let done = 0;
+      let found = 0;
+      const worker = async () => {
+        while (!stop.current && next < spans.length) {
+          const span = spans[next];
+          next += 1;
+          try {
+            const before = current.beats.filter((b) => b.seconds >= span.from - 5 && b.seconds < span.from).map((b) => `${b.seconds} s: ${b.what}`);
+            const frames = dense.filter((f) => f.seconds >= span.from && f.seconds < span.to + 1);
+            const response = await fetch(`/api/webtoon/${slug}/guide`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...(await studioHeaders()) },
+              body: JSON.stringify({ detail: { from: span.from, to: span.to, kind: span.kind, summary: span.summary, cast, before, frames } }),
+            });
+            const payload = (await response.json().catch(() => ({}))) as { gestures?: unknown[]; error?: string };
+            if (!response.ok || payload.error) throw new Error(payload.error ?? `erreur ${response.status}`);
+            current = applyDetail(current, { from: span.from, to: span.to }, { gestures: payload.gestures });
+            found += (payload.gestures ?? []).length;
+          } catch {
+            // A stretch that failed stays to re-read.
+          }
+          done += 1;
+          setGuide(current);
+          setRun((r) => (r ? { ...r, done } : r));
+          if (user) await saveGuide(slug, current, user).catch(() => undefined);
+        }
+      };
+      try {
+        await Promise.all([worker(), worker()]);
+        const message = `${found} geste${found > 1 ? "s" : ""} repéré${found > 1 ? "s" : ""}${dense.length ? "" : " (sans images denses : une image par seconde)"}`;
+        if (task) task.done(message);
+        else notify(`Relecture fine : ${message}`);
+      } finally {
+        setRun(null);
+      }
+    },
+    [run, slug, user, notify, track],
+  );
+
+  return { guide, setGuide, run, start, refine, stop: () => (stop.current = true) };
 }

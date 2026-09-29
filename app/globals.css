@@ -6346,3 +6346,15 @@ select.studio-input {
   color: var(--st-accent-2, #9fd2ff);
   font-weight: 600;
 }
+
+.studio-frame-gesture {
+  display: block;
+  margin: 0 0.35rem 0.15rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+  background: rgba(255, 169, 77, 0.16);
+  color: #ffc98a;
+  font-size: 0.62rem;
+  line-height: 1.3;
+  text-align: left;
+}

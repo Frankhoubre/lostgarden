@@ -20,6 +20,8 @@ type StudioFramesProps = {
   run: GuideRun;
   onRead: (fromScratch: boolean) => void;
   onStop: () => void;
+  /** The close re-reading of the action and of the busy stretches (gestures, to check). */
+  onRefine?: () => void;
 };
 
 const tc = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, "0")}`;
@@ -33,7 +35,7 @@ const PACE_WORD = { action: "beaucoup de cases dynamiques", normal: "rythme norm
  * happens in it. Below, the frames themselves, grouped by sequence, the part
  * already adapted marked; a frame opens large and becomes a new panel.
  */
-export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, guide, run, onRead, onStop }: StudioFramesProps) {
+export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, guide, run, onRead, onStop, onRefine }: StudioFramesProps) {
   const [open, setOpen] = useState<{ src: string; label: string; seconds: number } | null>(null);
   /** One frame per second (what the writer reads) or one every five seconds (lighter to scan). */
   const [dense, setDense] = useState(false);
@@ -45,6 +47,11 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
   const duration = all.length ? all[all.length - 1].seconds : 0;
   const adaptedUntil = useMemo(() => coveredUntil(panels), [panels]);
   const beats = useMemo(() => new Map((guide?.beats ?? []).map((b) => [b.seconds, b])), [guide]);
+  const gestures = useMemo(() => {
+    const map = new Map<number, string[]>();
+    for (const g of guide?.gestures ?? []) map.set(g.seconds, [...(map.get(g.seconds) ?? []), g.gesture]);
+    return map;
+  }, [guide]);
   const sequences = useMemo(() => guide?.sequences ?? [], [guide]);
   const counts = SEQUENCE_KINDS.map((kind) => ({ kind, n: sequences.filter((s) => s.kind === kind).length, seconds: sequences.filter((s) => s.kind === kind).reduce((sum, s) => sum + s.to - s.from + 1, 0) })).filter((c) => c.n);
   const read = guide?.analyzed_until ?? 0;
@@ -76,6 +83,11 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
                 {!complete ? (
                   <button type="button" className="webtoon-mini studio-primary" onClick={() => onRead(false)} disabled={!duration}>
                     {read > 0 ? "Reprendre la lecture" : "Lire le film"}
+                  </button>
+                ) : null}
+                {complete && onRefine ? (
+                  <button type="button" className="webtoon-mini" onClick={onRefine} title="Relit de près les passages d'action et les passages agités (quatre images par seconde quand elles ont été extraites) pour repérer les gestes : un jet, un coup, une chute. Les gestes repérés sont des indications à vérifier.">
+                    Relire les passages d&apos;action{guide?.gestures?.length ? ` · ${guide.gestures.length} gestes` : ""}
                   </button>
                 ) : null}
                 {read > 0 ? (
@@ -185,6 +197,7 @@ export function StudioFrames({ panels, onCreatePanel, frames: projectFrames, gui
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={frame.src} alt={beat?.what ?? `Image à ${frame.label}`} loading="lazy" />
                       <span>{frame.label}</span>
+                      {gestures.get(frame.seconds) ? <small className="studio-frame-gesture" title="Geste repéré par la relecture fine, à vérifier">{gestures.get(frame.seconds)!.join(" · ")}</small> : null}
                       {beat ? <small className={`studio-frame-beat ${beat.change && beat.change !== "rien" ? "is-change" : ""}`}>{beat.what}</small> : null}
                     </button>
                   );

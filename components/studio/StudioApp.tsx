@@ -26,6 +26,7 @@ import { EMPTY_LIBRARY, loadLibrary, saveLibrary } from "@/lib/webtoon/library";
 import { EMPTY_PROJECT_LIBRARY, sparseFrames, type StudioProject } from "@/lib/webtoon/project";
 import { DRAFTS_COLLECTION, PUBLISHED_COLLECTION, STUDIO_SESSION_ID, loadStrip, saveStrip, watchDraftMeta, type DraftMeta } from "@/lib/webtoon/studio";
 import { NOTIFICATION_LIMIT, loadNotifications, looksLikeError, saveNotifications, type StudioNotification, type TrackTask } from "@/lib/webtoon/notifications";
+import { libraryWith } from "@/lib/webtoon/references";
 import { localizedText } from "@/lib/webtoon/text";
 import type { LibraryOverlay, WebtoonPanel, WebtoonScript } from "@/lib/webtoon/types";
 
@@ -274,6 +275,11 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
   // The studio's library of characters and locations, saved a moment after
   // each change so a sheet edit or a new character never needs a click.
   const [library, setLibraryState] = useState<LibraryOverlay>(project ? EMPTY_PROJECT_LIBRARY : EMPTY_LIBRARY);
+  /** Who is in the film, for the close re-reading: the name and the look of each character sheet. */
+  const castForGuide = useMemo(
+    () => libraryWith(library).filter((a) => a.kind === "character" && a.image && (a.priority ?? 1) === 1).map((a) => ({ name: a.name.split(",")[0], looks: a.must_keep })),
+    [library],
+  );
   const librarySave = useRef<number | null>(null);
   const setLibrary = useCallback(
     (next: LibraryOverlay) => {
@@ -672,6 +678,7 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               run={filmGuide.run}
               onRead={(fromScratch) => void filmGuide.start(fromScratch)}
               onStop={filmGuide.stop}
+              onRefine={() => void filmGuide.refine(castForGuide)}
             />
           ) : null}
         </main>

@@ -72,6 +72,8 @@ export async function extractFrames(input: {
   width?: number;
   /** Seconds already extracted, skipped (a resumed extraction). */
   skip?: ReadonlySet<number>;
+  /** Exact moments to extract instead of every `interval` (the dense frames of the action scenes, fractions of seconds). */
+  times?: number[];
   onFrame: (seconds: number, blob: Blob) => Promise<void>;
   onProgress?: (state: { read: number; sent: number; total: number }) => void;
   shouldStop?: () => boolean;
@@ -86,7 +88,8 @@ export async function extractFrames(input: {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas indisponible");
   const times: number[] = [];
-  for (let t = 0; t < info.duration - 0.05; t += interval) times.push(Math.round(t));
+  if (input.times?.length) times.push(...input.times.filter((t) => t >= 0 && t < info.duration - 0.05));
+  else for (let t = 0; t < info.duration - 0.05; t += interval) times.push(Math.round(t));
   const total = times.length;
   let read = 0;
   let sent = 0;
@@ -102,7 +105,7 @@ export async function extractFrames(input: {
         continue;
       }
       // A little after the second, so a cut exactly on it shows the new shot.
-      await seek(video, Math.min(info.duration - 0.05, seconds + 0.04));
+      await seek(video, Math.min(info.duration - 0.05, input.times?.length ? seconds : seconds + 0.04));
       context.drawImage(video, 0, 0, width, height);
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
       read += 1;
