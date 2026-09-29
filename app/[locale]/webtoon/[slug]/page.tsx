@@ -15,6 +15,7 @@ import { fetchSeries } from "@/lib/webtoon/series-server";
 import { neighbours, type SeriesEpisode } from "@/lib/webtoon/series";
 import { EpisodeNav } from "@/components/webtoon/EpisodeNav";
 import { ReadingProgress } from "@/components/webtoon/ReadingProgress";
+import { ReadingStats } from "@/components/webtoon/ReadingStats";
 import type { WebtoonPanel } from "@/lib/webtoon/types";
 import { getWebtoonScript, WEBTOON_SLUGS } from "@/lib/webtoon/scripts";
 import { fill, localizedText } from "@/lib/webtoon/text";
@@ -95,6 +96,7 @@ export default async function WebtoonReaderPage({ params }: PageProps) {
           <WebtoonReader panels={script.panels} />
         </div>
         <ReadingProgress slug={slug} locale={locale} />
+        <ReadingStats slug={slug} locale={locale} />
         <EpisodeNav locale={locale} previous={previous} next={next} />
 
         <StoryboardNotes script={script} />
@@ -128,6 +130,7 @@ async function ProjectEpisode({ locale, episode, panels, previous, next }: { loc
           <WebtoonReader panels={panels} />
         </div>
         <ReadingProgress slug={episode.slug} locale={locale} />
+        <ReadingStats slug={episode.slug} locale={locale} />
         <EpisodeNav locale={locale} previous={previous} next={next} />
       </WebtoonPageShell>
     </>

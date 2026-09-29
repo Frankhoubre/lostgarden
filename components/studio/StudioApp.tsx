@@ -21,6 +21,7 @@ import { StudioNotifications } from "@/components/studio/StudioNotifications";
 import { ProgressBar } from "@/components/studio/ProgressBar";
 import { StudioObjects } from "@/components/studio/StudioObjects";
 import { StudioProjectText } from "@/components/studio/StudioProjectText";
+import { StudioReads } from "@/components/studio/StudioReads";
 import { StudioScreenplay } from "@/components/studio/StudioScreenplay";
 import { getDb, getFirebaseAuth } from "@/lib/firebase";
 import { localePath } from "@/lib/i18n/navigation";
@@ -47,7 +48,7 @@ const PREVIEW_LOCALES: { id: Locale; label: string }[] = [
 /** What the editor reports about its running job, shown in the bar from every tab. */
 export type JobSummary = { label: string; done: number; total: number; deadline: number; started?: number } | null;
 
-type Tab = "webtoon" | "scenario" | "personnages" | "objets" | "decors" | "film";
+type Tab = "webtoon" | "scenario" | "personnages" | "objets" | "decors" | "film" | "lecture";
 
 const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "webtoon", label: "Webtoon", hint: "Cases, bulles, sons, tailles" },
@@ -56,6 +57,7 @@ const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "objets", label: "Objets", hint: "Pendentif, casque, ce que la main tient" },
   { id: "decors", label: "Décors", hint: "Lieux, ancres de style, bible" },
   { id: "film", label: "Images du film", hint: "Une image toutes les 5 s" },
+  { id: "lecture", label: "Lecture", hint: "Où les lecteurs décrochent" },
 ];
 
 /** The icons of the left bar: the name of each tab is in its tooltip. */
@@ -102,6 +104,14 @@ function NavIcon({ tab }: { tab: Tab }) {
         <svg {...common}>
           <path d="M2.5 20l6.5-10 4.5 6.5 3-4 5 7.5z" />
           <circle cx="17.5" cy="6" r="2" />
+        </svg>
+      );
+    case "lecture":
+      // A falling curve over its axes: the readers left at each panel.
+      return (
+        <svg {...common}>
+          <path d="M3.5 3.5v17h17" />
+          <path d="M7 7c3 0 3.5 3.5 6 5.5s3.5 1 6.5 4.5" />
         </svg>
       );
     default:
@@ -846,6 +856,16 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               onRead={(fromScratch) => void filmGuide.start(fromScratch)}
               onStop={filmGuide.stop}
               onRefine={() => void filmGuide.refine(castForGuide)}
+            />
+          ) : null}
+          {tab === "lecture" ? (
+            <StudioReads
+              slug={script.slug}
+              panels={panels}
+              onOpenPanel={(panelId) => {
+                setSelectedId(panelId);
+                setTab("webtoon");
+              }}
             />
           ) : null}
         </main>

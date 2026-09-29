@@ -12,6 +12,11 @@ const WORDS: Record<Locale, { resume: string; from: string; close: string }> = {
 
 export const progressKey = (slug: string) => `webtoon-progress:${slug}`;
 
+/** The panels of the strip on the page, in reading order. */
+export const PANEL_SELECTOR = ".webtoon-strip .webtoon-panel";
+/** A panel counts as read when it crosses this thin band a little above the middle of the screen. */
+export const READING_BAND = "-40% 0px -55% 0px";
+
 /** The furthest panel read of an episode, kept in this browser. */
 export function readProgress(slug: string): { index: number; total: number } | null {
   try {
@@ -32,7 +37,7 @@ export function ReadingProgress({ slug, locale }: { slug: string; locale: Locale
 
   useEffect(() => {
     const saved = readProgress(slug);
-    const panels = [...document.querySelectorAll<HTMLElement>(".webtoon-strip .webtoon-panel")];
+    const panels = [...document.querySelectorAll<HTMLElement>(PANEL_SELECTOR)];
     const total = panels.length;
     let shown = false;
     const first = window.setTimeout(() => {
@@ -58,7 +63,7 @@ export function ReadingProgress({ slug, locale }: { slug: string; locale: Locale
         }, 500);
         if (shown && furthest > 3) setResume(null);
       },
-      { rootMargin: "-40% 0px -55% 0px" },
+      { rootMargin: READING_BAND },
     );
     panels.forEach((p) => observer.observe(p));
     return () => {
@@ -74,7 +79,7 @@ export function ReadingProgress({ slug, locale }: { slug: string; locale: Locale
       <button
         type="button"
         onClick={() => {
-          document.querySelectorAll<HTMLElement>(".webtoon-strip .webtoon-panel")[resume]?.scrollIntoView({ block: "start" });
+          document.querySelectorAll<HTMLElement>(PANEL_SELECTOR)[resume]?.scrollIntoView({ block: "start" });
           setResume(null);
         }}
       >
