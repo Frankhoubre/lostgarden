@@ -28,6 +28,12 @@ service cloud.firestore {
       allow read, write: if isStudio();
     }
 
+    // Background jobs of the studio (lib/webtoon/studio-job.ts): studio only.
+    // The account's refresh token is kept there encrypted with a server secret.
+    match /webtoon_jobs/{slug} {
+      allow read, write: if isStudio();
+    }
+
     // Running cost of the generations of a strip: studio only.
     match /webtoon_costs/{slug} {
       allow read, write: if isStudio();

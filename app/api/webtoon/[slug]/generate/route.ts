@@ -148,9 +148,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       base64: image.base64,
       mediaType: image.media_type,
     });
+    // The size goes with the image: a background job has no browser to measure it.
+    const dims = await sharp(Buffer.from(image.base64, "base64")).metadata().catch(() => null);
     return Response.json({
       panel_id: panel.panel_id,
       model: image.model,
+      ...(dims?.width && dims.height ? { width: dims.width, height: dims.height } : {}),
       ...(src ? { src } : { data_url: `data:${image.media_type};base64,${image.base64}` }),
       generated_at: new Date().toISOString(),
       cost_usd: spent + checkCost,

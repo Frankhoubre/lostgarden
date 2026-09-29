@@ -20,6 +20,7 @@ import { PhonePreview } from "@/components/studio/PhonePreview";
 import { EpisodeHandoffCard } from "@/components/studio/EpisodeHandoffCard";
 import { HANDOFF_PANELS, loadHandoff, type EpisodeHandoff } from "@/lib/webtoon/handoff-client";
 import { BUILT_IN_PROJECT_ID } from "@/lib/webtoon/project";
+import { startJob } from "@/lib/webtoon/job-client";
 import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
 import { StudioDirector } from "@/components/studio/StudioDirector";
@@ -356,6 +357,32 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   const [letterIssues, setLetterIssues] = useState<LetteringIssue[] | null>(null);
   /** The summary of the check against the sheets, closed by the author until the next check. */
   const [hideAudit, setHideAudit] = useState(false);
+  /** Long runs on the server, so the tab can be closed (lib/webtoon/studio-job.ts). Remembered per browser. */
+  const [background, setBackground] = useState(() => {
+    try {
+      return window.localStorage.getItem("studio.background") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const chooseBackground = (on: boolean) => {
+    setBackground(on);
+    try {
+      window.localStorage.setItem("studio.background", on ? "1" : "0");
+    } catch {
+      // The choice just does not persist.
+    }
+  };
+  /** Hands a run to the server; the bar under the header follows it and this tab merges each of its saves. */
+  const runInBackground = async (input: Parameters<typeof startJob>[1]) => {
+    if (!user) {
+      notify("Connectez-vous au studio pour lancer un travail en arrière-plan.");
+      return;
+    }
+    const result = await startJob(script.slug, { ...input, params: { quality, ...input.params } });
+    notify(result.ok ? `${input.label} : lancé en arrière-plan. Vous pouvez fermer l'onglet, le travail continue sur le serveur.` : `Arrière-plan impossible : ${result.error}`);
+  };
+
   /** Where the episode before left the characters (a project's own episode only, never the first one). */
   const [handoff, setHandoff] = useState<EpisodeHandoff | null>(null);
   const handoffRef = useRef<EpisodeHandoff | null>(null);
@@ -632,7 +659,11 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       notify("Toutes les cases ont une image à jour");
       return;
     }
-    if (!window.confirm(`Générer ${todo.length} case${todo.length > 1 ? "s" : ""} (${todo.map((p) => p.panel_id).join(", ")}) ?`)) return;
+    if (!window.confirm(`Générer ${todo.length} case${todo.length > 1 ? "s" : ""} (${todo.map((p) => p.panel_id).join(", ")})${background ? " en arrière-plan" : ""} ?`)) return;
+    if (background) {
+      await runInBackground({ kind: "images", label: `${todo.length} image${todo.length > 1 ? "s" : ""} manquante${todo.length > 1 ? "s" : ""}`, panel_ids: todo.map((p) => p.panel_id) });
+      return;
+    }
     setBusy(true);
     stopBatch.current = false;
     try {
@@ -780,12 +811,20 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
       const seconds = Math.max(5, Math.min(600, Math.round(nextCount) || 30));
       const from = coveredUntil(panels);
       const estimate = Math.max(2, Math.round(seconds / SECONDS_PER_PANEL[paceAt(from)]));
-      if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases) ?`)) return;
+      if (!window.confirm(`Écrire et générer les ${seconds} secondes suivantes du film (${formatSeconds(from)} à ${formatSeconds(from + seconds)}, environ ${estimate} cases)${background ? " en arrière-plan" : ""} ?`)) return;
+      if (background) {
+        await runInBackground({ kind: "continue", label: `Suite de ${formatSeconds(from)} à ${formatSeconds(from + seconds)}`, params: { count: estimate, until: from + seconds, pace, insert_after: null } });
+        return;
+      }
       await writeSpan({ base: panels, insertAfter: null, count: estimate, until: from + seconds, label: "la suite" });
       return;
     }
     const count = Math.max(1, Math.min(30, Math.round(nextCount) || 1));
     if (!window.confirm(`Écrire et générer ${count === 1 ? "la case suivante" : `les ${count} cases suivantes`} à partir de ${coveredUntil(panels).toFixed(0)} s du film${pace === "auto" ? (guide?.sequences.length ? ", au rythme du guide du film" : ", en rythme normal (le film n'est pas encore lu)") : `, en rythme ${paceWord(pace)}`} ?`)) return;
+    if (background) {
+      await runInBackground({ kind: "continue", label: `${count} case${count > 1 ? "s" : ""} suivante${count > 1 ? "s" : ""}`, params: { count, until: null, pace, insert_after: null } });
+      return;
+    }
     await writeSpan({ base: panels, insertAfter: null, count, until: null, label: "la suite" });
   };
 
@@ -1788,6 +1827,10 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                   </p>
                 );
               })()}
+              <label className="studio-bg-toggle" title="Le serveur écrit, dessine et traduit sans cet onglet : vous pouvez le fermer et retrouver les cases plus tard. Vaut aussi pour « Générer les cases manquantes ».">
+                <input type="checkbox" checked={background} onChange={(e) => chooseBackground(e.target.checked)} disabled={!user} />
+                <span>Continuer même onglet fermé</span>
+              </label>
               <button type="button" className="webtoon-mini studio-primary" onClick={() => void continueStory()} disabled={busy}>
                 {busy ? <><span className="studio-spinner" aria-hidden /> En cours…</> : nextUnit === "seconds" ? `Générer les ${Math.max(5, Math.min(600, Math.round(nextCount) || 30))} secondes suivantes` : (() => { const n = Math.max(1, Math.min(30, Math.round(nextCount) || 1)); return n === 1 ? "Générer la case suivante" : `Générer les ${n} cases suivantes`; })()}
               </button>
