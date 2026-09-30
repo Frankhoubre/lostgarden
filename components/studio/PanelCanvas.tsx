@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { frameCenter, frameClass, frameStyle, frameWidth, imageStyle } from "@/lib/webtoon/frame";
 import { freshMotion } from "@/lib/webtoon/motion";
 import { WEBTOON_WIDTH, type Anchor, type WebtoonPanel } from "@/lib/webtoon/types";
+import { ActionIcon } from "@/components/studio/ActionIcon";
 
 type Drag =
   | { kind: "dialogue" | "tail" | "sfx" | "caption"; index: number }
@@ -37,6 +38,8 @@ type PanelCanvasProps = {
   onLayer?: (direction: "front" | "back") => void;
   /** On the strip: delete this panel. */
   onDelete?: () => void;
+  /** "Dupliquer": a copy of the panel right after it. */
+  onDuplicate?: () => void;
 };
 
 /** What covers a panel while its image is made: the word shown, and the timing of its progress bar. */
@@ -57,7 +60,7 @@ const canvasWidth = (from: HTMLElement) => from.closest<HTMLElement>(".studio-ca
  * left and right edges widen or narrow it; "Recadrer" pans and zooms the
  * image inside its frame (drag, wheel, slider), in both views.
  */
-export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect, busy, onLayer, onDelete }: PanelCanvasProps) {
+export function PanelCanvas({ panel, locale, onChange, showFocal = false, variant = "single", selected = false, onSelect, busy, onLayer, onDelete, onDuplicate }: PanelCanvasProps) {
   const surface = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -339,6 +342,12 @@ export function PanelCanvas({ panel, locale, onChange, showFocal = false, varian
                 <path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2" />
               </svg>
               Recadrer
+            </button>
+          ) : null}
+          {canPlace && onDuplicate ? (
+            <button type="button" className="studio-place-crop" title="Dupliquer cette case juste après elle (Cmd+D)" onClick={(event) => { event.stopPropagation(); onDuplicate(); }}>
+              <ActionIcon name="duplicate" size={13} />
+              Dupliquer
             </button>
           ) : null}
           {canPlace && onDelete ? (
