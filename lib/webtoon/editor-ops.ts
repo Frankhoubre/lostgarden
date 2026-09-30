@@ -96,6 +96,28 @@ export function deletePanels(panels: WebtoonPanel[], ids: Iterable<string>): Web
 }
 
 /** Insert an empty panel after `id`, inheriting beat, location and background. */
+/**
+ * A copy of the panels, each right after its original: same image, same text, same frame, a new id. The
+ * copy starts its own life: no review, no image history (the original keeps its own).
+ */
+export function duplicatePanels(panels: WebtoonPanel[], ids: readonly string[]): { panels: WebtoonPanel[]; created: string[] } {
+  const wanted = new Set(ids);
+  const next: WebtoonPanel[] = [];
+  const created: string[] = [];
+  for (const panel of panels) {
+    next.push(panel);
+    if (!wanted.has(panel.panel_id)) continue;
+    const { review: _review, image_history: _history, ...rest } = panel;
+    void _review;
+    void _history;
+    // A copy of a copy is "p01-bis-2", not "p01-bis-bis".
+    const id = uniqueId([...panels, ...next], `${panel.panel_id.replace(/-bis(-\d+)?$/, "")}-bis`);
+    created.push(id);
+    next.push({ ...rest, panel_id: id, frame: panel.frame ? { ...panel.frame, overlap: undefined } : undefined });
+  }
+  return { panels: created.length ? renumber(next) : panels, created };
+}
+
 export function insertAfter(panels: WebtoonPanel[], id: string): WebtoonPanel[] {
   const index = panels.findIndex((p) => p.panel_id === id);
   if (index < 0) return panels;

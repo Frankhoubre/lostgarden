@@ -4843,6 +4843,21 @@ h3 {
 }
 
 /* Actions on the image, right under it. */
+.studio-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.studio-action.is-icon {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.studio-action-icon {
+  flex: none;
+}
+
 .studio-stage-actions {
   display: flex;
   flex-wrap: wrap;

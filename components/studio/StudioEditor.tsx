@@ -5,6 +5,7 @@ import { PanelCanvas } from "@/components/studio/PanelCanvas";
 import { sfxFont } from "@/components/webtoon/fonts";
 import { PanelInpaint, retouchImage, type RetouchRequest } from "@/components/studio/PanelInpaint";
 import { PanelSketch, transformSketch, type SketchRequest } from "@/components/studio/PanelSketch";
+import { ActionIcon } from "@/components/studio/ActionIcon";
 import { CastPicker } from "@/components/studio/CastPicker";
 import { PanelHistory } from "@/components/studio/PanelHistory";
 import { PanelMotion } from "@/components/studio/PanelMotion";
@@ -45,6 +46,7 @@ import {
   appendFromFrame,
   deletePanel,
   deletePanels,
+  duplicatePanels,
   setLayer,
   renumber,
   insertAfter,
@@ -338,6 +340,23 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   useEffect(() => {
     deleteRef.current = deleteSelected;
   });
+  // Cmd+D (Ctrl+D) duplicates, outside text fields and windows.
+  const duplicateRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    duplicateRef.current = duplicateSelected;
+  });
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "d" || event.shiftKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true'], dialog")) return;
+      if (document.querySelector("dialog[open]")) return;
+      event.preventDefault();
+      duplicateRef.current();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   // V validates the selected panel and X sends it back, both moving to the next one: a whole episode reviewed from the keyboard.
   const reviewKeyRef = useRef<(status: ReviewState) => void>(() => {});
   useEffect(() => {
@@ -609,6 +628,22 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
   };
 
   /** Delete the selected panel (button on the panel, the toolbar, or the Delete key), the next one selected. */
+  /**
+   * "Dupliquer": the checked panels when the selected one is among them, else the selected one; each copy
+   * lands right after its original (same image, text and frame) and the first copy is selected.
+   */
+  const duplicateSelected = () => {
+    const current = panelsRef.current;
+    const ids = selectedId && checked.has(selectedId) ? current.filter((p) => checked.has(p.panel_id)).map((p) => p.panel_id) : selectedId ? [selectedId] : [];
+    if (!ids.length) return;
+    const { panels: next, created } = duplicatePanels(current, ids);
+    if (!created.length) return;
+    setPanels(next);
+    select(created[0]);
+    onAutosave?.();
+    notify(created.length > 1 ? `${created.length} cases dupliquées, chacune juste après son original` : `Case dupliquée : la copie est la case ${next.findIndex((p) => p.panel_id === created[0]) + 1}`);
+  };
+
   const deleteSelected = () => {
     const current = panelsRef.current;
     const at = current.findIndex((p) => p.panel_id === selectedId);
@@ -1738,6 +1773,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
               </button>
               <button type="button" className="webtoon-mini" onClick={() => void auditPanels(checkedPanels, true)} disabled={busy} title="Compare les cases cochées aux fiches de leurs personnages, même déjà contrôlées">Contrôler</button>
               <button type="button" className="webtoon-mini" onClick={() => rhythmStrip(new Set(checkedPanels.map((p) => p.panel_id)))} disabled={busy || !guide?.sequences.length} title={guide?.sequences.length ? "L'espace avant chaque case cochée suit la scène du film : serré dans l'action, large dans la contemplation, une grande respiration entre deux scènes" : "Lisez d'abord le film dans « Images du film »"}>Rythmer</button>
+              <button type="button" className="webtoon-mini" onClick={() => { const ids = checkedPanels.map((p) => p.panel_id); const { panels: next, created } = duplicatePanels(panelsRef.current, ids); if (!created.length) return; setPanels(next); select(created[0]); onAutosave?.(); notify(`${created.length} case${created.length > 1 ? "s" : ""} dupliquée${created.length > 1 ? "s" : ""}`); }} disabled={busy} title="Chaque case cochée est copiée juste après elle">Dupliquer</button>
               <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteChecked} disabled={busy}>Supprimer</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set(panels.map((p) => p.panel_id)))} disabled={checked.size === panels.length}>Tout</button>
               <button type="button" className="webtoon-mini" onClick={() => setChecked(new Set())}>Aucune</button>
@@ -2008,6 +2044,7 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                     </select>
                   </label>
                   <p className="studio-gear-title">Découper</p>
+                  <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); duplicateSelected(); }}><b>Dupliquer</b><small>Une copie juste après, même image et même texte (Cmd+D).</small></button>
                   <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => splitPanel(c, selected.panel_id)); }}><b>Couper en deux</b><small>Deux cases de moitié de hauteur, même image.</small></button>
                   <button type="button" role="menuitem" onClick={() => { setPanelMenuOpen(false); setPanels((c) => mergeWithNext(c, selected.panel_id)); }} disabled={index >= panels.length - 1}><b>Fusionner avec la suivante</b><small>Une seule case plus haute, textes réunis.</small></button>
                   <p className="studio-gear-title">Retirer</p>
@@ -2063,6 +2100,14 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
                 if (id !== selectedId) select(id);
                 deleteSelected();
               }}
+              onDuplicate={(id) => {
+                const { panels: next, created } = duplicatePanels(panelsRef.current, [id]);
+                if (!created.length) return;
+                setPanels(next);
+                select(created[0]);
+                onAutosave?.();
+                notify("Case dupliquée juste après l'originale");
+              }}
               frames={FILM_FRAMES}
               onInsertAfter={(id) => {
                 const next = insertAfter(panels, id);
@@ -2099,26 +2144,23 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           </span>
           {!isTitleCard ? (
             <>
-              <button type="button" className="webtoon-mini studio-primary" onClick={regenerate} disabled={drawing.has(selected.panel_id)} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références ; d'autres cases peuvent être redessinées en même temps" : "Dessine la case à partir de sa description et de ses références"}>
-                {drawing.get(selected.panel_id)?.kind === "generate" ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : selected.image.src ? "Regénérer l'image" : "Générer l'image"}
+              <button type="button" className="webtoon-mini studio-primary studio-action" onClick={regenerate} disabled={drawing.has(selected.panel_id)} title={selected.image.src ? "Redessine la case à partir de sa description et de ses références ; d'autres cases peuvent être redessinées en même temps" : "Dessine la case à partir de sa description et de ses références"}>
+                {drawing.get(selected.panel_id)?.kind === "generate" ? <><span className="studio-spinner" aria-hidden /> Dessin…</> : <><ActionIcon name="generate" />{selected.image.src ? "Regénérer" : "Générer"}</>}
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">
-                {drawing.get(selected.panel_id)?.kind === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : "Modifier / retoucher"}
+              <button type="button" className="webtoon-mini studio-action" onClick={() => setInpaintOpen(true)} disabled={drawing.has(selected.panel_id) || !selected.image.src} title="Modifie la case avec un prompt, toute l'image ou seulement une zone peinte">
+                {drawing.get(selected.panel_id)?.kind === "retouch" ? <><span className="studio-spinner" aria-hidden /> Retouche…</> : <><ActionIcon name="retouch" />Retoucher</>}
               </button>
-              <button type="button" className="webtoon-mini" onClick={() => setSketchOpen(true)} disabled={drawing.has(selected.panel_id)} title="Dessinez la case (page blanche, par-dessus l'image ou sur un croquis importé), puis transformez-la en case finale">Dessiner</button>
-              <button type="button" className="webtoon-mini" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de ton ordinateur">Remplacer</button>
-              <button type="button" className="webtoon-mini" onClick={copyPrompt} title="Copie la requête complète (prompt et références) dans le presse-papier">Copier la requête</button>
+              <button type="button" className="webtoon-mini studio-action" onClick={() => setSketchOpen(true)} disabled={drawing.has(selected.panel_id)} title="Dessinez la case (page blanche, par-dessus l'image ou sur un croquis importé), puis transformez-la en case finale"><ActionIcon name="draw" />Dessiner</button>
+              <button type="button" className="webtoon-mini studio-action" onClick={() => fileInput.current?.click()} disabled={busy} title="Remplace l'image par un fichier de votre ordinateur"><ActionIcon name="replace" />Remplacer</button>
+              <button type="button" className="webtoon-mini studio-action" onClick={() => setHistoryOpen(true)} disabled={!selected.image.src && !(selected.image_history ?? []).length} title="Toutes les images générées pour cette case, pour en remettre une"><ActionIcon name="history" />Historique</button>
+              <button type="button" className="webtoon-mini studio-action is-icon" onClick={copyPrompt} title="Copier la requête complète (prompt et références) dans le presse-papier" aria-label="Copier la requête"><ActionIcon name="copy" /></button>
             </>
           ) : null}
-          {!isTitleCard ? (
-            <button type="button" className="webtoon-mini" onClick={() => setHistoryOpen(true)} disabled={!selected.image.src && !(selected.image_history ?? []).length} title="Toutes les images générées pour cette case, pour en remettre une">
-              Historique
-            </button>
-          ) : null}
           <span className="studio-stage-actions-sep" aria-hidden />
-          <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "front")} title="Passe cette case devant les cases voisines, là où elles se chevauchent">Mettre au-dessus</button>
-          <button type="button" className="webtoon-mini" onClick={() => moveLayer(selected.panel_id, "back")} title="Passe cette case derrière les cases voisines, là où elles se chevauchent">Mettre en dessous</button>
-          <button type="button" className="webtoon-mini webtoon-mini-danger" onClick={deleteSelected} title="Supprime cette case (touche Suppr)">Supprimer</button>
+          <button type="button" className="webtoon-mini studio-action" onClick={duplicateSelected} title={checked.size > 1 && checked.has(selected.panel_id) ? `Duplique les ${checked.size} cases cochées, chacune juste après son original (Cmd+D)` : "Duplique cette case juste après elle : même image, même texte, même cadre (Cmd+D)"}><ActionIcon name="duplicate" />Dupliquer</button>
+          <button type="button" className="webtoon-mini studio-action is-icon" onClick={() => moveLayer(selected.panel_id, "front")} title="Mettre au-dessus : devant les cases voisines, là où elles se chevauchent" aria-label="Mettre au-dessus"><ActionIcon name="front" /></button>
+          <button type="button" className="webtoon-mini studio-action is-icon" onClick={() => moveLayer(selected.panel_id, "back")} title="Mettre en dessous : derrière les cases voisines, là où elles se chevauchent" aria-label="Mettre en dessous"><ActionIcon name="back" /></button>
+          <button type="button" className="webtoon-mini webtoon-mini-danger studio-action is-icon" onClick={deleteSelected} title="Supprimer cette case (touche Suppr)" aria-label="Supprimer la case"><ActionIcon name="delete" /></button>
           <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void replaceImage(f); e.target.value = ""; }} />
         </div>
         {versions.length > 1 ? (
