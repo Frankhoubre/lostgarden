@@ -23,6 +23,7 @@ import { EpisodeHandoffCard } from "@/components/studio/EpisodeHandoffCard";
 import { HANDOFF_PANELS, loadHandoff, type EpisodeHandoff } from "@/lib/webtoon/handoff-client";
 import { BUILT_IN_PROJECT_ID } from "@/lib/webtoon/project";
 import { startJob } from "@/lib/webtoon/job-client";
+import type { ScriptScene } from "@/lib/webtoon/story";
 import { REVIEW_LABEL, needsFinish, reviewOf, reviewProgress, withReview, type ReviewState } from "@/lib/webtoon/review";
 import { fitLettering, letteringIssues, measureLettering, type LetteringIssue } from "@/components/studio/lettering-fit";
 import { StripCanvas } from "@/components/studio/StripCanvas";
@@ -207,6 +208,9 @@ type StudioEditorProps = {
   previewLocale: Locale;
   /** Reports the running job so the bar can show it from every tab. */
   onJob?: (job: JobSummary) => void;
+  /** The screenplay scenes placed on the film: the inspector says which scene a panel belongs to. */
+  storyScenes?: ScriptScene[];
+  onOpenScene?: (index: number) => void;
   /** Reports the panels ticked in the list, in strip order (the social teaser starts from them). */
   onCheckedChange?: (ids: string[]) => void;
   /** The film guide (sequences, second by second lines): the "auto" pace follows it and the writer reads it. */
@@ -223,7 +227,7 @@ type StudioEditorProps = {
  * the right. Every change goes through the pure editor operations, so the
  * public reader renders exactly what is edited here.
  */
-export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, checkBudget, onAutosave, library, setLibrary, previewLocale, onJob, onCheckedChange, filmFrames, allFrames, guide = null }: StudioEditorProps) {
+export function StudioEditor({ script, panels, setPanels, selectedId, setSelectedId, notify, track, checkBudget, onAutosave, library, setLibrary, previewLocale, onJob, onCheckedChange, storyScenes, onOpenScene, filmFrames, allFrames, guide = null }: StudioEditorProps) {
   useLocale();
   const FILM_FRAMES = filmFrames ?? LOST_GARDEN_FRAMES;
   const ALL_FRAMES = useMemo(() => allFrames ?? studioFilmFramesDense(), [allFrames]);
@@ -2188,6 +2192,16 @@ export function StudioEditor({ script, panels, setPanels, selectedId, setSelecte
           ))}
         </nav>
 
+        {(() => {
+          // The scene of the screenplay this panel tells: the one whose seconds hold the panel's.
+          const t = selected.source_time_start;
+          const scene = t === null ? undefined : storyScenes?.find((s) => s.from !== null && t >= s.from - 1 && t <= (s.to ?? s.from) + 1);
+          return scene ? (
+            <button type="button" className="studio-scene-link" onClick={() => onOpenScene?.(scene.index)} title="Ouvrir la scène dans l'onglet Scénario">
+              Scénario : {scene.heading} · page {scene.page}
+            </button>
+          ) : null;
+        })()}
         {selected.image.src ? (
           <div className={`studio-rv-card is-${reviewOf(selected).status}`}>
             <div className="studio-rv-states" role="group" aria-label="Relecture de la case">

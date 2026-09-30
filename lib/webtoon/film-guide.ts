@@ -39,6 +39,9 @@ export type GuideSequence = {
   summary: string;
   place?: string;
   characters?: string[];
+  /** The author's card of the sequence: the emotion it must leave, and how to tell it ("du silence, des cases larges"). */
+  emotion?: string;
+  intent?: string;
 };
 
 /** A gesture seen in the close re-reading of an action sequence: each one must get its own panel. */
@@ -205,7 +208,7 @@ export function guideBrief(slice: (Pick<FilmGuide, "sequences" | "beats"> & { ge
   const tc = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, "0")}`;
   const sequences = slice.sequences
     .filter((s) => s.to >= from && s.from <= to)
-    .map((s) => `${tc(s.from)} to ${tc(s.to)}: ${s.kind.toUpperCase()} sequence, intensity ${s.intensity}/5, "${s.title}": ${s.summary}`);
+    .map((s) => `${tc(s.from)} to ${tc(s.to)}: ${s.kind.toUpperCase()} sequence, intensity ${s.intensity}/5, "${s.title}": ${s.summary}${s.emotion ? ` EMOTION TO LEAVE (the author's): ${s.emotion}.` : ""}${s.intent ? ` DIRECTION FROM THE AUTHOR, follow it: ${s.intent}.` : ""}`);
   const beats = slice.beats.filter((b) => b.seconds >= from && b.seconds <= to).map((b) => `${tc(b.seconds)} ${b.what}${b.change && b.change !== "rien" ? ` (changed: ${b.change})` : ""}`);
   const gestures = (slice.gestures ?? []).filter((g) => g.seconds >= from && g.seconds <= to).map((g) => `${tc(g.seconds)} ${g.gesture}`);
   return [

@@ -3883,6 +3883,342 @@ h3 {
   color: var(--st-muted, #a3a9b5);
 }
 
+.studio-story {
+  display: grid;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+}
+
+.studio-story-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.studio-story-count {
+  margin-left: 0.35rem;
+  padding: 0 0.35rem;
+  border-radius: 99px;
+  background: #ffa94d;
+  font-size: 0.66rem;
+  color: #111;
+}
+
+.studio-story-status,
+.studio-story-progress span {
+  font-size: 0.72rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-story-progress {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.studio-story-split {
+  display: grid;
+  grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .studio-story-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-story-scenes {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.studio-story-scenes ol {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.studio-story-scene {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.07));
+  border-radius: 8px;
+  background: var(--st-raised, #1b1e24);
+  text-align: left;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-story-scene.is-on {
+  border-color: #7dd3fc;
+}
+
+.studio-story-scene b {
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.studio-story-scene small {
+  font-size: 0.66rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-story-detail {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.studio-story-detail h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.studio-story-detail h4,
+.studio-story-block h3 {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.studio-story-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.74rem;
+}
+
+.studio-story-place input,
+.studio-story-filter {
+  width: 5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  background: #0f1115;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-story-filter {
+  width: 18rem;
+}
+
+.studio-story-frames {
+  display: flex;
+  gap: 0.3rem;
+  overflow-x: auto;
+}
+
+.studio-story-frames img {
+  height: 5.5rem;
+  border-radius: 5px;
+}
+
+.studio-story-panels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.studio-story-panels button {
+  width: 4.2rem;
+  height: 5.2rem;
+  overflow: hidden;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.08));
+  border-radius: 5px;
+  background: #0f1115;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-story-panels img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.studio-story-lines,
+.studio-story-missing {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.studio-story-lines li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border-left: 3px solid rgba(99, 230, 190, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.studio-story-lines li.is-missing {
+  border-left-color: #ffa94d;
+}
+
+.studio-story-lines li.is-film {
+  border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.studio-story-lines small {
+  font-size: 0.66rem;
+  color: var(--st-faint, #6c7280);
+}
+
+.studio-story-text pre {
+  max-height: 22rem;
+  overflow: auto;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: #0f1115;
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+}
+
+.studio-story-block {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.studio-story-missing li {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.06));
+  border-radius: 8px;
+  background: var(--st-raised, #1b1e24);
+}
+
+.studio-story-kind {
+  padding: 0.05rem 0.4rem;
+  border-radius: 99px;
+  font-size: 0.64rem;
+  background: rgba(125, 211, 252, 0.15);
+  color: #7dd3fc;
+}
+
+.studio-story-kind.is-script {
+  background: rgba(177, 151, 252, 0.15);
+  color: #b197fc;
+}
+
+.studio-story-when {
+  font-variant-numeric: tabular-nums;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.studio-cast-timeline {
+  width: 100%;
+  height: auto;
+  background: #0f1115;
+  border-radius: 8px;
+}
+
+.studio-cast-grid {
+  stroke: rgba(255, 255, 255, 0.06);
+}
+
+.studio-cast-axis,
+.studio-cast-name {
+  fill: #a3a9b5;
+  font-size: 11px;
+}
+
+.studio-cast-name {
+  fill: #eceef2;
+  font-size: 12px;
+}
+
+.studio-cast-unread {
+  fill: rgba(255, 255, 255, 0.03);
+}
+
+.studio-cast-film {
+  fill: rgba(125, 211, 252, 0.45);
+}
+
+.studio-cast-panel {
+  fill: #63e6be;
+  cursor: pointer;
+}
+
+.studio-cast-panel.is-odd {
+  fill: #ff6b6b;
+}
+
+.studio-seq-cards {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.studio-seq-card {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.06));
+  border-left: 4px solid;
+  border-radius: 8px;
+  background: var(--st-raised, #1b1e24);
+}
+
+.studio-seq-card img {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.studio-seq-card > div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.studio-seq-card input,
+.studio-seq-card textarea {
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--st-line, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  background: #0f1115;
+  font-size: 0.74rem;
+  color: var(--st-text, #eceef2);
+}
+
+.studio-seq-card .studio-seq-title {
+  font-weight: 600;
+}
+
+.studio-seq-card small {
+  font-size: 0.68rem;
+  color: var(--st-muted, #a3a9b5);
+}
+
+.studio-scene-link {
+  display: block;
+  width: 100%;
+  margin: 0 0 0.6rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px dashed rgba(177, 151, 252, 0.4);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  text-align: left;
+  color: #d0bfff;
+}
+
 .studio-sketch {
   width: min(1180px, 97vw);
   max-width: none;

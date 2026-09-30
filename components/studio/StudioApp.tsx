@@ -29,6 +29,11 @@ import { StudioBackgroundJob } from "@/components/studio/StudioBackgroundJob";
 import { StudioPublishDiff } from "@/components/studio/StudioPublishDiff";
 import { StudioSnapshots } from "@/components/studio/StudioSnapshots";
 import { StudioGlossary } from "@/components/studio/StudioGlossary";
+import { StudioStory } from "@/components/studio/StudioStory";
+import { saveGuide } from "@/lib/webtoon/film-guide-client";
+import { loadFilmRead, loadStory } from "@/lib/webtoon/story-client";
+import type { FilmRead, StoryDoc } from "@/lib/webtoon/story";
+import { bibleFor } from "@/lib/webtoon/style-bible";
 import { publishDiff, type PublishDiff } from "@/lib/webtoon/publish-diff";
 import { createSnapshot } from "@/lib/webtoon/snapshots-client";
 import { cancelJob, kickJob, watchJob } from "@/lib/webtoon/job-client";
@@ -300,6 +305,24 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
     return list.length ? list[list.length - 1].seconds : 0;
   }, [frames]);
   const filmGuide = useFilmGuide({ slug: script.slug, user, duration: filmDuration, notify, track });
+  const allFilmFrames = useMemo(() => frames ?? studioFilmFramesDense(), [frames]);
+
+  /** The screenplay aligned on the film and the film read second by second (lib/webtoon/story.ts), for the Scénario tab and the inspector. */
+  const [story, setStory] = useState<StoryDoc | null>(null);
+  const [filmRead, setFilmRead] = useState<FilmRead | null>(null);
+  const [storyScene, setStoryScene] = useState<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    void Promise.all([loadStory(script.slug).catch(() => null), loadFilmRead(script.slug).catch(() => null)]).then(([s, r]) => {
+      if (cancelled) return;
+      setStory(s);
+      setFilmRead(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, script.slug]);
 
   useEffect(() => {
     const level = budgetLevel(cost);
@@ -1016,9 +1039,45 @@ export function StudioApp({ script, project = null, frames }: StudioAppProps) {
               filmFrames={frames ? sparseFrames(frames) : undefined}
               allFrames={frames}
               guide={filmGuide.guide}
+              storyScenes={story?.scenes}
+              onOpenScene={(index) => {
+                setStoryScene(index);
+                setTab("scenario");
+              }}
             />
           </div>
-          {tab === "scenario" ? (project ? <StudioProjectText project={project} notify={notify} /> : <StudioScreenplay panels={panels} />) : null}
+          {tab === "scenario" ? (
+            <StudioStory
+              slug={script.slug}
+              user={user}
+              panels={panels}
+              setPanels={(update) => {
+                setPanels(update);
+                requestAutosave();
+              }}
+              guide={filmGuide.guide}
+              onGuideChange={(next) => {
+                filmGuide.setGuide(next);
+                if (user) void saveGuide(script.slug, next, user).then(() => notify("Fiches des séquences enregistrées : l'écrivain les lira")).catch((error: unknown) => notify(`Fiches non enregistrées : ${error instanceof Error ? error.message : "erreur"}`));
+              }}
+              story={story}
+              setStory={setStory}
+              read={filmRead}
+              setRead={setFilmRead}
+              frames={allFilmFrames}
+              cast={libraryCharacters(library).map((c) => ({ id: c.id, name: c.name, looks: libraryWith(library).find((a) => a.kind === "character" && a.subject === c.id && a.must_keep)?.must_keep }))}
+              mute={bibleFor(script.style_bible_id).mute ?? []}
+              hasScreenplay={project ? Boolean(project.screenplay?.trim()) : true}
+              scene={storyScene}
+              onScene={setStoryScene}
+              onOpenPanel={(id) => {
+                setSelectedId(id);
+                setTab("webtoon");
+              }}
+              notify={notify}
+              raw={project ? <StudioProjectText project={project} notify={notify} /> : <StudioScreenplay panels={panels} />}
+            />
+          ) : null}
           {tab === "personnages" ? <StudioCharacters script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "objets" ? <StudioObjects script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
           {tab === "decors" ? <StudioLocations script={script} panels={panels} setPanels={setPanels} library={library} setLibrary={setLibrary} notify={notify} /> : null}
