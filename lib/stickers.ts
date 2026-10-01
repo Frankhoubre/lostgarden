@@ -183,7 +183,7 @@ export const STICKERS: Sticker[] = [];
 
 /** Leave a value empty to hide its link on the page. */
 export const LINKS: { giphy: string; tenor: string; telegram: string } = {
-  giphy: "https://giphy.com/lostgardenworld",
+  giphy: "https://giphy.com/channel/lostgardenworld",
   tenor: "",
   telegram: "",
 };
