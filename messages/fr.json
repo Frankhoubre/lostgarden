@@ -46,6 +46,10 @@
       "ogTitle": "Lost Garden Press Kit · Série animée indépendante",
       "ogDescription": "Épisode de 17 minutes, studio d'une seule personne, direction artistique et réception du public. Ressources presse officielles."
     },
+    "stickers": {
+      "title": "Stickers et GIFs Lost Garden · Des réactions gratuites à partager",
+      "description": "Les GIFs et stickers de Lost Garden, gratuits, à télécharger et à envoyer. Serrure, Lanterne et les chevaliers débarquent dans vos conversations."
+    },
     "episodeOnePublic": {
       "title": "Lost Garden épisode 1 | Animé dark fantasy assisté par IA",
       "description": "Regardez l'épisode 1 de Lost Garden, animé original assisté par IA par Frank Houbre. Lanterne, Rose et un monde sous la terre."
@@ -313,6 +317,7 @@
     "vision": "Vision",
     "process": "Process IA",
     "press": "Presse",
+    "stickers": "Stickers & GIFs",
     "episodeOne": "Épisode 1",
     "episodeTwo": "Épisode 2",
     "legalNotice": "Mentions légales",
@@ -711,6 +716,26 @@
       "tiktok": "TikTok"
     },
     "backToSite": "Retour au site"
+  },
+  "stickers": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbStickers": "Stickers & GIFs",
+    "badge": "Libres de partage",
+    "title": "Stickers & GIFs",
+    "lead": "Les réactions de Lost Garden, libres et gratuites. Téléchargez-les, envoyez-les, et laissez vos amis se demander qui est Serrure.",
+    "downloadAll": "Télécharger tous les GIFs (.zip)",
+    "gifsTitle": "GIFs",
+    "downloadGif": "Télécharger le GIF",
+    "copyLink": "Copier le lien",
+    "copied": "Copié",
+    "copyFailed": "Copie impossible",
+    "stickersTitle": "Stickers",
+    "downloadSticker": "Télécharger le sticker",
+    "findUsTitle": "Retrouvez-nous sur",
+    "giphy": "GIPHY",
+    "tenor": "Tenor",
+    "telegram": "Stickers Telegram",
+    "license": "Utilisez-les librement pour partager et réagir, où vous voulez. Seule limite : pas d'usage commercial."
   },
   "episodeOnePublic": {
     "headline": "Épisode 1",
