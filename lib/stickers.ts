@@ -185,7 +185,7 @@ export const STICKERS: Sticker[] = [];
 export const LINKS: { giphy: string; tenor: string; telegram: string } = {
   giphy: "https://giphy.com/channel/lostgardenworld",
   tenor: "https://tenor.com/users/lostgarden",
-  telegram: "",
+  telegram: "https://t.me/addstickers/LostGardenWorld",
 };
 
 export const STICKERS_ZIP_URL = "/stickers/lost-garden-gifs.zip";
