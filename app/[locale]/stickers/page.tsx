@@ -65,6 +65,7 @@ export default async function StickersPage({ params }: StickersPageProps) {
   const findUs = [
     { label: copy.giphy, href: LINKS.giphy },
     { label: copy.tenor, href: LINKS.tenor },
+    { label: copy.telegramStickers, href: LINKS.telegramStickers },
     { label: copy.telegram, href: LINKS.telegram },
   ].filter((link) => link.href !== "");
 
