@@ -221,10 +221,16 @@ export const STICKERS: Sticker[] = [
 export const STICKERS_PACK_ZIP_URL = "/stickers/lost-garden-stickers.zip";
 
 /** Leave a value empty to hide its link on the page. */
-export const LINKS: { giphy: string; tenor: string; telegram: string } = {
+export const LINKS: {
+  giphy: string;
+  tenor: string;
+  telegram: string;
+  telegramStickers: string;
+} = {
   giphy: "https://giphy.com/channel/lostgardenworld",
   tenor: "https://tenor.com/users/lostgarden",
   telegram: "https://t.me/addstickers/LostGardenWorld",
+  telegramStickers: "https://t.me/addstickers/LostGardenStickers",
 };
 
 export const STICKERS_ZIP_URL = "/stickers/lost-garden-gifs.zip";
