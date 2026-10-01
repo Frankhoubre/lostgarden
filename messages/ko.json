@@ -46,6 +46,10 @@
       "ogTitle": "Lost Garden 프레스 키트 · 독립 애니메이션",
       "ogDescription": "17분 완성 에피소드, 1인 제작, 미술 연출과 시청자 반응. 공식 프레스 자료."
     },
+    "stickers": {
+      "title": "Lost Garden 스티커 & GIF · 자유롭게 쓰는 리액션",
+      "description": "Lost Garden GIF와 스티커를 무료로 내려받아 보내 보세요. Serrure, Lanterne, 그리고 기사들이 여러분의 단톡방으로 찾아갑니다."
+    },
     "episodeOnePublic": {
       "title": "Lost Garden 1화 | AI 지원 다크 판타지 애니메이션",
       "description": "Frank Houbre의 오리지널 AI 지원 애니메이션 Lost Garden 1화 시청. 공허한 기사 Lanterne, Rose, 지하 세계."
@@ -313,6 +317,7 @@
     "vision": "비전",
     "process": "제작 과정",
     "press": "보도자료",
+    "stickers": "스티커 & GIF",
     "episodeOne": "1화",
     "episodeTwo": "2화",
     "legalNotice": "법적 고지",
@@ -709,6 +714,26 @@
       "tiktok": "TikTok"
     },
     "backToSite": "사이트로 돌아가기"
+  },
+  "stickers": {
+    "breadcrumbHome": "홈",
+    "breadcrumbStickers": "스티커 & GIF",
+    "badge": "자유롭게 공유",
+    "title": "스티커 & GIF",
+    "lead": "Lost Garden 리액션, 마음껏 쓰세요. 내려받고, 보내고, 친구들이 Serrure가 누군지 궁금해하게 만들어 보세요.",
+    "downloadAll": "GIF 전체 다운로드 (.zip)",
+    "gifsTitle": "GIF",
+    "downloadGif": "GIF 다운로드",
+    "copyLink": "링크 복사",
+    "copied": "복사됨",
+    "copyFailed": "복사하지 못했어요",
+    "stickersTitle": "스티커",
+    "downloadSticker": "스티커 다운로드",
+    "findUsTitle": "여기서도 만나요",
+    "giphy": "GIPHY",
+    "tenor": "Tenor",
+    "telegram": "텔레그램 스티커",
+    "license": "공유하고 리액션할 때는 무료로 자유롭게 쓰세요. 상업적 이용은 안 됩니다."
   },
   "episodeOnePublic": {
     "headline": "1화",

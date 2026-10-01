@@ -46,6 +46,10 @@
       "ogTitle": "Lost Garden Press Kit · Independent Animated Series",
       "ogDescription": "A 17-minute episode from a one-person studio. Art direction, audience reception, and official press materials."
     },
+    "stickers": {
+      "title": "Lost Garden Stickers & GIFs · Free reactions to share",
+      "description": "Free Lost Garden GIFs and stickers to download and send. Serrure, Lanterne and the knights, ready for your group chats."
+    },
     "episodeOnePublic": {
       "title": "Lost Garden Episode 1 | AI-Assisted Dark Fantasy Anime",
       "description": "Watch Episode One of Lost Garden, an original AI-assisted anime by Frank Houbre. Hollow knight Lanterne, Rose, and a world beneath the earth."
@@ -313,6 +317,7 @@
     "vision": "Vision",
     "process": "AI process",
     "press": "Press",
+    "stickers": "Stickers & GIFs",
     "episodeOne": "Episode 1",
     "episodeTwo": "Episode 2",
     "legalNotice": "Legal notice",
@@ -712,6 +717,26 @@
       "tiktok": "TikTok"
     },
     "backToSite": "Back to site"
+  },
+  "stickers": {
+    "breadcrumbHome": "Home",
+    "breadcrumbStickers": "Stickers & GIFs",
+    "badge": "Free to share",
+    "title": "Stickers & GIFs",
+    "lead": "Lost Garden reactions, free to use. Download them, send them, make your friends wonder who Serrure is.",
+    "downloadAll": "Download all GIFs (.zip)",
+    "gifsTitle": "GIFs",
+    "downloadGif": "Download GIF",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "copyFailed": "Couldn't copy",
+    "stickersTitle": "Stickers",
+    "downloadSticker": "Download sticker",
+    "findUsTitle": "Find us on",
+    "giphy": "GIPHY",
+    "tenor": "Tenor",
+    "telegram": "Telegram stickers",
+    "license": "Use them freely to share and react, wherever you like. Just don't use them for anything commercial."
   },
   "episodeOnePublic": {
     "headline": "Episode One",

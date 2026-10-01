@@ -46,6 +46,10 @@
       "ogTitle": "Lost Garden プレスキット · インディー・アニメーションシリーズ",
       "ogDescription": "17分の完成エピソード、ワンパーソン制作、美術演出と視聴者の反響。公式プレス素材を掲載。"
     },
+    "stickers": {
+      "title": "Lost Garden ステッカー＆GIF · 自由に使えるリアクション素材",
+      "description": "Lost Garden の GIF とステッカーを無料でダウンロード。Serrure や Lanterne、騎士たちをいつものチャットに連れていきましょう。"
+    },
     "episodeOnePublic": {
       "title": "Lost Garden 第1話 | AI支援ダークファンタジーアニメ",
       "description": "Frank HoubreのオリジナルAI支援アニメLost Garden第1話を視聴。空洞の騎士Lanterne、Rose、地下の世界。"
@@ -313,6 +317,7 @@
     "vision": "ビジョン",
     "process": "制作プロセス",
     "press": "プレス",
+    "stickers": "ステッカー＆GIF",
     "episodeOne": "第1話",
     "episodeTwo": "第2話",
     "legalNotice": "法的通知",
@@ -710,6 +715,26 @@
       "tiktok": "TikTok"
     },
     "backToSite": "サイトに戻る"
+  },
+  "stickers": {
+    "breadcrumbHome": "ホーム",
+    "breadcrumbStickers": "ステッカー＆GIF",
+    "badge": "自由にシェア",
+    "title": "ステッカー＆GIF",
+    "lead": "Lost Garden のリアクション素材、自由に使ってください。ダウンロードして、送って、友だちに「Serrure って誰？」と思わせちゃいましょう。",
+    "downloadAll": "GIF をまとめてダウンロード（.zip）",
+    "gifsTitle": "GIF",
+    "downloadGif": "GIF をダウンロード",
+    "copyLink": "リンクをコピー",
+    "copied": "コピーしました",
+    "copyFailed": "コピーできませんでした",
+    "stickersTitle": "ステッカー",
+    "downloadSticker": "ステッカーをダウンロード",
+    "findUsTitle": "こちらでも見つかります",
+    "giphy": "GIPHY",
+    "tenor": "Tenor",
+    "telegram": "Telegram ステッカー",
+    "license": "シェアやリアクションには無料で自由に使えます。商用利用はご遠慮ください。"
   },
   "episodeOnePublic": {
     "headline": "第1話",

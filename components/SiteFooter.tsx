@@ -60,6 +60,7 @@ export function SiteFooter() {
     { label: dict.footer.episodeTwo, href: localePath(locale, "/episode-2") },
     { label: dict.footer.episodeOne, href: localePath(locale, "/episode-1") },
     { label: dict.footer.press, href: localePath(locale, "/press") },
+    { label: dict.footer.stickers, href: localePath(locale, "/stickers") },
   ];
 
   const legalLinks: FooterLink[] = [
