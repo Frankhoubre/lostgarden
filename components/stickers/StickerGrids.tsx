@@ -91,7 +91,9 @@ function GifPreview({ gif }: { gif: StickerGif }) {
     // React does not always reflect `muted` as an attribute, and autoplay needs it.
     video.muted = true;
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        // A fast scroll can queue several entries: the last one is the current state.
+        const entry = entries[entries.length - 1];
         setVisible(entry.isIntersecting);
         if (entry.isIntersecting) setSeen(true);
       },
@@ -126,6 +128,10 @@ function GifPreview({ gif }: { gif: StickerGif }) {
         loop
         playsInline
         preload="metadata"
+        onCanPlay={(e) => {
+          // play() can be refused while the file is still loading: try again once it can play.
+          if (visible) e.currentTarget.play().catch(() => {});
+        }}
         aria-label={gif.title}
         className="absolute inset-0 h-full w-full object-cover"
       />
