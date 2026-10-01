@@ -179,7 +179,46 @@ export const GIFS: StickerGif[] = [
   },
 ];
 
-export const STICKERS: Sticker[] = [];
+export const STICKERS: Sticker[] = [
+  { slug: "lanterne", title: "Lanterne: yes!" },
+  { slug: "souris", title: "The mouse: ...hi?" },
+  { slug: "lanterne-coeur", title: "Lanterne: love it" },
+  { slug: "lanterne-salut", title: "Lanterne: hello!" },
+  { slug: "lanterne-cafe", title: "Lanterne: coffee first" },
+  { slug: "lanterne-dodo", title: "Lanterne: good night" },
+  { slug: "serrure-pistolets", title: "Serrure: you got this" },
+  { slug: "serrure-facepalm", title: "Serrure: seriously?" },
+  { slug: "serrure-salut", title: "Serrure: at your service" },
+  { slug: "duo-check", title: "Serrure and Lanterne: team" },
+  { slug: "souris-epee", title: "The mouse: for glory!" },
+  { slug: "lanterne-pouces", title: "Lanterne: thumbs up" },
+  { slug: "lanterne-coucou", title: "Lanterne peeks" },
+  { slug: "lanterne-pensif", title: "Lanterne thinking" },
+  { slug: "lanterne-mouais", title: "Lanterne: mouais" },
+  { slug: "lanterne-lecture", title: "Lanterne reading" },
+  { slug: "lanterne-danse", title: "Lanterne dancing" },
+  { slug: "lanterne-epaules", title: "Lanterne shrugs" },
+  { slug: "serrure-pouce", title: "Serrure: I got this" },
+  { slug: "serrure-bras-croises", title: "Serrure, arms crossed" },
+  { slug: "serrure-epaules", title: "Serrure shrugs" },
+  { slug: "serrure-caisse", title: "Serrure chilling" },
+  { slug: "serrure-cle", title: "Serrure and his key" },
+  { slug: "serrure-idee", title: "Serrure: idea!" },
+  { slug: "duo-tapote", title: "Serrure pats Lanterne" },
+  { slug: "duo-dos-a-dos", title: "Serrure and Lanterne back to back" },
+  { slug: "duo-epaules", title: "Lanterne on Serrure's shoulders" },
+  { slug: "barrik-pouce", title: "Barrik: thumbs up" },
+  { slug: "barrik-biceps", title: "Barrik flexes" },
+  { slug: "barrik-salut", title: "Barrik: hello" },
+  { slug: "barrik-sieste", title: "Barrik naps" },
+  { slug: "bourdon-pouce", title: "Bourdon the blacksmith: thumbs up" },
+  { slug: "bourdon-rire", title: "Bourdon laughs" },
+  { slug: "souris-salut", title: "The mouse: hi!" },
+  { slug: "souris-coeur", title: "The mouse: love" },
+  { slug: "roi-voute", title: "The Vault King judges you" },
+];
+
+export const STICKERS_PACK_ZIP_URL = "/stickers/lost-garden-stickers.zip";
 
 /** Leave a value empty to hide its link on the page. */
 export const LINKS: { giphy: string; tenor: string; telegram: string } = {

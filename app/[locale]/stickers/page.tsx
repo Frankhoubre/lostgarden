@@ -10,7 +10,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/navigation";
 import { breadcrumbJsonLd, buildPageMetadata, webPageJsonLd } from "@/lib/seo";
-import { GIFS, LINKS, STICKERS, STICKERS_ZIP_URL } from "@/lib/stickers";
+import { GIFS, LINKS, STICKERS, STICKERS_PACK_ZIP_URL, STICKERS_ZIP_URL } from "@/lib/stickers";
 
 type StickersPageProps = {
   params: Promise<{ locale: string }>;
@@ -143,6 +143,15 @@ export default async function StickersPage({ params }: StickersPageProps) {
               <SectionTitle as="h2">
                 <span id="stickers-stickers">{copy.stickersTitle}</span>
               </SectionTitle>
+              <div className="mt-8">
+                <a
+                  href={STICKERS_PACK_ZIP_URL}
+                  download="lost-garden-stickers.zip"
+                  className="btn-primary btn-shimmer"
+                >
+                  {copy.downloadAllStickers}
+                </a>
+              </div>
               <div className="mt-10">
                 <StickerGrid stickers={STICKERS} />
               </div>
