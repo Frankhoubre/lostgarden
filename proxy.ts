@@ -43,6 +43,8 @@ export function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
+    pathname === "/go" ||
+    pathname.startsWith("/go/") ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next();
