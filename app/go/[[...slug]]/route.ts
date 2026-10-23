@@ -10,6 +10,11 @@ const DESTINATIONS: Record<string, string> = {
   manga: `/fr${LATEST_EPISODE.pathSuffix}`,
   webtoon: "/fr/webtoon",
   personnages: "/fr#characters",
+  // English versions, for posts, comments and emails written in English.
+  "episode-en": `/en${LATEST_EPISODE.pathSuffix}`,
+  "anime-en": `/en${LATEST_EPISODE.pathSuffix}`,
+  "webtoon-en": "/en/webtoon",
+  characters: "/en#characters",
 };
 
 const CANONICAL_ORIGIN = "https://www.lostgarden.world";
