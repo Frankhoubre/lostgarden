@@ -325,7 +325,8 @@
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
     "bestAiAnime": "Best AI anime",
     "blog": "Articles",
-    "game": "Game"
+    "game": "Game",
+    "madeWith": "Made with"
   },
   "bestAiAnime": {
     "headline": "Best AI anime: 6 series actually made with AI",
@@ -617,6 +618,7 @@
     "aboutFrank": {
       "title": "About Frank Houbre",
       "bio": "Frank Houbre is a French entrepreneur and creator specializing in new AI-assisted audiovisual workflows. His work sits at the intersection of storytelling, art direction, marketing, video production, and creative tools. With Lost Garden, he experiments with an extremely lean independent studio model, in which one person can write, visualize, produce, and finish a complete animated episode. He is also the creator of ScreenWeaver, the tool that connects writing, narrative structure, storyboard, and visual production, and the tool he used to write, storyboard, and produce all of Lost Garden.",
+      "screenweaverLabel": "Creative tool",
       "portraitAlt": "Portrait of Frank Houbre, creator of Lost Garden",
       "emailLabel": "Press email"
     },
