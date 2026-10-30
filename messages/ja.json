@@ -325,7 +325,8 @@
     "copyright": "© {year} Lost Garden, Frank Houbre. All rights reserved.",
     "bestAiAnime": "AIアニメ ベスト6",
     "blog": "記事一覧",
-    "game": "ゲーム"
+    "game": "ゲーム",
+    "madeWith": "使用ツール"
   },
   "bestAiAnime": {
     "headline": "AIで作られたアニメ・ベスト6",
@@ -615,6 +616,7 @@
     "aboutFrank": {
       "title": "Frank Houbreについて",
       "bio": "Frank Houbreは、AI支援の映像制作ワークフローに特化したフランスの起業家・クリエイターです。ストーリーテリング、美術演出、マーケティング、映像制作、クリエイティブツールの交差点で活動しています。Lost Gardenでは、一人が完成アニメーション・エピソードを書き、可視化し、制作し、仕上げることができる、極めて小規模なインディースタジオの形を実験しています。執筆、物語構造、絵コンテ、ビジュアル制作をつなぐツールScreenWeaverの制作者でもあり、Lost Gardenの脚本・絵コンテ・制作のすべてをこのツールで手がけました。",
+      "screenweaverLabel": "制作ツール",
       "portraitAlt": "Lost Gardenクリエイター Frank Houbreのポートレート",
       "emailLabel": "取材用メール"
     },

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LEGAL_PUBLISHER } from "@/lib/legal";
-import { SOCIAL_LINKS } from "@/lib/social";
+import { SOCIAL_LINKS, screenweaverUrl } from "@/lib/social";
 import { AnimatedInView } from "./AnimatedInView";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { formatMessage } from "@/lib/i18n/format";
@@ -87,6 +87,17 @@ export function SiteFooter() {
         </Link>
         <p className="font-body text-sm font-medium text-ivory/75">
           {dict.footer.byline}
+        </p>
+        <p className="font-body text-sm text-ivory/60">
+          {dict.footer.madeWith}{" "}
+          <a
+            href={screenweaverUrl(locale)}
+            target="_blank"
+            rel="noopener"
+            className="font-semibold text-ivory/85 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm"
+          >
+            ScreenWeaver
+          </a>
         </p>
         <nav aria-label={dict.footer.socialAria}>
           <ul className="flex flex-wrap items-center justify-center gap-6">

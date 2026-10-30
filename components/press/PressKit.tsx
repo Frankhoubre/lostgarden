@@ -7,6 +7,7 @@ import { SectionTitle } from "@/components/SectionTitle";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/types";
 import { localePath } from "@/lib/i18n/navigation";
+import { screenweaverUrl } from "@/lib/social";
 import {
   PRESS_ASSET_FILES,
   PRESS_KIT,
@@ -415,6 +416,17 @@ export function PressKit({ locale, dict }: PressKitProps) {
                 {p.aboutFrank.bio}
               </p>
               <ul className="mt-8 space-y-2 font-body text-sm sm:text-base">
+                <li>
+                  <span className="text-cyan-pale/65">{p.aboutFrank.screenweaverLabel}: </span>
+                  <a
+                    href={screenweaverUrl(locale)}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-cyan-pale/90 underline-offset-4 hover:text-magic hover:underline"
+                  >
+                    ScreenWeaver (screenweaver.ai)
+                  </a>
+                </li>
                 <li>
                   <span className="text-cyan-pale/65">{p.aboutFrank.emailLabel}: </span>
                   <a

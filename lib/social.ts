@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/config";
+
 export const SOCIAL_LINKS = {
   youtube: "https://www.youtube.com/@lostgardenanime",
   instagram: "https://www.instagram.com/lostgarden.world",
@@ -17,3 +19,13 @@ export const DATABASE_LINKS = {
 
 /** Wikidata item for the creator, used in the Person markup. */
 export const CREATOR_WIKIDATA = "https://www.wikidata.org/wiki/Q139094807";
+
+/**
+ * ScreenWeaver, the tool the series is written and produced in. Linked from
+ * the footer and the press kit, on the localized home when one exists.
+ */
+const SCREENWEAVER_HOME = "https://www.screenweaver.ai";
+
+export function screenweaverUrl(locale: Locale): string {
+  return locale === "en" ? `${SCREENWEAVER_HOME}/` : `${SCREENWEAVER_HOME}/${locale}`;
+}
