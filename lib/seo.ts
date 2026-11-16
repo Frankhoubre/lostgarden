@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import {
   EPISODES,
   LATEST_EPISODE,
+  episodeThumbnailUrl,
   SERIES_PUBLISHED_AT,
   type Episode,
 } from "@/lib/episode";
@@ -94,6 +95,8 @@ type BuildPageMetadataOptions = {
   ogImageWidth?: number;
   ogImageHeight?: number;
   ogImageAlt?: string;
+  /** The route has its own `opengraph-image`: leave the share image to it. */
+  segmentImage?: boolean;
 };
 
 export function localeHreflangAlternates(
@@ -127,6 +130,7 @@ export function buildPageMetadata({
   ogImageWidth = SITE.ogImageWidth,
   ogImageHeight = SITE.ogImageHeight,
   ogImageAlt = `${SITE.name}, official anime project`,
+  segmentImage = false,
 }: BuildPageMetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
   const hreflang =
@@ -151,20 +155,24 @@ export function buildPageMetadata({
         .filter((loc) => loc !== locale)
         .map((loc) => openGraphLocales[loc]),
       siteName: SITE.name,
-      images: [
-        {
-          url: ogImage,
-          width: ogImageWidth,
-          height: ogImageHeight,
-          alt: ogImageAlt,
-        },
-      ],
+      ...(segmentImage
+        ? {}
+        : {
+            images: [
+              {
+                url: ogImage,
+                width: ogImageWidth,
+                height: ogImageHeight,
+                alt: ogImageAlt,
+              },
+            ],
+          }),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      ...(segmentImage ? {} : { images: [ogImage] }),
     },
     robots: noIndex
       ? { index: false, follow: false }
@@ -315,10 +323,19 @@ export function articlePageJsonLd({
     headline,
     description,
     url: absoluteUrl(path),
-    image: absoluteUrl(SITE.ogImage),
+    mainEntityOfPage: { "@type": "WebPage", "@id": absoluteUrl(path) },
+    // Every article route ships its own share image (see lib/article-share.tsx).
+    image: {
+      "@type": "ImageObject",
+      url: absoluteUrl(`${path}/opengraph-image`),
+      width: 1200,
+      height: 630,
+    },
     author: {
       "@type": "Person",
       name: SITE.creator,
+      url: SITE.url,
+      sameAs: [CREATOR_WIKIDATA],
     },
     publisher: { "@id": `${SITE.url}/#organization` },
     isPartOf: { "@id": `${SITE.url}/#website` },
@@ -396,15 +413,18 @@ export function episodeVideoJsonLd({
   description: string;
   episode?: Episode;
 }) {
-  const image = absoluteUrl(SITE.ogImage);
-
   return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     name,
     description,
-    thumbnailUrl: image,
+    // The episode's own frame, not the site-wide image: Google shows it in video results.
+    thumbnailUrl: [
+      episodeThumbnailUrl(episode),
+      `https://i.ytimg.com/vi/${episode.youtubeId}/hqdefault.jpg`,
+    ],
     uploadDate: episode.publishedAt,
+    ...(episode.duration ? { duration: episode.duration } : {}),
     contentUrl: episode.watchUrl,
     embedUrl: episode.embedUrl,
     inLanguage: schemaLanguages[locale],
@@ -423,6 +443,31 @@ export function episodeVideoJsonLd({
   };
 }
 
+/**
+ * Last real content change of each page (ISO date). A sitemap that claims every
+ * page changed "just now" teaches crawlers to ignore the field: update a line
+ * here when the page's content changes, and only then.
+ */
+const PAGE_LAST_MODIFIED: Record<IndexablePathSuffix, string> = {
+  "/": "2026-11-16",
+  "/episode-2": "2026-09-15",
+  "/episode-1": "2026-09-15",
+  "/press": "2026-11-16",
+  "/stickers": "2026-10-01",
+  "/game": "2026-09-24",
+  "/webtoon": "2026-11-16",
+  "/vision": "2026-11-16",
+  "/process": "2026-11-16",
+  "/best-ai-anime": "2026-09-04",
+  "/blog": "2026-11-16",
+  "/how-to-make-ai-anime": "2026-09-04",
+  "/ai-character-consistency": "2026-09-04",
+  "/is-ai-anime-real-anime": "2026-09-04",
+  "/ai-anime-vs-traditional-animation": "2026-09-04",
+  "/legal-notice": "2026-09-24",
+  "/privacy-policy": "2026-09-29",
+};
+
 export function getSitemapEntries(): Array<{
   url: string;
   lastModified: Date;
@@ -430,7 +475,6 @@ export function getSitemapEntries(): Array<{
   priority: number;
   alternates: { languages: Record<string, string> };
 }> {
-  const lastModified = new Date();
   const entries: Array<{
     url: string;
     lastModified: Date;
@@ -444,7 +488,7 @@ export function getSitemapEntries(): Array<{
     for (const locale of locales) {
       entries.push({
         url: absoluteUrl(localePath(locale, pathSuffix)),
-        lastModified,
+        lastModified: new Date(PAGE_LAST_MODIFIED[pathSuffix]),
         changeFrequency: hints.changeFrequency,
         priority: hints.priority,
         alternates: { languages: localeHreflangAlternates(pathSuffix) },

@@ -72,7 +72,7 @@ export function KnightCard({ number, content }: KnightCardProps) {
       <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-5 lg:p-4">
         {content.revealed ? (
           <>
-            <span className="anime-label character-type-badge w-fit rounded-md border-2 border-glow/35 bg-cavern/80 px-2.5 py-0.5 font-display text-[0.65rem] text-soft-glow lg:text-[0.6rem]">
+            <span className="anime-label character-type-badge w-fit rounded-md border-2 border-glow/35 bg-cavern/80 px-2.5 py-0.5 font-display text-[0.7rem] text-soft-glow lg:text-[0.6rem]">
               {content.title}
             </span>
             <h3
@@ -99,7 +99,7 @@ export function KnightCard({ number, content }: KnightCardProps) {
           </>
         ) : (
           <>
-            <span className="anime-label w-fit rounded-md border border-glow/25 bg-cavern/60 px-3 py-1 font-display text-[0.65rem] tracking-[0.18em] text-cyan-pale/70">
+            <span className="anime-label w-fit rounded-md border border-glow/25 bg-cavern/60 px-3 py-1 font-display text-[0.7rem] tracking-[0.18em] text-cyan-pale/70">
               {content.hiddenBadge}
             </span>
             <h3

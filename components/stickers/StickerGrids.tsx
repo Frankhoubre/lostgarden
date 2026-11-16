@@ -14,7 +14,7 @@ import {
 const COPY_FEEDBACK_MS = 2000;
 
 const SMALL_BUTTON =
-  "min-h-0 w-full px-3 py-2.5 text-center text-[0.65rem] leading-tight tracking-[0.08em] sm:text-xs";
+  "min-h-0 w-full px-3 py-2.5 text-center text-[0.7rem] leading-tight tracking-[0.08em] sm:text-xs";
 
 async function copyText(text: string): Promise<boolean> {
   try {

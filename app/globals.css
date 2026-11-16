@@ -1317,9 +1317,10 @@ h3 {
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5);
 }
 
-/* These unlayered rules beat Tailwind's layered `md:hidden` utility,
-   so the desktop visibility switch lives here (after the base rules). */
-@media (min-width: 768px) {
+/* These unlayered rules beat Tailwind's layered `lg:hidden` utility,
+   so the desktop visibility switch lives here (after the base rules).
+   Seven links and the language menu do not fit under 1024px (French least of all). */
+@media (min-width: 1024px) {
   .site-nav-burger,
   .site-nav-mobile {
     display: none;
@@ -1516,6 +1517,7 @@ h3 {
 }
 
 .knights-carousel-dot {
+  position: relative;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
@@ -1525,6 +1527,13 @@ h3 {
     transform 0.2s ease,
     background 0.2s ease,
     box-shadow 0.2s ease;
+}
+
+/* The dot stays small to the eye, the finger gets a 24px target. */
+.knights-carousel-dot::after {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
 }
 
 .knights-carousel-dot.is-active {

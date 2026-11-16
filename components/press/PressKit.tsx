@@ -77,7 +77,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
 
         <div className="relative z-10 mx-auto flex min-h-[70svh] max-w-6xl flex-col justify-end px-5 pb-12 pt-28 sm:min-h-[88vh] sm:px-6 sm:pb-20">
           <AnimatedInView>
-            <p className="anime-label font-display text-[0.65rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
+            <p className="anime-label font-display text-[0.7rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
               {p.hero.badge}
             </p>
             <h1 className="anime-heading mt-4 font-display text-[clamp(2.75rem,1.5rem+6vw,4.5rem)] text-lily">
@@ -102,7 +102,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
                   <p className="anime-heading font-display text-xl text-lily sm:text-2xl">
                     {stat.value}
                   </p>
-                  <p className="mt-1 font-body text-[0.65rem] font-medium uppercase tracking-wide text-cyan-pale/65 sm:text-xs">
+                  <p className="mt-1 font-body text-[0.7rem] font-medium uppercase tracking-wide text-cyan-pale/65 sm:text-xs">
                     {stat.label}
                   </p>
                 </div>
@@ -134,7 +134,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
         aria-label={p.humanCraft.label}
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
-          <p className="anime-label shrink-0 font-display text-[0.65rem] font-semibold tracking-[0.16em] text-magic sm:pt-0.5 sm:text-xs">
+          <p className="anime-label shrink-0 font-display text-[0.7rem] font-semibold tracking-[0.16em] text-magic sm:pt-0.5 sm:text-xs">
             {p.humanCraft.label}
           </p>
           <p className="font-body text-sm leading-relaxed text-ivory/82 sm:text-[0.95rem]">
@@ -153,7 +153,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
             <a
               key={item.id}
               href={`#${item.id}`}
-              className="press-anchor-link shrink-0 rounded-md px-3 py-2 font-display text-[0.65rem] font-semibold tracking-[0.1em] text-cyan-pale/70 transition hover:bg-cavern/70 hover:text-lily sm:text-xs"
+              className="press-anchor-link shrink-0 rounded-md px-3 py-2 font-display text-[0.7rem] font-semibold tracking-[0.1em] text-cyan-pale/70 transition hover:bg-cavern/70 hover:text-lily sm:text-xs"
             >
               {item.label}
             </a>
@@ -560,7 +560,7 @@ export function PressKit({ locale, dict }: PressKitProps) {
               </a>
             </div>
             <div className="mt-10">
-              <p className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-cyan-pale/55">
+              <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-cyan-pale/55">
                 {p.contact.topicsLabel}
               </p>
               <ul className="mt-3 flex flex-wrap justify-center gap-2">

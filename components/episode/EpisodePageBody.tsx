@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import {
   episodeMetaCopy,
   episodePageCopy,
+  episodeThumbnailUrl,
   type Episode,
 } from "@/lib/episode";
 import type { Locale } from "@/lib/i18n/config";
@@ -28,6 +29,11 @@ export async function buildEpisodeMetadata(locale: Locale, episode: Episode) {
     path: localePath(locale, episode.pathSuffix),
     pathSuffix: episode.pathSuffix,
     absoluteTitle: true,
+    // Each episode shares its own frame instead of the site-wide image.
+    ogImage: episodeThumbnailUrl(episode),
+    ogImageWidth: 1280,
+    ogImageHeight: 720,
+    ogImageAlt: meta.title,
   });
 }
 

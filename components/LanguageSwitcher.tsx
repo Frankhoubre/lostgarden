@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
     <label className={`lang-switcher flex items-center gap-2 ${className}`.trim()}>
       <span className="sr-only">{dict.lang.switcherLabel}</span>
       <span
-        className="anime-label hidden font-display text-[0.65rem] tracking-[0.14em] text-cyan-pale/60 sm:inline"
+        className="anime-label hidden font-display text-[0.7rem] tracking-[0.14em] text-cyan-pale/60 sm:inline"
         aria-hidden="true"
       >
         {dict.lang.switcherLabel}

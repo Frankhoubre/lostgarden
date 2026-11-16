@@ -9,11 +9,11 @@
       "description": "Lost Gardenの第1話と第2話を視聴し、ロア、制作ノート、地下世界の断片を探索。"
     },
     "vision": {
-      "title": "ビジョン | Lost Garden",
+      "title": "AIでアニメを作る：Lost Gardenのビジョン",
       "description": "Frank Houbreが語るLost Garden、AI支援アニメ：Lanterne、Rose、傷ついた地下世界、AIが芸術的ビジョンを形にする方法。"
     },
     "process": {
-      "title": "AIアニメ制作プロセス | Lost Garden",
+      "title": "Lost Gardenの作り方：AIアニメ制作プロセス",
       "description": "Lost Gardenの制作方法：AI支援アニメーションパイプライン、FAQ、インディーAI生成アニメの参考。"
     },
     "bestAiAnime": {
@@ -21,7 +21,7 @@
       "description": "実際にAIで制作されたアニメ6作品を出典付きでランキング。Lost Garden、ツインズひなひま、Anipops、犬と少年、Corridor Digital、Vidu。それぞれAIが何をしたのかも解説します。"
     },
     "blog": {
-      "title": "記事一覧 | Lost Garden",
+      "title": "AIアニメのガイドと制作ノート | Lost Garden",
       "description": "AIアニメの制作ノートとガイド。エピソードの作り方、キャラクターの一貫性、そして見る価値のある作品。"
     },
     "howToMakeAiAnime": {
@@ -71,7 +71,7 @@
       "description": "Lost Garden の世界を舞台にした無料のレトロブラウザゲーム。青いキノコの森、鎖の世界、傾いた城をランタンと駆け抜けろ。魔界村スタイル。"
     },
     "webtoon": {
-      "title": "ウェブトゥーン | Lost Garden",
+      "title": "Lost Garden ウェブトゥーン：ダークファンタジーを縦読みで",
       "description": "Lost Garden を縦読みウェブトゥーンに翻案。第1話の冒頭をコマごとに、絵コンテと翻案エンジンとともに。"
     }
   },

@@ -9,11 +9,11 @@
       "description": "Watch Lost Garden Episode One and Episode Two, and explore lore, production notes, and fragments from beneath the earth."
     },
     "vision": {
-      "title": "Vision | Lost Garden",
+      "title": "Making an Anime With AI: The Vision Behind Lost Garden",
       "description": "Frank Houbre on Lost Garden, an AI-assisted anime: Lanterne, Rose, a wounded underground world, and how AI helps turn artistic vision into images, animation, and sound."
     },
     "process": {
-      "title": "AI Anime Process | Lost Garden",
+      "title": "How Lost Garden Is Made: AI Anime Production Process",
       "description": "How Lost Garden is made: AI-assisted animation pipeline, FAQ, and reference for indie AI-generated anime."
     },
     "bestAiAnime": {
@@ -21,7 +21,7 @@
       "description": "The 6 best anime made with AI, ranked and sourced: Lost Garden, Twins Hinahima, Anipops, The Dog & the Boy, Corridor Digital and Vidu. What the AI really did in each one."
     },
     "blog": {
-      "title": "Articles | Lost Garden",
+      "title": "AI Anime Guides and Production Notes | Lost Garden",
       "description": "Guides and production notes on AI anime: how the episodes are made, character consistency, and the projects worth watching."
     },
     "howToMakeAiAnime": {
@@ -41,7 +41,7 @@
       "description": "Written after finishing a 17 minute episode alone: what an AI-assisted pipeline genuinely changes, what it leaves untouched, and where it is still clearly worse."
     },
     "press": {
-      "title": "Lost Garden Press Kit · Independent Animated Dark Fantasy Series by Frank Houbre",
+      "title": "Lost Garden Press Kit · AI-Assisted Anime by Frank Houbre",
       "description": "Official press kit for Lost Garden, a 17-minute independent animated dark fantasy episode produced solo by Frank Houbre through an AI-assisted creative workflow.",
       "ogTitle": "Lost Garden Press Kit · Independent Animated Series",
       "ogDescription": "A 17-minute episode from a one-person studio. Art direction, audience reception, and official press materials."
@@ -71,7 +71,7 @@
       "description": "A free retro browser game in the Lost Garden universe: guide Lanterne through the blue mushroom forest, the world of chains and the leaning castle, Ghouls'n Ghosts style."
     },
     "webtoon": {
-      "title": "Webtoon | Lost Garden",
+      "title": "Lost Garden Webtoon: Read the Dark Fantasy Series Online",
       "description": "Lost Garden adapted as a vertical webtoon: the opening of episode 1, panel by panel, with the storyboard and the adaptation engine behind it."
     }
   },

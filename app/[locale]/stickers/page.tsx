@@ -104,7 +104,7 @@ export default async function StickersPage({ params }: StickersPageProps) {
       <main>
         <section className="section-pad section-misty">
           <div className="mx-auto max-w-6xl">
-            <p className="anime-label font-display text-[0.65rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
+            <p className="anime-label font-display text-[0.7rem] tracking-[0.2em] text-cyan-pale/75 sm:text-xs">
               {copy.badge}
             </p>
             <h1 className="anime-heading mt-4 font-display text-[clamp(2.5rem,1.5rem+5vw,4rem)] text-lily">
