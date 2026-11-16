@@ -42,9 +42,9 @@ export function CookieBanner() {
       role="dialog"
       aria-labelledby="cookie-banner-title"
       aria-describedby="cookie-banner-desc"
-      className="cookie-banner fixed inset-x-0 bottom-0 z-[100] border-t-2 border-glow/30 bg-abyss/95 p-4 shadow-[0_-8px_32px_rgba(2,8,23,0.85)] backdrop-blur-md sm:p-5"
+      className="cookie-banner fixed inset-x-0 bottom-0 z-[100] border-t-2 border-glow/30 bg-abyss/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(2,8,23,0.85)] backdrop-blur-md sm:p-5"
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="min-w-0 flex-1">
           <p
             id="cookie-banner-title"
@@ -54,7 +54,7 @@ export function CookieBanner() {
           </p>
           <p
             id="cookie-banner-desc"
-            className="mt-2 font-body text-sm leading-relaxed text-ivory/85"
+            className="mt-1.5 font-body text-[0.8rem] leading-snug text-ivory/85 sm:mt-2 sm:text-sm sm:leading-relaxed"
           >
             {dict.cookies.bodyBefore}{" "}
             <Link
@@ -66,7 +66,7 @@ export function CookieBanner() {
             {dict.cookies.bodyAfter}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex sm:items-center">
           <button
             type="button"
             onClick={() => dismiss("rejected")}

@@ -37,6 +37,7 @@ export async function generateMetadata({
     pathSuffix: "/best-ai-anime",
     absoluteTitle: true,
     ogType: "article",
+    segmentImage: true,
   });
 }
 

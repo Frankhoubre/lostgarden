@@ -19,15 +19,15 @@ function FooterLinkList({
   prominent?: boolean;
 }) {
   return (
-    <ul className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+    <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-6">
       {links.map((link) => (
         <li key={link.href}>
           <Link
             href={link.href}
             className={
               prominent
-                ? "font-display text-xs font-semibold uppercase tracking-wider text-ivory/85 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm sm:text-sm"
-                : "font-body text-xs font-medium text-ivory/55 underline-offset-4 transition hover:text-cyan-pale hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm sm:text-sm"
+                ? "inline-block py-2 font-display text-xs font-semibold uppercase tracking-wider text-ivory/85 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm sm:text-sm"
+                : "inline-block py-2 font-body text-xs font-medium text-ivory/55 underline-offset-4 transition hover:text-cyan-pale hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm sm:text-sm"
             }
           >
             {link.label}
@@ -76,7 +76,7 @@ export function SiteFooter() {
           className="footer-logo-wrap relative block w-[min(85vw,14rem)] sm:w-52"
         >
           <Image
-            src="/images/logo-lost-garden.png"
+            src="/images/logo-lost-garden.webp"
             alt={dict.common.logoAlt}
             width={1024}
             height={576}
@@ -94,13 +94,13 @@ export function SiteFooter() {
             href={screenweaverUrl(locale)}
             target="_blank"
             rel="noopener"
-            className="font-semibold text-ivory/85 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm"
+            className="inline-block py-1 font-semibold text-ivory/85 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 rounded-sm"
           >
             ScreenWeaver
           </a>
         </p>
         <nav aria-label={dict.footer.socialAria}>
-          <ul className="flex flex-wrap items-center justify-center gap-6">
+          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
             {socialLinks.map((link) => (
               <li key={link.label}>
                 <a
@@ -111,7 +111,7 @@ export function SiteFooter() {
                         rel: "noopener noreferrer",
                       }
                     : {})}
-                  className="font-display text-sm font-semibold uppercase tracking-wider text-ivory/80 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 focus-visible:ring-offset-2 focus-visible:ring-offset-abyss rounded-sm"
+                  className="inline-block py-2 font-display text-sm font-semibold uppercase tracking-wider text-ivory/80 underline-offset-4 transition hover:text-magic hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-glow/60 focus-visible:ring-offset-2 focus-visible:ring-offset-abyss rounded-sm"
                 >
                   {link.label}
                 </a>
@@ -127,7 +127,7 @@ export function SiteFooter() {
             <FooterLinkList links={legalLinks} />
           </nav>
         </div>
-        <p className="text-xs text-ivory/30">
+        <p className="text-xs text-ivory/50">
           {formatMessage(dict.footer.copyright, {
             year: String(new Date().getFullYear()),
           })}

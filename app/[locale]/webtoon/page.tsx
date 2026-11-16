@@ -87,7 +87,7 @@ export default async function WebtoonIndexPage({ params }: PageProps) {
                   ) : null}
                 </div>
                 <div className="p-4">
-                  <p className="anime-label text-[0.65rem] text-cyan-pale">{card.label}</p>
+                  <p className="anime-label text-[0.7rem] text-cyan-pale">{card.label}</p>
                   <h2 className="mt-1 font-display text-lg text-lily">{card.title}</h2>
                   <p className="mt-2 text-xs text-ivory/60">{fill(w.panels, { count: card.panels })}</p>
                   <EpisodeProgress slug={card.slug} locale={locale} />

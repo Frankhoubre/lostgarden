@@ -54,7 +54,7 @@ export function SiteNav() {
           aria-label={nav.home}
         >
           <Image
-            src="/images/logo-lost-garden.png"
+            src="/images/logo-lost-garden.webp"
             alt={dict.common.logoAlt}
             width={1024}
             height={576}
@@ -64,7 +64,7 @@ export function SiteNav() {
           />
         </a>
 
-        <ul className="hidden flex-1 items-center justify-center gap-1 md:flex lg:gap-2">
+        <ul className="hidden flex-1 items-center justify-center gap-1 lg:flex xl:gap-2">
           {navLinks.map((link) => (
             <motion.li
               key={link.href}
@@ -85,13 +85,13 @@ export function SiteNav() {
           ))}
         </ul>
 
-        <div className="hidden shrink-0 md:block">
+        <div className="hidden shrink-0 lg:block">
           <LanguageSwitcher />
         </div>
 
         <button
           type="button"
-          className="site-nav-burger md:hidden"
+          className="site-nav-burger lg:hidden"
           aria-expanded={menuOpen}
           aria-controls="site-nav-mobile"
           aria-label={menuOpen ? nav.closeMenu : nav.openMenu}
@@ -119,7 +119,7 @@ export function SiteNav() {
         {menuOpen ? (
           <motion.div
             id="site-nav-mobile"
-            className="site-nav-mobile md:hidden"
+            className="site-nav-mobile lg:hidden"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
             animate={
               prefersReducedMotion

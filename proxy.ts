@@ -71,12 +71,15 @@ export function proxy(request: NextRequest) {
     }
 
     const response = NextResponse.next();
-    response.headers.set("x-locale", pathnameLocale);
-    response.cookies.set(LOCALE_COOKIE, pathnameLocale, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: "lax",
-    });
+    // Only write the cookie when the language really changes: a Set-Cookie on every
+    // response (crawlers included) keeps pages out of shared caches for nothing.
+    if (request.cookies.get(LOCALE_COOKIE)?.value !== pathnameLocale) {
+      response.cookies.set(LOCALE_COOKIE, pathnameLocale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    }
     return response;
   }
 

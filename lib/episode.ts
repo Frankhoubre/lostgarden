@@ -11,7 +11,14 @@ export type Episode = {
   readonly embedUrl: string;
   /** Actual YouTube upload date, matching IMDb, TMDB and Wikidata. */
   readonly publishedAt: string;
+  /** ISO 8601 running time, when known. */
+  readonly duration?: string;
 };
+
+/** The episode's YouTube frame (1280 x 720), used for link previews and video results. */
+export function episodeThumbnailUrl(episode: Episode): string {
+  return `https://i.ytimg.com/vi/${episode.youtubeId}/maxresdefault.jpg`;
+}
 
 export const EPISODE_ONE: Episode = {
   number: 1,
@@ -20,6 +27,7 @@ export const EPISODE_ONE: Episode = {
   watchUrl: "https://youtu.be/eZ_JlaLDJ-8",
   embedUrl: "https://www.youtube.com/embed/eZ_JlaLDJ-8",
   publishedAt: "2026-05-29",
+  duration: "PT17M",
 };
 
 export const EPISODE_TWO: Episode = {

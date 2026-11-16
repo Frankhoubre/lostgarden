@@ -33,6 +33,7 @@ export async function generateMetadata({
     pathSuffix: "/vision",
     absoluteTitle: true,
     ogType: "article",
+    segmentImage: true,
   });
 }
 

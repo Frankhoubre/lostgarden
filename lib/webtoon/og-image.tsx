@@ -84,7 +84,7 @@ function clip(text: string, max: number): string {
   return `${space > max * 0.5 ? cut.slice(0, space) : cut}…`;
 }
 
-export async function webtoonOgImage({ kicker, heading, title, cover, footer }: { kicker: string; heading: string; title?: string; cover?: string; footer: string }): Promise<ImageResponse> {
+export async function webtoonOgImage({ kicker, heading, title, cover, footer, headingSize = 112 }: { kicker: string; heading: string; title?: string; cover?: string; footer: string; /** Smaller for a long headline (an article title). */ headingSize?: number }): Promise<ImageResponse> {
   const shownTitle = title ? clip(title, 72) : undefined;
   const text = [kicker.toUpperCase(), heading, shownTitle ?? "", footer.toUpperCase()].join(" ");
   const cjk = /[぀-ヿ一-鿿]/.test(text) ? "Noto Sans JP" : /[가-힯]/.test(text) ? "Noto Sans KR" : null;
@@ -115,7 +115,7 @@ export async function webtoonOgImage({ kicker, heading, title, cover, footer }: 
         />
         <div style={{ position: "absolute", left: 72, top: 0, width: textWidth, height: WEBTOON_OG_SIZE.height, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "flex", fontSize: 34, letterSpacing: 8, color: "#b9f3ff" }}>{kicker.toUpperCase()}</div>
-          <div style={{ display: "flex", fontSize: 112, lineHeight: 1.05, color: "#f8fafc", marginTop: 8 }}>{heading}</div>
+          <div style={{ display: "flex", fontSize: headingSize, lineHeight: headingSize < 100 ? 1.15 : 1.05, color: "#f8fafc", marginTop: headingSize < 100 ? 20 : 8 }}>{heading}</div>
           {shownTitle ? <div style={{ display: "flex", fontSize: 42, lineHeight: 1.2, color: "#d8d2c2", marginTop: 18 }}>{shownTitle}</div> : null}
           <div style={{ display: "flex", fontSize: 24, letterSpacing: 5, color: "#38bdf8", marginTop: 40 }}>{footer.toUpperCase()}</div>
         </div>

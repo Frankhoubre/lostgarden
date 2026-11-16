@@ -36,6 +36,7 @@ export async function generateMetadata({
     pathSuffix: "/process",
     absoluteTitle: true,
     ogType: "article",
+    segmentImage: true,
   });
 }
 

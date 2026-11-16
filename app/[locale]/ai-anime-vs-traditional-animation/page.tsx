@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     pathSuffix: SLUG,
     absoluteTitle: true,
     ogType: "article",
+    segmentImage: true,
   });
 }
 

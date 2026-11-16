@@ -91,7 +91,7 @@ export function Hero() {
           variants={fadeUp}
         >
           <Image
-            src="/images/logo-lost-garden.png"
+            src="/images/logo-lost-garden.webp"
             alt={dict.common.logoAlt}
             width={1024}
             height={576}
@@ -151,7 +151,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.6, duration: 0.8, ease: EASE_OUT_EXPO }}
         >
-          <span className="anime-label font-display text-[0.65rem] tracking-[0.2em]">
+          <span className="anime-label font-display text-[0.7rem] tracking-[0.2em]">
             {dict.hero.descend}
           </span>
           <span className="scroll-hint-chevron" aria-hidden="true" />

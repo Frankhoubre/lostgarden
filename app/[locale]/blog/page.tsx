@@ -54,6 +54,7 @@ export async function generateMetadata({
     path: localePath(locale, "/blog"),
     pathSuffix: "/blog",
     absoluteTitle: true,
+    segmentImage: true,
   });
 }
 

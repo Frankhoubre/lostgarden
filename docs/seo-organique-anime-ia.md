@@ -62,15 +62,17 @@ Le japonais et le coréen sont l'angle mort de tout le monde. Le site a déjà l
 
 Rythme réaliste : un article toutes les deux ou trois semaines. Quatre articles solides valent mieux que quinze pages minces, surtout sur un domaine jeune.
 
-## Corrections techniques à faire
+## Corrections techniques
 
-**Le sitemap ment.** Dans `lib/seo.ts`, `getSitemapEntries()` met `new Date()` en `lastModified` pour toutes les entrées, à chaque requête. Google apprend vite à ignorer un site qui déclare que tout a changé toutes les cinq minutes. Il faut une vraie date par page, écrite en dur ou dérivée d'un champ dans le contenu.
+Faites en novembre 2026 :
 
-**Les pages sont dynamiques.** Le build sort toutes les routes en `ƒ` (server-rendered on demand) alors que le contenu est statique. Le proxy pose un cookie sur chaque réponse, ce qui empêche la mise en cache. Sur les pages éditoriales, ça coûte du temps de réponse pour rien, et le temps de réponse compte au crawl. À creuser : ne poser le cookie que sur la navigation utilisateur, pas sur les requêtes de bots.
+- **Sitemap honnête.** `PAGE_LAST_MODIFIED` dans `lib/seo.ts` porte une vraie date par page. À mettre à jour quand le contenu d'une page change, et seulement à ce moment-là.
+- **Pages statiques.** Le layout racine vit dans `app/[locale]/layout.tsx` et lit la langue dans l'URL, plus dans les en-têtes : toutes les pages éditoriales sont prérendues. Le proxy ne pose le cookie de langue que lorsqu'il change.
+- **Polices.** La police japonaise n'est plus préchargée (190 fichiers, 2 Mo par page avant) : le navigateur ne charge que les tranches utiles.
+- **Image de partage par article.** Chaque page éditoriale a son `opengraph-image` (titre de l'article sur un plan de la série), voir `lib/article-share.tsx`. Les pages épisode partagent la vignette YouTube de l'épisode.
+- **`llms.txt`** à jour avec l'épisode 2, le webtoon, le jeu et les guides.
 
-**Pas d'image dédiée par article.** Toutes les pages partagent `/images/og-image.png`. Une image propre par article améliore le taux de clic sur les partages et donne quelque chose à indexer dans Google Images, qui est une source de trafic réelle sur les requêtes anime.
-
-**Ajouter un `llms.txt`.** Google l'ignore, mais Perplexity et quelques autres le lisent. Coût : dix minutes.
+Reste à faire : brancher Search Console (voir plus bas) et ajouter AniList, MyAnimeList et ANN dans `DATABASE_LINKS` dès que les fiches existent.
 
 ## Ce qui compte autant que le site
 
